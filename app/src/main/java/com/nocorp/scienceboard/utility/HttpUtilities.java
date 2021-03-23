@@ -18,16 +18,11 @@ public class HttpUtilities {
 
         URI uri = new URI(urlString);
         String protocol = uri.getScheme();
-
-        if( ! isValidProtocol(protocol))
-            return null;
-
+        if( ! isValidProtocol(protocol)) return null;
         String domain = uri.getHost();
         String path = uri.getPath();
 
-
 //        return buildSafeUrl(domain);
-
         return uri.toString();
     }
 
@@ -51,35 +46,35 @@ public class HttpUtilities {
      * - last part contains top level domain like .com, .org etc.
      */
     public static boolean isValidUrl(String urlString) {
-        if(urlString==null || urlString.isEmpty()) return false;
+        if(urlString==null) return false;
         String trimmedString = urlString.trim();
         if(trimmedString.isEmpty()) return false;
 
-        boolean isWellFormed = false;
+        return checkUrlFormatWithUrlValidator(trimmedString)
+                && checkUrlFormatWithRegex(trimmedString);
+    }
 
-        // validate with Patterns class
-        // notes: unit tests return nullpointer, maybe is an integration test?
-//        isWellFormed = Patterns.WEB_URL.matcher(trimmedString).matches();
+    private static boolean checkUrlFormatWithRegex(String urlString) {
+        String regex = "((http|https)://)(www.)?"
+                + "[a-zA-Z0-9@:%._\\+~#?&//=]"
+                + "{2,256}\\.[a-z]"
+                + "{2,6}\\b([-a-zA-Z0-9@:%"
+                + "._\\+~#?&//=]*)";
 
-        // validate with UrlValidator
+        Pattern p = Pattern.compile(regex);
+        Matcher m = p.matcher(urlString);
+        return m.matches();
+    }
+
+    private static boolean checkUrlFormatWithUrlValidator(String urlString) {
         String[] customSchemes = { "http", "https" };
         UrlValidator urlValidator = new UrlValidator(customSchemes);
-        isWellFormed = urlValidator.isValid(trimmedString);
+        return urlValidator.isValid(urlString);
+    }
 
-        // validate with regex
-        if (isWellFormed) {
-            String regex = "((http|https)://)(www.)?"
-                    + "[a-zA-Z0-9@:%._\\+~#?&//=]"
-                    + "{2,256}\\.[a-z]"
-                    + "{2,6}\\b([-a-zA-Z0-9@:%"
-                    + "._\\+~#?&//=]*)";
-
-            Pattern p = Pattern.compile(regex);
-            Matcher m = p.matcher(trimmedString);
-            return m.matches();
-        }
-
-        return false;
+    // TODO: unit tests return nullpointer, maybe is an integration test?
+    private static boolean checkUrlFormatWithAndroidPatternsClass(String urlString) {
+        return Patterns.WEB_URL.matcher(urlString).matches();
     }
 
     public static String buildSafeUrl(String host) {
