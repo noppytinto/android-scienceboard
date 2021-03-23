@@ -23,6 +23,7 @@ public class HttpUtilities {
             return null;
 
         String domain = uri.getHost();
+        String path = uri.getPath();
 
 
 //        return buildSafeUrl(domain);
@@ -50,37 +51,32 @@ public class HttpUtilities {
      * - last part contains top level domain like .com, .org etc.
      */
     public static boolean isValidUrl(String urlString) {
+        if(urlString==null || urlString.isEmpty()) return false;
+        String trimmedString = urlString.trim();
+        if(trimmedString.isEmpty()) return false;
+
         boolean isWellFormed = false;
-        isWellFormed = Patterns.WEB_URL.matcher(urlString).matches();
 
-        if(isWellFormed) {
-            UrlValidator urlValidator = new UrlValidator();
-            if (urlValidator.isValid(urlString)) {
-                // Regex to check valid URL
-                String regex = "((http|https)://)(www.)?"
-                        + "[a-zA-Z0-9@:%._\\+~#?&//=]"
-                        + "{2,256}\\.[a-z]"
-                        + "{2,6}\\b([-a-zA-Z0-9@:%"
-                        + "._\\+~#?&//=]*)";
+        // validate with Patterns class
+        // notes: unit tests return nullpointer, maybe is an integration test?
+//        isWellFormed = Patterns.WEB_URL.matcher(trimmedString).matches();
 
-                // Compile the ReGex
-                Pattern p = Pattern.compile(regex);
+        // validate with UrlValidator
+        String[] customSchemes = { "http", "https" };
+        UrlValidator urlValidator = new UrlValidator(customSchemes);
+        isWellFormed = urlValidator.isValid(trimmedString);
 
-                // If the string is empty
-                // return false
-                if (urlString == null) {
-                    return false;
-                }
+        // validate with regex
+        if (isWellFormed) {
+            String regex = "((http|https)://)(www.)?"
+                    + "[a-zA-Z0-9@:%._\\+~#?&//=]"
+                    + "{2,256}\\.[a-z]"
+                    + "{2,6}\\b([-a-zA-Z0-9@:%"
+                    + "._\\+~#?&//=]*)";
 
-                // Find match between given string
-                // and regular expression
-                // using Pattern.matcher()
-                Matcher m = p.matcher(urlString);
-
-                // Return if the string
-                // matched the ReGex
-                return m.matches();
-            }
+            Pattern p = Pattern.compile(regex);
+            Matcher m = p.matcher(trimmedString);
+            return m.matches();
         }
 
         return false;
