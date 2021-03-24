@@ -37,7 +37,6 @@ public class MainActivity extends AppCompatActivity {
                 String rdfTag = "http://feeds.nature.com/nature/rss/current"; // unsecure (HTTP)
                 String rssTag = "https://home.cern/api/news/news/feed.rss";
                 String malformedRss = "https://www.theverge.com/";
-
                 String inputUrl = rdfTag;
 
                 String sanitizedUrl = HttpUtilities.sanitizeUrl(inputUrl);

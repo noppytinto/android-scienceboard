@@ -15,7 +15,7 @@ public class HttpUtilities {
     private static final String DOUBLE_DASHES = "://";
 
     public static String sanitizeUrl(String urlString) throws URISyntaxException {
-        if( ! isValidUrl(urlString)) throw new URISyntaxException("null", "null url string");
+        if( ! isValidUrl(urlString)) throw new URISyntaxException("", "invalid url string");
 
         String trimmedString = urlString.trim();
 
@@ -45,7 +45,7 @@ public class HttpUtilities {
     }
 
     private static boolean checkUrlFormatWithRegex(String urlString) {
-        String regex = "((http|https)://)(www.)?"
+        final String regex = "((http|https)://)(www.)?"
                 + "[a-zA-Z0-9@:%._\\+~#?&//=]"
                 + "{2,256}\\.[a-z]"
                 + "{2,6}\\b([-a-zA-Z0-9@:%"
@@ -57,7 +57,7 @@ public class HttpUtilities {
     }
 
     private static boolean checkUrlFormatWithUrlValidator(String urlString) {
-        String[] customSchemes = { "http", "https" };
+        String[] customSchemes = { HTTP_PROTOCOL, HTTPS_PROTOCOL };
         UrlValidator urlValidator = new UrlValidator(customSchemes);
         return urlValidator.isValid(urlString);
     }
