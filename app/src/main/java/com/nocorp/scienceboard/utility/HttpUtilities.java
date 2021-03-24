@@ -12,36 +12,26 @@ import java.util.regex.Pattern;
 public class HttpUtilities {
     private static final String HTTP_PROTOCOL = "http";
     private static final String HTTPS_PROTOCOL = "https";
+    private static final String DOUBLE_DASHES = "://";
 
     public static String sanitizeUrl(String urlString) throws URISyntaxException {
-        if( ! isValidUrl(urlString)) return null;
+        if( ! isValidUrl(urlString)) throw new URISyntaxException("null", "null url string");
 
-        URI uri = new URI(urlString);
+        String trimmedString = urlString.trim();
+
+        URI uri = new URI(trimmedString);
         String protocol = uri.getScheme();
-        if( ! isValidProtocol(protocol)) return null;
         String domain = uri.getHost();
         String path = uri.getPath();
+//        String query = uri.getQuery(); // only used if rss url requires querying
 
-//        return buildSafeUrl(domain);
-        return uri.toString();
-    }
-
-    public static boolean isValidProtocol(String protocol) {
-        if(protocol.equals(HTTP_PROTOCOL)) {
-            return true;
-        }
-        else if(protocol.equals(HTTPS_PROTOCOL)) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        return protocol + DOUBLE_DASHES + domain + path;
     }
 
     /**
      * - The URL must start with either http or https and
      * - then followed by :// and
-     * - then it must contain www. and
+     * - then it can contain www. and
      * - then followed by subdomain of length (2, 256) and
      * - last part contains top level domain like .com, .org etc.
      */
@@ -75,6 +65,19 @@ public class HttpUtilities {
     // TODO: unit tests return nullpointer, maybe is an integration test?
     private static boolean checkUrlFormatWithAndroidPatternsClass(String urlString) {
         return Patterns.WEB_URL.matcher(urlString).matches();
+    }
+
+
+    public static boolean isValidProtocol(String protocol) {
+        if(protocol.equals(HTTP_PROTOCOL)) {
+            return true;
+        }
+        else if(protocol.equals(HTTPS_PROTOCOL)) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     public static String buildSafeUrl(String host) {

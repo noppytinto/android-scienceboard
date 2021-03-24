@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         Runnable task = () -> {
             try {
                 String feedTag = "https://www.theverge.com/rss/index.xml";
-                String rdfTag = "http://feeds.nature.com/nature/rss/current?format=xml"; // unsecure (HTTP)
+                String rdfTag = "http://feeds.nature.com/nature/rss/current"; // unsecure (HTTP)
                 String rssTag = "https://home.cern/api/news/news/feed.rss";
                 String malformedRss = "https://www.theverge.com/";
 
