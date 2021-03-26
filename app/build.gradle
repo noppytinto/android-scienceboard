@@ -36,13 +36,12 @@ android {
 //    }
 
     // **** define your res folders ****
-//    sourceSets {
-//        main.res.srcDirs += [
-//                'src/main/java/com/nocorp/alwaysread/res',
-//                'src/main/java/com/nocorp/alwaysread/ui/feed/res',
-//                'src/main/java/com/nocorp/alwaysread/ui/viewholderitem/res'
-//        ]
-//    }
+    sourceSets {
+        main.res.srcDirs += [
+                'src/main/java/com/nocorp/scienceboard/res',
+                'src/main/java/com/nocorp/scienceboard/ui/viewholder/res'
+        ]
+    }
 }
 
 dependencies {
@@ -54,6 +53,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui:2.3.4'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.3.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'

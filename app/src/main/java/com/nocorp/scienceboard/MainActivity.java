@@ -1,10 +1,16 @@
 package com.nocorp.scienceboard;
 
 import android.os.Bundle;
+import android.text.Html;
+import android.text.Spanned;
+import android.widget.TextView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.utility.HttpUtilities;
+import com.nocorp.scienceboard.utility.XmlParser;
+import com.rometools.rome.feed.synd.SyndCategory;
+import com.rometools.rome.feed.synd.SyndContent;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.feed.synd.SyndImage;
@@ -18,9 +24,16 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -30,53 +43,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         initView();
 
-
-        Runnable task = () -> {
-            try {
-                String feedTag = "https://www.theverge.com/rss/index.xml";
-                String rdfTag = "http://feeds.nature.com/nature/rss/current"; // unsecure (HTTP)
-                String rssTag = "https://home.cern/api/news/news/feed.rss";
-                String malformedRss = "https://www.theverge.com/";
-                String inputUrl = rdfTag;
-
-                String sanitizedUrl = HttpUtilities.sanitizeUrl(inputUrl);
-
-                SyndFeed feed = new SyndFeedInput().build(new XmlReader(new URL(sanitizedUrl)));
-                System.out.println(feed.getTitle());
-                String logo = getLogoUrl(feed);
-                System.out.println(logo);
-                List<SyndEntry> entries = feed.getEntries();
-                System.out.println(entries);
-
-            } catch (FeedException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-            }
-        };
-
-        ThreadManager threadManager = ThreadManager.getInstance();
-        threadManager.runTaskInPool(task);
-
-
     }
 
-    private String getLogoUrl(SyndFeed feed) {
-        String logo = null;
-        SyndImage syndImage = feed.getIcon();
-        if (syndImage!=null) {
-            logo = syndImage.getUrl();
-        }
-        else {
-            syndImage = feed.getImage();
-            if (syndImage!=null) {
-                logo = syndImage.getUrl();
-            }
-        }
-        return logo;
-    }
+
 
     private void initView() {
         setContentView(R.layout.activity_main);

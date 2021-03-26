@@ -6,7 +6,7 @@ public class Source implements Serializable {
     String name;
     String websiteUrl;
     String rssUrl;
-    String faviconUrl;
+    String iconUrl;
     String rssType;
 
 }
