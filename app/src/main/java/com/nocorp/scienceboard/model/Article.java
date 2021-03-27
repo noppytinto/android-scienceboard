@@ -1,9 +1,22 @@
 package com.nocorp.scienceboard.model;
 
+import com.rometools.rome.feed.synd.SyndEntry;
+
+import java.util.Date;
+
 public class Article {
     private String title;
     private String contentText;
     private String thumbnailUrl;
+    private String webpageUrl;
+    private SyndEntry syndEntry;
+    private Source source;
+    private Date publishDate;
+
+
+    public Article() {
+
+    }
 
 
     public Article(String title, String contentText, String thumbnailUrl) {
@@ -45,5 +58,37 @@ public class Article {
 
     public void setThumbnailUrl(String thumbnailUrl) {
         this.thumbnailUrl = thumbnailUrl;
+    }
+
+    public String getWebpageUrl() {
+        return webpageUrl;
+    }
+
+    public void setWebpageUrl(String webpageUrl) {
+        this.webpageUrl = webpageUrl;
+    }
+
+    public SyndEntry getSyndEntry() {
+        return syndEntry;
+    }
+
+    public void setSyndEntry(SyndEntry syndEntry) {
+        this.syndEntry = syndEntry;
+    }
+
+    public Source getSource() {
+        return source;
+    }
+
+    public void setSource(Source source) {
+        this.source = source;
+    }
+
+    public Date getPublishDate() {
+        return publishDate;
+    }
+
+    public void setPublishDate(Date publishDate) {
+        this.publishDate = publishDate;
     }
 }

@@ -12,8 +12,10 @@ import com.bumptech.glide.Glide;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.recycler.viewholder.ArticleViewHolder;
+import com.nocorp.scienceboard.utility.MyUtilities;
 
 
+import java.util.Date;
 import java.util.List;
 
 public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<ArticleViewHolder> {
@@ -51,6 +53,10 @@ public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<ArticleViewHo
                 .into(holder.thumbnail);
 
         holder.title.setText(article.getTitle());
+        Date pubDate = article.getPublishDate();
+        long pubDateInMillis = pubDate.getTime();
+        String readablePubDate = MyUtilities.convertMillisToReadableTimespan(pubDateInMillis);
+        holder.pubDate.setText(readablePubDate);
     }
 
     @Override

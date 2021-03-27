@@ -2,9 +2,12 @@ package com.nocorp.scienceboard.repository;
 
 
 import com.nocorp.scienceboard.model.Article;
+import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.system.MyOkHttpClient;
+import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.utility.HttpUtilities;
 import com.rometools.rome.feed.atom.Feed;
+import com.rometools.rome.feed.synd.SyndContent;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.feed.synd.SyndImage;
@@ -12,11 +15,14 @@ import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
 
+import org.jdom2.Element;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import okhttp3.OkHttpClient;
@@ -30,6 +36,7 @@ public class SourceRepository {
     private static final String SEARCH_GAMES_URL = "https://api.rawg.io/api/games?key=" + RAWG_API_KEY + "&page_size=10";
     private final String RAWG_BASE_URL = "https://api.rawg.io";
     private static SourceRepository singletonInstance;
+    private ArticleDownloader articlesListener;
 
 
     private SourceRepository() {
@@ -42,6 +49,7 @@ public class SourceRepository {
 
         return singletonInstance;
     }
+
 
     private interface RetrofitAPI {
         @GET("feed/")
@@ -56,34 +64,87 @@ public class SourceRepository {
     }
 
 
+    public void setArticlesListener(ArticleDownloader listener) {
+        this.articlesListener = listener;
+    }
 
 
 
-    private List<Article> downloadArticles(String rssUrl) throws URISyntaxException, IOException, FeedException {
-        String sanitizedUrl = HttpUtilities.sanitizeUrl(rssUrl);
-        SyndFeed feed = new SyndFeedInput().build(new XmlReader(new URL(sanitizedUrl)));
-
+    public void getArticles(String rssUrl) {
         List<Article> articlesList = new ArrayList<>();
 
-        if (feed!=null) {
-            List<SyndEntry> entries = feed.getEntries();
-            String logo = getLogoUrl(feed);
+        Runnable task = () -> {
+            try {
+                Source source = new Source();
 
-        }
+                String sanitizedUrl = HttpUtilities.sanitizeUrl(rssUrl);
+                SyndFeed feed = new SyndFeedInput().build(new XmlReader(new URL(sanitizedUrl)));
+                if (feed!=null) {
+                    List<SyndEntry> entries = feed.getEntries();
+                    String logoUrl = getLogoUrl(feed);
+                    String title = feed.getTitle();
+                    String websiteUrl = feed.getLink();
+                    source.setLogoUrl(logoUrl);
+                    source.setName(title);
+                    source.setWebsiteUrl(websiteUrl);
 
+                    for(SyndEntry entry : entries) {
+                        String articleTitle = entry.getTitle();
+                        String webpageUrl = entry.getLink();
+                        String thumbnailUrl = getThumbnailUrl(entry);
+                        Date publishDate = entry.getPublishedDate();
 
+                        Article article = new Article();
+                        article.setThumbnailUrl(thumbnailUrl);
+                        article.setTitle(articleTitle);
+                        article.setWebpageUrl(webpageUrl);
+                        article.setSyndEntry(entry);
+                        article.setSource(source);
+                        article.setPublishDate(publishDate);
 
+                        articlesList.add(article);
+                    }
 
+                    //
+                }
+                articlesListener.onArticlesDownloaded(articlesList);
 
+            } catch (FeedException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+        };
 
-
-        return articlesList;
+        ThreadManager threadManager = ThreadManager.getInstance();
+        threadManager.runTaskInPool(task);
     }
 
     private Article buildArticle(SyndFeed feed) {
 
 
         return null;
+    }
+
+
+    public String getThumbnailUrl(SyndEntry entry) {
+        if(entry==null) return null;
+        String thumbnailUrl = null;
+
+        // media namespace strategy
+        List<Element> elements = entry.getForeignMarkup();
+        for(Element element: elements) {
+            String namespace = element.getNamespacePrefix();
+            if(namespace.equals("media")) {
+                thumbnailUrl = element.getAttributeValue("url");
+                break;
+            }
+        }
+
+
+        return thumbnailUrl;
     }
 
 
