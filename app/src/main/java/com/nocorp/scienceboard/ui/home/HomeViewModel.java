@@ -25,7 +25,7 @@ public class HomeViewModel extends ViewModel implements ArticleDownloader {
     }
 
     public void fetchArticles(String rssUrl) {
-        sourceRepository.getArticles(rssUrl);
+        sourceRepository.getArticles(rssUrl, 20);
     }
 
     public void setArticlesList(List<Article> articlesList) {

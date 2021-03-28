@@ -15,10 +15,13 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.chimbori.crux.articles.Article;
+import com.chimbori.crux.articles.ArticleExtractor;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterFeedsList;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.utility.HttpUtilities;
+import com.nocorp.scienceboard.utility.MyOkHttpClient;
 import com.rometools.rome.feed.synd.SyndContent;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
@@ -28,18 +31,30 @@ import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
 
 import org.jdom2.Element;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Node;
+import org.jsoup.safety.Whitelist;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import io.reactivex.rxjava3.core.Observable;
+import okhttp3.FormBody;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class HomeFragment extends Fragment {
     private HomeViewModel homeViewModel;
@@ -60,7 +75,6 @@ public class HomeFragment extends Fragment {
         webView = view.findViewById(R.id.webView);
 
         initRecycleView(view);
-//        testWebview();
     }
 
     @Override
@@ -69,19 +83,86 @@ public class HomeFragment extends Fragment {
 
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         homeViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), articles -> {
-            if(articles!=null || articles.size()!=0) {
-                recyclerAdapterFeedsList.loadNewData(articles);
+            if(articles==null || articles.size()==0) {
+                Toast.makeText(requireContext(), "No articles avalaible!", Toast.LENGTH_SHORT).show();
             }
             else {
-                Toast.makeText(requireContext(), "No articles avalaible!", Toast.LENGTH_SHORT).show();
+                recyclerAdapterFeedsList.loadNewData(articles);
             }
         });
 
-        homeViewModel.fetchArticles("https://feeds.feedburner.com/nvidiablog");
+        String feedTag = "https://www.theverge.com/rss/index.xml";
+        String rdfTag = "https://www.nature.com/nmat.rss"; // unsecure (HTTP)
+        String rssTag = "https://home.cern/api/news/news/feed.rss";
+        String malformedRss = "https://www.theverge.com/";
+
+
+        String wired = "https://www.wired.com/feed/rss";
+        String nvidiaBlog = "https://feeds.feedburner.com/nvidiablog";
+        String hdblog = "https://www.hdblog.it/feed/";
+        String verge = "https://www.theverge.com/rss/index.xml";
+        String nature = "http://feeds.nature.com/nature/rss/current";
+        String cern = "https://home.cern/api/news/news/feed.rss";
+        String spacenews = "https://spacenews.com/feed/";
+        String space = "https://www.space.com/feeds/all";
+        String phys_org_space = "https://phys.org/rss-feed/space-news/";
+        String newscientist_space = "https://www.newscientist.com/subject/space/feed/";
+        String esa_italy = "https://www.esa.int/rssfeed/Italy";
+        String esa_space_news = "https://www.esa.int/rssfeed/Our_Activities/Space_News";
+        String nytimes_space = "https://rss.nytimes.com/services/xml/rss/nyt/Space.xml";
+        String livescience = "https://www.livescience.com/feeds/all";
+
+        String inputUrl = livescience;
+
+        homeViewModel.fetchArticles(inputUrl);
+//
+//
+//        testWebview(inputUrl);
+
+
+
+
+
+        Runnable task = () -> {
+            Document document = null;
+            try {
+                String url = "https://blogs.nvidia.com/blog/2021/03/25/geforce-now-thursday-march-25/?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+nvidiablog+%28The+NVIDIA+Blog%29";
+                document = Jsoup.connect(url).get();
+//                String cleanHtmlCode = Jsoup.clean(document.body().toString(), Whitelist.basicWithImages().addTags("html", "head", "body", "meta", "title", "p", "a", "h", "figure", "figcaption", "sub", "strong", "img"));
+                String cleanHtmlCode = Jsoup.clean(document.body().toString(), Whitelist.basicWithImages());
+
+                HttpUrl httpUrl = HttpUrl.Companion.parse(url);
+                Article article = new ArticleExtractor(httpUrl, document)
+                        .extractMetadata()
+                        .extractContent()
+                        .getArticle();
+
+                String a = article.getDescription();
+                String b = article.getTitle();
+                List<Article.Image> images = article.getImages();
+                HttpUrl c = article.getVideoUrl();
+                Document d = article.getDocument();
+                String e = article.getSiteName();
+
+                String t = d.html();
+
+                System.out.println(e);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        };
+
+        ThreadManager threadManager = ThreadManager.getInstance();
+//        threadManager.runTask(task);
+
+
+
 
     }
 
-    //
+
+    //---------------------------------------------------------------------
 
     private void initRecycleView(View view) {
         // defining Recycler view
@@ -104,6 +185,7 @@ public class HomeFragment extends Fragment {
                 String rssTag = "https://home.cern/api/news/news/feed.rss";
                 String malformedRss = "https://www.theverge.com/";
                 String wired = "https://www.wired.com/feed/rss";
+                String nvidiaBlog = "https://feeds.feedburner.com/nvidiablog";
 
                 String inputUrl = "https://feeds.feedburner.com/nvidiablog";
 
@@ -192,7 +274,7 @@ public class HomeFragment extends Fragment {
         };
 
         ThreadManager threadManager = ThreadManager.getInstance();
-        threadManager.runTaskInPool(task);
+        threadManager.runTask(task);
     }
 
     private void onFeedDownloaded(String htmlContent) {
@@ -208,6 +290,7 @@ public class HomeFragment extends Fragment {
             }
         });
     }
+
 
     public String getThumbnailUrl(SyndEntry entry) {
         if(entry==null) return null;

@@ -55,7 +55,7 @@ public class ThreadManager {
         return singletonInstance;
     }
 
-    public void runTaskInPool(Runnable runnable) {
+    public void runTask(Runnable runnable) {
         threadPoolExecutor.execute(runnable);
     }
 

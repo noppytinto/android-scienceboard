@@ -29,6 +29,7 @@ android {
 
     buildFeatures {
         dataBinding true
+        viewBinding true
     }
 
 //    testOptions {
@@ -97,4 +98,6 @@ dependencies {
 //    implementation 'com.apptastic:rssreader:2.4.1'
     implementation 'com.rometools:rome:1.15.0'
 
+    // web crawler
+    implementation 'com.chimbori.crux:crux:3.0.1'
 }

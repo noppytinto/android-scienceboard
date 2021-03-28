@@ -3,4 +3,13 @@
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">nature.com</domain>
     </domain-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">feeds.nature.com</domain>
+    </domain-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">cds.cern.ch</domain>
+    </domain-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">cdn.mos.cms.futurecdn.net</domain>
+    </domain-config>
 </network-security-config>
