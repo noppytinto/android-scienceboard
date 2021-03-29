@@ -22,7 +22,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chimbori.crux.articles.Article;
-import com.chimbori.crux.articles.ArticleExtractor;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
@@ -47,19 +46,15 @@ import org.jdom2.Element;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Node;
-import org.jsoup.safety.Whitelist;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
-import okhttp3.HttpUrl;
 
 import static com.google.android.gms.ads.nativead.NativeAdOptions.ADCHOICES_BOTTOM_RIGHT;
 
@@ -221,9 +216,9 @@ public class HomeFragment extends Fragment {
         actionButton.setText(nativeAd.getCallToAction());
         adView.setCallToActionView(actionButton);
 
-        ImageView appIcon = adView.findViewById(R.id.imageView_layoutNativeAdArticlesListLevel_adAppIcon);
-        appIcon.setImageDrawable(nativeAd.getIcon().getDrawable());
-        adView.setIconView(appIcon);
+        ImageView adImage = adView.findViewById(R.id.imageView_layoutNativeAdArticlesListLevel_adImage);
+        adImage.setImageDrawable(nativeAd.getImages().get(0).getDrawable());
+        adView.setImageView(adImage);
 
         // Call the NativeAdView's setNativeAd method to register the
         // NativeAdObject.
