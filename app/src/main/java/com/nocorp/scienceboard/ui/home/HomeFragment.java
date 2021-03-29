@@ -71,6 +71,7 @@ public class HomeFragment extends Fragment {
     private AdLoader adLoader;
     private View view;
     private NativeAd nativeAd;
+    private List<NativeAd> nativeAds;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -84,6 +85,7 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         webView = view.findViewById(R.id.webView);
         this.view = view;
+        nativeAds = new ArrayList<>();
         initRecycleView(view);
         initAdLoader();
     }
@@ -97,9 +99,8 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(requireContext(), "An error occurred during articles fetch, contact the developer.", Toast.LENGTH_SHORT).show();
             }
             else {
-                articles = populateWithAds(articles);
+                articles = populateWithAds(articles, 5);
                 recyclerAdapterFeedsList.loadNewData(articles);
-
             }
         });
 
@@ -142,18 +143,25 @@ public class HomeFragment extends Fragment {
 
     }
 
-    private List<ListItem> populateWithAds(List<ListItem> articles) {
-        ListAd listAd = new ListAd();
-        listAd.setAd(nativeAd);
-
+    private List<ListItem> populateWithAds(List<ListItem> articles, int eachNitems) {
         List<ListItem> oldList = new ArrayList<>(articles);
         List<ListItem> listWithAds = new ArrayList<>();
-        int step = 4;
+
+        int j=0;
+        int baseStep = eachNitems;
+        int increment = baseStep + 1;
+
         for(int i=0; i<articles.size(); i++) {
             ListItem listItem = oldList.get(i);
-            if(i==step) {
-                listWithAds.add(listAd);
-                step = step + 5;
+            if(i==baseStep) {
+                if(nativeAds!=null && nativeAds.size()>0) {
+                    if(j>=nativeAds.size()) j=0;
+
+                    ListAd listAd = new ListAd();
+                    listAd.setAd(nativeAds.get(j));
+                    listWithAds.add(listAd);
+                    baseStep = baseStep + increment;
+                }
             }
             else {
                 listWithAds.add(listItem);
@@ -181,7 +189,7 @@ public class HomeFragment extends Fragment {
                     } else {
                         Log.d(TAG, "onActivityCreated: ad loaded");
                         // The AdLoader has finished loading ads.
-                        nativeAd = ad;
+                        nativeAds.add(ad);
 //                        displayNativeAd(nativeAd);
                     }
                 })
@@ -202,12 +210,8 @@ public class HomeFragment extends Fragment {
                 .withNativeAdOptions(new NativeAdOptions.Builder()
                         .build())
                 .build();
-        adLoader.loadAd(new AdRequest.Builder().build());
+        adLoader.loadAds(new AdRequest.Builder().build(), 5);
     }
-
-    private void populateArticleListWithAds(NativeAd ad, List<Article> articlesList) {
-    }
-
 
     protected boolean isDestroyed() {
         return (this.isRemoving() || this.getActivity() == null || this.isDetached() || !this.isAdded() || this.getView() == null);
@@ -341,7 +345,6 @@ public class HomeFragment extends Fragment {
     }
 
     private void onFeedDownloaded(String htmlContent) {
-
         requireActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
