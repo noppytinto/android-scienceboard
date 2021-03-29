@@ -153,7 +153,7 @@ public class HomeFragment extends Fragment {
             ListItem listItem = oldList.get(i);
             if(i==step) {
                 listWithAds.add(listAd);
-                step = step + 4;
+                step = step + 5;
             }
             else {
                 listWithAds.add(listItem);

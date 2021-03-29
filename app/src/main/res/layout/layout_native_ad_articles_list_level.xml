@@ -102,6 +102,7 @@
                     app:layout_constraintEnd_toEndOf="@+id/textView_layoutNativeAdArticlesListLevel_headline"
                     app:layout_constraintStart_toStartOf="@+id/textView_layoutNativeAdArticlesListLevel_headline"
                     app:layout_constraintTop_toBottomOf="@+id/textView_layoutNativeAdArticlesListLevel_headline"
+                    app:strokeColor="@color/light_gray"
                     tools:text="visit" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
