@@ -1,6 +1,11 @@
 package com.nocorp.scienceboard.utility;
 
 public class MyValues {
+
+    public enum ItemType {
+        ARTICLE,
+        LIST_AD,
+    }
     public enum SearchType {
         GAME,
         MOVIE,

@@ -1,12 +1,15 @@
 package com.nocorp.scienceboard.model;
 
+import com.nocorp.scienceboard.ui.viewholder.ListItem;
+import com.nocorp.scienceboard.utility.MyValues;
 import com.rometools.rome.feed.synd.SyndEntry;
 
 import java.util.Date;
 
-public class Article {
+public class Article extends ListItem {
     private String title;
-    private String contentText;
+    private String description;
+    private String content;
     private String thumbnailUrl;
     private String webpageUrl;
     private SyndEntry syndEntry;
@@ -15,19 +18,22 @@ public class Article {
 
 
     public Article() {
-
+        super(MyValues.ItemType.ARTICLE);
     }
 
 
-    public Article(String title, String contentText, String thumbnailUrl) {
+    public Article(String title, String content, String thumbnailUrl) {
+        this();
         this.title = title;
-        this.contentText = contentText;
+        this.content = content;
         this.thumbnailUrl = thumbnailUrl;
     }
 
     public Article(String title, String thumbnailUrl) {
+        this();
         this.title = title;
     }
+
 //    Date publishDate;
 //    String overview;
 //    String fullText;
@@ -44,12 +50,12 @@ public class Article {
         this.title = title;
     }
 
-    public String getContentText() {
-        return contentText;
+    public String getContent() {
+        return content;
     }
 
-    public void setContentText(String contentText) {
-        this.contentText = contentText;
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public String getThumbnailUrl() {
@@ -90,5 +96,13 @@ public class Article {
 
     public void setPublishDate(Date publishDate) {
         this.publishDate = publishDate;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

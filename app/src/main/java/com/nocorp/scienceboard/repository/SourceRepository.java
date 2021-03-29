@@ -6,6 +6,7 @@ import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.system.MyOkHttpClient;
 import com.nocorp.scienceboard.system.ThreadManager;
+import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.utility.HttpUtilities;
 import com.rometools.rome.feed.module.Module;
 import com.rometools.rome.feed.synd.SyndContent;
@@ -36,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import okhttp3.HttpUrl;
@@ -51,7 +53,7 @@ public class SourceRepository {
     private static final String SEARCH_GAMES_URL = "https://api.rawg.io/api/games?key=" + RAWG_API_KEY + "&page_size=10";
     private final String RAWG_BASE_URL = "https://api.rawg.io";
     private static SourceRepository singletonInstance;
-    private ArticleDownloader articlesListener;
+    private ArticlesFetcher articlesListener;
 
 
     private SourceRepository() {
@@ -77,7 +79,7 @@ public class SourceRepository {
         }
     }
 
-    public void setArticlesListener(ArticleDownloader listener) {
+    public void setArticlesListener(ArticlesFetcher listener) {
         this.articlesListener = listener;
     }
 
@@ -86,7 +88,7 @@ public class SourceRepository {
 
 
     public void getArticles(String rssUrl, int limit) {
-        List<Article> articlesList = new ArrayList<>();
+        List<ListItem> articlesList = new ArrayList<>();
         AtomicInteger counter = new AtomicInteger();
 
         Runnable task = () -> {
@@ -109,7 +111,7 @@ public class SourceRepository {
                 }
 
                 // publish result
-                articlesListener.onArticlesDownloaded(articlesList);
+                articlesListener.onFetchCompleted(articlesList);
 
             } catch (FeedException e) {
                 e.printStackTrace();
@@ -133,18 +135,22 @@ public class SourceRepository {
         Article article = null;
 
         try {
-            String articleTitle = entry.getTitle();
+            String title = entry.getTitle();
             String webpageUrl = entry.getLink();
             String thumbnailUrl = getThumbnailUrl(entry);
             Date publishDate = entry.getPublishedDate();
+            String content = getContent(entry);
+            String description = getDescription(entry);
 
             article = new Article();
             article.setThumbnailUrl(thumbnailUrl);
-            article.setTitle(articleTitle);
+            article.setTitle(title);
             article.setWebpageUrl(webpageUrl);
             article.setSyndEntry(entry);
             article.setSource(source);
             article.setPublishDate(publishDate);
+            article.setContent(content);
+            article.setDescription(description);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -158,10 +164,11 @@ public class SourceRepository {
         try {
             source = new Source();
             String logoUrl = getLogoUrl(feed);
-            String title = feed.getTitle();
+            String name = feed.getTitle();
             String websiteUrl = feed.getLink();
+
             source.setLogoUrl(logoUrl);
-            source.setName(title);
+            source.setName(name);
             source.setWebsiteUrl(websiteUrl);
         } catch (Exception e) {
             e.printStackTrace();
@@ -207,6 +214,11 @@ public class SourceRepository {
         return thumbnailUrl;
     }
 
+    /**
+     * sometimes the thumbnail is contained in "enclosure" tags
+     * @param entry
+     * @return
+     */
     private boolean hasEnclosure(SyndEntry entry) {
         boolean result = false;
 
@@ -281,7 +293,7 @@ public class SourceRepository {
                 imageUrl = "https://" + host + sub + "?" + query;
             }
 
-            System.out.println(imageUrl);
+//            System.out.println(imageUrl);
 
         } catch (URISyntaxException e) {
             e.printStackTrace();
@@ -327,6 +339,7 @@ public class SourceRepository {
                 String namespacePrefix = element.getNamespacePrefix();
                 String namespaceName = element.getName();
 
+                // in case image is in media:content namespace, but with "image" type
                 if(namespacePrefix.contains(prefix) && name.contains("content")) {
                     String medium = element.getAttributeValue("medium");
                     if(medium!=null && (medium.contains("img") || medium.contains("image") || medium.contains("thumb"))) {
@@ -436,23 +449,20 @@ public class SourceRepository {
 //        return retrofitClient.create(RetrofitAPI.class);
 //    }
 
-    private RetrofitAPI buildRetrofitService(String baseUrl) {
-        final Retrofit retrofitClient = new Retrofit.Builder()
-                .baseUrl("https://www.hdblog.it/")
-                .client(MyOkHttpClient.getClient())
-                .build();
 
-        return retrofitClient.create(RetrofitAPI.class);
-    }
 
     private List<String> extractImagesUrlFromEntry(SyndEntry entry) {
         if(entry==null) return null;
         List<String> imagesUrl = new ArrayList<>();
 
-        String htmlCode = getHtmlContent(entry);
+//        String htmlCode = getHtmlContent(entry);
 
-        if(htmlCode!=null) {
-            Document doc = Jsoup.parse(htmlCode);
+        String description = getDescription(entry);
+        String content = getContent(entry);
+
+        // checking images in description
+        if(description != null) {
+            Document doc = Jsoup.parse(description);
             Elements urls = doc.select("img");
 
             for(org.jsoup.nodes.Element el: urls) {
@@ -460,7 +470,18 @@ public class SourceRepository {
                 if(url!=null || url.isEmpty())
                     imagesUrl.addAll(Collections.singleton(url));
             }
+        }
 
+        // checking images in content
+        if(content != null) {
+            Document doc = Jsoup.parse(content);
+            Elements urls = doc.select("img");
+
+            for(org.jsoup.nodes.Element el: urls) {
+                String url = el.attr("src");
+                if(url!=null || url.isEmpty())
+                    imagesUrl.addAll(Collections.singleton(url));
+            }
         }
 
         return imagesUrl;
@@ -488,6 +509,34 @@ public class SourceRepository {
             }
         }
         return htmlCode;
+    }
+
+    private String getContent(SyndEntry entry) {
+        if(entry==null) return null;
+
+        String result = null;
+        String contentType = null;
+        List<SyndContent> contents = entry.getContents();
+
+        for(SyndContent content: contents) {
+            contentType = content.getType();
+            if(contentType.equals("html")) {
+                result = content.getValue();
+                break;
+            }
+        }
+        return result;
+    }
+
+
+    private String getDescription(SyndEntry entry) {
+        if(entry==null) return null;
+
+        String result = null;
+        SyndContent description = entry.getDescription();
+        result = description.getValue();
+
+        return result;
     }
 
     private List<String> extractImagesUrlFromHtml(String htmlCode) {
@@ -609,5 +658,17 @@ public class SourceRepository {
         return request;
     }
 
+
+
+
+
+    private RetrofitAPI buildRetrofitService(String baseUrl) {
+        final Retrofit retrofitClient = new Retrofit.Builder()
+                .baseUrl("https://www.hdblog.it/")
+                .client(MyOkHttpClient.getClient())
+                .build();
+
+        return retrofitClient.create(RetrofitAPI.class);
+    }
 
 }

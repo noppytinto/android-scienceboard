@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.recycler.viewholder;
+package com.nocorp.scienceboard.ui.viewholder;
 
 import android.view.View;
 import android.widget.ImageView;

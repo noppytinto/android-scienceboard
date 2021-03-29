@@ -1,15 +1,21 @@
 package com.nocorp.scienceboard.ui.home;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -17,11 +23,18 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.chimbori.crux.articles.Article;
 import com.chimbori.crux.articles.ArticleExtractor;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdLoader;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.nativead.NativeAd;
+import com.google.android.gms.ads.nativead.NativeAdOptions;
+import com.google.android.gms.ads.nativead.NativeAdView;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterFeedsList;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.utility.HttpUtilities;
-import com.nocorp.scienceboard.utility.MyOkHttpClient;
 import com.rometools.rome.feed.synd.SyndContent;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
@@ -31,8 +44,6 @@ import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
 
 import org.jdom2.Element;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Node;
@@ -40,27 +51,28 @@ import org.jsoup.safety.Whitelist;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.net.ConnectException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import io.reactivex.rxjava3.core.Observable;
-import okhttp3.FormBody;
 import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+
+import static com.google.android.gms.ads.nativead.NativeAdOptions.ADCHOICES_BOTTOM_RIGHT;
 
 public class HomeFragment extends Fragment {
+    private final String TAG = this.getClass().getSimpleName();
     private HomeViewModel homeViewModel;
     private WebView webView;
     private RecyclerAdapterFeedsList recyclerAdapterFeedsList;
     private RecyclerView recyclerView;
+    private CircularProgressIndicator progressIndicator;
+    private AdLoader adLoader;
+    private View view;
+    private NativeAd nativeAd;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -73,18 +85,18 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         webView = view.findViewById(R.id.webView);
-
+        this.view = view;
         initRecycleView(view);
+        initAdLoader();
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         homeViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), articles -> {
             if(articles==null || articles.size()==0) {
-                Toast.makeText(requireContext(), "No articles avalaible!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "An error occurred during articles fetch, contact the developer.", Toast.LENGTH_SHORT).show();
             }
             else {
                 recyclerAdapterFeedsList.loadNewData(articles);
@@ -96,23 +108,29 @@ public class HomeFragment extends Fragment {
         String rssTag = "https://home.cern/api/news/news/feed.rss";
         String malformedRss = "https://www.theverge.com/";
 
-
-        String wired = "https://www.wired.com/feed/rss";
-        String nvidiaBlog = "https://feeds.feedburner.com/nvidiablog";
-        String hdblog = "https://www.hdblog.it/feed/";
-        String verge = "https://www.theverge.com/rss/index.xml";
-        String nature = "http://feeds.nature.com/nature/rss/current";
+        // space
+        String esa_italy = "https://www.esa.int/rssfeed/Italy";
+        String nytimes_space = "https://rss.nytimes.com/services/xml/rss/nyt/Space.xml";
         String cern = "https://home.cern/api/news/news/feed.rss";
         String spacenews = "https://spacenews.com/feed/";
         String space = "https://www.space.com/feeds/all";
         String phys_org_space = "https://phys.org/rss-feed/space-news/";
         String newscientist_space = "https://www.newscientist.com/subject/space/feed/";
-        String esa_italy = "https://www.esa.int/rssfeed/Italy";
         String esa_space_news = "https://www.esa.int/rssfeed/Our_Activities/Space_News";
-        String nytimes_space = "https://rss.nytimes.com/services/xml/rss/nyt/Space.xml";
+
+        // tech
+        String wired = "https://www.wired.com/feed/rss";
+        String nvidiaBlog = "https://feeds.feedburner.com/nvidiablog";
+        String hdblog = "https://www.hdblog.it/feed/";
+        String verge = "https://www.theverge.com/rss/index.xml";
+
+        // science
+        String nature = "http://feeds.nature.com/nature/rss/current";
         String livescience = "https://www.livescience.com/feeds/all";
 
-        String inputUrl = livescience;
+
+        //
+        String inputUrl = spacenews;
 
         homeViewModel.fetchArticles(inputUrl);
 //
@@ -122,43 +140,57 @@ public class HomeFragment extends Fragment {
 
 
 
+    }
 
-        Runnable task = () -> {
-            Document document = null;
-            try {
-                String url = "https://blogs.nvidia.com/blog/2021/03/25/geforce-now-thursday-march-25/?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+nvidiablog+%28The+NVIDIA+Blog%29";
-                document = Jsoup.connect(url).get();
-//                String cleanHtmlCode = Jsoup.clean(document.body().toString(), Whitelist.basicWithImages().addTags("html", "head", "body", "meta", "title", "p", "a", "h", "figure", "figcaption", "sub", "strong", "img"));
-                String cleanHtmlCode = Jsoup.clean(document.body().toString(), Whitelist.basicWithImages());
+    private void initAdLoader() {
+        adLoader = new AdLoader.Builder(requireContext(), "ca-app-pub-3940256099942544/2247696110") // TODO: this is a test id, change on production
+                .forNativeAd(ad -> {
+                    // Show the ad.
+                    if (isDestroyed()) {
+                        ad.destroy();
+                        Log.d(TAG, "onActivityCreated: ad destroyed");
+                        return;
+                    }
 
-                HttpUrl httpUrl = HttpUrl.Companion.parse(url);
-                Article article = new ArticleExtractor(httpUrl, document)
-                        .extractMetadata()
-                        .extractContent()
-                        .getArticle();
+                    if (adLoader.isLoading()) {
+                        // The AdLoader is still loading ads.
+                        // Expect more adLoaded or onAdFailedToLoad callbacks.
+                        Log.d(TAG, "onActivityCreated: add loading");
 
-                String a = article.getDescription();
-                String b = article.getTitle();
-                List<Article.Image> images = article.getImages();
-                HttpUrl c = article.getVideoUrl();
-                Document d = article.getDocument();
-                String e = article.getSiteName();
+                    } else {
+                        Log.d(TAG, "onActivityCreated: ad loaded");
+                        // The AdLoader has finished loading ads.
+                        nativeAd = ad;
+                        displayNativeAd(nativeAd);
+                    }
+                })
+                .withAdListener(new AdListener() {
+                    @Override
+                    public void onAdFailedToLoad(LoadAdError adError) {
+                        // Handle the failure by logging, altering the UI, and so on.
+                        Log.d(TAG, "onAdFailedToLoad: ad failed to load");
+                    }
 
-                String t = d.html();
+                    @Override
+                    public void onAdClicked() {
+                        // Log the click event or other custom behavior.
+                        Log.d(TAG, "onAdClicked: ad clicked");
+                    }
 
-                System.out.println(e);
+                })
+                .withNativeAdOptions(new NativeAdOptions.Builder()
+                        .setAdChoicesPlacement(ADCHOICES_BOTTOM_RIGHT)
+                        .build())
+                .build();
+        adLoader.loadAd(new AdRequest.Builder().build());
+    }
 
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        };
-
-        ThreadManager threadManager = ThreadManager.getInstance();
-//        threadManager.runTask(task);
+    private void populateArticleListWithAds(NativeAd ad, List<Article> articlesList) {
+    }
 
 
-
-
+    protected boolean isDestroyed() {
+        return (this.isRemoving() || this.getActivity() == null || this.isDetached() || !this.isAdded() || this.getView() == null);
     }
 
 
@@ -171,6 +203,47 @@ public class HomeFragment extends Fragment {
         recyclerAdapterFeedsList = new RecyclerAdapterFeedsList(new ArrayList<>(), requireContext());
         recyclerView.setAdapter(recyclerAdapterFeedsList);
     }
+
+    private void displayNativeAd(NativeAd nativeAd) {
+        ConstraintLayout parent = view.findViewById(R.id.include_homeFragment_nativeAd).findViewById(R.id.constraintLayout_layoutNativeAdArticlesListLevel_parent);
+
+        // Inflate a layout and add it to the parent ViewGroup.
+        LayoutInflater inflater = (LayoutInflater) parent.getContext()
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        NativeAdView adView = (NativeAdView) inflater
+                .inflate(R.layout.layout_native_ad_articles_list_level, null);
+
+        TextView headline = adView.findViewById(R.id.textView_layoutNativeAdArticlesListLevel_headline);
+        headline.setText(nativeAd.getHeadline());
+        adView.setHeadlineView(headline);
+
+        Button actionButton = adView.findViewById(R.id.buttonlayoutNativeAdArticlesListLevel_action);
+        actionButton.setText(nativeAd.getCallToAction());
+        adView.setCallToActionView(actionButton);
+
+        ImageView appIcon = adView.findViewById(R.id.imageView_layoutNativeAdArticlesListLevel_adAppIcon);
+        appIcon.setImageDrawable(nativeAd.getIcon().getDrawable());
+        adView.setIconView(appIcon);
+
+        // Call the NativeAdView's setNativeAd method to register the
+        // NativeAdObject.
+        adView.setNativeAd(nativeAd);
+
+        // Ensure that the parent view doesn't already contain an ad view.
+        parent.removeAllViews();
+
+        // Place the AdView into the parent.
+        parent.addView(adView);
+    }
+
+
+
+
+
+
+
+
+
 
 
 
@@ -291,7 +364,6 @@ public class HomeFragment extends Fragment {
         });
     }
 
-
     public String getThumbnailUrl(SyndEntry entry) {
         if(entry==null) return null;
         String thumbnailUrl = null;
@@ -392,7 +464,6 @@ public class HomeFragment extends Fragment {
 
         return iframes;
     }
-
 
     private String getLogoUrl(SyndFeed feed) {
         if(feed==null) return null;

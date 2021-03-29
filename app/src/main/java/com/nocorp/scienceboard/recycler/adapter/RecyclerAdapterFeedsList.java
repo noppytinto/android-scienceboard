@@ -19,8 +19,12 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.model.Article;
-import com.nocorp.scienceboard.recycler.viewholder.ArticleViewHolder;
+import com.nocorp.scienceboard.model.ListAd;
+import com.nocorp.scienceboard.ui.viewholder.ArticleViewHolder;
+import com.nocorp.scienceboard.ui.viewholder.ListAdViewHolder;
+import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.utility.MyUtilities;
+import com.nocorp.scienceboard.utility.MyValues;
 
 
 import org.jetbrains.annotations.NotNull;
@@ -28,14 +32,18 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Date;
 import java.util.List;
 
-public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<ArticleViewHolder> {
-    private List<Article> articlesList;
+public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    private List<ListItem> recyclerList;
     private Context context;
+
+    private static final int ARTICLE_TYPE = 1;
+    private static final int LIST_AD_TYPE = 2;
+
 
 
     //------------------------------------------------------------------------CONSTRUCTORS
-    public RecyclerAdapterFeedsList(List<Article> articlesList, Context context) {
-        this.articlesList = articlesList;
+    public RecyclerAdapterFeedsList(List<ListItem> recyclerList, Context context) {
+        this.recyclerList = recyclerList;
         this.context = context;
     }
 
@@ -44,19 +52,60 @@ public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<ArticleViewHo
     //------------------------------------------------------------------------ METHODS
 
 
+    @Override
+    public int getItemViewType(int position) {
+        MyValues.ItemType type = recyclerList.get(position).getItemType();
+        switch (type) {
+            case ARTICLE:
+                return ARTICLE_TYPE;
+            case LIST_AD:
+                return LIST_AD_TYPE;
+            default:
+                return 0;
+        }
+    }
+
+
     @NonNull
     @Override
-    public ArticleViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_article_viewholder, parent, false);
-        return new ArticleViewHolder(view);
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = null;
+
+        if(viewType == ARTICLE_TYPE) {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_article_viewholder, parent, false);
+            return new ArticleViewHolder(view);
+        }
+        else if(viewType == LIST_AD_TYPE) {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_native_ad_articles_list_level, parent, false);
+            return new ListAdViewHolder(view);
+        }
+        else {
+            return new ArticleViewHolder(null);
+        }
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ArticleViewHolder holder, int position) {
-        Article article = articlesList.get(position);
-        String thumbnailUrl = article.getThumbnailUrl();
-        String readablePubDate = buildPubDate(article);
-        String title = article.getTitle();
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        if(getItemViewType(position) == ARTICLE_TYPE) {
+            Article article = (Article) recyclerList.get(position);
+
+            //
+            buildArticleItem((ArticleViewHolder) holder, article);
+        }
+        else if(getItemViewType(position) == LIST_AD_TYPE) {
+            ListAd listAd = (ListAd) recyclerList.get(position);
+
+            //
+            buildListAdItem((ListAdViewHolder) holder, listAd);
+        }
+
+
+    }
+
+    private void buildArticleItem(ArticleViewHolder holder, Article item) {
+        String thumbnailUrl = item.getThumbnailUrl();
+        String readablePubDate = buildPubDate(item);
+        String title = item.getTitle();
 
         if(thumbnailUrl==null) {
             holder.hideCardView();
@@ -93,6 +142,10 @@ public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<ArticleViewHo
         holder.pubDate.setText(readablePubDate);
     }
 
+    private void buildListAdItem(ListAdViewHolder holder, ListAd item) {
+
+    }
+
     @NotNull
     private String buildPubDate(Article article) {
         Date pubDate = article.getPublishDate();
@@ -102,16 +155,16 @@ public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<ArticleViewHo
 
     @Override
     public int getItemCount() {
-        return ( (articlesList != null) && (articlesList.size() != 0) ? articlesList.size() : 0);
+        return ( (recyclerList != null) && (recyclerList.size() != 0) ? recyclerList.size() : 0);
     }
 
 
-    public Article getArticle(int position) {
-        return ( (articlesList != null) && (articlesList.size() != 0) ? articlesList.get(position) : null);
+    public ListItem getItem(int position) {
+        return ( (recyclerList != null) && (recyclerList.size() != 0) ? recyclerList.get(position) : null);
     }
 
-    public void loadNewData(List<Article> newList) {
-        articlesList = newList;
+    public void loadNewData(List<ListItem> newList) {
+        recyclerList = newList;
         notifyDataSetChanged();
     }
 

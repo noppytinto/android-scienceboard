@@ -5,6 +5,9 @@ import android.text.Html;
 import android.text.Spanned;
 import android.widget.TextView;
 
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.utility.HttpUtilities;
@@ -43,8 +46,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         initView();
 
+        initGoogleAdMob();
+
     }
 
+    private void initGoogleAdMob() {
+        MobileAds.initialize(this, initializationStatus -> {
+            //TODO
+        });
+    }
 
 
     private void initView() {
