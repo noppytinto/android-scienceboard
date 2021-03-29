@@ -17,6 +17,7 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.google.android.gms.ads.nativead.NativeAd;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.ListAd;
@@ -143,7 +144,8 @@ public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<RecyclerView.
     }
 
     private void buildListAdItem(ListAdViewHolder holder, ListAd item) {
-
+        NativeAd nativeAd = item.getAd();
+        holder.displayNativeAd(nativeAd);
     }
 
     @NotNull

@@ -17,23 +17,22 @@
             android:layout_width="0dp"
             android:layout_height="100dp"
             android:layout_marginStart="8dp"
+            android:background="@color/light_gray"
             app:cardCornerRadius="3dp"
             app:cardElevation="0dp"
-            android:background="@color/light_gray"
-            app:layout_constraintBottom_toBottomOf="@+id/cardView2"
             app:layout_constraintDimensionRatio="w,16:10"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/cardView2"
-            app:layout_constraintWidth_min="160dp"
-            >
+            app:layout_constraintWidth_min="150dp">
 
 
             <ImageView
                 android:id="@+id/imageView_layoutNativeAdArticlesListLevel_adImage"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="@color/light_gray"
                 android:scaleType="centerCrop"
-                android:background="@color/light_gray"/>
+                tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
 
         </androidx.cardview.widget.CardView>
@@ -43,9 +42,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="2dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginBottom="24dp"
+            android:layout_marginBottom="4dp"
             android:background="@color/white"
             app:cardCornerRadius="3dp"
             app:cardElevation="@dimen/default_card_elevation"
@@ -85,18 +84,21 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="4dp"
                     android:layout_marginBottom="4dp"
+                    android:adjustViewBounds="true"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/buttonlayoutNativeAdArticlesListLevel_action"
+                    app:layout_constraintVertical_bias="1.0"
                     app:srcCompat="@drawable/ic_ad_badge" />
 
 
                 <Button
                     android:id="@+id/buttonlayoutNativeAdArticlesListLevel_action"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="0dp"
                     android:layout_height="40dp"
                     android:padding="3dp"
                     android:textColor="@color/gray"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     app:layout_constraintEnd_toEndOf="@+id/textView_layoutNativeAdArticlesListLevel_headline"
                     app:layout_constraintStart_toStartOf="@+id/textView_layoutNativeAdArticlesListLevel_headline"
                     app:layout_constraintTop_toBottomOf="@+id/textView_layoutNativeAdArticlesListLevel_headline"

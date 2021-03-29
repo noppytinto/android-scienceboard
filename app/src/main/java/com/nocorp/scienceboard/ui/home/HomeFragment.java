@@ -31,9 +31,12 @@ import com.google.android.gms.ads.nativead.NativeAdOptions;
 import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.nocorp.scienceboard.R;
+import com.nocorp.scienceboard.model.ListAd;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterFeedsList;
 import com.nocorp.scienceboard.system.ThreadManager;
+import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.utility.HttpUtilities;
+import com.nocorp.scienceboard.utility.MyValues;
 import com.rometools.rome.feed.synd.SyndContent;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
@@ -94,7 +97,9 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(requireContext(), "An error occurred during articles fetch, contact the developer.", Toast.LENGTH_SHORT).show();
             }
             else {
+                articles = populateWithAds(articles);
                 recyclerAdapterFeedsList.loadNewData(articles);
+
             }
         });
 
@@ -137,6 +142,27 @@ public class HomeFragment extends Fragment {
 
     }
 
+    private List<ListItem> populateWithAds(List<ListItem> articles) {
+        ListAd listAd = new ListAd();
+        listAd.setAd(nativeAd);
+
+        List<ListItem> oldList = new ArrayList<>(articles);
+        List<ListItem> listWithAds = new ArrayList<>();
+        int step = 4;
+        for(int i=0; i<articles.size(); i++) {
+            ListItem listItem = oldList.get(i);
+            if(i==step) {
+                listWithAds.add(listAd);
+                step = step + 4;
+            }
+            else {
+                listWithAds.add(listItem);
+            }
+        }
+
+        return listWithAds;
+    }
+
     private void initAdLoader() {
         adLoader = new AdLoader.Builder(requireContext(), "ca-app-pub-3940256099942544/2247696110") // TODO: this is a test id, change on production
                 .forNativeAd(ad -> {
@@ -156,7 +182,7 @@ public class HomeFragment extends Fragment {
                         Log.d(TAG, "onActivityCreated: ad loaded");
                         // The AdLoader has finished loading ads.
                         nativeAd = ad;
-                        displayNativeAd(nativeAd);
+//                        displayNativeAd(nativeAd);
                     }
                 })
                 .withAdListener(new AdListener() {
@@ -174,7 +200,6 @@ public class HomeFragment extends Fragment {
 
                 })
                 .withNativeAdOptions(new NativeAdOptions.Builder()
-                        .setAdChoicesPlacement(ADCHOICES_BOTTOM_RIGHT)
                         .build())
                 .build();
         adLoader.loadAd(new AdRequest.Builder().build());
@@ -199,37 +224,7 @@ public class HomeFragment extends Fragment {
         recyclerView.setAdapter(recyclerAdapterFeedsList);
     }
 
-    private void displayNativeAd(NativeAd nativeAd) {
-        ConstraintLayout parent = view.findViewById(R.id.include_homeFragment_nativeAd).findViewById(R.id.constraintLayout_layoutNativeAdArticlesListLevel_parent);
 
-        // Inflate a layout and add it to the parent ViewGroup.
-        LayoutInflater inflater = (LayoutInflater) parent.getContext()
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        NativeAdView adView = (NativeAdView) inflater
-                .inflate(R.layout.layout_native_ad_articles_list_level, null);
-
-        TextView headline = adView.findViewById(R.id.textView_layoutNativeAdArticlesListLevel_headline);
-        headline.setText(nativeAd.getHeadline());
-        adView.setHeadlineView(headline);
-
-        Button actionButton = adView.findViewById(R.id.buttonlayoutNativeAdArticlesListLevel_action);
-        actionButton.setText(nativeAd.getCallToAction());
-        adView.setCallToActionView(actionButton);
-
-        ImageView adImage = adView.findViewById(R.id.imageView_layoutNativeAdArticlesListLevel_adImage);
-        adImage.setImageDrawable(nativeAd.getImages().get(0).getDrawable());
-        adView.setImageView(adImage);
-
-        // Call the NativeAdView's setNativeAd method to register the
-        // NativeAdObject.
-        adView.setNativeAd(nativeAd);
-
-        // Ensure that the parent view doesn't already contain an ad view.
-        parent.removeAllViews();
-
-        // Place the AdView into the parent.
-        parent.addView(adView);
-    }
 
 
 

@@ -12,12 +12,11 @@
         android:layout_width="0dp"
         android:layout_height="100dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         app:cardCornerRadius="3dp"
         app:cardElevation="0dp"
         app:layout_constraintDimensionRatio="w,16:10"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/cardView"
         app:layout_constraintWidth_min="150dp">
 
         <ImageView
@@ -30,12 +29,13 @@
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="8dp"
         android:background="@color/white"
         app:cardCornerRadius="3dp"
         app:cardElevation="@dimen/default_card_elevation"
@@ -76,13 +76,13 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="8dp"
+                android:text="@string/test"
                 android:textColor="@color/gray"
                 android:textSize="12sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView_articleViewholder_title"
                 app:layout_constraintVertical_bias="1.0"
-                android:text="@string/test"
                 tools:text="Physics / 1h" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
