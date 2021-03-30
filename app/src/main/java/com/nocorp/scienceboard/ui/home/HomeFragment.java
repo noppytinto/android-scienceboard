@@ -119,7 +119,7 @@ public class HomeFragment extends Fragment implements FeedProvider.OnFeedsDownlo
 
     @Override
     public void onFeedsDownloadCompleted(List<Source> sources) {
-//        homeViewModel.fetchArticles(sources);
+        homeViewModel.fetchArticles(sources);
         requireActivity().runOnUiThread(() ->
                 Toast.makeText(requireContext(), "feeds fetched", Toast.LENGTH_SHORT).show()
         );

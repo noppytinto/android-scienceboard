@@ -66,17 +66,17 @@ public class FeedProvider {
         sourceUrls.add(esa_italy);
         sourceUrls.add(nytimes_space);
         sourceUrls.add(cern);
-        sourceUrls.add(spacenews);
+//        sourceUrls.add(spacenews);
         sourceUrls.add(space);
-        sourceUrls.add(phys_org_space);
+//        sourceUrls.add(phys_org_space);
         sourceUrls.add(newscientist_space);
         sourceUrls.add(esa_space_news);
         sourceUrls.add(wired);
-        sourceUrls.add(nvidiaBlog);
+//        sourceUrls.add(nvidiaBlog);
         sourceUrls.add(hdblog);
         sourceUrls.add(theverge);
-        sourceUrls.add(nature);
-        sourceUrls.add(livescience);
+//        sourceUrls.add(nature);
+//        sourceUrls.add(livescience);
 
     }
 
@@ -156,8 +156,9 @@ public class FeedProvider {
             source.setLogoUrl(logoUrl);
             source.setName(name);
             source.setWebsiteUrl(websiteUrl);
-            source.setArticles(articles);
             source.setEntries(entries);
+            source.setArticles(articles);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
