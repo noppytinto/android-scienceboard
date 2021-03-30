@@ -1,42 +1,28 @@
 package com.nocorp.scienceboard.ui.home;
 
-import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.chimbori.crux.articles.Article;
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdLoader;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.nativead.NativeAd;
-import com.google.android.gms.ads.nativead.NativeAdOptions;
-import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.nocorp.scienceboard.R;
-import com.nocorp.scienceboard.model.ListAd;
+import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterFeedsList;
+import com.nocorp.scienceboard.repository.FeedProvider;
 import com.nocorp.scienceboard.system.ThreadManager;
-import com.nocorp.scienceboard.ui.viewholder.ListItem;
+import com.nocorp.scienceboard.utility.AdProvider;
 import com.nocorp.scienceboard.utility.HttpUtilities;
-import com.nocorp.scienceboard.utility.MyValues;
 import com.rometools.rome.feed.synd.SyndContent;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
@@ -59,24 +45,22 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static com.google.android.gms.ads.nativead.NativeAdOptions.ADCHOICES_BOTTOM_RIGHT;
-
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements FeedProvider.OnFeedsDownloadedListener {
     private final String TAG = this.getClass().getSimpleName();
     private HomeViewModel homeViewModel;
     private WebView webView;
     private RecyclerAdapterFeedsList recyclerAdapterFeedsList;
     private RecyclerView recyclerView;
     private CircularProgressIndicator progressIndicator;
-    private AdLoader adLoader;
     private View view;
-    private NativeAd nativeAd;
-    private List<NativeAd> nativeAds;
+    private AdProvider adProvider;
+
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-
         View root = inflater.inflate(R.layout.fragment_home, container, false);
+        adProvider = AdProvider.getInstance(); // is not guaranteed that
+        adProvider.loadSomeAds(5, requireContext());
         return root;
     }
 
@@ -84,139 +68,44 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         webView = view.findViewById(R.id.webView);
+        progressIndicator = view.findViewById(R.id.progressIndicator_homeFragment);
         this.view = view;
-        nativeAds = new ArrayList<>();
         initRecycleView(view);
-        initAdLoader();
+
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         homeViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), articles -> {
             if(articles==null || articles.size()==0) {
+                progressIndicator.setVisibility(View.GONE);
                 Toast.makeText(requireContext(), "An error occurred during articles fetch, contact the developer.", Toast.LENGTH_SHORT).show();
             }
             else {
-                articles = populateWithAds(articles, 5);
+                progressIndicator.setVisibility(View.GONE);
+                articles = adProvider.populateListWithAds(articles, 5);
                 recyclerAdapterFeedsList.loadNewData(articles);
             }
         });
 
-        String feedTag = "https://www.theverge.com/rss/index.xml";
-        String rdfTag = "https://www.nature.com/nmat.rss"; // unsecure (HTTP)
-        String rssTag = "https://home.cern/api/news/news/feed.rss";
-        String malformedRss = "https://www.theverge.com/";
-
-        // space
-        String esa_italy = "https://www.esa.int/rssfeed/Italy";
-        String nytimes_space = "https://rss.nytimes.com/services/xml/rss/nyt/Space.xml";
-        String cern = "https://home.cern/api/news/news/feed.rss";
-        String spacenews = "https://spacenews.com/feed/";
-        String space = "https://www.space.com/feeds/all";
-        String phys_org_space = "https://phys.org/rss-feed/space-news/";
-        String newscientist_space = "https://www.newscientist.com/subject/space/feed/";
-        String esa_space_news = "https://www.esa.int/rssfeed/Our_Activities/Space_News";
-
-        // tech
-        String wired = "https://www.wired.com/feed/rss";
-        String nvidiaBlog = "https://feeds.feedburner.com/nvidiablog";
-        String hdblog = "https://www.hdblog.it/feed/";
-        String verge = "https://www.theverge.com/rss/index.xml";
-
-        // science
-        String nature = "http://feeds.nature.com/nature/rss/current";
-        String livescience = "https://www.livescience.com/feeds/all";
-
-
-        //
-        String inputUrl = spacenews;
-
-        homeViewModel.fetchArticles(inputUrl);
-//
-//
+        FeedProvider feedProvider = new FeedProvider(this);
+        feedProvider.downloadFeeds();
 //        testWebview(inputUrl);
-
-
-
-
     }
 
-    private List<ListItem> populateWithAds(List<ListItem> articles, int eachNitems) {
-        List<ListItem> oldList = new ArrayList<>(articles);
-        List<ListItem> listWithAds = new ArrayList<>();
-
-        int j=0;
-        int baseStep = eachNitems;
-        int increment = baseStep + 1;
-
-        for(int i=0; i<articles.size(); i++) {
-            ListItem listItem = oldList.get(i);
-            if(i==baseStep) {
-                if(nativeAds!=null && nativeAds.size()>0) {
-                    if(j>=nativeAds.size()) j=0;
-
-                    ListAd listAd = new ListAd();
-                    listAd.setAd(nativeAds.get(j));
-                    listWithAds.add(listAd);
-                    baseStep = baseStep + increment;
-                }
-            }
-            else {
-                listWithAds.add(listItem);
-            }
-        }
-
-        return listWithAds;
-    }
-
-    private void initAdLoader() {
-        adLoader = new AdLoader.Builder(requireContext(), "ca-app-pub-3940256099942544/2247696110") // TODO: this is a test id, change on production
-                .forNativeAd(ad -> {
-                    // Show the ad.
-                    if (isDestroyed()) {
-                        ad.destroy();
-                        Log.d(TAG, "onActivityCreated: ad destroyed");
-                        return;
-                    }
-
-                    if (adLoader.isLoading()) {
-                        // The AdLoader is still loading ads.
-                        // Expect more adLoaded or onAdFailedToLoad callbacks.
-                        Log.d(TAG, "onActivityCreated: add loading");
-
-                    } else {
-                        Log.d(TAG, "onActivityCreated: ad loaded");
-                        // The AdLoader has finished loading ads.
-                        nativeAds.add(ad);
-//                        displayNativeAd(nativeAd);
-                    }
-                })
-                .withAdListener(new AdListener() {
-                    @Override
-                    public void onAdFailedToLoad(LoadAdError adError) {
-                        // Handle the failure by logging, altering the UI, and so on.
-                        Log.d(TAG, "onAdFailedToLoad: ad failed to load");
-                    }
-
-                    @Override
-                    public void onAdClicked() {
-                        // Log the click event or other custom behavior.
-                        Log.d(TAG, "onAdClicked: ad clicked");
-                    }
-
-                })
-                .withNativeAdOptions(new NativeAdOptions.Builder()
-                        .build())
-                .build();
-        adLoader.loadAds(new AdRequest.Builder().build(), 5);
-    }
 
     protected boolean isDestroyed() {
         return (this.isRemoving() || this.getActivity() == null || this.isDetached() || !this.isAdded() || this.getView() == null);
     }
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        adProvider.destroyAds();
+    }
 
     //---------------------------------------------------------------------
 
@@ -228,7 +117,20 @@ public class HomeFragment extends Fragment {
         recyclerView.setAdapter(recyclerAdapterFeedsList);
     }
 
+    @Override
+    public void onFeedsDownloadCompleted(List<Source> sources) {
+//        homeViewModel.fetchArticles(sources);
+        requireActivity().runOnUiThread(() ->
+                Toast.makeText(requireContext(), "feeds fetched", Toast.LENGTH_SHORT).show()
+        );
+    }
 
+    @Override
+    public void onFeedsDownloadFailed(String cause) {
+        requireActivity().runOnUiThread(() ->
+                Toast.makeText(requireContext(), "Cannot fetch feeds, contact the developer.\n$cause", Toast.LENGTH_SHORT).show()
+        );
+    }
 
 
 
@@ -475,4 +377,6 @@ public class HomeFragment extends Fragment {
         }
         return logo;
     }
+
+
 }

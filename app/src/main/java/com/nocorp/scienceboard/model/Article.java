@@ -6,7 +6,7 @@ import com.rometools.rome.feed.synd.SyndEntry;
 
 import java.util.Date;
 
-public class Article extends ListItem {
+public class Article extends ListItem implements Comparable<Article> {
     private String title;
     private String description;
     private String content;
@@ -33,6 +33,7 @@ public class Article extends ListItem {
         this();
         this.title = title;
     }
+
 
 //    Date publishDate;
 //    String overview;
@@ -105,4 +106,14 @@ public class Article extends ListItem {
     public void setDescription(String description) {
         this.description = description;
     }
-}
+
+    @Override
+    public int compareTo(Article another) {
+        if(this.publishDate.getTime() > another.publishDate.getTime())
+            return -1;
+        else if(this.publishDate.getTime() < another.publishDate.getTime())
+            return 1;
+
+        return 0;
+    }
+}// end Article

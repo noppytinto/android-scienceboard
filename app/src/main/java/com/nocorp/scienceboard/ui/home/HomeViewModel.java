@@ -4,21 +4,22 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.nocorp.scienceboard.model.Article;
+import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.repository.ArticlesFetcher;
-import com.nocorp.scienceboard.repository.SourceRepository;
+import com.nocorp.scienceboard.repository.ArticleRepository;
+import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 
 import java.util.List;
 
 public class HomeViewModel extends ViewModel implements ArticlesFetcher {
     private MutableLiveData<List<ListItem>> articlesList;
-    private SourceRepository sourceRepository;
+    private ArticleRepository articleRepository;
 
     public HomeViewModel() {
         articlesList = new MutableLiveData<>();
-        sourceRepository = SourceRepository.getInstance();
-        sourceRepository.setArticlesListener(this);
+        articleRepository = ArticleRepository.getInstance();
+        articleRepository.setArticlesListener(this);
 
 
     }
@@ -27,8 +28,8 @@ public class HomeViewModel extends ViewModel implements ArticlesFetcher {
         return articlesList;
     }
 
-    public void fetchArticles(String rssUrl) {
-        sourceRepository.getArticles(rssUrl, 20);
+    public void fetchArticles(List<Source> sources) {
+        articleRepository.getArticles(sources, 20);
     }
 
     public void setArticlesList(List<ListItem> articlesList) {

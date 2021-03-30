@@ -6,15 +6,17 @@ public class MyValues {
         ARTICLE,
         LIST_AD,
     }
-    public enum SearchType {
-        GAME,
-        MOVIE,
-        USER,
-        CAST,
-        DIRECTOR,
-        UNIVERSAL,
-        NONE
+
+    public enum SourceCategory {
+        SCIENCE,
+        TECH,
+        SPACE,
+        NATURE,
+        MEDICINE,
+        BIOLOGY,
+        PHYSICS
     }
+
 
     public enum DownloadStatus {
         IDLE,

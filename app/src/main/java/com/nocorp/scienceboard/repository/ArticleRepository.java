@@ -7,7 +7,6 @@ import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.system.MyOkHttpClient;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
-import com.nocorp.scienceboard.utility.HttpUtilities;
 import com.rometools.rome.feed.module.Module;
 import com.rometools.rome.feed.synd.SyndContent;
 import com.rometools.rome.feed.synd.SyndEnclosure;
@@ -15,8 +14,6 @@ import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.feed.synd.SyndImage;
 import com.rometools.rome.io.FeedException;
-import com.rometools.rome.io.SyndFeedInput;
-import com.rometools.rome.io.XmlReader;
 
 import org.jdom2.Element;
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import okhttp3.HttpUrl;
@@ -48,21 +44,21 @@ import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.http.GET;
 
-public class SourceRepository {
+public class ArticleRepository {
     private static final String RAWG_API_KEY = "5c84ab52d6a84d2785b6770d8e52b455&";
     private static final String SEARCH_GAMES_URL = "https://api.rawg.io/api/games?key=" + RAWG_API_KEY + "&page_size=10";
     private final String RAWG_BASE_URL = "https://api.rawg.io";
-    private static SourceRepository singletonInstance;
+    private static ArticleRepository singletonInstance;
     private ArticlesFetcher articlesListener;
 
 
-    private SourceRepository() {
+    private ArticleRepository() {
 
     }
 
-    public static SourceRepository getInstance() {
+    public static ArticleRepository getInstance() {
         if(singletonInstance==null)
-            return new SourceRepository();
+            return new ArticleRepository();
 
         return singletonInstance;
     }
@@ -87,37 +83,39 @@ public class SourceRepository {
 
 
 
-    public void getArticles(String rssUrl, int limit) {
-        List<ListItem> articlesList = new ArrayList<>();
-        AtomicInteger counter = new AtomicInteger();
-
+    public void getArticles(List<Source> sources, int limit) {
         Runnable task = () -> {
+            List<ListItem> limitedArticlesList = new ArrayList<>();
+            int counter = 0;
+            List<Article> fullList = new ArrayList<>();
+
+
+            for(Source source: sources) {
+                List<Article> temp = source.getArticles();
+                if(temp!=null && temp.size()>0) {
+                    for(Article article : temp) {
+                        article.setSource(source);
+                    }
+                    fullList.addAll(temp);
+                }
+            }
+
+            Collections.sort(fullList);
+
             try {
-                Source source = null;
-                String sanitizedUrl = HttpUtilities.sanitizeUrl(rssUrl);
-                SyndFeed feed = new SyndFeedInput().build(new XmlReader(new URL(sanitizedUrl)));
-
-                if (feed!=null) {
-                    source = buildSource(feed);
-
-                    List<SyndEntry> entries = feed.getEntries();
-                    for(SyndEntry entry : entries) {
-                        if(counter.get() == limit) break;
-                        Article article = buildArticle(source, entry);
-                        if(article!=null) articlesList.add(article);
-
-                        counter.getAndIncrement();
+                if (fullList!=null && fullList.size()>=0) {
+                    for(Article partialArticle : fullList) {
+                        if(counter == limit) break;
+                        Article completeArticle = downloadAdditionalInformation(partialArticle, partialArticle.getSyndEntry());
+                        if(completeArticle!=null) limitedArticlesList.add(completeArticle);
+                        counter++;
                     }
                 }
 
                 // publish result
-                articlesListener.onFetchCompleted(articlesList);
+                articlesListener.onFetchCompleted(limitedArticlesList);
 
-            } catch (FeedException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (URISyntaxException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         };
@@ -131,14 +129,13 @@ public class SourceRepository {
 
 
     @NotNull
-    private Article buildArticle(Source source, SyndEntry entry) {
+    private Article downloadAdditionalInformation(Article partialArticle, SyndEntry entry) {
         Article article = null;
 
         try {
             String title = entry.getTitle();
             String webpageUrl = entry.getLink();
             String thumbnailUrl = getThumbnailUrl(entry);
-            Date publishDate = entry.getPublishedDate();
             String content = getContent(entry);
             String description = getDescription(entry);
 
@@ -146,11 +143,11 @@ public class SourceRepository {
             article.setThumbnailUrl(thumbnailUrl);
             article.setTitle(title);
             article.setWebpageUrl(webpageUrl);
-            article.setSyndEntry(entry);
-            article.setSource(source);
-            article.setPublishDate(publishDate);
             article.setContent(content);
             article.setDescription(description);
+            article.setSource(partialArticle.getSource());
+            article.setPublishDate(partialArticle.getPublishDate());
+            article.setSyndEntry(partialArticle.getSyndEntry());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -177,20 +174,10 @@ public class SourceRepository {
         return source;
     }
 
-    private Article buildArticle(SyndFeed feed) {
-
-
-        return null;
-    }
-
 
     public String getThumbnailUrl(SyndEntry entry) {
         if(entry==null) return null;
         String thumbnailUrl = null;
-
-        List<Module> modules = entry.getModules();
-        List<SyndEnclosure> enclosures = entry.getEnclosures();
-        List<Element> elements = entry.getForeignMarkup();
 
         // media namespace strategy
         if(hasForeignMarkup("media", "thumb", entry)) {
@@ -518,13 +505,18 @@ public class SourceRepository {
         String contentType = null;
         List<SyndContent> contents = entry.getContents();
 
-        for(SyndContent content: contents) {
-            contentType = content.getType();
-            if(contentType.equals("html")) {
-                result = content.getValue();
-                break;
+        if(contents!=null && contents.size()>0) {
+            for(SyndContent content: contents) {
+                if(content!=null) {
+                    contentType = content.getType();
+                    if(contentType!=null && contentType.equals("html")) {
+                        result = content.getValue();
+                        break;
+                    }
+                }
             }
         }
+
         return result;
     }
 
@@ -534,7 +526,8 @@ public class SourceRepository {
 
         String result = null;
         SyndContent description = entry.getDescription();
-        result = description.getValue();
+        if(description!=null)
+            result = description.getValue();
 
         return result;
     }
