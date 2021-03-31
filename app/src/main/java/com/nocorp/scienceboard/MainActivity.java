@@ -20,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
         initView();
         AdProvider adProvider = AdProvider.getInstance();
         adProvider.initAdMob(this);
+        adProvider.loadSomeAds(5, this);
     }
 
     private void initView() {

@@ -1,6 +1,7 @@
 package com.nocorp.scienceboard.ui.home;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,7 +61,6 @@ public class HomeFragment extends Fragment implements FeedProvider.OnFeedsDownlo
                              ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_home, container, false);
         adProvider = AdProvider.getInstance(); // is not guaranteed that
-        adProvider.loadSomeAds(5, requireContext());
         return root;
     }
 
@@ -71,7 +71,6 @@ public class HomeFragment extends Fragment implements FeedProvider.OnFeedsDownlo
         progressIndicator = view.findViewById(R.id.progressIndicator_homeFragment);
         this.view = view;
         initRecycleView(view);
-
     }
 
     @Override
@@ -97,6 +96,8 @@ public class HomeFragment extends Fragment implements FeedProvider.OnFeedsDownlo
     }
 
 
+
+
     protected boolean isDestroyed() {
         return (this.isRemoving() || this.getActivity() == null || this.isDetached() || !this.isAdded() || this.getView() == null);
     }
@@ -104,8 +105,14 @@ public class HomeFragment extends Fragment implements FeedProvider.OnFeedsDownlo
     @Override
     public void onDetach() {
         super.onDetach();
-        adProvider.destroyAds();
+//        adProvider.destroyAds();
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
 
     //---------------------------------------------------------------------
 
@@ -120,16 +127,21 @@ public class HomeFragment extends Fragment implements FeedProvider.OnFeedsDownlo
     @Override
     public void onFeedsDownloadCompleted(List<Source> sources) {
         homeViewModel.fetchArticles(sources);
-        requireActivity().runOnUiThread(() ->
-                Toast.makeText(requireContext(), "feeds fetched", Toast.LENGTH_SHORT).show()
-        );
+        Log.d(TAG, "SCIENCE_BOARD - onFeedsDownloadFailed: feeds fetched");
+
+        // this (runOnUiThread) is unstable, can cause crashes, so better not use it
+//        requireActivity().runOnUiThread(() ->
+//                Toast.makeText(requireContext(), "feeds fetched", Toast.LENGTH_SHORT).show()
+//        );
     }
 
     @Override
     public void onFeedsDownloadFailed(String cause) {
-        requireActivity().runOnUiThread(() ->
-                Toast.makeText(requireContext(), "Cannot fetch feeds, contact the developer.\n$cause", Toast.LENGTH_SHORT).show()
-        );
+        // this (runOnUiThread) is unstable, can cause crashes, so better not use it
+        Log.d(TAG, "SCIENCE_BOARD - onFeedsDownloadFailed: feeds not fetched, cause: $cause");
+//        requireActivity().runOnUiThread(() ->
+//                Toast.makeText(requireContext(), "Cannot fetch feeds, contact the developer.\n$cause", Toast.LENGTH_SHORT).show()
+//        );
     }
 
 
