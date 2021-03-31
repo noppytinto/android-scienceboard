@@ -36,16 +36,21 @@ import java.util.List;
 public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private List<ListItem> recyclerList;
     private Context context;
+    private OnArticleClickedListener listener;
 
     private static final int ARTICLE_TYPE = 1;
     private static final int LIST_AD_TYPE = 2;
 
+    public interface OnArticleClickedListener {
+        public void onArticleClicked(int position);
+    }
 
 
     //------------------------------------------------------------------------CONSTRUCTORS
-    public RecyclerAdapterFeedsList(List<ListItem> recyclerList, Context context) {
+    public RecyclerAdapterFeedsList(List<ListItem> recyclerList, Context context, OnArticleClickedListener listener) {
         this.recyclerList = recyclerList;
         this.context = context;
+        this.listener = listener;
     }
 
 
@@ -74,14 +79,14 @@ public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<RecyclerView.
 
         if(viewType == ARTICLE_TYPE) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_article_viewholder, parent, false);
-            return new ArticleViewHolder(view);
+            return new ArticleViewHolder(view, listener);
         }
         else if(viewType == LIST_AD_TYPE) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_native_ad_articles_list_level, parent, false);
             return new ListAdViewHolder(view);
         }
         else {
-            return new ArticleViewHolder(null);
+            return new ArticleViewHolder(null, listener);
         }
     }
 

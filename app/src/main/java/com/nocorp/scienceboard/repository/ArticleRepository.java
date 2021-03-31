@@ -83,19 +83,10 @@ public class ArticleRepository {
         Runnable task = () -> {
             List<ListItem> limitedArticlesList = new ArrayList<>();
             int counter = 0;
-            List<Article> fullList = new ArrayList<>();
 
+            List<Article> fullList = combineArticles(sources);
 
-            for(Source source: sources) {
-                List<Article> temp = source.getArticles();
-                if(temp!=null && temp.size()>0) {
-                    for(Article article : temp) {
-                        article.setSource(source);
-                    }
-                    fullList.addAll(temp);
-                }
-            }
-
+            // sort articles by publication date
             Collections.sort(fullList);
 
             try {
@@ -120,8 +111,21 @@ public class ArticleRepository {
         threadManager.runTask(task);
     }
 
+    private List<Article> combineArticles(List<Source> sources) {
+        List<Article> articles = new ArrayList<>();
 
+        for(Source source: sources) {
+            List<Article> temp = source.getArticles();
+            if(temp!=null && temp.size()>0) {
+                for(Article article : temp) {
+                    article.setSource(source);
+                }
+                articles.addAll(temp);
+            }
+        }
 
+        return articles;
+    }
 
 
     @NotNull

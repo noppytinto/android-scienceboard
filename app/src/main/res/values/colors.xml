@@ -14,4 +14,44 @@
     <color name="orange_base">#FF8222</color>
 
 
+
+
+
+
+
+
+
+
+
+
+    <!-- my colors -->
+    <color name="primary_blue">#015896</color>
+    <color name="light_blue">#B2CCDF</color>
+    <color name="dark_blue">#004678</color>
+    <color name="yellow">#FED23F</color>
+    <color name="orange">#ff6600</color>
+    <color name="green">#86D602</color>
+    <color name="red">#F3311F</color>
+    <color name="divider">#FED23F</color>
+    <color name="darkSemiTransparent">#C6000000</color>
+    <color name="netflix_red">#E50914</color>
+
+
+    <!-- variations -->
+    <color name="light_blue_2">#4786B3</color>
+    <color name="light_blue_3">#006FBF</color>
+
+
+
+
+    <!-- material design palette -->
+    <color name="orange_original">#F6A040</color>
+    <color name="orange_700">#ff9a00</color>
+    <color name="orange_800">#ff8800</color>
+    <color name="orange_900">#ff6600</color>
+    <color name="divider_blue">#004B81</color>
+    <color name="divider_toolbar">#0067B1</color>
+
+
+
 </resources>

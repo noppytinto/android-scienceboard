@@ -13,11 +13,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.nocorp.scienceboard.MobileNavigationDirections;
 import com.nocorp.scienceboard.R;
+import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterFeedsList;
 import com.nocorp.scienceboard.repository.FeedProvider;
@@ -46,7 +50,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class HomeFragment extends Fragment implements FeedProvider.OnFeedsDownloadedListener {
+public class HomeFragment extends Fragment implements FeedProvider.OnFeedsDownloadedListener, RecyclerAdapterFeedsList.OnArticleClickedListener {
     private final String TAG = this.getClass().getSimpleName();
     private HomeViewModel homeViewModel;
     private WebView webView;
@@ -91,7 +95,7 @@ public class HomeFragment extends Fragment implements FeedProvider.OnFeedsDownlo
         });
 
         FeedProvider feedProvider = new FeedProvider(this);
-        feedProvider.downloadFeeds();
+        feedProvider.downloadRssSources();
 //        testWebview(inputUrl);
     }
 
@@ -120,7 +124,7 @@ public class HomeFragment extends Fragment implements FeedProvider.OnFeedsDownlo
         // defining Recycler view
         recyclerView = view.findViewById(R.id.recyclerView_homeFragment);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerAdapterFeedsList = new RecyclerAdapterFeedsList(new ArrayList<>(), requireContext());
+        recyclerAdapterFeedsList = new RecyclerAdapterFeedsList(new ArrayList<>(), requireContext(), this);
         recyclerView.setAdapter(recyclerAdapterFeedsList);
     }
 
@@ -391,4 +395,16 @@ public class HomeFragment extends Fragment implements FeedProvider.OnFeedsDownlo
     }
 
 
+    @Override
+    public void onArticleClicked(int position) {
+        Article article = (Article) recyclerAdapterFeedsList.getItem(position);
+        if(article!=null) {
+            String url = article.getWebpageUrl();
+            if(url!=null || !url.isEmpty()) {
+                MobileNavigationDirections.ActionGlobalWebviewFragment action =
+                        MobileNavigationDirections.actionGlobalWebviewFragment(url);
+                Navigation.findNavController(view).navigate(action);
+            }
+        }
+    }
 }

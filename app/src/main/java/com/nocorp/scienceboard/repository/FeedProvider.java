@@ -10,20 +10,14 @@ import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.feed.synd.SyndImage;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedInput;
-import com.rometools.rome.io.XmlReader;
 
 import org.xml.sax.InputSource;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.ConnectException;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.GZIPInputStream;
 
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -40,17 +34,20 @@ public class FeedProvider {
         public void onFeedsDownloadFailed(String cause);
     }
 
+
+    //------------------------------------------------------------ CONSTRUCTOR
+
     public FeedProvider(OnFeedsDownloadedListener listener) {
         this.listener = listener;
         sourceUrls = new ArrayList<>();
-        fetchSourcesUrl();
+        loadRssUrls();
     }
 
 
 
+    //------------------------------------------------------------
 
-
-    private void fetchSourcesUrl() {
+    private void loadRssUrls() {
         final String feedTag = "https://www.theverge.com/rss/index.xml";
         final String rdfTag = "https://www.nature.com/nmat.rss"; // unsecure (HTTP)
         final String rssTag = "https://home.cern/api/news/news/feed.rss";
@@ -94,9 +91,7 @@ public class FeedProvider {
 
     }
 
-
-
-    public List<Source> downloadFeeds() {
+    public List<Source> downloadRssSources() {
         sources = new ArrayList<>();
         if(sourceUrls==null || sourceUrls.size()<=0) {
             listener.onFeedsDownloadFailed("url list is empty/null");
@@ -124,8 +119,6 @@ public class FeedProvider {
 
         return sources;
     }
-
-
 
     private Source downloadFeed(String url) {
         Source source = null;
@@ -178,15 +171,12 @@ public class FeedProvider {
         return source;
     }
 
-
-
     private Article preBuildArticle(SyndEntry entry) {
         Article article = new Article();
         article.setPublishDate(entry.getPublishedDate());
         article.setSyndEntry(entry);
         return article;
     }
-
 
     private Source buildSource(SyndFeed feed) {
         Source source = null;
@@ -265,7 +255,4 @@ public class FeedProvider {
         return request;
     }
 
-
-
-
-}// end SourceProvider
+}// end FeedProvider
