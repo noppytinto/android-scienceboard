@@ -4,16 +4,14 @@ package com.nocorp.scienceboard.repository;
 import com.chimbori.crux.articles.ArticleExtractor;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
-import com.nocorp.scienceboard.system.MyOkHttpClient;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
-import com.rometools.rome.feed.module.Module;
+import com.nocorp.scienceboard.utility.MyOkHttpClient;
 import com.rometools.rome.feed.synd.SyndContent;
 import com.rometools.rome.feed.synd.SyndEnclosure;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.feed.synd.SyndImage;
-import com.rometools.rome.io.FeedException;
 
 import org.jdom2.Element;
 import org.jetbrains.annotations.NotNull;
@@ -32,9 +30,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;

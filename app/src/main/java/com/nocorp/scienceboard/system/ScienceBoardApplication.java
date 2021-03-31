@@ -2,6 +2,7 @@ package com.nocorp.scienceboard.system;
 
 import android.app.Application;
 import android.util.Log;
+import com.nocorp.scienceboard.utility.MyOkHttpClient;
 
 public class ScienceBoardApplication extends Application {
     @Override
@@ -9,6 +10,6 @@ public class ScienceBoardApplication extends Application {
         super.onCreate();
         ThreadManager.init();
         MyOkHttpClient.init(this);
-        Log.d(ScienceBoardApplication.class.getSimpleName(), "onCreate(): application initilized");
+        Log.d(ScienceBoardApplication.class.getSimpleName(), "SCIENCEBOARD - onCreate(): application initilized");
     }
 }

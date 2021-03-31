@@ -4,6 +4,7 @@ import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.utility.HttpUtilities;
+import com.nocorp.scienceboard.utility.MyOkHttpClient;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.feed.synd.SyndImage;
@@ -11,11 +12,24 @@ import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
 
+import org.xml.sax.InputSource;
+
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.ConnectException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
+
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 public class FeedProvider {
     private List<Source> sources;
@@ -113,15 +127,38 @@ public class FeedProvider {
 
 
 
-    private Source downloadFeed(String rssUrl) {
+    private Source downloadFeed(String url) {
         Source source = null;
+        Response response = null;
+        boolean result = false;
 
         try {
-            String sanitizedUrl = HttpUtilities.sanitizeUrl(rssUrl);
-            SyndFeed feed = new SyndFeedInput().build(new XmlReader(new URL(sanitizedUrl)));
-            if (feed!=null) {
-                source = buildSource(feed);
+            String sanitizedUrl = HttpUtilities.sanitizeUrl(url);
+//            SyndFeed feed = new SyndFeedInput().build(new XmlReader(new URL(sanitizedUrl)));
+
+
+            // build httpurl and request for remote db
+            HttpUrl httpUrl = buildHttpURL(url);
+            final OkHttpClient httpClient = MyOkHttpClient.getClient();
+            Request request = buildRequest(httpUrl);
+
+            // performing request
+            response = httpClient.newCall(request).execute();
+
+            // check response
+            if (response.isSuccessful()) {
+                try (ResponseBody responseBody = response.body()) {
+                    InputStream is = responseBody.byteStream();
+                    InputSource inputSource = new InputSource(is);
+                    SyndFeedInput input = new SyndFeedInput();
+                    SyndFeed feed = input.build(inputSource);
+                    if (feed!=null) {
+                        source = buildSource(feed);
+                    }
+                }
             }
+            // if the response is unsuccesfull
+            else result = false;
 
         } catch (FeedException e) {
             e.printStackTrace();
@@ -130,9 +167,18 @@ public class FeedProvider {
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
+        catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (response != null) {
+                response.close();
+            }
+        }
 
         return source;
     }
+
+
 
     private Article preBuildArticle(SyndEntry entry) {
         Article article = new Article();
@@ -194,6 +240,29 @@ public class FeedProvider {
             }
         }
         return logo;
+    }
+
+    public static HttpUrl buildHttpURL(String url) {
+        HttpUrl httpUrl = HttpUrl.get(url);
+
+        return httpUrl;
+    }
+
+    public static Request buildRequest(HttpUrl httpUrl) {
+        Request request = null;
+        try {
+            request = new Request.Builder()
+                    .url(httpUrl)
+                    .header("User-Agent", "OkHttp Headers.java")
+                    .addHeader("Accept", "application/json; q=0.5")
+                    .addHeader("Accept", "application/vnd.github.v3+json")
+                    .head()
+                    .build();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return request;
     }
 
 
