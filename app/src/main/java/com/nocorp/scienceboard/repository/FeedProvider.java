@@ -256,7 +256,7 @@ public class FeedProvider {
                     .header("User-Agent", "OkHttp Headers.java")
                     .addHeader("Accept", "application/json; q=0.5")
                     .addHeader("Accept", "application/vnd.github.v3+json")
-                    .head()
+                    .get()
                     .build();
         } catch (Exception e) {
             e.printStackTrace();
