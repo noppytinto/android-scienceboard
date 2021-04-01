@@ -1,7 +1,6 @@
 package com.nocorp.scienceboard.ui.home;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,11 +8,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Lifecycle;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.viewpager2.widget.ViewPager2;
+
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.utility.AdProvider;
 import com.nocorp.scienceboard.viewpager.HomeViewPagerAdapter;
@@ -26,6 +30,7 @@ public class HomeFragment extends Fragment{
     private HomeViewModel homeViewModel;
     private View view;
     private AdProvider adProvider;
+    private TabLayout tabLayout;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -39,10 +44,6 @@ public class HomeFragment extends Fragment{
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         this.view = view;
-        viewPager = view.findViewById(R.id.viewPager_homeFragment);
-        viewPager.setAdapter(viewPagerAdapter);
-
-
 
         NavController navController = Navigation.findNavController(view);
         AppBarConfiguration appBarConfiguration =
@@ -50,6 +51,37 @@ public class HomeFragment extends Fragment{
         Toolbar toolbar = view.findViewById(R.id.toolbar_homeFragment);
 
         NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration);
+
+
+        tabLayout = view.findViewById(R.id.tablayout_homeFragment);
+        viewPager = view.findViewById(R.id.viewPager_homeFragment);
+        FragmentManager fm = getChildFragmentManager();
+        Lifecycle lifecycle = getViewLifecycleOwner().getLifecycle();
+        viewPagerAdapter = new HomeViewPagerAdapter(fm, lifecycle);
+//        viewPager.setUserInputEnabled(false); // disables horiz. swipe to scroll tabs gestures
+        viewPager.setAdapter(viewPagerAdapter);
+
+
+        TabLayoutMediator tabLayoutMediator = new TabLayoutMediator(tabLayout, viewPager, new TabLayoutMediator.TabConfigurationStrategy() {
+            @Override
+            public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
+                switch (position) {
+                    case 0:
+//                        tab.setIcon(R.drawable.movie_icon_light_blue);
+                        tab.setText("ALL");
+                        break;
+                    case 1:
+//                        tab.setIcon(R.drawable.home_icon_light_blue);
+                        break;
+                    case 2:
+//                        tab.setIcon(R.drawable.search_icon_light_blue);
+                        break;
+                }
+            }
+        });
+        tabLayoutMediator.attach();
+
+
 
 
 

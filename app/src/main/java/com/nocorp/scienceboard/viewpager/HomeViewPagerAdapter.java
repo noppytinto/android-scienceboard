@@ -32,7 +32,7 @@ public class HomeViewPagerAdapter extends FragmentStateAdapter {
             }
 
             default:
-                return null;
+                return AllArticlesTabFragment.newInstance();
         }
     }
 

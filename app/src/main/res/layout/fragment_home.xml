@@ -24,7 +24,7 @@
         </androidx.appcompat.widget.Toolbar>
 
         <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabs_homeFragment"
+            android:id="@+id/tablayout_homeFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_scrollFlags="snap"
@@ -65,17 +65,33 @@
         </com.google.android.material.tabs.TabLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.core.widget.NestedScrollView
+<!--    <androidx.core.widget.NestedScrollView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">-->
+
+<!--        <androidx.constraintlayout.widget.ConstraintLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="300dp">-->
+
+
+
+<!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
+
+
+
+
+<!--    </androidx.core.widget.NestedScrollView>-->
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager_homeFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
-
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/viewPager_homeFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-
-
-    </androidx.core.widget.NestedScrollView>
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
