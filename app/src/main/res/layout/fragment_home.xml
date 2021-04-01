@@ -17,7 +17,9 @@
             android:id="@+id/toolbar_homeFragment"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:layout_scrollFlags="scroll|enterAlways">
+            app:layout_scrollFlags="scroll|enterAlways"
+            android:elevation="7dp"
+            >
 
             <TextView
                 android:id="@+id/textView"
@@ -41,7 +43,8 @@
             app:tabIndicatorColor="@color/orange"
             app:tabIndicatorHeight="5dp"
             app:tabMode="scrollable"
-            app:tabRippleColor="@color/orange">
+            app:tabRippleColor="@color/orange"
+            >
 
             <com.google.android.material.tabs.TabItem
                 android:layout_width="wrap_content"

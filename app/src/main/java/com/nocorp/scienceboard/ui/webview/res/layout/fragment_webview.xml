@@ -20,7 +20,9 @@
         app:layout_constraintTop_toTopOf="parent"
         app:menu="@menu/menu_webview"
         app:navigationIcon="@drawable/ic_back_arrow"
-        app:titleTextColor="@color/black" />
+        app:titleTextColor="@color/black"
+        android:elevation="7dp"
+        />
 
 
     <WebView
