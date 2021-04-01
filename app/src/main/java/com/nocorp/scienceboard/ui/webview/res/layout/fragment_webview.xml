@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".webview.WebviewFragment">
+    tools:context=".ui.webview.WebviewFragment">
 
 
     <androidx.appcompat.widget.Toolbar
@@ -14,11 +14,12 @@
         android:background="?attr/colorPrimary"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
-        app:menu="@menu/menu_webview"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:menu="@menu/menu_webview"
+        app:navigationIcon="@drawable/ic_back_arrow" />
 
     <WebView
         android:id="@+id/webView_webviewFragment"

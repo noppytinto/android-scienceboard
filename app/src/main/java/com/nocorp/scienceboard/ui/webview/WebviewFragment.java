@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.webview;
+package com.nocorp.scienceboard.ui.webview;
 
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -6,29 +6,38 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebSettings;
+import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
 import com.nocorp.scienceboard.R;
+import com.nocorp.scienceboard.databinding.FragmentWebviewBinding;
 
 import static android.view.View.SCROLLBARS_INSIDE_OVERLAY;
 
 
-public class WebviewFragment extends Fragment {
+public class WebviewFragment extends Fragment implements androidx.appcompat.widget.Toolbar.OnMenuItemClickListener {
     private final String TAG = this.getClass().getSimpleName();
     private WebView webView;
     private String url;
     private LinearProgressIndicator progressIndicator;
     private View view;
     private Snackbar snackbar;
+    private FragmentWebviewBinding viewBinding;
+    private Toolbar toolbar;
+    private Toast toast;
 
 
 
@@ -47,23 +56,26 @@ public class WebviewFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_webview, container, false);
+        viewBinding = FragmentWebviewBinding.inflate(inflater, container, false);
+        view = viewBinding.getRoot();
+        return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        webView = view.findViewById(R.id.webView_webviewFragment);
-        progressIndicator = view.findViewById(R.id.progressIndicator_webviewFragment);
+        webView = viewBinding.webViewWebviewFragment;
+        progressIndicator = viewBinding.progressIndicatorWebviewFragment;
+        toolbar = viewBinding.toolbarWebviewFragment;
+        toolbar.setOnMenuItemClickListener(this);
+        toolbar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
 
-        this.view = view;
         if (getArguments() != null) {
             // the url is always !=null and non-empty
             this.url = WebviewFragmentArgs.fromBundle(getArguments()).getUrl();
@@ -74,14 +86,50 @@ public class WebviewFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         applyBrowsingRecommendedSettings(webView);
-        webView.loadUrl("url");
+        webView.loadUrl(url);
+    }
+
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        viewBinding = null;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        if(snackbar!=null) snackbar.dismiss();
+    }
+
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        if(item.getItemId() == R.id.option_webviewMenu_refresh) {
+            if(snackbar!=null) snackbar.dismiss();
+            webView.loadUrl(url);
+            showBottomToast("refreshing page");
+            return true;
+        }
+        else if(item.getItemId() == R.id.option_webviewMenu_share) {
+            //TODO
+            return true;
+        }
+        else if(item.getItemId() == R.id.option_webviewMenu_delete) {
+            WebStorage.getInstance().deleteAllData();
+            showBottomToast("browsing data deleted");
+            return true;
+        }
+
+        return false;
     }
 
 
 
+
     //-------------------------------------------------------------------------
+
 
     private void applyBrowsingRecommendedSettings(WebView webView) {
         WebSettings webSettings = webView.getSettings();
@@ -161,13 +209,19 @@ public class WebviewFragment extends Fragment {
         snackbar.show();
     }
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        if(snackbar!=null) snackbar.dismiss();
-//        webView.clearCache(false);
-//        WebStorage.getInstance().deleteAllData();
+    private void showBottomToast(String message) {
+        if(toast!=null) toast.cancel();
+        toast = Toast.makeText(requireContext(),message, Toast.LENGTH_LONG);
+        toast.show();
     }
+
+    private void showCenteredToast(String message) {
+        if(toast!=null) toast.cancel();
+        toast = Toast.makeText(requireContext(),message, Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
+    }
+
 
 
 }// end WebviewFragment

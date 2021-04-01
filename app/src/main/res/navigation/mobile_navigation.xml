@@ -24,7 +24,7 @@
         tools:layout="@layout/fragment_history" />
     <fragment
         android:id="@+id/webviewFragment"
-        android:name="com.nocorp.scienceboard.webview.WebviewFragment"
+        android:name="com.nocorp.scienceboard.ui.webview.WebviewFragment"
         android:label=" "
         tools:layout="@layout/fragment_webview" >
         <argument

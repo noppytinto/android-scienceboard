@@ -1,6 +1,7 @@
 package com.nocorp.scienceboard;
 
 import android.os.Bundle;
+import android.view.View;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.nocorp.scienceboard.utility.AdProvider;
@@ -21,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
     private AdProvider adProvider;
     private NavController navController;
     private ActionBar actionBar;
+    private BottomNavigationView bottomNavBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initView() {
         setContentView(R.layout.activity_main);
-        BottomNavigationView navView = findViewById(R.id.nav_view);
+        bottomNavBar = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
@@ -42,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
                 .build();
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-        NavigationUI.setupWithNavController(navView, navController);
+        NavigationUI.setupWithNavController(bottomNavBar, navController);
 
         navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
             @Override
@@ -51,19 +53,28 @@ public class MainActivity extends AppCompatActivity {
                 if(destination.getId() == R.id.navigation_home) {
                     if(getSupportActionBar()!=null)
                         getSupportActionBar().hide();
+
+                    if(bottomNavBar!=null)
+                        bottomNavBar.setVisibility(View.VISIBLE);
                 }
-                else if(destination.getId() == R.id.action_global_webviewFragment) {
+                else if(destination.getId() == R.id.webviewFragment) {
                     if(getSupportActionBar()!=null)
                         getSupportActionBar().hide();
+                    if(bottomNavBar!=null)
+                        bottomNavBar.setVisibility(View.GONE);
                 }
                 else {
                     if(getSupportActionBar()!=null)
                         getSupportActionBar().show();
+
+                    if(bottomNavBar!=null)
+                        bottomNavBar.setVisibility(View.VISIBLE);
                 }
             }
         });
 
         actionBar = getSupportActionBar();
+        getSupportActionBar().setShowHideAnimationEnabled(false);
 
     }
 
