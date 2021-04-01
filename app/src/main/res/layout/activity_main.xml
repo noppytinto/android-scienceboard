@@ -8,9 +8,6 @@
 <!--    old tags-->
 <!--    android:paddingTop="?attr/actionBarSize"-->
 
-
-
-
     <fragment
         android:id="@+id/nav_host_fragment"
         android:name="androidx.navigation.fragment.NavHostFragment"
@@ -27,11 +24,10 @@
         android:id="@+id/nav_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="?android:attr/windowBackground"
-        app:backgroundTint="@color/black"
-        app:itemIconTint="@color/gray"
-        app:itemTextColor="@color/gray"
-        app:labelVisibilityMode="selected"
+        android:background="@drawable/shape_bottom_navbar"
+        app:itemIconTint="@color/bottom_nav_state_colors"
+        app:itemTextColor="@color/bottom_nav_state_colors"
+        app:labelVisibilityMode="unlabeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

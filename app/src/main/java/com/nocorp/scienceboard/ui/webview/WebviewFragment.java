@@ -1,6 +1,7 @@
 package com.nocorp.scienceboard.ui.webview;
 
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -18,8 +19,14 @@ import android.webkit.WebSettings;
 import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
 import com.nocorp.scienceboard.R;
@@ -32,12 +39,14 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private final String TAG = this.getClass().getSimpleName();
     private WebView webView;
     private String url;
+    private String sourceLogoUrl;
     private LinearProgressIndicator progressIndicator;
     private View view;
     private Snackbar snackbar;
     private FragmentWebviewBinding viewBinding;
     private Toolbar toolbar;
     private Toast toast;
+    private ImageView imageViewSourceLogo;
 
 
 
@@ -79,6 +88,28 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         if (getArguments() != null) {
             // the url is always !=null and non-empty
             this.url = WebviewFragmentArgs.fromBundle(getArguments()).getUrl();
+//            this.sourceLogoUrl = WebviewFragmentArgs.fromBundle(getArguments()).getSourceLogoUrl();
+//
+//            if(sourceLogoUrl!=null && !sourceLogoUrl.isEmpty()) {
+//                Glide.with(requireContext())
+//                        .load(sourceLogoUrl)
+//                        .centerInside()
+//                        .listener(new RequestListener<Drawable>() {
+//                                      @Override
+//                                      public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+//                                          // TODO
+//                                          return false;
+//                                      }
+//
+//                                      @Override
+//                                      public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+//                                          // TODO
+//                                          return false;
+//                                      }
+//                                  }
+//                        )
+//                        .into(imageViewSourceLogo);
+//            }
         }
     }
 
@@ -134,6 +165,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private void applyBrowsingRecommendedSettings(WebView webView) {
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
+        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setUseWideViewPort(true);
         webSettings.setSupportZoom(true);

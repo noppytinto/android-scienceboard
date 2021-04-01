@@ -15,13 +15,23 @@
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar_homeFragment"
-            android:layout_height="?attr/actionBarSize"
             android:layout_width="match_parent"
-            app:layout_scrollFlags="scroll|enterAlways"
-            >
+            android:layout_height="?attr/actionBarSize"
+            app:layout_scrollFlags="scroll|enterAlways">
 
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:fontFamily="@font/playfair_display_black"
+                android:text="Discover"
+                android:textColor="@color/black"
+                android:textSize="24sp" />
 
         </androidx.appcompat.widget.Toolbar>
+
+
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tablayout_homeFragment"

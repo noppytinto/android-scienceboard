@@ -118,9 +118,11 @@ public class AllArticlesTabFragment extends Fragment implements FeedProvider.OnF
         Article article = (Article) recyclerAdapterFeedsList.getItem(position);
         if(article!=null) {
             String url = article.getWebpageUrl();
+            String sourceLogoUrl = article.getSource().getLogoUrl();
+
             if(url!=null || !url.isEmpty()) {
                 MobileNavigationDirections.ActionGlobalWebviewFragment action =
-                        MobileNavigationDirections.actionGlobalWebviewFragment(url);
+                        MobileNavigationDirections.actionGlobalWebviewFragment(url, sourceLogoUrl);
                 Navigation.findNavController(view).navigate(action);
             }
         }

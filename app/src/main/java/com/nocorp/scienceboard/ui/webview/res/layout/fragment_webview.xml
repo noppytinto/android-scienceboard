@@ -19,7 +19,9 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:menu="@menu/menu_webview"
-        app:navigationIcon="@drawable/ic_back_arrow" />
+        app:navigationIcon="@drawable/ic_back_arrow"
+        app:titleTextColor="@color/black" />
+
 
     <WebView
         android:id="@+id/webView_webviewFragment"
@@ -28,16 +30,16 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar_webviewFragment" />
+        app:layout_constraintTop_toBottomOf="@+id/progressIndicator_webviewFragment" />
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/progressIndicator_webviewFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:indeterminate="true"
-        app:indicatorColor="@color/orange_base"
+        app:indicatorColor="@color/orange_light"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_webviewFragment" />
 </androidx.constraintlayout.widget.ConstraintLayout>

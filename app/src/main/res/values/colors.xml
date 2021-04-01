@@ -11,7 +11,8 @@
 
     <color name="light_gray">#F2F2F2</color>
     <color name="gray">#6E6E6E</color>
-    <color name="orange_base">#FF8222</color>
+    <color name="orange_light">#FF6D00</color>
+    <color name="orange_dark">#E65100</color>
 
 
 
@@ -31,7 +32,7 @@
     <color name="yellow">#FED23F</color>
     <color name="orange">#ff6600</color>
     <color name="green">#4CAF50</color>
-    <color name="red">#F3311F</color>
+    <color name="red">#D32F2F</color>
     <color name="divider">#FED23F</color>
     <color name="darkSemiTransparent">#C6000000</color>
     <color name="netflix_red">#E50914</color>
@@ -51,7 +52,7 @@
     <color name="orange_900">#ff6600</color>
     <color name="divider_blue">#004B81</color>
     <color name="divider_toolbar">#0067B1</color>
-
+    <color name="dark_gray">#4E4E4E</color>
 
 
 </resources>

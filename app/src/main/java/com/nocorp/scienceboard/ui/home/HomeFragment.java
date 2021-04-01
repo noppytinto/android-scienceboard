@@ -58,7 +58,7 @@ public class HomeFragment extends Fragment{
         FragmentManager fm = getChildFragmentManager();
         Lifecycle lifecycle = getViewLifecycleOwner().getLifecycle();
         viewPagerAdapter = new HomeViewPagerAdapter(fm, lifecycle);
-//        viewPager.setUserInputEnabled(false); // disables horiz. swipe to scroll tabs gestures
+        viewPager.setUserInputEnabled(false); // disables horiz. swipe to scroll tabs gestures
         viewPager.setAdapter(viewPagerAdapter);
 
 
@@ -67,14 +67,22 @@ public class HomeFragment extends Fragment{
             public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
                 switch (position) {
                     case 0:
-//                        tab.setIcon(R.drawable.movie_icon_light_blue);
                         tab.setText("ALL");
                         break;
                     case 1:
-//                        tab.setIcon(R.drawable.home_icon_light_blue);
+                        tab.setText("Tech");
                         break;
                     case 2:
-//                        tab.setIcon(R.drawable.search_icon_light_blue);
+                        tab.setText("Physics");
+                        break;
+                    case 3:
+                        tab.setText("Space");
+                        break;
+                    case 4:
+                        tab.setText("Biology");
+                        break;
+                    case 5:
+                        tab.setText("Medicine");
                         break;
                 }
             }

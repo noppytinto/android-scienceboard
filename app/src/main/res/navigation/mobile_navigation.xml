@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/navigation_home"
         android:name="com.nocorp.scienceboard.ui.home.HomeFragment"
-        android:label="Explore"
+        android:label=" "
         tools:layout="@layout/fragment_home" />
 
     <fragment
@@ -30,6 +30,10 @@
         <argument
             android:name="url"
             app:argType="string" />
+        <argument
+            android:name="sourceLogoUrl"
+            app:argType="string"
+            app:nullable="true" />
     </fragment>
     <action
         android:id="@+id/action_global_webviewFragment"

@@ -82,7 +82,7 @@ public class FeedProvider {
 //        sourceUrls.add(phys_org_space);
         sourceUrls.add(newscientist_space);
         sourceUrls.add(esa_space_news);
-        sourceUrls.add(wired);
+//        sourceUrls.add(wired);
 //        sourceUrls.add(nvidiaBlog);
         sourceUrls.add(hdblog);
         sourceUrls.add(theverge);
