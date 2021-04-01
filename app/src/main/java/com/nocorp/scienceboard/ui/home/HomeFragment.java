@@ -5,58 +5,25 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavDirections;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.nocorp.scienceboard.MobileNavigationDirections;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
+import androidx.viewpager2.widget.ViewPager2;
 import com.nocorp.scienceboard.R;
-import com.nocorp.scienceboard.model.Article;
-import com.nocorp.scienceboard.model.Source;
-import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterFeedsList;
-import com.nocorp.scienceboard.repository.FeedProvider;
-import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.utility.AdProvider;
-import com.nocorp.scienceboard.utility.HttpUtilities;
-import com.rometools.rome.feed.synd.SyndContent;
-import com.rometools.rome.feed.synd.SyndEntry;
-import com.rometools.rome.feed.synd.SyndFeed;
-import com.rometools.rome.feed.synd.SyndImage;
-import com.rometools.rome.io.FeedException;
-import com.rometools.rome.io.SyndFeedInput;
-import com.rometools.rome.io.XmlReader;
+import com.nocorp.scienceboard.viewpager.HomeViewPagerAdapter;
 
-import org.jdom2.Element;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Node;
-import org.jsoup.select.Elements;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-public class HomeFragment extends Fragment implements FeedProvider.OnFeedsDownloadedListener, RecyclerAdapterFeedsList.OnArticleClickedListener {
+public class HomeFragment extends Fragment{
     private final String TAG = this.getClass().getSimpleName();
+    private HomeViewPagerAdapter viewPagerAdapter;
+    private ViewPager2 viewPager;
     private HomeViewModel homeViewModel;
-    private WebView webView;
-    private RecyclerAdapterFeedsList recyclerAdapterFeedsList;
-    private RecyclerView recyclerView;
-    private CircularProgressIndicator progressIndicator;
     private View view;
     private AdProvider adProvider;
 
@@ -71,32 +38,28 @@ public class HomeFragment extends Fragment implements FeedProvider.OnFeedsDownlo
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        webView = view.findViewById(R.id.webView);
-        progressIndicator = view.findViewById(R.id.progressIndicator_homeFragment);
         this.view = view;
-        initRecycleView(view);
+        viewPager = view.findViewById(R.id.viewPager_homeFragment);
+        viewPager.setAdapter(viewPagerAdapter);
+
+
+
+        NavController navController = Navigation.findNavController(view);
+        AppBarConfiguration appBarConfiguration =
+                new AppBarConfiguration.Builder(navController.getGraph()).build();
+        Toolbar toolbar = view.findViewById(R.id.toolbar_homeFragment);
+
+        NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration);
+
+
+
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
-        homeViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), articles -> {
-            if(articles==null || articles.size()==0) {
-                progressIndicator.setVisibility(View.GONE);
-                Toast.makeText(requireContext(), "An error occurred during articles fetch, contact the developer.", Toast.LENGTH_SHORT).show();
-            }
-            else {
-                progressIndicator.setVisibility(View.GONE);
-                articles = adProvider.populateListWithAds(articles, 5);
-                recyclerAdapterFeedsList.loadNewData(articles);
-            }
-        });
 
-        FeedProvider feedProvider = new FeedProvider(this);
-        feedProvider.downloadRssSources();
-//        testWebview(inputUrl);
     }
 
 
@@ -118,38 +81,6 @@ public class HomeFragment extends Fragment implements FeedProvider.OnFeedsDownlo
     }
 
 
-    //---------------------------------------------------------------------
-
-    private void initRecycleView(View view) {
-        // defining Recycler view
-        recyclerView = view.findViewById(R.id.recyclerView_homeFragment);
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerAdapterFeedsList = new RecyclerAdapterFeedsList(new ArrayList<>(), requireContext(), this);
-        recyclerView.setAdapter(recyclerAdapterFeedsList);
-    }
-
-    @Override
-    public void onFeedsDownloadCompleted(List<Source> sources) {
-        homeViewModel.fetchArticles(sources);
-        Log.d(TAG, "SCIENCE_BOARD - onFeedsDownloadFailed: feeds fetched");
-
-        // this (runOnUiThread) is unstable, can cause crashes, so better not use it
-//        requireActivity().runOnUiThread(() ->
-//                Toast.makeText(requireContext(), "feeds fetched", Toast.LENGTH_SHORT).show()
-//        );
-    }
-
-    @Override
-    public void onFeedsDownloadFailed(String cause) {
-        // this (runOnUiThread) is unstable, can cause crashes, so better not use it
-        Log.d(TAG, "SCIENCE_BOARD - onFeedsDownloadFailed: feeds not fetched, cause: $cause");
-//        requireActivity().runOnUiThread(() ->
-//                Toast.makeText(requireContext(), "Cannot fetch feeds, contact the developer.\n$cause", Toast.LENGTH_SHORT).show()
-//        );
-    }
-
-
-
 
 
 
@@ -160,251 +91,238 @@ public class HomeFragment extends Fragment implements FeedProvider.OnFeedsDownlo
 
 
     //--------------------------------------------------------------------- methods
-
-    private void testWebview() {
-        Runnable task = () -> {
-            try {
-                int index = 0;
-                String feedTag = "https://www.theverge.com/rss/index.xml";
-                String rdfTag = "https://www.nature.com/nmat.rss"; // unsecure (HTTP)
-                String rssTag = "https://home.cern/api/news/news/feed.rss";
-                String malformedRss = "https://www.theverge.com/";
-                String wired = "https://www.wired.com/feed/rss";
-                String nvidiaBlog = "https://feeds.feedburner.com/nvidiablog";
-
-                String inputUrl = "https://feeds.feedburner.com/nvidiablog";
-
-                String sanitizedUrl = HttpUtilities.sanitizeUrl(inputUrl);
-                SyndFeed feed = new SyndFeedInput().build(new XmlReader(new URL(sanitizedUrl)));
-                String logo = getLogoUrl(feed);
-                List<SyndEntry> entries = feed.getEntries();
-                SyndEntry entry = entries.get(index);
-                String title = entry.getTitle();
-                String articleLink = entry.getLink();
-                String thumbnailUrl = getThumbnailUrl(entry);
-                List<SyndContent> contents = entry.getContents();
-
-                String htmlContent = null;
-                String contentType = null;
-                String contentMode = null;
-                String contentText = null;
-                List<String> imagesUrls = null;
-
-                if(contents.size()!=0) {
-                    SyndContent content = contents.get(0);
-                    htmlContent = content.getValue();
-                    contentType = content.getType();
-                    contentMode = content.getMode();
-                    contentText = extractReadableTextFromHtml(htmlContent);
-                    imagesUrls = extractImagesUrlFromHtml(htmlContent);
-
-                }
-                else {
-                    SyndContent description2 = entries.get(index).getDescription();
-                    SyndContent content = description2;
-                    htmlContent = content.getValue();
-                    contentType = content.getType();
-                    contentMode = content.getMode();
-                    contentText = extractReadableTextFromHtml(htmlContent);
-                    imagesUrls = extractImagesUrlFromHtml(htmlContent);
-                }
-
-                String frameVideo = "Video From YouTube<br><p><iframe width=\"100%\" height=\"200\" src=\"https://www.youtube.com/embed/47yJ2XCRLZs\" frameborder=\"0\" allowfullscreen></iframe>tralalal</p> blablabla <figure id=\"attachment_49306\" aria-describedby=\"caption-attachment-49306\" style=\"width: 90%\" class=\"wp-caption alignleft\">\n" +
-                        "                <a href=\"https://blogs.nvidia.com/wp-content/uploads/2021/03/Berzelius-end-image.jpg\">\n" +
-                        "                    <img loading=\"lazy\"\n" +
-                        "                        class=\"wp-image-49306 size-medium\"\n" +
-                        "                        src=\"https://blogs.nvidia.com/wp-content/uploads/2021/03/Berzelius-end-image-400x294.jpg\"\n" +
-                        "                        alt=\"BerzeLiUs supercomputer in Sweden e\" width=\"400\" height=\"294\"\n" +
-                        "                        srcset=\"\n" +
-                        "                        https://blogs.nvidia.com/wp-content/uploads/2021/03/Berzelius-end-image-400x294.jpg 400w, \n" +
-                        "                        https://blogs.nvidia.com/wp-content/uploads/2021/03/Berzelius-end-image-672x494.jpg 672w, \n" +
-                        "                        https://blogs.nvidia.com/wp-content/uploads/2021/03/Berzelius-end-image-768x565.jpg 768w, \n" +
-                        "                        https://blogs.nvidia.com/wp-content/uploads/2021/03/Berzelius-end-image-612x450.jpg 612w, \n" +
-                        "                        https://blogs.nvidia.com/wp-content/uploads/2021/03/Berzelius-end-image-292x215.jpg 292w, \n" +
-                        "                        https://blogs.nvidia.com/wp-content/uploads/2021/03/Berzelius-end-image-136x100.jpg 136w, \n" +
-                        "                        https://blogs.nvidia.com/wp-content/uploads/2021/03/Berzelius-end-image.jpg 1128w\"\n" +
-                        "                        sizes=\"(max-width: 90%) 100vw, 400px\" />\n" +
-                        "                </a>\n" +
-                        "                <figcaption id=\"caption-attachment-49306\" class=\"wp-caption-text\">\n" +
-                        "                    Above and at top: The BerzeLiUs system.\n" +
-                        "                    Pictures: Thor Balkhed, Linkoping University.\n" +
-                        "                </figcaption>\n" +
-                        "            </figure>" +
-                        "            <p>Berzelius (pronounced behr-zeh-LEE-us) invented chemistry’s shorthand (think H<sub>2</sub>0) and discovered a\n" +
-                        "                handful of elements including silicon. A 300-petaflops system now stands on the Linköping University (<a\n" +
-                        "                    href=\"https://liu.se/en\">LiU</a>) campus, less than 70 kilometers from his birthplace in south-central\n" +
-                        "                Sweden, like a living silicon tribute to innovations yet to come.</p>" +
-                        "            <p>“Many cities in Sweden have a square or street that bears Berzelius’s name, but the average person probably\n" +
-                        "                doesn’t know much about him,” said Niclas Andersson, technical director at the National Supercomputer Centre (<a\n" +
-                        "                    href=\"https://www.nsc.liu.se/\">NSC</a>) at Linköping University, which is home to the system based on the <a\n" +
-                        "                    href=\"https://www.nvidia.com/en-us/data-center/dgx-superpod/\">NVIDIA DGX SuperPOD</a>.</p>";
-
-                frameVideo = addEndingCode(frameVideo);
-
-                onFeedDownloaded(frameVideo);
-
-
-                List<String> elements = extractParagraphs(frameVideo);
-
-//                System.out.println(description);
-
-
-            } catch (FeedException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-            }
-        };
-
-        ThreadManager threadManager = ThreadManager.getInstance();
-        threadManager.runTask(task);
-    }
-
-    private void onFeedDownloaded(String htmlContent) {
-        requireActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                WebSettings webSettings = webView.getSettings();
-                webSettings.setJavaScriptEnabled(true);
-//                WebChromeClient webChromeClient = new WebChromeClient();
-//                webView.setWebChromeClient(webChromeClient);
-                webView.loadData(htmlContent, "text/html", "UTF-8");
-            }
-        });
-    }
-
-    public String getThumbnailUrl(SyndEntry entry) {
-        if(entry==null) return null;
-        String thumbnailUrl = null;
-
-        // media namespace strategy
-        List<Element> elements = entry.getForeignMarkup();
-        for(Element element: elements) {
-            String namespace = element.getNamespacePrefix();
-            if(namespace.equals("media")) {
-                thumbnailUrl = element.getAttributeValue("url");
-                break;
-            }
-        }
-
-
-        return thumbnailUrl;
-    }
-
-    public String addEndingCode(String htmlCode) {
-        final String BREAK_TAG = "<br>";
-        final String breaks = BREAK_TAG + BREAK_TAG + BREAK_TAG + BREAK_TAG;
-
-        htmlCode = htmlCode + breaks;
-        return htmlCode;
-    }
-
-    private String extractReadableTextFromHtml(String htmlCode) {
-        Document doc = Jsoup.parse(htmlCode);
-        String text = doc.body().text();
-
-        return text;
-    }
-
-    private Elements extractElements(String htmlCode) {
-        Document doc = Jsoup.parse(htmlCode);
-        Elements elements = doc.body().getAllElements();
-
-        return elements;
-    }
-
-    private List<String> extractImagesUrlFromHtml(String htmlCode) {
-        if(htmlCode==null || htmlCode.isEmpty()) return null;
-
-        Document doc = Jsoup.parse(htmlCode);
-        Elements urls = doc.select("img");
-        List<String> imagesUrl = new ArrayList<>();
-
-        for(org.jsoup.nodes.Element el: urls) {
-            String url = el.attr("src");
-            if(url!=null || url.isEmpty())
-                imagesUrl.addAll(Collections.singleton(url));
-        }
-
-        return imagesUrl;
-    }
-
-    private List<String> extractParagraphs(String htmlCode) {
-        if(htmlCode==null || htmlCode.isEmpty()) return null;
-
-//        htmlCode = Jsoup.clean(htmlCode, Whitelist.none().addTags("html", "head", "body", "meta", "title", "p", "a", "h", "figure", "figcaption", "sub", "strong", "img"));
-
-        Document doc = Jsoup.parse(htmlCode);
-        Elements elements = doc.getAllElements();
-        List<Node> nodes = doc.body().childNodes();
-
-        Elements paragraphs = new Elements();
-        Elements iframes = new Elements();
-        Elements images = new Elements();
-        Elements children = new Elements();
-
-        for (org.jsoup.nodes.Element element : elements) {
-            if(element.is("p")) {
-                paragraphs.add(element);
-                // extract iframes
-                if(element.childrenSize()!=0) {
-                    iframes.addAll(extraxtIframes(element.children()));
-                }
-            }
-        }
-
-        List<String> result = new ArrayList<>();
-
-
-//        for(org.jsoup.nodes.Element el: elements) {
+//
+//    private void testWebview() {
+//        Runnable task = () -> {
+//            try {
+//                int index = 0;
+//                String feedTag = "https://www.theverge.com/rss/index.xml";
+//                String rdfTag = "https://www.nature.com/nmat.rss"; // unsecure (HTTP)
+//                String rssTag = "https://home.cern/api/news/news/feed.rss";
+//                String malformedRss = "https://www.theverge.com/";
+//                String wired = "https://www.wired.com/feed/rss";
+//                String nvidiaBlog = "https://feeds.feedburner.com/nvidiablog";
+//
+//                String inputUrl = "https://feeds.feedburner.com/nvidiablog";
+//
+//                String sanitizedUrl = HttpUtilities.sanitizeUrl(inputUrl);
+//                SyndFeed feed = new SyndFeedInput().build(new XmlReader(new URL(sanitizedUrl)));
+//                String logo = getLogoUrl(feed);
+//                List<SyndEntry> entries = feed.getEntries();
+//                SyndEntry entry = entries.get(index);
+//                String title = entry.getTitle();
+//                String articleLink = entry.getLink();
+//                String thumbnailUrl = getThumbnailUrl(entry);
+//                List<SyndContent> contents = entry.getContents();
+//
+//                String htmlContent = null;
+//                String contentType = null;
+//                String contentMode = null;
+//                String contentText = null;
+//                List<String> imagesUrls = null;
+//
+//                if(contents.size()!=0) {
+//                    SyndContent content = contents.get(0);
+//                    htmlContent = content.getValue();
+//                    contentType = content.getType();
+//                    contentMode = content.getMode();
+//                    contentText = extractReadableTextFromHtml(htmlContent);
+//                    imagesUrls = extractImagesUrlFromHtml(htmlContent);
+//
+//                }
+//                else {
+//                    SyndContent description2 = entries.get(index).getDescription();
+//                    SyndContent content = description2;
+//                    htmlContent = content.getValue();
+//                    contentType = content.getType();
+//                    contentMode = content.getMode();
+//                    contentText = extractReadableTextFromHtml(htmlContent);
+//                    imagesUrls = extractImagesUrlFromHtml(htmlContent);
+//                }
+//
+//                String frameVideo = "Video From YouTube<br><p><iframe width=\"100%\" height=\"200\" src=\"https://www.youtube.com/embed/47yJ2XCRLZs\" frameborder=\"0\" allowfullscreen></iframe>tralalal</p> blablabla <figure id=\"attachment_49306\" aria-describedby=\"caption-attachment-49306\" style=\"width: 90%\" class=\"wp-caption alignleft\">\n" +
+//                        "                <a href=\"https://blogs.nvidia.com/wp-content/uploads/2021/03/Berzelius-end-image.jpg\">\n" +
+//                        "                    <img loading=\"lazy\"\n" +
+//                        "                        class=\"wp-image-49306 size-medium\"\n" +
+//                        "                        src=\"https://blogs.nvidia.com/wp-content/uploads/2021/03/Berzelius-end-image-400x294.jpg\"\n" +
+//                        "                        alt=\"BerzeLiUs supercomputer in Sweden e\" width=\"400\" height=\"294\"\n" +
+//                        "                        srcset=\"\n" +
+//                        "                        https://blogs.nvidia.com/wp-content/uploads/2021/03/Berzelius-end-image-400x294.jpg 400w, \n" +
+//                        "                        https://blogs.nvidia.com/wp-content/uploads/2021/03/Berzelius-end-image-672x494.jpg 672w, \n" +
+//                        "                        https://blogs.nvidia.com/wp-content/uploads/2021/03/Berzelius-end-image-768x565.jpg 768w, \n" +
+//                        "                        https://blogs.nvidia.com/wp-content/uploads/2021/03/Berzelius-end-image-612x450.jpg 612w, \n" +
+//                        "                        https://blogs.nvidia.com/wp-content/uploads/2021/03/Berzelius-end-image-292x215.jpg 292w, \n" +
+//                        "                        https://blogs.nvidia.com/wp-content/uploads/2021/03/Berzelius-end-image-136x100.jpg 136w, \n" +
+//                        "                        https://blogs.nvidia.com/wp-content/uploads/2021/03/Berzelius-end-image.jpg 1128w\"\n" +
+//                        "                        sizes=\"(max-width: 90%) 100vw, 400px\" />\n" +
+//                        "                </a>\n" +
+//                        "                <figcaption id=\"caption-attachment-49306\" class=\"wp-caption-text\">\n" +
+//                        "                    Above and at top: The BerzeLiUs system.\n" +
+//                        "                    Pictures: Thor Balkhed, Linkoping University.\n" +
+//                        "                </figcaption>\n" +
+//                        "            </figure>" +
+//                        "            <p>Berzelius (pronounced behr-zeh-LEE-us) invented chemistry’s shorthand (think H<sub>2</sub>0) and discovered a\n" +
+//                        "                handful of elements including silicon. A 300-petaflops system now stands on the Linköping University (<a\n" +
+//                        "                    href=\"https://liu.se/en\">LiU</a>) campus, less than 70 kilometers from his birthplace in south-central\n" +
+//                        "                Sweden, like a living silicon tribute to innovations yet to come.</p>" +
+//                        "            <p>“Many cities in Sweden have a square or street that bears Berzelius’s name, but the average person probably\n" +
+//                        "                doesn’t know much about him,” said Niclas Andersson, technical director at the National Supercomputer Centre (<a\n" +
+//                        "                    href=\"https://www.nsc.liu.se/\">NSC</a>) at Linköping University, which is home to the system based on the <a\n" +
+//                        "                    href=\"https://www.nvidia.com/en-us/data-center/dgx-superpod/\">NVIDIA DGX SuperPOD</a>.</p>";
+//
+//                frameVideo = addEndingCode(frameVideo);
+//
+//                onFeedDownloaded(frameVideo);
+//
+//
+//                List<String> elements = extractParagraphs(frameVideo);
+//
+////                System.out.println(description);
+//
+//
+//            } catch (FeedException e) {
+//                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            } catch (URISyntaxException e) {
+//                e.printStackTrace();
+//            }
+//        };
+//
+//        ThreadManager threadManager = ThreadManager.getInstance();
+//        threadManager.runTask(task);
+//    }
+//
+//    private void onFeedDownloaded(String htmlContent) {
+//        requireActivity().runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//                WebSettings webSettings = webView.getSettings();
+//                webSettings.setJavaScriptEnabled(true);
+////                WebChromeClient webChromeClient = new WebChromeClient();
+////                webView.setWebChromeClient(webChromeClient);
+//                webView.loadData(htmlContent, "text/html", "UTF-8");
+//            }
+//        });
+//    }
+//
+//    public String getThumbnailUrl(SyndEntry entry) {
+//        if(entry==null) return null;
+//        String thumbnailUrl = null;
+//
+//        // media namespace strategy
+//        List<Element> elements = entry.getForeignMarkup();
+//        for(Element element: elements) {
+//            String namespace = element.getNamespacePrefix();
+//            if(namespace.equals("media")) {
+//                thumbnailUrl = element.getAttributeValue("url");
+//                break;
+//            }
+//        }
+//
+//
+//        return thumbnailUrl;
+//    }
+//
+//    public String addEndingCode(String htmlCode) {
+//        final String BREAK_TAG = "<br>";
+//        final String breaks = BREAK_TAG + BREAK_TAG + BREAK_TAG + BREAK_TAG;
+//
+//        htmlCode = htmlCode + breaks;
+//        return htmlCode;
+//    }
+//
+//    private String extractReadableTextFromHtml(String htmlCode) {
+//        Document doc = Jsoup.parse(htmlCode);
+//        String text = doc.body().text();
+//
+//        return text;
+//    }
+//
+//    private Elements extractElements(String htmlCode) {
+//        Document doc = Jsoup.parse(htmlCode);
+//        Elements elements = doc.body().getAllElements();
+//
+//        return elements;
+//    }
+//
+//    private List<String> extractImagesUrlFromHtml(String htmlCode) {
+//        if(htmlCode==null || htmlCode.isEmpty()) return null;
+//
+//        Document doc = Jsoup.parse(htmlCode);
+//        Elements urls = doc.select("img");
+//        List<String> imagesUrl = new ArrayList<>();
+//
+//        for(org.jsoup.nodes.Element el: urls) {
 //            String url = el.attr("src");
 //            if(url!=null || url.isEmpty())
-//                result.addAll(Collections.singleton(url));
+//                imagesUrl.addAll(Collections.singleton(url));
 //        }
+//
+//        return imagesUrl;
+//    }
+//
+//    private List<String> extractParagraphs(String htmlCode) {
+//        if(htmlCode==null || htmlCode.isEmpty()) return null;
+//
+////        htmlCode = Jsoup.clean(htmlCode, Whitelist.none().addTags("html", "head", "body", "meta", "title", "p", "a", "h", "figure", "figcaption", "sub", "strong", "img"));
+//
+//        Document doc = Jsoup.parse(htmlCode);
+//        Elements elements = doc.getAllElements();
+//        List<Node> nodes = doc.body().childNodes();
+//
+//        Elements paragraphs = new Elements();
+//        Elements iframes = new Elements();
+//        Elements images = new Elements();
+//        Elements children = new Elements();
+//
+//        for (org.jsoup.nodes.Element element : elements) {
+//            if(element.is("p")) {
+//                paragraphs.add(element);
+//                // extract iframes
+//                if(element.childrenSize()!=0) {
+//                    iframes.addAll(extraxtIframes(element.children()));
+//                }
+//            }
+//        }
+//
+//        List<String> result = new ArrayList<>();
+//
+//
+////        for(org.jsoup.nodes.Element el: elements) {
+////            String url = el.attr("src");
+////            if(url!=null || url.isEmpty())
+////                result.addAll(Collections.singleton(url));
+////        }
+//
+//        return result;
+//    }
+//
+//    private Collection<? extends org.jsoup.nodes.Element> extraxtIframes(Elements elements) {
+//        if(elements==null || elements.size()==0) return null;
+//        Elements iframes = new Elements();
+//
+//        iframes = elements.select("iframe");
+//
+//        return iframes;
+//    }
+//
+//    private String getLogoUrl(SyndFeed feed) {
+//        if(feed==null) return null;
+//
+//        String logo = null;
+//        SyndImage syndImage = feed.getIcon();
+//        if (syndImage!=null) {
+//            logo = syndImage.getUrl();
+//        }
+//        else {
+//            // notes: sometimes the logo is fetched via getImage()
+//            syndImage = feed.getImage();
+//            if (syndImage!=null) {
+//                logo = syndImage.getUrl();
+//            }
+//        }
+//        return logo;
+//    }
 
-        return result;
-    }
-
-    private Collection<? extends org.jsoup.nodes.Element> extraxtIframes(Elements elements) {
-        if(elements==null || elements.size()==0) return null;
-        Elements iframes = new Elements();
-
-        iframes = elements.select("iframe");
-
-        return iframes;
-    }
-
-    private String getLogoUrl(SyndFeed feed) {
-        if(feed==null) return null;
-
-        String logo = null;
-        SyndImage syndImage = feed.getIcon();
-        if (syndImage!=null) {
-            logo = syndImage.getUrl();
-        }
-        else {
-            // notes: sometimes the logo is fetched via getImage()
-            syndImage = feed.getImage();
-            if (syndImage!=null) {
-                logo = syndImage.getUrl();
-            }
-        }
-        return logo;
-    }
-
-
-    @Override
-    public void onArticleClicked(int position) {
-        Article article = (Article) recyclerAdapterFeedsList.getItem(position);
-        if(article!=null) {
-            String url = article.getWebpageUrl();
-            if(url!=null || !url.isEmpty()) {
-                MobileNavigationDirections.ActionGlobalWebviewFragment action =
-                        MobileNavigationDirections.actionGlobalWebviewFragment(url);
-                Navigation.findNavController(view).navigate(action);
-            }
-        }
-    }
 }

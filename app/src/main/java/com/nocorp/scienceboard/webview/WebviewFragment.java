@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebSettings;
-import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -30,6 +29,11 @@ public class WebviewFragment extends Fragment {
     private LinearProgressIndicator progressIndicator;
     private View view;
     private Snackbar snackbar;
+
+
+
+    //-------------------------------------------------------------------------
+
 
 //    public static WebviewFragment newInstance(String param1, String param2) {
 //        WebviewFragment fragment = new WebviewFragment();
@@ -58,12 +62,7 @@ public class WebviewFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         webView = view.findViewById(R.id.webView_webviewFragment);
         progressIndicator = view.findViewById(R.id.progressIndicator_webviewFragment);
-        snackbar = Snackbar.make(view, "",Snackbar.LENGTH_INDEFINITE);
-        snackbar.setTextColor(getResources().getColor(R.color.white));
-        snackbar.setBackgroundTint(getResources().getColor(R.color.red));
-        snackbar.setAnchorView(R.id.nav_view);
-        snackbar.setAction("retry", v -> webView.loadUrl(url));
-        snackbar.setActionTextColor(getResources().getColor(R.color.white));
+
         this.view = view;
         if (getArguments() != null) {
             // the url is always !=null and non-empty
@@ -75,9 +74,16 @@ public class WebviewFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-//        WebChromeClient webChromeClient = new WebChromeClient();
-//        webView.setWebChromeClient(webChromeClient);
 
+        applyBrowsingRecommendedSettings(webView);
+        webView.loadUrl("url");
+    }
+
+
+
+    //-------------------------------------------------------------------------
+
+    private void applyBrowsingRecommendedSettings(WebView webView) {
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setLoadWithOverviewMode(true);
@@ -87,7 +93,6 @@ public class WebviewFragment extends Fragment {
         webSettings.setDisplayZoomControls(false);
         webSettings.setDomStorageEnabled(true);
         webSettings.setDatabaseEnabled(true);
-//        webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             webSettings.setSafeBrowsingEnabled(true);
         }
@@ -95,6 +100,10 @@ public class WebviewFragment extends Fragment {
         webView.setScrollbarFadingEnabled(false);
         webView.setFocusable(true);
         webView.setFocusableInTouchMode(true);
+        defineWebclientBehavior(webView);
+    }
+
+    private void defineWebclientBehavior(WebView webView) {
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -106,6 +115,7 @@ public class WebviewFragment extends Fragment {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 progressIndicator.setVisibility(View.GONE);
+//                showLoadCompletedSnackbar();
             }
 
             @Override
@@ -117,20 +127,37 @@ public class WebviewFragment extends Fragment {
             @Override
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
                 super.onReceivedError(view, errorCode, description, failingUrl);
-                progressIndicator.setVisibility(View.GONE);
-//                Toast.makeText(requireContext(), "An error occurred when displaying page.\n$description\n$errorCode", Toast.LENGTH_SHORT).show();
-
-                showErrorSnackbar(errorCode, description);
+                String message = "An error occurred when displaying page." + "\ndescription: " + description + "\nerror: " + errorCode;
+                showErrorSnackbar(message);
             }
+
         });
-        webView.loadUrl(url);
-
-
     }
 
-    private void showErrorSnackbar(int errorCode, String description) {
-        String message = "An error occurred when displaying page." + "\ndescription: " + description + "\nerror: " + errorCode;
+    private void showLoadCompletedSnackbar() {
+        String message = "Load completed.";
+        snackbar = Snackbar.make(view, "",Snackbar.LENGTH_SHORT);
         snackbar.setText(message);
+        snackbar.setText(message);
+        snackbar.setTextColor(getResources().getColor(R.color.white));
+        snackbar.setBackgroundTint(getResources().getColor(R.color.green));
+        snackbar.setAnchorView(R.id.nav_view);
+        snackbar.setAction("ok", v -> snackbar.dismiss());
+        snackbar.setActionTextColor(getResources().getColor(R.color.white));
+        snackbar.show();
+    }
+
+    private void showErrorSnackbar(String message) {
+        snackbar = Snackbar.make(view, "",Snackbar.LENGTH_INDEFINITE);
+        snackbar.setText(message);
+        snackbar.setTextColor(getResources().getColor(R.color.white));
+        snackbar.setBackgroundTint(getResources().getColor(R.color.red));
+        snackbar.setAnchorView(R.id.nav_view);
+        snackbar.setAction("retry", v -> {
+            snackbar.dismiss();
+            webView.loadUrl(url);
+        });
+        snackbar.setActionTextColor(getResources().getColor(R.color.white));
         snackbar.show();
     }
 

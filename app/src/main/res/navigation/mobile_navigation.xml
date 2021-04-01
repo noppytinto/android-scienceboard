@@ -8,20 +8,20 @@
     <fragment
         android:id="@+id/navigation_home"
         android:name="com.nocorp.scienceboard.ui.home.HomeFragment"
-        android:label="@string/title_home"
+        android:label="Explore"
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="com.nocorp.scienceboard.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        android:id="@+id/navigation_bookmarks"
+        android:name="com.nocorp.scienceboard.ui.bookmarks.BookmarksFragment"
+        android:label="Bookmarks"
+        tools:layout="@layout/fragment_bookmarks" />
 
     <fragment
-        android:id="@+id/navigation_notifications"
-        android:name="com.nocorp.scienceboard.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+        android:id="@+id/navigation_history"
+        android:name="com.nocorp.scienceboard.ui.history.HistoryFragment"
+        android:label="History"
+        tools:layout="@layout/fragment_history" />
     <fragment
         android:id="@+id/webviewFragment"
         android:name="com.nocorp.scienceboard.webview.WebviewFragment"

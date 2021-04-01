@@ -12,37 +12,14 @@ import com.nocorp.scienceboard.ui.viewholder.ListItem;
 
 import java.util.List;
 
-public class HomeViewModel extends ViewModel implements ArticlesFetcher {
-    private MutableLiveData<List<ListItem>> articlesList;
-    private ArticleRepository articleRepository;
+public class HomeViewModel extends ViewModel{
+
 
     public HomeViewModel() {
-        articlesList = new MutableLiveData<>();
-        articleRepository = ArticleRepository.getInstance();
-        articleRepository.setArticlesListener(this);
+
 
 
     }
 
-    public LiveData<List<ListItem>> getObservableArticlesList() {
-        return articlesList;
-    }
 
-    public void fetchArticles(List<Source> sources) {
-        articleRepository.getArticles(sources, 20);
-    }
-
-    public void setArticlesList(List<ListItem> articlesList) {
-        this.articlesList.postValue(articlesList);
-    }
-
-    @Override
-    public void onFetchCompleted(List<ListItem> articles) {
-        setArticlesList(articles);
-    }
-
-    @Override
-    public void onFetchFailed(String cause) {
-
-    }
 }

@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.ui.dashboard;
+package com.nocorp.scienceboard.ui.bookmarks;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,17 +14,17 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.nocorp.scienceboard.R;
 
-public class DashboardFragment extends Fragment {
+public class BookmarksFragment extends Fragment {
 
-    private DashboardViewModel dashboardViewModel;
+    private BookmarksViewModel bookmarksViewModel;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        dashboardViewModel =
-                new ViewModelProvider(this).get(DashboardViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_dashboard, container, false);
+        bookmarksViewModel =
+                new ViewModelProvider(this).get(BookmarksViewModel.class);
+        View root = inflater.inflate(R.layout.fragment_bookmarks, container, false);
         final TextView textView = root.findViewById(R.id.text_dashboard);
-        dashboardViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
+        bookmarksViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 textView.setText(s);
