@@ -60,10 +60,11 @@ public class FeedProvider {
         final String nytimes_space = "https://rss.nytimes.com/services/xml/rss/nyt/Space.xml";
         final String cern = "https://home.cern/api/news/news/feed.rss";
         final String spacenews = "https://spacenews.com/feed/";
-        final String space = "https://www.space.com/feeds/all";
+        final String space_com = "https://www.space.com/feeds/all";
         final String phys_org_space = "https://phys.org/rss-feed/space-news/";
         final String newscientist_space = "https://www.newscientist.com/subject/space/feed/";
         final String esa_space_news = "https://www.esa.int/rssfeed/Our_Activities/Space_News";
+        final String nasa = "https://www.nasa.gov/rss/dyn/breaking_news.rss";
 
         // tech
         final String wired = "https://www.wired.com/feed/rss";
@@ -76,26 +77,25 @@ public class FeedProvider {
         final String livescience = "https://www.livescience.com/feeds/all";
 
 
-        sourceUrls.add(esa_italy);
-        sourceUrls.add(nytimes_space);
-        sourceUrls.add(cern);
-        sourceUrls.add(space);
-
-        sourceUrls.add(newscientist_space);
-        sourceUrls.add(esa_space_news);
-
-        sourceUrls.add(hdblog);
-        sourceUrls.add(theverge);
-
-
-        // ----------------- slow
-        sourceUrls.add(spacenews);
-
-        sourceUrls.add(phys_org_space);
-        sourceUrls.add(wired);
-        sourceUrls.add(nvidiaBlog);
-        sourceUrls.add(nature);
-        sourceUrls.add(livescience);
+//        sourceUrls.add(esa_italy);
+//        sourceUrls.add(nytimes_space);
+//        sourceUrls.add(cern);
+//        sourceUrls.add(space_com);
+//        sourceUrls.add(newscientist_space);
+//        sourceUrls.add(esa_space_news);
+//        sourceUrls.add(hdblog);
+//        sourceUrls.add(theverge);
+        sourceUrls.add(nasa);
+//
+//
+//
+//        // ----------------- slow
+//        sourceUrls.add(spacenews);
+//        sourceUrls.add(phys_org_space);
+//        sourceUrls.add(wired);
+//        sourceUrls.add(nvidiaBlog);
+//        sourceUrls.add(nature);
+//        sourceUrls.add(livescience);
 
     }
 
