@@ -1,6 +1,7 @@
-package com.nocorp.scienceboard.model;
+package com.nocorp.scienceboard.model.xml;
 
 import java.util.Date;
+import java.util.List;
 
 public class Channel {
     private String name;
@@ -10,6 +11,7 @@ public class Channel {
     private String language;
     private Date lastUpdate;
     private Date pubDate;
+    private List<Entry> entries;
 
     public String getName() {
         return name;
@@ -65,5 +67,13 @@ public class Channel {
 
     public void setPubDate(Date pubDate) {
         this.pubDate = pubDate;
+    }
+
+    public List<Entry> getEntries() {
+        return entries;
+    }
+
+    public void setEntries(List<Entry> entries) {
+        this.entries = entries;
     }
 }

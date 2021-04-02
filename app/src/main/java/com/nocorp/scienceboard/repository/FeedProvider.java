@@ -1,7 +1,7 @@
 package com.nocorp.scienceboard.repository;
 
 import com.nocorp.scienceboard.model.Article;
-import com.nocorp.scienceboard.model.Channel;
+import com.nocorp.scienceboard.model.xml.Channel;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.utility.DomXmlParser;
@@ -77,7 +77,7 @@ public class FeedProvider {
         final String livescience = "https://www.livescience.com/feeds/all";
 
 
-//        sourceUrls.add(esa_italy);
+        sourceUrls.add(esa_italy);
 //        sourceUrls.add(nytimes_space);
 //        sourceUrls.add(cern);
 //        sourceUrls.add(space_com);
@@ -85,16 +85,18 @@ public class FeedProvider {
 //        sourceUrls.add(esa_space_news);
 //        sourceUrls.add(hdblog);
 //        sourceUrls.add(theverge);
-        sourceUrls.add(nasa);
-//
-//
-//
+//        sourceUrls.add(nasa);
+
+
+
 //        // ----------------- slow
 //        sourceUrls.add(spacenews);
 //        sourceUrls.add(phys_org_space);
 //        sourceUrls.add(wired);
 //        sourceUrls.add(nvidiaBlog);
 //        sourceUrls.add(nature);
+//        sourceUrls.add(livescience);
+//
 //        sourceUrls.add(livescience);
 
     }

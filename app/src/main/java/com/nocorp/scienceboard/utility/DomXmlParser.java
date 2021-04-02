@@ -2,14 +2,17 @@ package com.nocorp.scienceboard.utility;
 
 import android.util.Log;
 
-import com.nocorp.scienceboard.model.Channel;
+import com.nocorp.scienceboard.model.xml.Channel;
+import com.nocorp.scienceboard.model.xml.Entry;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -19,6 +22,7 @@ import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 public class DomXmlParser implements XmlParser{
     private final String TAG = this.getClass().getSimpleName();
@@ -27,7 +31,6 @@ public class DomXmlParser implements XmlParser{
     private final String LINK_TAG = "link";
     private final String CHANNEL_TAG = "channel";
     private final String FEED_TAG = "feed";
-
     private final String ITEM_TAG = "item";
     private final String ENTRY_TAG = "entry";
     private final String PUBDATE_TAG = "pubDate";
@@ -37,10 +40,7 @@ public class DomXmlParser implements XmlParser{
     public Channel getChannelInfo(String inputStream) {
         Channel result = null;
         try {
-            DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder docBuilder = builderFactory.newDocumentBuilder();
-            InputStream targetStream = new ByteArrayInputStream(inputStream.getBytes());
-            Document doc = docBuilder.parse(targetStream);
+            Document doc = buildDocument(inputStream);
 
             List<String> knownChannelTags = new ArrayList<>();
             knownChannelTags.add(CHANNEL_TAG);
@@ -60,11 +60,120 @@ public class DomXmlParser implements XmlParser{
 
         } catch (Exception e) {
             e.printStackTrace();
-            Log.d(TAG, "parseChannel: ");
         }
 
         return result;
     }
+
+    private Channel buildChannel(Node channelNode) throws ParseException {
+        Channel channel = null;
+        String name = null;
+        String language = null;
+        String websiteUrl = null;
+        String rssUrl = null;
+        Date lastUpdate = null;
+        Date pubDate = null;
+        List<Entry> entries = null;
+
+        if(channelNode != null) {
+            name = getChannelName(channelNode);
+            language = getLanguage(channelNode);
+            websiteUrl = getWebsiteUrl(channelNode);
+            String stringDate = getLastUpdate(channelNode);
+            lastUpdate = convertStringToDate(stringDate);
+            String stringDate_2 = getPubDate(channelNode);
+            pubDate = convertStringToDate(stringDate_2);
+            entries = getEntries(channelNode);
+
+            channel = new Channel();
+            channel.setName(name);
+            channel.setLanguage(language);
+            channel.setWebsiteUrl(websiteUrl);
+            channel.setRssUrl(rssUrl);
+            channel.setLastUpdate(lastUpdate);
+            channel.setPubDate(pubDate);
+            channel.setEntries(entries);
+        }
+
+
+        return channel;
+    }
+
+
+    private List<Entry> getEntries(Node channelNode) {
+        List<Entry> results = null;
+
+        try {
+            List<String> knownEntryTags = new ArrayList<>();
+            knownEntryTags.add(ENTRY_TAG);
+            knownEntryTags.add(ITEM_TAG);
+
+            for(String candidateEntryTagName: knownEntryTags) {
+                Document document = channelNode.getOwnerDocument();
+                NodeList itemNodes = document.getElementsByTagName(candidateEntryTagName);
+                if(itemNodes!=null || itemNodes.getLength()>0) {
+                    Node entryNode = itemNodes.item(0);
+                    if(entryNode!=null && isElementNode(entryNode)){
+                        Entry entry = buildEntry(entryNode);
+                        if(entry!=null)
+                            results = buildEntry(candidates.item(0));
+                        Log.d(TAG, "getEntry: ");
+                        break;
+                    }
+                }
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return entries;
+    }
+
+    private Entry buildEntry(Node entryNode) {
+        Entry entry = null;
+        String title = null;
+        String webpageUrl = null;
+        Date pubDate = null;
+        String thumbnailUrl = null;
+
+        if(entryNode != null) {
+            title = getChannelName(entryNode);
+//            webpageUrl = getWebsiteUrl(entryNode);
+            String stringDate = getLastUpdate(entryNode);
+            pubDate = convertStringToDate(stringDate);
+
+            entry = new Entry();
+            entry.setTitle(title);
+            entry.setWebpageUrl(webpageUrl);
+            entry.setPubDate(pubDate);
+            entry.setThumbnailUrl(thumbnailUrl);
+        }
+
+
+        return entry;
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+    private Document buildDocument(String inputStream) throws ParserConfigurationException, IOException, SAXException {
+        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder = builderFactory.newDocumentBuilder();
+        InputStream targetStream = new ByteArrayInputStream(inputStream.getBytes());
+        return docBuilder.parse(targetStream);
+    }
+
+
 
     private boolean isElementNode(Node node) {
         return (node.getNodeType() == Node.ELEMENT_NODE);
@@ -79,37 +188,6 @@ public class DomXmlParser implements XmlParser{
     }
 
 
-    private Channel buildChannel(Node nodeChannel) throws ParseException {
-        Channel channel = null;
-        String name = null;
-        String language = null;
-        String websiteUrl = null;
-        String rssUrl = null;
-        Date lastUpdate = null;
-        Date pubDate = null;
-
-        if(nodeChannel != null) {
-            name = getChannelName(nodeChannel);
-            language = getLanguage(nodeChannel);
-            websiteUrl = getWebsiteUrl(nodeChannel);
-            String stringDate = getLastUpdate(nodeChannel);
-            lastUpdate = convertStringToDate(stringDate);
-            String stringDate_2 = getPubDate(nodeChannel);
-            pubDate = convertStringToDate(stringDate_2);
-
-            channel = new Channel();
-            channel.setName(name);
-            channel.setLanguage(language);
-            channel.setWebsiteUrl(websiteUrl);
-            channel.setRssUrl(rssUrl);
-            channel.setLastUpdate(lastUpdate);
-            channel.setPubDate(pubDate);
-
-        }
-
-
-        return channel;
-    }
 
     private Date convertStringToDate(String stringDate) {
         if(stringDate==null || stringDate.isEmpty()) return null;

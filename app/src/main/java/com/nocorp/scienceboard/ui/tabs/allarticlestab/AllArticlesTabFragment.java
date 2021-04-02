@@ -95,7 +95,7 @@ public class AllArticlesTabFragment extends Fragment implements FeedProvider.OnF
     @Override
     public void onFeedsDownloadCompleted(List<Source> sources) {
 //        viewModel.fetchArticles(sources);
-        Log.d(TAG, "SCIENCE_BOARD - onFeedsDownloadFailed: feeds fetched");
+        Log.d(TAG, "SCIENCE_BOARD - onFeedsDownloadCompleted: feeds fetched");
 
         // this (runOnUiThread) is unstable, can cause crashes, so better not use it
 //        requireActivity().runOnUiThread(() ->
