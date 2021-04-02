@@ -77,7 +77,7 @@ public class AllArticlesTabFragment extends Fragment implements FeedProvider.OnF
         });
 
         FeedProvider feedProvider = new FeedProvider(this);
-        feedProvider.downloadRssSources();
+        feedProvider.downloadRssSources_dom();
     }
 
 
@@ -94,7 +94,7 @@ public class AllArticlesTabFragment extends Fragment implements FeedProvider.OnF
 
     @Override
     public void onFeedsDownloadCompleted(List<Source> sources) {
-        viewModel.fetchArticles(sources);
+//        viewModel.fetchArticles(sources);
         Log.d(TAG, "SCIENCE_BOARD - onFeedsDownloadFailed: feeds fetched");
 
         // this (runOnUiThread) is unstable, can cause crashes, so better not use it

@@ -1,8 +1,10 @@
 package com.nocorp.scienceboard.repository;
 
 import com.nocorp.scienceboard.model.Article;
+import com.nocorp.scienceboard.model.Channel;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.system.ThreadManager;
+import com.nocorp.scienceboard.utility.DomXmlParser;
 import com.nocorp.scienceboard.utility.HttpUtilities;
 import com.nocorp.scienceboard.utility.MyOkHttpClient;
 import com.rometools.rome.feed.synd.SyndEntry;
@@ -15,7 +17,7 @@ import org.xml.sax.InputSource;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,17 +79,23 @@ public class FeedProvider {
         sourceUrls.add(esa_italy);
         sourceUrls.add(nytimes_space);
         sourceUrls.add(cern);
-//        sourceUrls.add(spacenews);
         sourceUrls.add(space);
-//        sourceUrls.add(phys_org_space);
+
         sourceUrls.add(newscientist_space);
         sourceUrls.add(esa_space_news);
-//        sourceUrls.add(wired);
-//        sourceUrls.add(nvidiaBlog);
+
         sourceUrls.add(hdblog);
         sourceUrls.add(theverge);
-//        sourceUrls.add(nature);
-//        sourceUrls.add(livescience);
+
+
+        // ----------------- slow
+        sourceUrls.add(spacenews);
+
+        sourceUrls.add(phys_org_space);
+        sourceUrls.add(wired);
+        sourceUrls.add(nvidiaBlog);
+        sourceUrls.add(nature);
+        sourceUrls.add(livescience);
 
     }
 
@@ -101,7 +109,7 @@ public class FeedProvider {
         Runnable task = () -> {
             try {
                 for(String url : sourceUrls) {
-                    Source source = downloadFeed(url);
+                    Source source = downloadSource(url);
                     if(source!=null) sources.add(source);
                 }
 
@@ -120,18 +128,87 @@ public class FeedProvider {
         return sources;
     }
 
-    private Source downloadFeed(String url) {
+    public List<Source> downloadRssSources_dom() {
+        sources = new ArrayList<>();
+        if(sourceUrls==null || sourceUrls.size()<=0) {
+            listener.onFeedsDownloadFailed("url list is empty/null");
+            return sources;
+        }
+
+        Runnable task = () -> {
+            try {
+                for(String url : sourceUrls) {
+                    Source source = downloadSource_dom(url);
+                    if(source!=null) sources.add(source);
+                }
+
+                //
+                listener.onFeedsDownloadCompleted(sources);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                listener.onFeedsDownloadFailed(e.getMessage());
+            }
+        };
+
+        ThreadManager threadManager = ThreadManager.getInstance();
+        threadManager.runTask(task);
+
+        return sources;
+    }
+
+    private Source downloadSource(String url) {
         Source source = null;
+
+        try {
+            String inputStream = getInputStreamFromUrl(url);
+            InputSource inputSource = new InputSource(inputStream);
+            SyndFeedInput input = new SyndFeedInput();
+            SyndFeed feed = input.build(inputSource);
+            if (feed!=null) {
+                source = buildSource(feed);
+            }
+
+        } catch (FeedException e) {
+            e.printStackTrace();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return source;
+    }
+
+
+    private Source downloadSource_dom(String url) {
+        Source source = null;
+
+        try {
+            String string = getInputStreamFromUrl(url);
+            DomXmlParser domXmlParser = new DomXmlParser();
+
+            Channel channelInfo = domXmlParser.getChannelInfo(string);
+            if (channelInfo!=null) {
+                channelInfo.setRssUrl(url);
+                source = buildSource_dom(channelInfo);
+            }
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return source;
+    }
+
+    private String getInputStreamFromUrl(String url) {
+        String result = null;
+        InputStream inputStream = null;
         Response response = null;
-        boolean result = false;
 
         try {
             String sanitizedUrl = HttpUtilities.sanitizeUrl(url);
-//            SyndFeed feed = new SyndFeedInput().build(new XmlReader(new URL(sanitizedUrl)));
-
-
-            // build httpurl and request for remote db
-            HttpUrl httpUrl = buildHttpURL(url);
+            HttpUrl httpUrl = buildHttpURL(sanitizedUrl);
             final OkHttpClient httpClient = MyOkHttpClient.getClient();
             Request request = buildRequest(httpUrl);
 
@@ -141,26 +218,17 @@ public class FeedProvider {
             // check response
             if (response.isSuccessful()) {
                 try (ResponseBody responseBody = response.body()) {
-                    InputStream is = responseBody.byteStream();
-                    InputSource inputSource = new InputSource(is);
-                    SyndFeedInput input = new SyndFeedInput();
-                    SyndFeed feed = input.build(inputSource);
-                    if (feed!=null) {
-                        source = buildSource(feed);
+                    if(responseBody!=null) {
+                        inputStream = responseBody.byteStream();
+                        result = inputStreamToString(inputStream);
                     }
+
+//                    InputSource inputSource = new InputSource(is);
                 }
             }
-            // if the response is unsuccesfull
-            else result = false;
 
-        } catch (FeedException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        catch (Exception e) {
+
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             if (response != null) {
@@ -168,7 +236,14 @@ public class FeedProvider {
             }
         }
 
-        return source;
+
+        return result;
+    }
+
+    public String inputStreamToString(InputStream inputStream) throws IOException {
+        String result = org.apache.commons.io.IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+
+        return result;
     }
 
     private Article preBuildArticle(SyndEntry entry) {
@@ -176,6 +251,27 @@ public class FeedProvider {
         article.setPublishDate(entry.getPublishedDate());
         article.setSyndEntry(entry);
         return article;
+    }
+
+    private Source buildSource_dom(Channel channel) {
+        Source source = null;
+
+        try {
+            source = new Source();
+            String name = channel.getName();
+            String websiteUrl = channel.getWebsiteUrl();
+//            List<SyndEntry> entries = channel.getEntries();
+//            List<Article> articles = preDownloadArticles(channel);
+
+            source.setName(name);
+            source.setWebsiteUrl(websiteUrl);
+//            source.setArticles(articles);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return source;
     }
 
     private Source buildSource(SyndFeed feed) {
