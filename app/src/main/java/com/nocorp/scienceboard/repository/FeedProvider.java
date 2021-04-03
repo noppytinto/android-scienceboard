@@ -82,20 +82,20 @@ public class FeedProvider {
         final String livescience = "https://www.livescience.com/feeds/all";
 
 
-        sourceUrls.add(esa_italy);
-        sourceUrls.add(nytimes_space);
-        sourceUrls.add(cern);
-        sourceUrls.add(space_com);
-        sourceUrls.add(newscientist_space);
-        sourceUrls.add(esa_space_news);
-        sourceUrls.add(hdblog);
+//        sourceUrls.add(esa_italy);
+//        sourceUrls.add(nytimes_space);
+//        sourceUrls.add(cern);
+//        sourceUrls.add(space_com);
+//        sourceUrls.add(newscientist_space);
+//        sourceUrls.add(esa_space_news);
+//        sourceUrls.add(hdblog);
         sourceUrls.add(theverge);
-        sourceUrls.add(nasa);
+//        sourceUrls.add(nasa);
 
 
 
 //        // ----------------- slow
-        sourceUrls.add(spacenews);
+//        sourceUrls.add(spacenews);
 //        sourceUrls.add(phys_org_space);
 //        sourceUrls.add(wired);
 //        sourceUrls.add(nvidiaBlog);

@@ -10,7 +10,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -327,7 +326,7 @@ public class DomXmlParser implements XmlParser{
     private Date convertStringToDate(String stringDate) {
         if(stringDate==null || stringDate.isEmpty()) return null;
 
-        stringDate = fixEDTtimezone(stringDate); // EDT timezone is not supported by java
+        stringDate = fixIncompatibleTimezones(stringDate); // EDT/EDS timezone are not supported by java
 
         List<SimpleDateFormat> knownPatterns = new ArrayList<>();
         knownPatterns.add(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'"));
@@ -359,11 +358,20 @@ public class DomXmlParser implements XmlParser{
         return null;
     }
 
-    private String fixEDTtimezone(String stringDate) {
+    /**
+     * EDT/EDS timezone are not supported by java
+     * @param stringDate
+     * @return
+     */
+    private String fixIncompatibleTimezones(String stringDate) {
         String result = stringDate;
-        if(stringDate!=null && stringDate.contains("EDT")) {
-            result = stringDate.replace("EDT", "-0400");
+        if(stringDate!=null) {
+            if(stringDate.contains("EDT"))
+                result = stringDate.replace("EDT", "-0400");
+            else if(stringDate.contains("EDS"))
+                result = stringDate.replace("EDS", "-0500");
         }
+
 
         return result;
     }
