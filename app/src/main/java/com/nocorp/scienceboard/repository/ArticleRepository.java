@@ -4,6 +4,7 @@ package com.nocorp.scienceboard.repository;
 import com.chimbori.crux.articles.ArticleExtractor;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
+import com.nocorp.scienceboard.model.xml.Entry;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.utility.MyOkHttpClient;
@@ -30,6 +31,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import okhttp3.HttpUrl;
@@ -78,6 +80,86 @@ public class ArticleRepository {
 
 
 
+    // DOM strategy
+    public void getArticles_dom(List<Source> sources, int limit) {
+        List<ListItem> limitedArticlesList = new ArrayList<>();
+        int counter = 0;
+
+        List<Entry> fullList = combineEntries(sources);
+
+        // sort articles by publication date
+        Collections.sort(fullList);
+
+        try {
+            if (fullList!=null && fullList.size()>=0) {
+                for(Entry entry : fullList) {
+                    if(counter == limit) break;
+                    Article article = buildArticle(entry);
+                    if(article!=null) {
+                        limitedArticlesList.add((Article)article);
+                    }
+                    counter++;
+                }
+            }
+
+            // publish result
+            articlesListener.onFetchCompleted(limitedArticlesList);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // DOM strategy
+    private List<Entry> combineEntries(List<Source> sources) {
+        List<Entry> result = new ArrayList<>();
+
+        for(Source source: sources) {
+            List<Entry> temp = source.getEntries();
+            if(temp!=null && temp.size()>0) {
+//                for(Entry entry: temp) entry.setSource(source);
+                result.addAll(temp);
+            }
+        }
+
+        return result;
+    }
+
+    // DOM strategy
+    private Article buildArticle(Entry entry) {
+        Article article = null;
+
+        try {
+            String title = entry.getTitle();
+            String webpageUrl = entry.getWebpageUrl();
+            String thumbnailUrl = entry.getThumbnailUrl();
+            Date pubDate = entry.getPubDate();
+            Source source = entry.getSource();
+
+            article = new Article();
+            article.setThumbnailUrl(thumbnailUrl);
+            article.setTitle(title);
+            article.setWebpageUrl(webpageUrl);
+            article.setPublishDate(pubDate);
+            article.setSource(source);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return article;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
     public void getArticles(List<Source> sources, int limit) {
         Runnable task = () -> {
@@ -111,21 +193,12 @@ public class ArticleRepository {
         threadManager.runTask(task);
     }
 
+    //TODO
     private List<Article> combineArticles(List<Source> sources) {
-        List<Article> articles = new ArrayList<>();
-
-        for(Source source: sources) {
-            List<Article> temp = source.getArticles();
-            if(temp!=null && temp.size()>0) {
-                for(Article article : temp) {
-                    article.setSource(source);
-                }
-                articles.addAll(temp);
-            }
-        }
-
-        return articles;
+        return null;
     }
+
+
 
 
     @NotNull
@@ -154,6 +227,8 @@ public class ArticleRepository {
 
         return article;
     }
+
+
 
     private Source buildSource(SyndFeed feed) {
         Source source = null;

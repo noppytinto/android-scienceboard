@@ -28,7 +28,7 @@ public class AllArticlesTabViewModel extends ViewModel implements ArticlesFetche
     }
 
     public void fetchArticles(List<Source> sources) {
-        articleRepository.getArticles(sources, 20);
+        articleRepository.getArticles_dom(sources, 20);
     }
 
     public void setArticlesList(List<ListItem> articlesList) {

@@ -1,14 +1,17 @@
 package com.nocorp.scienceboard.model.xml;
 
+import com.nocorp.scienceboard.model.Source;
+
 import java.util.Date;
 
-public class Entry {
+public class Entry implements Comparable<Entry> {
     private String webpageUrl;
     private String title;
     private String description;
     private String content;
     private String thumbnailUrl;
     private Date pubDate;
+    private Source source;
 
     public String getWebpageUrl() {
         return webpageUrl;
@@ -58,4 +61,21 @@ public class Entry {
         this.content = content;
     }
 
+    @Override
+    public int compareTo(Entry another) {
+        if(this.pubDate.getTime() > another.pubDate.getTime())
+            return -1;
+        else if(this.pubDate.getTime() < another.pubDate.getTime())
+            return 1;
+
+        return 0;
+    }
+
+    public Source getSource() {
+        return source;
+    }
+
+    public void setSource(Source source) {
+        this.source = source;
+    }
 }// end Entry

@@ -4,8 +4,11 @@ import android.util.Patterns;
 
 import org.apache.commons.validator.routines.UrlValidator;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,6 +39,13 @@ public class HttpUtilities {
         String domain = uri.getHost();
         return protocol + DOUBLE_DASHES + domain;
     }
+
+    private String inputStreamToString(InputStream inputStream) throws IOException {
+        String result = org.apache.commons.io.IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+
+        return result;
+    }
+
 
     /**
      * - The URL must start with either http or https and

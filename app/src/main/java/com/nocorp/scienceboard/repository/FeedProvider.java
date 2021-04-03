@@ -82,25 +82,25 @@ public class FeedProvider {
         final String livescience = "https://www.livescience.com/feeds/all";
 
 
-//        sourceUrls.add(esa_italy);
-//        sourceUrls.add(nytimes_space);
-//        sourceUrls.add(cern);
-//        sourceUrls.add(space_com);
-//        sourceUrls.add(newscientist_space);
-//        sourceUrls.add(esa_space_news);
-//        sourceUrls.add(hdblog);
+        sourceUrls.add(esa_italy);
+        sourceUrls.add(nytimes_space);
+        sourceUrls.add(cern);
+        sourceUrls.add(space_com);
+//        sourceUrls.add(newscientist_space); // no thumbnails
+        sourceUrls.add(esa_space_news);
+        sourceUrls.add(hdblog);
         sourceUrls.add(theverge);
-//        sourceUrls.add(nasa);
+//        sourceUrls.add(nasa); // not https
 
 
 
 //        // ----------------- slow
-//        sourceUrls.add(spacenews);
+        sourceUrls.add(spacenews);
 //        sourceUrls.add(phys_org_space);
 //        sourceUrls.add(wired);
-//        sourceUrls.add(nvidiaBlog);
-//        sourceUrls.add(nature);
-//        sourceUrls.add(livescience);
+//        sourceUrls.add(nvidiaBlog); // not https
+//        sourceUrls.add(nature); // no thumbnails, images not https
+        sourceUrls.add(livescience);
 
     }
 
@@ -191,7 +191,6 @@ public class FeedProvider {
         try {
 //            String string = getInputStreamFromUrl(url);
             DomXmlParser domXmlParser = new DomXmlParser();
-
             Channel channel = domXmlParser.getChannel(url);
             if (channel!=null) {
                 channel.setRssUrl(url);
@@ -273,6 +272,11 @@ public class FeedProvider {
             source.setWebsiteUrl(websiteUrl);
             source.setLastUpdate(lastUpdate);
             source.setEntries(entries);
+
+            if(entries!=null && entries.size()>0) {
+                for(Entry entry: entries)
+                    entry.setSource(source);
+            }
 //            source.setArticles(articles);
 
         } catch (Exception e) {

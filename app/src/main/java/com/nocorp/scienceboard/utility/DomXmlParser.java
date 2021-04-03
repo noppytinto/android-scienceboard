@@ -4,19 +4,24 @@ import android.util.Log;
 
 import com.nocorp.scienceboard.model.xml.Channel;
 import com.nocorp.scienceboard.model.xml.Entry;
+import com.rometools.rome.feed.synd.SyndEntry;
 
+import org.jsoup.Jsoup;
+import org.jsoup.select.Elements;
 import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -38,44 +43,55 @@ public class DomXmlParser implements XmlParser{
     private final String CONTENT_ENCODED_TAG = "content:encoded";
     private final String LANGUAGE_TAG = "language";
     private final String LINK_TAG = "link";
+    private final String ID_TAG = "id";
     private final String CHANNEL_TAG = "channel";
     private final String FEED_TAG = "feed";
     private final String ITEM_TAG = "item";
     private final String ENTRY_TAG = "entry";
     private final String PUBDATE_TAG = "pubDate";
+    private final String PUBLISHED_TAG = "published";
+    private final String DC_DATE_TAG = "dc:date";
+
     private final String LAST_BUILD_DATE_TAG = "lastBuildDate";
     private final String UPDATE_TAG = "update";
     private final String MEDIA_CONTENT_TAG = "media:content";
     private final String CONTENT_MEDIUM_TAG = "content:medium";
+    private final String MEDIA_THUMBNAIL_TAG = "media:thumbnail";
     private final String IMAGE_TAG = "image";
     private final String IMG_TAG = "img";
     private final String THUMB_TAG = "thumb";
     private final String THUMBNAIL_TAG = "thumbnail";
     private final String TMB_TAG = "tmb";
+    private final String ENCLOSURE_TAG = "enclosure";
 
     //
     private final String HREF_ATTRIBUTE = "href";
     private final String URL_ATTRIBUTE = "url";
     private final String IMAGE_TYPE = "image";
+    private final String SRC_ATTRIBUTE = "src";
+    private final String IMG_ATTRIBUTE = "img";
 
     private final int ENTRY_LIMIT = 10;
 
 
 
+    //-------------------------------------------------------------- CONSTRUCTORS
 
 
 
 
+    //-------------------------------------------------------------- GETTERS/SETTERS
 
+    @Override
     public Channel getChannel(String rssUrl) {
         Channel result = null;
         InputStream inputStream = null;
         Response response = null;
 
         try {
+            final OkHttpClient httpClient = MyOkHttpClient.getClient();
             String sanitizedUrl = HttpUtilities.sanitizeUrl(rssUrl);
             HttpUrl httpUrl = buildHttpURL(sanitizedUrl);
-            final OkHttpClient httpClient = MyOkHttpClient.getClient();
             Request request = buildRequest(httpUrl);
 
             // performing request
@@ -118,6 +134,10 @@ public class DomXmlParser implements XmlParser{
 
 
 
+
+
+    //--------------------------------------------------------------
+
     private boolean checkChannelLastUpdate(Node nodeChannel) {
         Date newDate = null;
         Date oldDate = null;
@@ -128,8 +148,6 @@ public class DomXmlParser implements XmlParser{
 
         return false;
     }
-
-
 
     private Channel buildChannel(Node channelNode, String url) throws ParseException {
         Channel channel = null;
@@ -226,7 +244,7 @@ public class DomXmlParser implements XmlParser{
             webpageUrl = getWebUrl(entryNode);
             String stringDate = getPubDate(entryNode);
             pubDate = convertStringToDate(stringDate);
-            thumbnailUrl = getThumbnailUrl(entryNode);
+            thumbnailUrl = getThumbnailUrl(entryNode, content, description);
 
             entry = new Entry();
             entry.setTitle(title);
@@ -240,24 +258,26 @@ public class DomXmlParser implements XmlParser{
         return entry;
     }
 
-    private String getThumbnailUrl(Node entryNode) {
+    private String getThumbnailUrl(Node entryNode, String content, String description) {
         String result = null;
         if(entryNode==null) return result;
         NodeList childNodes = entryNode.getChildNodes();
         if(childNodes==null || childNodes.getLength()<=0) return result;
 
         // classic tag strategy
-        result = getNodeValue(childNodes, THUMB_TAG, THUMBNAIL_TAG, IMAGE_TAG, IMG_TAG);
-
-        // crawling html strategy
-        if(result==null || result.isEmpty()) {
-
-        }
+        result = getNodeValue(childNodes, THUMB_TAG, THUMBNAIL_TAG, IMAGE_TAG, IMG_TAG, CONTENT_MEDIUM_TAG);
 
         // attribute strategy
         if(result==null || result.isEmpty()) {
-
+            result = getAttributeValue(childNodes, THUMB_TAG, THUMBNAIL_TAG, IMAGE_TAG, IMG_TAG, MEDIA_CONTENT_TAG, CONTENT_MEDIUM_TAG, ENCLOSURE_TAG, MEDIA_THUMBNAIL_TAG);
         }
+
+        // crawling html strategy from content/description
+        if(result==null || result.isEmpty()) {
+            result = extractFirstImageFromHtml(content, description);
+        }
+
+
 
         return result;
     }
@@ -278,9 +298,6 @@ public class DomXmlParser implements XmlParser{
         return getNodeValue(childNodes, CONTENT_TAG, CONTENT_ENCODED_TAG);
     }
 
-
-
-
     private String getEntryTitle(Node entryNode) {
         String result = null;
         if(entryNode==null) return result;
@@ -289,20 +306,11 @@ public class DomXmlParser implements XmlParser{
         return getNodeValue(childNodes, TITLE_TAG);
     }
 
-
-
-
-
-
-
-
     private Document buildDocument(InputStream inputStream) throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder docBuilder = builderFactory.newDocumentBuilder();
         return docBuilder.parse(inputStream);
     }
-
-
 
     private boolean isElementNode(Node node) {
         return (node.getNodeType() == Node.ELEMENT_NODE);
@@ -316,12 +324,9 @@ public class DomXmlParser implements XmlParser{
         return (node.getNodeType() == Node.CDATA_SECTION_NODE);
     }
 
-
     private boolean isAttributeNode(Node node) {
         return (node.getNodeType() == Node.ATTRIBUTE_NODE);
     }
-
-
 
     private Date convertStringToDate(String stringDate) {
         if(stringDate==null || stringDate.isEmpty()) return null;
@@ -334,6 +339,8 @@ public class DomXmlParser implements XmlParser{
         knownPatterns.add(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"));
         knownPatterns.add(new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss"));
         knownPatterns.add(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX"));
+        knownPatterns.add(new SimpleDateFormat("EEE dd MMM yyyy HH:mm Z"));
+        knownPatterns.add(new SimpleDateFormat("EEE, dd MMM yyyy HH:mm Z"));
         knownPatterns.add(new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z"));
         knownPatterns.add(new SimpleDateFormat("EEE dd MMM yyyy HH:mm:ss Z"));
         knownPatterns.add(new SimpleDateFormat("EEEE, dd MMM yyyy HH:mm:ss Z"));
@@ -354,7 +361,7 @@ public class DomXmlParser implements XmlParser{
                 // Loop on
             }
         }
-        Log.d(TAG, "convertStringToDate: No known Date format found for: " + stringDate);
+        Log.d(TAG, "SCIENCE_BOARD - convertStringToDate: No known Date format found for: " + stringDate);
         return null;
     }
 
@@ -375,7 +382,6 @@ public class DomXmlParser implements XmlParser{
 
         return result;
     }
-
 
     private String getChannelName(Node nodeChannel) {
         String result = null;
@@ -398,7 +404,16 @@ public class DomXmlParser implements XmlParser{
         if(node==null) return result;
         NodeList childNodes = node.getChildNodes();
         if(childNodes==null || childNodes.getLength()<=0) return result;
-        return getNodeValue(childNodes, LINK_TAG);
+
+//        // classic tag strategy
+//        result = getNodeValue(childNodes, LINK_TAG, ID_TAG);
+//
+//        // attribute strategy
+//        if(result==null || result.isEmpty()) {
+//            result = getAttributeValue(childNodes, LINK_TAG);
+//        }
+//
+        return getNodeValue(childNodes, LINK_TAG, ID_TAG);
     }
 
     private String getLastUpdate(Node channelNode) {
@@ -414,19 +429,17 @@ public class DomXmlParser implements XmlParser{
         if(node==null) return result;
         NodeList childNodes = node.getChildNodes();
         if(childNodes==null || childNodes.getLength()<=0) return result;
-        return getNodeValue(childNodes, PUBDATE_TAG);
+        return getNodeValue(childNodes, PUBDATE_TAG, PUBLISHED_TAG, DC_DATE_TAG);
     }
 
-
-
-    private String getNodeValue(NodeList nodeList, String... nodeName) {
+    private String getNodeValue(NodeList nodeList, String... nodeNames) {
         String result = null;
-        if(nodeName==null || nodeName.length <= 0) return result;
+        if(nodeNames==null || nodeNames.length <= 0) return result;
         if(nodeList==null || nodeList.getLength()<=0) return result;
 
         for(int i=0; i<nodeList.getLength(); i++) {
             Node currentNode = nodeList.item(i);
-            if(nodeContainsTheseTags(currentNode, nodeName)){
+            if(nodeContainsTheseTags(currentNode, nodeNames)){
                 if(currentNode.hasChildNodes() && isTextNode(currentNode.getFirstChild())) {
                     result = currentNode.getFirstChild().getNodeValue();
                     return result;
@@ -449,8 +462,25 @@ public class DomXmlParser implements XmlParser{
         for(int i=0; i<nodeList.getLength(); i++) {
             Node currentNode = nodeList.item(i);
             if(nodeContainsTheseTags(currentNode, nodeName)){
-                if(currentNode.hasChildNodes() && isAttributeNode(currentNode.getFirstChild())) {
-                    result = currentNode.getFirstChild().getNodeValue();
+                if(currentNode.hasAttributes()) {
+                    NamedNodeMap attributes = currentNode.getAttributes();
+                    Node urlAttribute = attributes.getNamedItem("url");
+                    Node typeAttribute = attributes.getNamedItem("type");
+
+                    if(urlAttribute!=null) {
+                        if(nodeName.equals(ENCLOSURE_TAG) &&
+                                (typeAttribute!=null && typeAttribute.getNodeValue().contains(IMG_ATTRIBUTE))) {
+                            result = attributes.getNamedItem("url").getNodeValue();
+                        }
+                        else {
+                            result = attributes.getNamedItem("url").getNodeValue();
+                        }
+                    }
+
+                    return result;
+                }
+                else if(currentNode.hasChildNodes() && isCdataNode(currentNode.getFirstChild())) {
+                    result = currentNode.getFirstChild().getTextContent();
                     return result;
                 }
             }
@@ -495,6 +525,78 @@ public class DomXmlParser implements XmlParser{
         return result;
     }
 
+
+
+    private List<String> extractImagesUrlFromHtml(String content, String description) {
+        List<String> imagesUrl = new ArrayList<>();
+
+        // checking images in description
+        if(description != null) {
+            org.jsoup.nodes.Document doc = Jsoup.parse(description);
+            Elements urls = doc.select(IMG_ATTRIBUTE);
+
+            for(org.jsoup.nodes.Element el: urls) {
+                String url = el.attr(SRC_ATTRIBUTE);
+                if(url!=null || url.isEmpty())
+                    imagesUrl.addAll(Collections.singleton(url));
+            }
+        }
+
+        // checking images in content
+        if(content != null) {
+            org.jsoup.nodes.Document doc = Jsoup.parse(content);
+            Elements urls = doc.select(IMG_ATTRIBUTE);
+
+            for(org.jsoup.nodes.Element el: urls) {
+                String url = el.attr(SRC_ATTRIBUTE);
+                if(url!=null || url.isEmpty())
+                    imagesUrl.addAll(Collections.singleton(url));
+            }
+        }
+
+        return imagesUrl;
+    }
+
+    private String extractFirstImageFromHtml(String content, String description) {
+        String imageUrl = null;
+
+        List<String> images = extractImagesUrlFromHtml(content, description);
+        if(images!=null && images.size()>0)
+            imageUrl = images.get(0);
+
+        imageUrl = fixMissingProtocol(imageUrl);
+
+//        if( ! isReachable(imageUrl)) {
+//            imageUrl = extractFirstImageFromWebsite(entry.getLink());
+//        }
+
+        return imageUrl;
+    }
+
+    private String fixMissingProtocol(String imageUrl) {
+        if(imageUrl==null) return null;
+        try {
+            URI uri = new URI(imageUrl);
+            String protocol = uri.getScheme();
+
+            if(protocol==null) {
+                String host = uri.getHost();
+                String sub = uri.getPath();
+                String query = uri.getQuery();
+                imageUrl = "https://" + host + sub + "?" + query;
+            }
+
+//            System.out.println(imageUrl);
+
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return imageUrl;
+    }
+
+
+
+
     private static HttpUrl buildHttpURL(String url) {
         HttpUrl httpUrl = HttpUrl.get(url);
 
@@ -516,12 +618,6 @@ public class DomXmlParser implements XmlParser{
         }
 
         return request;
-    }
-
-    private String inputStreamToString(InputStream inputStream) throws IOException {
-        String result = org.apache.commons.io.IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-
-        return result;
     }
 
 
