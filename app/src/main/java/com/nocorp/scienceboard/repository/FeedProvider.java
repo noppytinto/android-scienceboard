@@ -1,33 +1,14 @@
 package com.nocorp.scienceboard.repository;
 
-import com.nocorp.scienceboard.model.Article;
-import com.nocorp.scienceboard.model.xml.Channel;
+import com.nocorp.scienceboard.utility.rss.model.Channel;
 import com.nocorp.scienceboard.model.Source;
-import com.nocorp.scienceboard.model.xml.Entry;
+import com.nocorp.scienceboard.utility.rss.model.Entry;
 import com.nocorp.scienceboard.system.ThreadManager;
-import com.nocorp.scienceboard.utility.DomXmlParser;
-import com.nocorp.scienceboard.utility.HttpUtilities;
-import com.nocorp.scienceboard.utility.MyOkHttpClient;
-import com.rometools.rome.feed.synd.SyndEntry;
-import com.rometools.rome.feed.synd.SyndFeed;
-import com.rometools.rome.feed.synd.SyndImage;
-import com.rometools.rome.io.FeedException;
-import com.rometools.rome.io.SyndFeedInput;
+import com.nocorp.scienceboard.utility.rss.DomXmlParser;
 
-import org.xml.sax.InputSource;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
 
 public class FeedProvider {
     private List<Source> sources;

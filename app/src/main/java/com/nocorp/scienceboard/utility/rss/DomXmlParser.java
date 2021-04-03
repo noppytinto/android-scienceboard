@@ -1,9 +1,11 @@
-package com.nocorp.scienceboard.utility;
+package com.nocorp.scienceboard.utility.rss;
 
 import android.util.Log;
 
-import com.nocorp.scienceboard.model.xml.Channel;
-import com.nocorp.scienceboard.model.xml.Entry;
+import com.nocorp.scienceboard.utility.rss.model.Channel;
+import com.nocorp.scienceboard.utility.rss.model.Entry;
+import com.nocorp.scienceboard.utility.HttpUtilities;
+import com.nocorp.scienceboard.utility.MyOkHttpClient;
 
 import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;

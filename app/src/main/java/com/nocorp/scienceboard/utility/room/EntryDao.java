@@ -1,14 +1,16 @@
-package com.nocorp.scienceboard.dao.room;
+package com.nocorp.scienceboard.utility.room;
 
+import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
-import com.nocorp.scienceboard.model.xml.Entry;
+import com.nocorp.scienceboard.utility.rss.model.Entry;
 
 import java.util.List;
 
+@Dao
 public interface EntryDao {
     @Query("SELECT * FROM entry")
     List<Entry> selectAll();

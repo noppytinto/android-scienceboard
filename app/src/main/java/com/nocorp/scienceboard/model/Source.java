@@ -1,7 +1,6 @@
 package com.nocorp.scienceboard.model;
 
-import com.nocorp.scienceboard.model.xml.Entry;
-import com.rometools.rome.feed.synd.SyndEntry;
+import com.nocorp.scienceboard.utility.rss.model.Entry;
 
 import java.io.Serializable;
 import java.util.Date;

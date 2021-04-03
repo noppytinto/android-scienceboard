@@ -1,47 +1,16 @@
 package com.nocorp.scienceboard.repository;
 
 
-import com.chimbori.crux.articles.ArticleExtractor;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
-import com.nocorp.scienceboard.model.xml.Channel;
-import com.nocorp.scienceboard.model.xml.Entry;
-import com.nocorp.scienceboard.system.ThreadManager;
+import com.nocorp.scienceboard.utility.rss.model.Channel;
+import com.nocorp.scienceboard.utility.rss.model.Entry;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
-import com.nocorp.scienceboard.utility.MyOkHttpClient;
-import com.rometools.rome.feed.synd.SyndContent;
-import com.rometools.rome.feed.synd.SyndEnclosure;
-import com.rometools.rome.feed.synd.SyndEntry;
-import com.rometools.rome.feed.synd.SyndFeed;
-import com.rometools.rome.feed.synd.SyndImage;
 
-import org.jdom2.Element;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
-
-import java.io.IOException;
-import java.net.ConnectException;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import retrofit2.Call;
-import retrofit2.Retrofit;
-import retrofit2.http.GET;
 
 public class ArticleRepository {
     private static ArticleRepository singletonInstance;

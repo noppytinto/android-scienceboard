@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.nocorp.scienceboard.utility.AdProvider;
+import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

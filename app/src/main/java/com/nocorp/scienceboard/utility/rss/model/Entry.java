@@ -1,11 +1,10 @@
-package com.nocorp.scienceboard.model.xml;
+package com.nocorp.scienceboard.utility.rss.model;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
-
-import com.nocorp.scienceboard.model.Source;
 
 import java.util.Date;
 
@@ -13,6 +12,7 @@ import java.util.Date;
 public class Entry implements Comparable<Entry> {
     @PrimaryKey
     @ColumnInfo(name = "webpage_url")
+    @NonNull
     private String webpageUrl;
     private String title;
     private String description;

@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.utility;
+package com.nocorp.scienceboard.utility.ad.admob;
 
 import android.content.Context;
 import android.util.Log;
@@ -12,7 +12,7 @@ import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.google.android.gms.ads.nativead.NativeAdOptions;
-import com.nocorp.scienceboard.model.ListAd;
+import com.nocorp.scienceboard.utility.ad.admob.model.ListAd;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 
 import java.util.ArrayList;

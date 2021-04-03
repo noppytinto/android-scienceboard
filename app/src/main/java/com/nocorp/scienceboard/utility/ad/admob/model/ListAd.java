@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.model;
+package com.nocorp.scienceboard.utility.ad.admob.model;
 
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;

@@ -1,5 +1,6 @@
-package com.nocorp.scienceboard.model.xml;
+package com.nocorp.scienceboard.utility.rss.model;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
@@ -11,6 +12,7 @@ import java.util.List;
 @Entity
 public class Channel {
     @PrimaryKey
+    @NonNull
     private String name;
     @ColumnInfo(name = "website_url")
     private String websiteUrl;
@@ -93,4 +95,6 @@ public class Channel {
     public void setEntries(List<Entry> entries) {
         this.entries = entries;
     }
+
+
 }

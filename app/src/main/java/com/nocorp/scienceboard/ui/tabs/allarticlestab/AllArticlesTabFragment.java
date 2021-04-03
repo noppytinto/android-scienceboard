@@ -25,7 +25,7 @@ import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterFeedsList;
 import com.nocorp.scienceboard.repository.FeedProvider;
-import com.nocorp.scienceboard.utility.AdProvider;
+import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
 import java.util.ArrayList;
 import java.util.List;

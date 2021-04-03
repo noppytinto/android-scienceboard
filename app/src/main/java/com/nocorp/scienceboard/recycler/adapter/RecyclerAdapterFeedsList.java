@@ -20,7 +20,7 @@ import com.bumptech.glide.request.target.Target;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.model.Article;
-import com.nocorp.scienceboard.model.ListAd;
+import com.nocorp.scienceboard.utility.ad.admob.model.ListAd;
 import com.nocorp.scienceboard.ui.viewholder.ArticleViewHolder;
 import com.nocorp.scienceboard.ui.viewholder.ListAdViewHolder;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;

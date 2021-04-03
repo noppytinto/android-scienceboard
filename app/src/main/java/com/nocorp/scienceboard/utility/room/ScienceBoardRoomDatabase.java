@@ -1,17 +1,18 @@
-package com.nocorp.scienceboard.dao.room;
+package com.nocorp.scienceboard.utility.room;
 
 
 import android.content.Context;
 
-import androidx.room.Dao;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.room.TypeConverters;
 
-import com.nocorp.scienceboard.model.xml.Channel;
-import com.nocorp.scienceboard.model.xml.Entry;
+import com.nocorp.scienceboard.utility.rss.model.Channel;
+import com.nocorp.scienceboard.utility.rss.model.Entry;
 
 @Database(entities = {Channel.class, Entry.class}, version = 1, exportSchema = false)
+@TypeConverters(DateConverter.class)
 public abstract class ScienceBoardRoomDatabase extends RoomDatabase {
     private static volatile ScienceBoardRoomDatabase singletonInstance;
     private static final String DB_NAME = "scienceboard-room-db";

@@ -19,7 +19,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.nocorp.scienceboard.R;
-import com.nocorp.scienceboard.utility.AdProvider;
+import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 import com.nocorp.scienceboard.viewpager.HomeViewPagerAdapter;
 
 

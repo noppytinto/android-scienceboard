@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.utility;
+package com.nocorp.scienceboard.utility.rss;
 
 import android.util.Xml;
 
