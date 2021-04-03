@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.nocorp.scienceboard.model.xml.Channel;
 import com.nocorp.scienceboard.model.xml.Entry;
-import com.rometools.rome.feed.synd.SyndEntry;
 
 import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
@@ -51,7 +50,6 @@ public class DomXmlParser implements XmlParser{
     private final String PUBDATE_TAG = "pubDate";
     private final String PUBLISHED_TAG = "published";
     private final String DC_DATE_TAG = "dc:date";
-
     private final String LAST_BUILD_DATE_TAG = "lastBuildDate";
     private final String UPDATE_TAG = "update";
     private final String MEDIA_CONTENT_TAG = "media:content";
@@ -71,7 +69,7 @@ public class DomXmlParser implements XmlParser{
     private final String SRC_ATTRIBUTE = "src";
     private final String IMG_ATTRIBUTE = "img";
 
-    private final int ENTRY_LIMIT = 10;
+    private final int ENTRIES_LIMIT = 10;
 
 
 
@@ -168,7 +166,6 @@ public class DomXmlParser implements XmlParser{
             lastUpdate = convertStringToDate(stringDate);
 //            String stringDate_2 = getPubDate(channelNode);
 //            pubDate = convertStringToDate(stringDate_2);
-            entries = getEntries(channelNode, ENTRY_LIMIT);
 
             channel = new Channel();
             channel.setName(name);
@@ -182,17 +179,31 @@ public class DomXmlParser implements XmlParser{
             }
             channel.setWebsiteUrl(websiteUrl);
             channel.setRssUrl(rssUrl);
+
+
+            entries = getEntries(channelNode, ENTRIES_LIMIT);
             if(lastUpdate==null) {
                 if(entries!=null && entries.size()>0)
                     lastUpdate = entries.get(0).getPubDate();
             }
             channel.setLastUpdate(lastUpdate);
 //            channel.setPubDate(pubDate);
+            entries = setChannel(entries, channel);
             channel.setEntries(entries);
         }
 
 
         return channel;
+    }
+
+    private List<Entry> setChannel(List<Entry> entries, Channel channel) {
+        if(entries!=null && entries.size()>0){
+            for(Entry entry: entries){
+                entry.setChannel(channel);
+            }
+        }
+
+        return entries;
     }
 
     private List<Entry> getEntries(Node channelNode, int limit) {

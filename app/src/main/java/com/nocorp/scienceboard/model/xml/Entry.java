@@ -1,17 +1,29 @@
 package com.nocorp.scienceboard.model.xml;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
 import com.nocorp.scienceboard.model.Source;
 
 import java.util.Date;
 
+@Entity
 public class Entry implements Comparable<Entry> {
+    @PrimaryKey
+    @ColumnInfo(name = "webpage_url")
     private String webpageUrl;
+    @ColumnInfo(name = "title")
     private String title;
+    @ColumnInfo(name = "description")
     private String description;
+    @ColumnInfo(name = "content")
     private String content;
+    @ColumnInfo(name = "thumbnail_url")
     private String thumbnailUrl;
+    @ColumnInfo(name = "pub_date")
     private Date pubDate;
-    private Source source;
+    private Channel channel;
 
     public String getWebpageUrl() {
         return webpageUrl;
@@ -71,11 +83,11 @@ public class Entry implements Comparable<Entry> {
         return 0;
     }
 
-    public Source getSource() {
-        return source;
+    public Channel getChannel() {
+        return channel;
     }
 
-    public void setSource(Source source) {
-        this.source = source;
+    public void setChannel(Channel channel) {
+        this.channel = channel;
     }
 }// end Entry

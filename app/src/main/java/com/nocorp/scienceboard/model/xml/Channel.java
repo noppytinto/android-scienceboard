@@ -1,15 +1,27 @@
 package com.nocorp.scienceboard.model.xml;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
 import java.util.Date;
 import java.util.List;
 
+@Entity
 public class Channel {
+    @PrimaryKey
     private String name;
+    @ColumnInfo(name = "website_url")
     private String websiteUrl;
+    @ColumnInfo(name = "rss_url")
     private String rssUrl;
+    @ColumnInfo(name = "logo_url")
     private String logoUrl;
+    @ColumnInfo(name = "language")
     private String language;
+    @ColumnInfo(name = "last_update")
     private Date lastUpdate;
+    @ColumnInfo(name = "pub_date")
     private Date pubDate;
     private List<Entry> entries;
 
