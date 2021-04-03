@@ -2,6 +2,7 @@ package com.nocorp.scienceboard.model.xml;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import java.util.Date;
@@ -17,12 +18,12 @@ public class Channel {
     private String rssUrl;
     @ColumnInfo(name = "logo_url")
     private String logoUrl;
-    @ColumnInfo(name = "language")
     private String language;
     @ColumnInfo(name = "last_update")
     private Date lastUpdate;
     @ColumnInfo(name = "pub_date")
     private Date pubDate;
+    @Ignore
     private List<Entry> entries;
 
     public String getName() {

@@ -2,6 +2,7 @@ package com.nocorp.scienceboard.model.xml;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import com.nocorp.scienceboard.model.Source;
@@ -13,16 +14,14 @@ public class Entry implements Comparable<Entry> {
     @PrimaryKey
     @ColumnInfo(name = "webpage_url")
     private String webpageUrl;
-    @ColumnInfo(name = "title")
     private String title;
-    @ColumnInfo(name = "description")
     private String description;
-    @ColumnInfo(name = "content")
     private String content;
     @ColumnInfo(name = "thumbnail_url")
     private String thumbnailUrl;
     @ColumnInfo(name = "pub_date")
     private Date pubDate;
+    @Ignore
     private Channel channel;
 
     public String getWebpageUrl() {
