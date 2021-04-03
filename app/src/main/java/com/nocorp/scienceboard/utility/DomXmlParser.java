@@ -1,12 +1,9 @@
 package com.nocorp.scienceboard.utility;
 
-import android.util.Log;
-
 import com.nocorp.scienceboard.model.xml.Channel;
 import com.nocorp.scienceboard.model.xml.Entry;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -27,6 +24,8 @@ import javax.xml.parsers.ParserConfigurationException;
 public class DomXmlParser implements XmlParser{
     private final String TAG = this.getClass().getSimpleName();
     private final String TITLE_TAG = "title";
+    private final String DESCRIPTION_TAG = "description";
+    private final String CONTENT_TAG = "content";
     private final String LANGUAGE_TAG = "language";
     private final String LINK_TAG = "link";
     private final String CHANNEL_TAG = "channel";
@@ -36,6 +35,12 @@ public class DomXmlParser implements XmlParser{
     private final String PUBDATE_TAG = "pubDate";
     private final String LAST_BUILD_DATE_TAG = "lastBuildDate";
     private final String UPDATE_TAG = "update";
+    private final String MEDIA_CONTENT_TAG = "media:content";
+    private final String IMAGE_TAG = "image";
+    private final String IMG_TAG = "img";
+    private final String THUMB_TAG = "thumb";
+    private final String THUMBNAIL_TAG = "thumbnail";
+    private final int ENTRY_LIMIT = 20;
 
     public Channel getChannelInfo(String inputStream) {
         Channel result = null;
@@ -78,12 +83,12 @@ public class DomXmlParser implements XmlParser{
         if(channelNode != null) {
             name = getChannelName(channelNode);
             language = getLanguage(channelNode);
-            websiteUrl = getWebsiteUrl(channelNode);
+            websiteUrl = getWebUrl(channelNode);
             String stringDate = getLastUpdate(channelNode);
             lastUpdate = convertStringToDate(stringDate);
             String stringDate_2 = getPubDate(channelNode);
             pubDate = convertStringToDate(stringDate_2);
-            entries = getEntries(channelNode);
+            entries = getEntries(channelNode, ENTRY_LIMIT);
 
             channel = new Channel();
             channel.setName(name);
@@ -99,26 +104,26 @@ public class DomXmlParser implements XmlParser{
         return channel;
     }
 
-
-    private List<Entry> getEntries(Node channelNode) {
+    private List<Entry> getEntries(Node channelNode, int limit) {
         List<Entry> results = null;
 
         try {
+            results = new ArrayList<>();
+            Document document = channelNode.getOwnerDocument();
             List<String> knownEntryTags = new ArrayList<>();
             knownEntryTags.add(ENTRY_TAG);
             knownEntryTags.add(ITEM_TAG);
 
-            for(String candidateEntryTagName: knownEntryTags) {
-                Document document = channelNode.getOwnerDocument();
-                NodeList itemNodes = document.getElementsByTagName(candidateEntryTagName);
-                if(itemNodes!=null || itemNodes.getLength()>0) {
-                    Node entryNode = itemNodes.item(0);
-                    if(entryNode!=null && isElementNode(entryNode)){
-                        Entry entry = buildEntry(entryNode);
-                        if(entry!=null)
-                            results = buildEntry(candidates.item(0));
-                        Log.d(TAG, "getEntry: ");
-                        break;
+            for(String candidateEntryTag: knownEntryTags) {
+                NodeList entryNodes = document.getElementsByTagName(candidateEntryTag);
+                if(entryNodes!=null) {
+                    for(int i=0; i<entryNodes.getLength(); i++) {
+                        Node entryNode = entryNodes.item(i);
+                        if(entryNode!=null && isElementNode(entryNode)){
+                            if(i>=limit) break;
+                            Entry entry = buildEntry(entryNode);
+                            if(entry!=null) results.add(entry);
+                        }
                     }
                 }
             }
@@ -128,36 +133,74 @@ public class DomXmlParser implements XmlParser{
             e.printStackTrace();
         }
 
-        return entries;
+        return results;
     }
 
     private Entry buildEntry(Node entryNode) {
         Entry entry = null;
         String title = null;
+        String description = null;
+        String content = null;
+
         String webpageUrl = null;
         Date pubDate = null;
         String thumbnailUrl = null;
 
         if(entryNode != null) {
-            title = getChannelName(entryNode);
-//            webpageUrl = getWebsiteUrl(entryNode);
-            String stringDate = getLastUpdate(entryNode);
+            title = getEntryTitle(entryNode);
+            description = getDescription(entryNode);
+            content = getContent(entryNode);
+            webpageUrl = getWebUrl(entryNode);
+            String stringDate = getPubDate(entryNode);
             pubDate = convertStringToDate(stringDate);
+            thumbnailUrl = getThumbnailUrl(entryNode);
 
             entry = new Entry();
             entry.setTitle(title);
+            entry.setDescription(description);
+            entry.setContent(content);
             entry.setWebpageUrl(webpageUrl);
             entry.setPubDate(pubDate);
             entry.setThumbnailUrl(thumbnailUrl);
         }
 
-
         return entry;
+    }
 
+    private String getThumbnailUrl(Node entryNode) {
+        String result = null;
+        if(entryNode==null) return result;
+        NodeList childNodes = entryNode.getChildNodes();
+        if(childNodes==null || childNodes.getLength()<=0) return result;
+        return getNodeValue(childNodes, DESCRIPTION_TAG);
+    }
 
+    private String getDescription(Node entryNode) {
+        String result = null;
+        if(entryNode==null) return result;
+        NodeList childNodes = entryNode.getChildNodes();
+        if(childNodes==null || childNodes.getLength()<=0) return result;
+        return getNodeValue(childNodes, DESCRIPTION_TAG);
+    }
+
+    private String getContent(Node entryNode) {
+        String result = null;
+        if(entryNode==null) return result;
+        NodeList childNodes = entryNode.getChildNodes();
+        if(childNodes==null || childNodes.getLength()<=0) return result;
+        return getNodeValue(childNodes, CONTENT_TAG);
     }
 
 
+
+
+    private String getEntryTitle(Node entryNode) {
+        String result = null;
+        if(entryNode==null) return result;
+        NodeList childNodes = entryNode.getChildNodes();
+        if(childNodes==null || childNodes.getLength()<=0) return result;
+        return getNodeValue(childNodes, TITLE_TAG);
+    }
 
 
 
@@ -182,6 +225,11 @@ public class DomXmlParser implements XmlParser{
     private boolean isTextNode(Node node) {
         return (node.getNodeType() == Node.TEXT_NODE);
     }
+
+    private boolean isCdataNode(Node node) {
+        return (node.getNodeType() == Node.CDATA_SECTION_NODE);
+    }
+
 
     private boolean isAttributeNode(Node node) {
         return (node.getNodeType() == Node.ATTRIBUTE_NODE);
@@ -231,34 +279,34 @@ public class DomXmlParser implements XmlParser{
         return getNodeValue(childNodes, TITLE_TAG);
     }
 
-    private String getLanguage(Node nodeChannel) {
+    private String getLanguage(Node channelNode) {
         String result = null;
-        if(nodeChannel==null) return result;
-        NodeList childNodes = nodeChannel.getChildNodes();
+        if(channelNode==null) return result;
+        NodeList childNodes = channelNode.getChildNodes();
         if(childNodes==null || childNodes.getLength()<=0) return result;
         return getNodeValue(childNodes, LANGUAGE_TAG);
     }
 
-    private String getWebsiteUrl(Node nodeChannel) {
+    private String getWebUrl(Node node) {
         String result = null;
-        if(nodeChannel==null) return result;
-        NodeList childNodes = nodeChannel.getChildNodes();
+        if(node==null) return result;
+        NodeList childNodes = node.getChildNodes();
         if(childNodes==null || childNodes.getLength()<=0) return result;
         return getNodeValue(childNodes, LINK_TAG);
     }
 
-    private String getLastUpdate(Node nodeChannel) {
+    private String getLastUpdate(Node channelNode) {
         String result = null;
-        if(nodeChannel==null) return result;
-        NodeList childNodes = nodeChannel.getChildNodes();
+        if(channelNode==null) return result;
+        NodeList childNodes = channelNode.getChildNodes();
         if(childNodes==null || childNodes.getLength()<=0) return result;
         return getNodeValue(childNodes, LAST_BUILD_DATE_TAG, UPDATE_TAG);
     }
 
-    private String getPubDate(Node nodeChannel) {
+    private String getPubDate(Node node) {
         String result = null;
-        if(nodeChannel==null) return result;
-        NodeList childNodes = nodeChannel.getChildNodes();
+        if(node==null) return result;
+        NodeList childNodes = node.getChildNodes();
         if(childNodes==null || childNodes.getLength()<=0) return result;
         return getNodeValue(childNodes, PUBDATE_TAG);
     }
@@ -272,9 +320,13 @@ public class DomXmlParser implements XmlParser{
 
         for(int i=0; i<nodeList.getLength(); i++) {
             Node currentNode = nodeList.item(i);
-            if(nodeContainsTheseTag(currentNode, nodeName)){
+            if(nodeContainsTheseTags(currentNode, nodeName)){
                 if(currentNode.hasChildNodes() && isTextNode(currentNode.getFirstChild())) {
                     result = currentNode.getFirstChild().getNodeValue();
+                    return result;
+                }
+                else if(currentNode.hasChildNodes() && isCdataNode(currentNode.getFirstChild())) {
+                    result = currentNode.getFirstChild().getTextContent();
                     return result;
                 }
             }
@@ -290,7 +342,7 @@ public class DomXmlParser implements XmlParser{
 
         for(int i=0; i<nodeList.getLength(); i++) {
             Node currentNode = nodeList.item(i);
-            if(nodeContainsTheseTag(currentNode, nodeName)){
+            if(nodeContainsTheseTags(currentNode, nodeName)){
                 if(currentNode.hasChildNodes() && isAttributeNode(currentNode.getFirstChild())) {
                     result = currentNode.getFirstChild().getNodeValue();
                     return result;
@@ -301,7 +353,7 @@ public class DomXmlParser implements XmlParser{
         return result;
     }
 
-    private boolean nodeContainsTheseTag(Node node, String... tags) {
+    private boolean nodeContainsTheseTags(Node node, String... tags) {
         boolean result = false;
         if(tags==null || tags.length<=0) return result;
         if(node==null) return result;

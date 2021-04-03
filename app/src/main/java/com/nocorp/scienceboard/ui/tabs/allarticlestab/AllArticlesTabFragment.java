@@ -98,9 +98,9 @@ public class AllArticlesTabFragment extends Fragment implements FeedProvider.OnF
         Log.d(TAG, "SCIENCE_BOARD - onFeedsDownloadCompleted: feeds fetched");
 
         // this (runOnUiThread) is unstable, can cause crashes, so better not use it
-//        requireActivity().runOnUiThread(() ->
-//                Toast.makeText(requireContext(), "feeds fetched", Toast.LENGTH_SHORT).show()
-//        );
+        requireActivity().runOnUiThread(() ->
+                Toast.makeText(requireContext(), "feeds fetched", Toast.LENGTH_SHORT).show()
+        );
     }
 
     @Override

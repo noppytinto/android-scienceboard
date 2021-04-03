@@ -5,6 +5,8 @@ import java.util.Date;
 public class Entry {
     private String webpageUrl;
     private String title;
+    private String description;
+    private String content;
     private String thumbnailUrl;
     private Date pubDate;
 
@@ -39,4 +41,21 @@ public class Entry {
     public void setPubDate(Date pubDate) {
         this.pubDate = pubDate;
     }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
 }// end Entry

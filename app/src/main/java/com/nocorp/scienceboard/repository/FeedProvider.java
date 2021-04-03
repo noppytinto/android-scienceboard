@@ -3,6 +3,7 @@ package com.nocorp.scienceboard.repository;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.xml.Channel;
 import com.nocorp.scienceboard.model.Source;
+import com.nocorp.scienceboard.model.xml.Entry;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.utility.DomXmlParser;
 import com.nocorp.scienceboard.utility.HttpUtilities;
@@ -78,14 +79,14 @@ public class FeedProvider {
 
 
         sourceUrls.add(esa_italy);
-//        sourceUrls.add(nytimes_space);
-//        sourceUrls.add(cern);
-//        sourceUrls.add(space_com);
-//        sourceUrls.add(newscientist_space);
-//        sourceUrls.add(esa_space_news);
-//        sourceUrls.add(hdblog);
-//        sourceUrls.add(theverge);
-//        sourceUrls.add(nasa);
+        sourceUrls.add(nytimes_space);
+        sourceUrls.add(cern);
+        sourceUrls.add(space_com);
+        sourceUrls.add(newscientist_space);
+        sourceUrls.add(esa_space_news);
+        sourceUrls.add(hdblog);
+        sourceUrls.add(theverge);
+        sourceUrls.add(nasa);
 
 
 
@@ -262,11 +263,12 @@ public class FeedProvider {
             source = new Source();
             String name = channel.getName();
             String websiteUrl = channel.getWebsiteUrl();
-//            List<SyndEntry> entries = channel.getEntries();
+            List<Entry> entries = channel.getEntries();
 //            List<Article> articles = preDownloadArticles(channel);
 
             source.setName(name);
             source.setWebsiteUrl(websiteUrl);
+            source.setEntries(entries);
 //            source.setArticles(articles);
 
         } catch (Exception e) {
@@ -290,7 +292,7 @@ public class FeedProvider {
             source.setLogoUrl(logoUrl);
             source.setName(name);
             source.setWebsiteUrl(websiteUrl);
-            source.setEntries(entries);
+//            source.setEntries(entries);
             source.setArticles(articles);
 
         } catch (Exception e) {

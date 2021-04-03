@@ -1,5 +1,6 @@
 package com.nocorp.scienceboard.model;
 
+import com.nocorp.scienceboard.model.xml.Entry;
 import com.rometools.rome.feed.synd.SyndEntry;
 
 import java.io.Serializable;
@@ -11,7 +12,7 @@ public class Source implements Serializable{
     private String rssUrl;
     private String logoUrl;
     private String rssType;
-    private List<SyndEntry> entries;
+    private List<Entry> entries;
     private List<Article> articles;
 
 
@@ -55,11 +56,11 @@ public class Source implements Serializable{
         this.rssType = rssType;
     }
 
-    public List<SyndEntry> getEntries() {
+    public List<Entry> getEntries() {
         return entries;
     }
 
-    public void setEntries(List<SyndEntry> entries) {
+    public void setEntries(List<Entry> entries) {
         this.entries = entries;
     }
 
