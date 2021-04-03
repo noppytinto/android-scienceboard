@@ -1,5 +1,7 @@
 package com.nocorp.scienceboard.repository;
 
+import android.content.Context;
+
 import com.nocorp.scienceboard.utility.rss.model.Channel;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.utility.rss.model.Entry;
@@ -85,7 +87,7 @@ public class FeedProvider {
 
     }
 
-    public List<Source> downloadRssSources_dom() {
+    public List<Source> downloadRssSources_dom(Context context) {
         sources = new ArrayList<>();
         if(sourceUrls==null || sourceUrls.size()<=0) {
             listener.onFeedsDownloadFailed("url list is empty/null");
@@ -95,7 +97,7 @@ public class FeedProvider {
         Runnable task = () -> {
             try {
                 for(String url : sourceUrls) {
-                    Source source = downloadSource_dom(url);
+                    Source source = downloadSource_dom(url, context);
                     if(source!=null) sources.add(source);
                 }
 
@@ -114,12 +116,12 @@ public class FeedProvider {
         return sources;
     }
 
-    private Source downloadSource_dom(String url) {
+    private Source downloadSource_dom(String url, Context context) {
         Source source = null;
 
         try {
             DomXmlParser domXmlParser = new DomXmlParser();
-            Channel channel = domXmlParser.getChannel(url);
+            Channel channel = domXmlParser.getChannel(url, context);
             if (channel!=null) {
                 channel.setRssUrl(url);
                 source = buildSource_dom(channel);

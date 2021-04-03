@@ -21,6 +21,10 @@ public interface EntryDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertAll(Entry... entries);
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    void insert(Entry entry);
+
+
     @Delete
     void delete(Entry entry);
 

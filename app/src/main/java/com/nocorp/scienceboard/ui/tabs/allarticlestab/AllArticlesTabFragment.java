@@ -98,7 +98,7 @@ public class AllArticlesTabFragment extends Fragment implements FeedProvider.OnF
 //            feedsLoading = true;
 //        }
 
-        feedProvider.downloadRssSources_dom();
+        feedProvider.downloadRssSources_dom(requireContext());
         feedLoadedAtStartup = true;
         feedsLoading = true;
     }
@@ -135,7 +135,7 @@ public class AllArticlesTabFragment extends Fragment implements FeedProvider.OnF
 
 
     private void updateFeeds() {
-        feedProvider.downloadRssSources_dom();
+        feedProvider.downloadRssSources_dom(requireContext());
     }
 
     @Override

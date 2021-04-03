@@ -1,7 +1,12 @@
 package com.nocorp.scienceboard.utility.rss;
 
+import android.content.Context;
 import android.util.Log;
 
+import com.nocorp.scienceboard.system.ThreadManager;
+import com.nocorp.scienceboard.utility.room.ChannelDao;
+import com.nocorp.scienceboard.utility.room.EntryDao;
+import com.nocorp.scienceboard.utility.room.ScienceBoardRoomDatabase;
 import com.nocorp.scienceboard.utility.rss.model.Channel;
 import com.nocorp.scienceboard.utility.rss.model.Entry;
 import com.nocorp.scienceboard.utility.HttpUtilities;
@@ -83,7 +88,7 @@ public class DomXmlParser implements XmlParser{
     //-------------------------------------------------------------- GETTERS/SETTERS
 
     @Override
-    public Channel getChannel(String rssUrl) {
+    public Channel getChannel(String rssUrl, Context context) {
         Channel result = null;
         InputStream inputStream = null;
         Response response = null;
@@ -113,7 +118,10 @@ public class DomXmlParser implements XmlParser{
                             if(candidatesChannels!=null || candidatesChannels.getLength()>0) {
                                 Node candidateChannel = candidatesChannels.item(0);
                                 if(candidateChannel!=null && isElementNode(candidateChannel)){
-                                    result = buildChannel(candidatesChannels.item(0), rssUrl);
+                                    result = buildChannel(candidatesChannels.item(0), rssUrl, context);
+                                    if(result!=null) {
+                                        saveChannelInRoom(result, context);
+                                    }
                                     break;
                                 }
                             }
@@ -132,7 +140,45 @@ public class DomXmlParser implements XmlParser{
         return result;
     }
 
+    private void saveChannelInRoom(Channel channel, Context context) {
+        ChannelDao channelDao = getChannelDao(context);
+        Runnable task = () -> {
+            channelDao.insert(channel);
+        };
 
+        ThreadManager t = ThreadManager.getInstance();
+        try {
+            t.runTask(task);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private ChannelDao getChannelDao(Context context) {
+        ScienceBoardRoomDatabase roomDatabase = ScienceBoardRoomDatabase.getInstance(context);
+        ChannelDao dao = roomDatabase.getChannelDao();
+        return dao;
+    }
+
+    private void saveEntryInRoom(Entry entry, Context context) {
+        EntryDao entryDao = getEntryDao(context);
+        Runnable task = () -> {
+            entryDao.insert(entry);
+        };
+
+        ThreadManager t = ThreadManager.getInstance();
+        try {
+            t.runTask(task);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private EntryDao getEntryDao(Context context) {
+        ScienceBoardRoomDatabase roomDatabase = ScienceBoardRoomDatabase.getInstance(context);
+        EntryDao dao = roomDatabase.getEntryDao();
+        return dao;
+    }
 
 
 
@@ -149,7 +195,7 @@ public class DomXmlParser implements XmlParser{
         return false;
     }
 
-    private Channel buildChannel(Node channelNode, String url) throws ParseException {
+    private Channel buildChannel(Node channelNode, String url, Context context) throws ParseException {
         Channel channel = null;
         String name = null;
         String language = null;
@@ -183,7 +229,7 @@ public class DomXmlParser implements XmlParser{
             channel.setRssUrl(rssUrl);
 
 
-            entries = getEntries(channelNode, ENTRIES_LIMIT);
+            entries = getEntries(channelNode, ENTRIES_LIMIT, context);
             if(lastUpdate==null) {
                 if(entries!=null && entries.size()>0)
                     lastUpdate = entries.get(0).getPubDate();
@@ -208,7 +254,7 @@ public class DomXmlParser implements XmlParser{
         return entries;
     }
 
-    private List<Entry> getEntries(Node channelNode, int limit) {
+    private List<Entry> getEntries(Node channelNode, int limit, Context context) {
         List<Entry> results = null;
 
         try {
@@ -226,7 +272,10 @@ public class DomXmlParser implements XmlParser{
                         if(entryNode!=null && isElementNode(entryNode)){
                             if(i>=limit) break;
                             Entry entry = buildEntry(entryNode);
-                            if(entry!=null) results.add(entry);
+                            if(entry!=null) {
+                                results.add(entry);
+                                saveEntryInRoom(entry, context);
+                            }
                         }
                     }
                 }
