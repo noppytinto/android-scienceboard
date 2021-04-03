@@ -127,17 +127,16 @@ dependencies {
 
     // rss parser
 //    implementation 'com.apptastic:rssreader:2.4.1'
-    implementation 'com.rometools:rome:1.15.0'
-
+//    implementation 'com.rometools:rome:1.15.0'
     // web crawler
-    implementation 'com.chimbori.crux:crux:3.0.1'
+//    implementation 'com.chimbori.crux:crux:3.0.1'
 
 
     // https://mvnrepository.com/artifact/commons-io/commons-io
-    implementation group: 'commons-io', name: 'commons-io', version: '2.8.0'
+//    implementation group: 'commons-io', name: 'commons-io', version: '2.8.0'
     // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
-    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
+//    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
     // https://mvnrepository.com/artifact/joda-time/joda-time
-    implementation group: 'joda-time', name: 'joda-time', version: '2.10.10'
+//    implementation group: 'joda-time', name: 'joda-time', version: '2.10.10'
 
 }

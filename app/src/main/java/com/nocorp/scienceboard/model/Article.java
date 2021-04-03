@@ -2,7 +2,6 @@ package com.nocorp.scienceboard.model;
 
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.utility.MyValues;
-import com.rometools.rome.feed.synd.SyndEntry;
 
 import java.util.Date;
 
@@ -12,7 +11,7 @@ public class Article extends ListItem implements Comparable<Article> {
     private String content;
     private String thumbnailUrl;
     private String webpageUrl;
-    private SyndEntry syndEntry;
+//    private SyndEntry syndEntry;
     private Source source;
     private Date publishDate;
 
@@ -75,13 +74,13 @@ public class Article extends ListItem implements Comparable<Article> {
         this.webpageUrl = webpageUrl;
     }
 
-    public SyndEntry getSyndEntry() {
-        return syndEntry;
-    }
-
-    public void setSyndEntry(SyndEntry syndEntry) {
-        this.syndEntry = syndEntry;
-    }
+//    public SyndEntry getSyndEntry() {
+//        return syndEntry;
+//    }
+//
+//    public void setSyndEntry(SyndEntry syndEntry) {
+//        this.syndEntry = syndEntry;
+//    }
 
     public Source getSource() {
         return source;

@@ -13,6 +13,6 @@ public class DateConverter {
 
     @TypeConverter
     public long fromDate(Date date) {
-        return date.getTime();
+        return date == null ? 0 : date.getTime();
     }
 }

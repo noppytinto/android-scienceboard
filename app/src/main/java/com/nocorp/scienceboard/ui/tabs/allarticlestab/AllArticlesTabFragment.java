@@ -43,6 +43,7 @@ public class AllArticlesTabFragment extends Fragment implements FeedProvider.OnF
     private FeedProvider feedProvider;
     private static boolean feedLoadedAtStartup = false;
     private boolean feedsLoading = false;
+    private Toast toast;
 
     public static AllArticlesTabFragment newInstance() {
         return new AllArticlesTabFragment();
@@ -143,13 +144,26 @@ public class AllArticlesTabFragment extends Fragment implements FeedProvider.OnF
         Log.d(TAG, "SCIENCE_BOARD - onFeedsDownloadCompleted: feeds fetched");
 
         // this (runOnUiThread) is unstable, can cause crashes, so better not use it
-        requireActivity().runOnUiThread(() ->
-                Toast.makeText(requireContext(), "feeds fetched", Toast.LENGTH_SHORT).show()
+        runToastOnUiThread("feeds fetched");
+    }
+
+    private void runToastOnUiThread(String message) {
+        requireActivity().runOnUiThread(() -> {
+                    try {
+                        if(toast!=null) toast.cancel();
+                        toast = Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT);
+                        toast.show();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
         );
     }
 
     @Override
     public void onFeedsDownloadFailed(String cause) {
+//        viewModel.setArticlesList(null);
+
         // this (runOnUiThread) is unstable, can cause crashes, so better not use it
         Log.d(TAG, "SCIENCE_BOARD - onFeedsDownloadFailed: feeds not fetched, cause: $cause");
 //        requireActivity().runOnUiThread(() ->
