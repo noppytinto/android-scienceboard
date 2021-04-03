@@ -4,6 +4,7 @@ import com.nocorp.scienceboard.model.xml.Entry;
 import com.rometools.rome.feed.synd.SyndEntry;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 public class Source implements Serializable{
@@ -14,6 +15,7 @@ public class Source implements Serializable{
     private String rssType;
     private List<Entry> entries;
     private List<Article> articles;
+    private Date lastUpdate;
 
 
     public String getName() {
@@ -71,4 +73,13 @@ public class Source implements Serializable{
     public void setArticles(List<Article> articles) {
         this.articles = articles;
     }
-}
+
+    public Date getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
+
+}// end Source

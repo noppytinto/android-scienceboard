@@ -28,6 +28,15 @@ public class HttpUtilities {
         return protocol + DOUBLE_DASHES + domain + path;
     }
 
+    public static String getBaseUrl(String urlString) throws URISyntaxException {
+        if( ! isValidUrl(urlString)) throw new URISyntaxException("", "invalid url string");
+        String trimmedString = urlString.trim();
+        URI uri = new URI(trimmedString);
+        String protocol = uri.getScheme();
+        String domain = uri.getHost();
+        return protocol + DOUBLE_DASHES + domain;
+    }
+
     /**
      * - The URL must start with either http or https and
      * - then followed by :// and

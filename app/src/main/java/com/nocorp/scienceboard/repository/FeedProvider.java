@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import okhttp3.HttpUrl;
@@ -32,6 +33,9 @@ public class FeedProvider {
     private List<Source> sources;
     private List<String> sourceUrls;
     private OnFeedsDownloadedListener listener;
+    //
+    private static List<Channel> channelsCache;
+
     public interface OnFeedsDownloadedListener {
         public void onFeedsDownloadCompleted(List<Source> sources);
         public void onFeedsDownloadFailed(String cause);
@@ -91,13 +95,11 @@ public class FeedProvider {
 
 
 //        // ----------------- slow
-//        sourceUrls.add(spacenews);
+        sourceUrls.add(spacenews);
 //        sourceUrls.add(phys_org_space);
 //        sourceUrls.add(wired);
 //        sourceUrls.add(nvidiaBlog);
 //        sourceUrls.add(nature);
-//        sourceUrls.add(livescience);
-//
 //        sourceUrls.add(livescience);
 
     }
@@ -187,13 +189,13 @@ public class FeedProvider {
         Source source = null;
 
         try {
-            String string = getInputStreamFromUrl(url);
+//            String string = getInputStreamFromUrl(url);
             DomXmlParser domXmlParser = new DomXmlParser();
 
-            Channel channelInfo = domXmlParser.getChannelInfo(string);
-            if (channelInfo!=null) {
-                channelInfo.setRssUrl(url);
-                source = buildSource_dom(channelInfo);
+            Channel channel = domXmlParser.getChannel(url);
+            if (channel!=null) {
+                channel.setRssUrl(url);
+                source = buildSource_dom(channel);
             }
 
         }
@@ -263,11 +265,13 @@ public class FeedProvider {
             source = new Source();
             String name = channel.getName();
             String websiteUrl = channel.getWebsiteUrl();
+            Date lastUpdate = channel.getLastUpdate();
             List<Entry> entries = channel.getEntries();
 //            List<Article> articles = preDownloadArticles(channel);
 
             source.setName(name);
             source.setWebsiteUrl(websiteUrl);
+            source.setLastUpdate(lastUpdate);
             source.setEntries(entries);
 //            source.setArticles(articles);
 

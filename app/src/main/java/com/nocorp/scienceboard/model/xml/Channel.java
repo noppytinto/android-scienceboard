@@ -54,6 +54,10 @@ public class Channel {
     }
 
     public Date getLastUpdate() {
+//        if(lastUpdate!=null)
+//            return lastUpdate;
+//        else if(entries!=null && entries.size()>0) // consider last article pub date as last update
+//            return entries.get(0).getPubDate();
         return lastUpdate;
     }
 
