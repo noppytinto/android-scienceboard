@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,12 +20,11 @@ import android.widget.Toast;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.nocorp.scienceboard.MobileNavigationDirections;
-import com.nocorp.scienceboard.R;
+import com.nocorp.scienceboard.databinding.AllArticlesTabFragmentBinding;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterFeedsList;
 import com.nocorp.scienceboard.repository.FeedProvider;
-import com.nocorp.scienceboard.ui.home.HomeViewModel;
 import com.nocorp.scienceboard.utility.AdProvider;
 
 import java.util.ArrayList;
@@ -38,58 +38,103 @@ public class AllArticlesTabFragment extends Fragment implements FeedProvider.OnF
     private AllArticlesTabViewModel viewModel;
     private View view;
     private AdProvider adProvider;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private AllArticlesTabFragmentBinding binding;
+    private FeedProvider feedProvider;
+    private static boolean feedLoadedAtStartup = false;
+    private boolean feedsLoading = false;
 
     public static AllArticlesTabFragment newInstance() {
         return new AllArticlesTabFragment();
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.all_articles_tab_fragment, container, false);
+        binding = AllArticlesTabFragmentBinding.inflate(getLayoutInflater());
+        view = binding.getRoot();
+        return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        this.view = view;
-        progressIndicator = view.findViewById(R.id.progressIndicator_allArticlesTabFragment);
+        progressIndicator = binding.progressIndicatorAllArticlesTabFragment;
+        swipeRefreshLayout = binding.swipeRefreshAllArticlesTabFragment;
         adProvider = AdProvider.getInstance(); // is not guaranteed that
-        initRecycleView(view);
+        feedProvider = new FeedProvider(this);
+        viewModel = new ViewModelProvider(this).get(AllArticlesTabViewModel.class);
+        initRecycleView();
+        setupSwipeDownToRefresh();
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        viewModel = new ViewModelProvider(this).get(AllArticlesTabViewModel.class);
-
-        viewModel = new ViewModelProvider(this).get(AllArticlesTabViewModel.class);
         viewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), articles -> {
             if(articles==null || articles.size()==0) {
+                swipeRefreshLayout.setRefreshing(false);
                 progressIndicator.setVisibility(View.GONE);
                 Toast.makeText(requireContext(), "An error occurred during articles fetch, contact the developer.", Toast.LENGTH_SHORT).show();
             }
             else {
+                swipeRefreshLayout.setRefreshing(false);
+                feedsLoading = false;
                 progressIndicator.setVisibility(View.GONE);
                 articles = adProvider.populateListWithAds(articles, 5);
                 recyclerAdapterFeedsList.loadNewData(articles);
             }
         });
 
-        FeedProvider feedProvider = new FeedProvider(this);
+//        if(feedLoadedAtStartup == false) {
+//            feedProvider.downloadRssSources_dom();
+//            feedLoadedAtStartup = true;
+//            feedsLoading = true;
+//        }
+
         feedProvider.downloadRssSources_dom();
+        feedLoadedAtStartup = true;
+        feedsLoading = true;
     }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
+
+
 
 
 
     //---------------------------------------------------------------------
 
-    private void initRecycleView(View view) {
+    private void initRecycleView() {
         // defining Recycler view
-        recyclerView = view.findViewById(R.id.recyclerView_allArticlesTabFragment);
+        recyclerView = binding.recyclerViewAllArticlesTabFragment;
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerAdapterFeedsList = new RecyclerAdapterFeedsList(new ArrayList<>(), requireContext(), this);
         recyclerView.setAdapter(recyclerAdapterFeedsList);
+    }
+
+    private void setupSwipeDownToRefresh() {
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                Log.i(TAG, "onRefresh called from SwipeRefreshLayout");
+                if( ! feedsLoading) updateFeeds();
+            }
+        });
+    }
+
+
+    private void updateFeeds() {
+        feedProvider.downloadRssSources_dom();
     }
 
     @Override

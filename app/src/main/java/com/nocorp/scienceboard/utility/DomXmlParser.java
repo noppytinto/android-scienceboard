@@ -525,8 +525,6 @@ public class DomXmlParser implements XmlParser{
         return result;
     }
 
-
-
     private List<String> extractImagesUrlFromHtml(String content, String description) {
         List<String> imagesUrl = new ArrayList<>();
 
@@ -593,9 +591,6 @@ public class DomXmlParser implements XmlParser{
         }
         return imageUrl;
     }
-
-
-
 
     private static HttpUrl buildHttpURL(String url) {
         HttpUrl httpUrl = HttpUrl.get(url);
