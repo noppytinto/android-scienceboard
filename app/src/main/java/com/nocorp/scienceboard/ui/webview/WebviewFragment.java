@@ -1,7 +1,6 @@
 package com.nocorp.scienceboard.ui.webview;
 
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -11,6 +10,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,11 +22,6 @@ import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
 import com.nocorp.scienceboard.R;
@@ -43,7 +38,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private LinearProgressIndicator progressIndicator;
     private View view;
     private Snackbar snackbar;
-    private FragmentWebviewBinding viewBinding;
+    private FragmentWebviewBinding binding;
     private Toolbar toolbar;
     private Toast toast;
     private ImageView imageViewSourceLogo;
@@ -71,17 +66,17 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        viewBinding = FragmentWebviewBinding.inflate(inflater, container, false);
-        view = viewBinding.getRoot();
+        binding = FragmentWebviewBinding.inflate(inflater, container, false);
+        view = binding.getRoot();
         return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        webView = viewBinding.webViewWebviewFragment;
-        progressIndicator = viewBinding.progressIndicatorWebviewFragment;
-        toolbar = viewBinding.toolbarWebviewFragment;
+        webView = binding.webViewWebviewFragment;
+        progressIndicator = binding.progressIndicatorWebviewFragment;
+        toolbar = binding.toolbarWebviewFragment;
         toolbar.setOnMenuItemClickListener(this);
         toolbar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
 
@@ -125,7 +120,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        viewBinding = null;
+        binding = null;
     }
 
     @Override
@@ -137,7 +132,13 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
-        if(item.getItemId() == R.id.option_webviewMenu_refresh) {
+        if(item.getItemId() == R.id.option_webviewMenu_stop) {
+            if(snackbar!=null) snackbar.dismiss();
+            webView.stopLoading();
+            showBottomToast("loading stopped");
+            return true;
+        }
+        else if(item.getItemId() == R.id.option_webviewMenu_refresh) {
             if(snackbar!=null) snackbar.dismiss();
             webView.loadUrl(url);
             showBottomToast("refreshing page");
@@ -154,6 +155,34 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         }
 
         return false;
+    }
+
+
+    /**
+     * override back button behavior for webviews.
+     * Back button will go back in case of webviews
+     * @param webView
+     */
+    private void setupBackButtonBehaviorForWebview(WebView webView) {
+        webView.setOnKeyListener(new View.OnKeyListener()
+        {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if(event.getAction() == KeyEvent.ACTION_DOWN) {
+                    WebView webView = (WebView) v;
+
+                    switch(keyCode) {
+                        case KeyEvent.KEYCODE_BACK:
+                            if(webView.canGoBack()) {
+                                webView.goBack();
+                                return true;
+                            }
+                            break;
+                    }
+                }
+                return false;
+            }
+        });
     }
 
 
@@ -184,6 +213,8 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     }
 
     private void defineWebclientBehavior(WebView webView) {
+        setupBackButtonBehaviorForWebview(webView);
+
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
