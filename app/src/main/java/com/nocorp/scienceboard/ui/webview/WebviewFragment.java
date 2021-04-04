@@ -28,7 +28,6 @@ import android.widget.Toast;
 
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
-import com.nocorp.scienceboard.BuildConfig;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentWebviewBinding;
 
@@ -43,7 +42,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private LinearProgressIndicator progressIndicator;
     private View view;
     private Snackbar snackbar;
-    private FragmentWebviewBinding binding;
+    private FragmentWebviewBinding viewBinding;
     private Toolbar toolbar;
     private Toast toast;
     private ImageView imageViewSourceLogo;
@@ -53,7 +52,6 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private int currentTextSize;
     private final int UPPER_TEXT_SIZE_LIMIT = 200;
     private final int LOWER_TEXT_SIZE_LIMIT = 0;
-    private MenuItem stopMenuItem;
 
 
 
@@ -73,47 +71,26 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        binding = FragmentWebviewBinding.inflate(inflater, container, false);
-        view = binding.getRoot();
-        setHasOptionsMenu(true);
+        viewBinding = FragmentWebviewBinding.inflate(inflater, container, false);
+        view = viewBinding.getRoot();
         return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        webView = binding.webViewWebviewFragment;
-        progressIndicator = binding.progressIndicatorWebviewFragment;
-        toolbar = binding.toolbarWebviewFragment;
+        webView = viewBinding.webViewWebviewFragment;
+        progressIndicator = viewBinding.progressIndicatorWebviewFragment;
+        toolbar = viewBinding.toolbarWebviewFragment;
         toolbar.setOnMenuItemClickListener(this);
         toolbar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
         currentTextSize = DEFAULT_TEXT_SIZE;
+//        viewBinding.toolbarWebviewFragment.inflateMenu(R.menu.menu_webview);
+
 
         if (getArguments() != null) {
             // the url is always !=null and non-empty
             this.url = WebviewFragmentArgs.fromBundle(getArguments()).getUrl();
-//            this.sourceLogoUrl = WebviewFragmentArgs.fromBundle(getArguments()).getSourceLogoUrl();
-//
-//            if(sourceLogoUrl!=null && !sourceLogoUrl.isEmpty()) {
-//                Glide.with(requireContext())
-//                        .load(sourceLogoUrl)
-//                        .centerInside()
-//                        .listener(new RequestListener<Drawable>() {
-//                                      @Override
-//                                      public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-//                                          // TODO
-//                                          return false;
-//                                      }
-//
-//                                      @Override
-//                                      public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-//                                          // TODO
-//                                          return false;
-//                                      }
-//                                  }
-//                        )
-//                        .into(imageViewSourceLogo);
-//            }
         }
     }
 
@@ -127,20 +104,13 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null;
+        viewBinding = null;
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         if(snackbar!=null) snackbar.dismiss();
-    }
-
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.menu_webview, menu);
-        stopMenuItem = menu.findItem(R.id.option_webviewMenu_stop);
     }
 
     @Override
@@ -182,6 +152,9 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         return false;
     }
 
+
+    //------------------------------------------------------------------------------------ METHODS
+
     private void shareText(String message) {
         try {
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
@@ -194,8 +167,6 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         }
     }
 
-
-    //------------------------------------------------------------------------------------ METHODS
 
     private void increaseTextSize() {
         if(currentTextSize <= UPPER_TEXT_SIZE_LIMIT) {
@@ -279,14 +250,14 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
                 super.onPageFinished(view, url);
                 progressIndicator.setVisibility(View.GONE);
 //                showLoadCompletedSnackbar();
-                stopMenuItem.setVisible(false);
+                hideStopIcon();
             }
 
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
                 progressIndicator.setVisibility(View.VISIBLE);
-                stopMenuItem.setVisible(true);
+                showStopIcon();
             }
 
             @Override
@@ -337,6 +308,16 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         toast = Toast.makeText(requireContext(),message, Toast.LENGTH_LONG);
         toast.setGravity(Gravity.CENTER, 0, 0);
         toast.show();
+    }
+
+    private void hideStopIcon() {
+        MenuItem saveItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_stop);
+        saveItem.setVisible(false);
+    }
+
+    private void showStopIcon() {
+        MenuItem saveItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_stop);
+        saveItem.setVisible(true);
     }
 
 
