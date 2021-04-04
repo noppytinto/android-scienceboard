@@ -1,7 +1,15 @@
 package com.nocorp.scienceboard.repository;
 
 import android.content.Context;
+import android.util.Log;
 
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.nocorp.scienceboard.utility.rss.model.Channel;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.utility.rss.model.Entry;
@@ -13,6 +21,9 @@ import java.util.Date;
 import java.util.List;
 
 public class FeedProvider {
+    private final String TAG = this.getClass().getSimpleName();
+    private final String SOURCES_COLLECTION_NAME = "sources";
+
     private List<Source> sources;
     private List<String> sourceUrls;
     private OnFeedsDownloadedListener listener;
@@ -37,7 +48,29 @@ public class FeedProvider {
 
     //------------------------------------------------------------
 
+
+    public void loadRssUrlsFromRemoteDb() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection(SOURCES_COLLECTION_NAME)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d(TAG, document.getId() + " => " + document.getData());
+                            }
+                        } else {
+                            Log.w(TAG, "Error getting documents.", task.getException());
+                        }
+                    }
+                });
+    }
+
     private void loadRssUrls() {
+        loadRssUrlsFromRemoteDb();
+
+
         final String feedTag = "https://www.theverge.com/rss/index.xml";
         final String rdfTag = "https://www.nature.com/nmat.rss"; // unsecure (HTTP)
         final String rssTag = "https://home.cern/api/news/news/feed.rss";

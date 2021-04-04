@@ -6,6 +6,7 @@ import android.view.View;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.nocorp.scienceboard.databinding.ActivityMainBinding;
+import com.nocorp.scienceboard.repository.SourceViewModel;
 import com.nocorp.scienceboard.utility.ConnectionManager;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
@@ -14,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
@@ -31,6 +33,8 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
     private Snackbar snackbar;
     private Toolbar toolbar;
     private ActionBar appBar;
+    private SourceViewModel sourceViewModel;
+
 
 
 
@@ -43,7 +47,10 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
         initView();
         initAdProvider();
 
-
+        sourceViewModel = new ViewModelProvider(this).get(SourceViewModel.class);
+        sourceViewModel.getObservableSources().observe(this, sources -> {
+            // TODO: Update the UI.
+        });
     }
 
     @Override

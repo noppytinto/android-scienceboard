@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.List;
 
 public class ArticleRepository {
+    private final String TAG = this.getClass().getSimpleName();
     private static ArticleRepository singletonInstance;
     private ArticlesFetcher articlesListener;
 

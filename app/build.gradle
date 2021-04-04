@@ -82,6 +82,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics'
     // Declare the dependency for the Performance Monitoring library
     implementation 'com.google.firebase:firebase-perf'
+    // Declare the dependency for the Cloud Firestore library
+    implementation 'com.google.firebase:firebase-firestore'
+
 
     // GOOGLE ADMOB INTEGRATION
     implementation 'com.google.android.gms:play-services-ads:19.8.0'

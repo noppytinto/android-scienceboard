@@ -28,12 +28,20 @@ import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterFeedsList;
 import com.nocorp.scienceboard.repository.FeedProvider;
+import com.nocorp.scienceboard.repository.SourceRepository;
+import com.nocorp.scienceboard.repository.SourceViewModel;
+import com.nocorp.scienceboard.repository.SourcesFetcher;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class AllArticlesTabFragment extends Fragment implements FeedProvider.OnFeedsDownloadedListener, RecyclerAdapterFeedsList.OnArticleClickedListener {
+public class AllArticlesTabFragment extends Fragment implements
+        FeedProvider.OnFeedsDownloadedListener,
+        RecyclerAdapterFeedsList.OnArticleClickedListener,
+        SourcesFetcher
+
+{
     private final String TAG = this.getClass().getSimpleName();
     private RecyclerAdapterFeedsList recyclerAdapterFeedsList;
     private RecyclerView recyclerView;
@@ -47,6 +55,7 @@ public class AllArticlesTabFragment extends Fragment implements FeedProvider.OnF
     private static boolean feedLoadedAtStartup = false;
     private boolean feedsLoading = false;
     private Toast toast;
+    private SourceViewModel sourceViewModel;
 
 
 
@@ -93,6 +102,11 @@ public class AllArticlesTabFragment extends Fragment implements FeedProvider.OnF
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        sourceViewModel = new ViewModelProvider(requireActivity()).get(SourceViewModel.class);
+//        sourceViewModel.getObservableSources().observe(getViewLifecycleOwner(), sources -> {
+//            // TODO: Update the UI.
+//        });
+
         viewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), articles -> {
             if(articles==null || articles.size()==0) {
                 swipeRefreshLayout.setRefreshing(false);
@@ -114,8 +128,11 @@ public class AllArticlesTabFragment extends Fragment implements FeedProvider.OnF
 //            feedsLoading = true;
 //        }
 
-        feedProvider.downloadRssSources_dom(requireContext());
-        feedLoadedAtStartup = true;
+//        feedProvider.downloadRssSources_dom(requireContext());
+//        feedLoadedAtStartup = true;
+
+        SourceRepository sourceRepository = new SourceRepository(this);
+        sourceRepository.loadSources();
 
         // test crashalytics
 //        throw new RuntimeException("Test Crash"); // Force a crash
@@ -214,5 +231,14 @@ public class AllArticlesTabFragment extends Fragment implements FeedProvider.OnF
     }
 
 
+    @Override
+    public void onSourcesFetchCompleted(List<Source> sources) {
+        showCenteredToast("sources fetched from remote db");
+    }
 
+    @Override
+    public void onSourcesFetchFailed(String cause) {
+        showCenteredToast("sources fetch failed! from remote db");
+
+    }
 }// end AllArticlesTabFragment

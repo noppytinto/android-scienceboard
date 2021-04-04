@@ -11,10 +11,11 @@ public class Source implements Serializable{
     private String websiteUrl;
     private String rssUrl;
     private String logoUrl;
-    private String rssType;
+    private String category;
     private List<Entry> entries;
     private List<Article> articles;
     private Date lastUpdate;
+    private String language;
 
 
     public String getName() {
@@ -49,12 +50,12 @@ public class Source implements Serializable{
         this.logoUrl = logoUrl;
     }
 
-    public String getRssType() {
-        return rssType;
+    public String getCategory() {
+        return category;
     }
 
-    public void setRssType(String rssType) {
-        this.rssType = rssType;
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public List<Entry> getEntries() {
@@ -81,4 +82,11 @@ public class Source implements Serializable{
         this.lastUpdate = lastUpdate;
     }
 
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
 }// end Source
