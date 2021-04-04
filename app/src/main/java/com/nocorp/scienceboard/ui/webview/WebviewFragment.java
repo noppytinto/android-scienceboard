@@ -14,6 +14,8 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,6 +47,13 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private Toolbar toolbar;
     private Toast toast;
     private ImageView imageViewSourceLogo;
+    private WebSettings webSettings;
+    private final int TEXT_SIZE_STEP = 20;
+    private final int DEFAULT_TEXT_SIZE = 90;
+    private int currentTextSize;
+    private final int UPPER_TEXT_SIZE_LIMIT = 200;
+    private final int LOWER_TEXT_SIZE_LIMIT = 0;
+    private MenuItem stopMenuItem;
 
 
 
@@ -59,10 +68,6 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 //        return fragment;
 //    }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -70,6 +75,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         // Inflate the layout for this fragment
         binding = FragmentWebviewBinding.inflate(inflater, container, false);
         view = binding.getRoot();
+        setHasOptionsMenu(true);
         return view;
     }
 
@@ -81,6 +87,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         toolbar = binding.toolbarWebviewFragment;
         toolbar.setOnMenuItemClickListener(this);
         toolbar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
+        currentTextSize = DEFAULT_TEXT_SIZE;
 
         if (getArguments() != null) {
             // the url is always !=null and non-empty
@@ -130,6 +137,13 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     }
 
     @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_webview, menu);
+        stopMenuItem = menu.findItem(R.id.option_webviewMenu_stop);
+    }
+
+    @Override
     public boolean onMenuItemClick(MenuItem item) {
         if(item.getItemId() == R.id.option_webviewMenu_stop) {
             if(snackbar!=null) snackbar.dismiss();
@@ -141,6 +155,18 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
             if(snackbar!=null) snackbar.dismiss();
             webView.loadUrl(url);
             showBottomToast(getString(R.string.string_refreshing_page));
+            return true;
+        }
+        else if(item.getItemId() == R.id.option_webviewMenu_increaseTextSize) {
+            increaseTextSize();
+            return true;
+        }
+        else if(item.getItemId() == R.id.option_webviewMenu_decreaseTextSize) {
+            decreaseTextSize();
+            return true;
+        }
+        else if(item.getItemId() == R.id.option_webviewMenu_defaultTextSize) {
+            setDefaultTextSize();
             return true;
         }
         else if(item.getItemId() == R.id.option_webviewMenu_share) {
@@ -171,6 +197,26 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 
     //------------------------------------------------------------------------------------ METHODS
 
+    private void increaseTextSize() {
+        if(currentTextSize <= UPPER_TEXT_SIZE_LIMIT) {
+            currentTextSize = currentTextSize + TEXT_SIZE_STEP;
+            webSettings.setTextZoom(currentTextSize);// where 90 is 90%; default value is ... 100
+        }
+    }
+
+    private void decreaseTextSize() {
+        if(currentTextSize >= LOWER_TEXT_SIZE_LIMIT){
+            currentTextSize = currentTextSize - TEXT_SIZE_STEP;
+            webSettings.setTextZoom(currentTextSize);
+        }
+    }
+
+    private void setDefaultTextSize() {
+        currentTextSize = DEFAULT_TEXT_SIZE;
+        webSettings.setTextZoom(currentTextSize);
+    }
+
+
     /**
      * override back button behavior for webviews.
      * Back button will go back in case of webviews
@@ -198,7 +244,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     }
 
     private void applyBrowsingRecommendedSettings(WebView webView) {
-        WebSettings webSettings = webView.getSettings();
+        webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         webSettings.setLoadWithOverviewMode(true);
@@ -233,12 +279,14 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
                 super.onPageFinished(view, url);
                 progressIndicator.setVisibility(View.GONE);
 //                showLoadCompletedSnackbar();
+                stopMenuItem.setVisible(false);
             }
 
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
                 progressIndicator.setVisibility(View.VISIBLE);
+                stopMenuItem.setVisible(true);
             }
 
             @Override
