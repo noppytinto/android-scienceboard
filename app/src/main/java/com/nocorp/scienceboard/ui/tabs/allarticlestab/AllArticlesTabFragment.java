@@ -2,6 +2,7 @@ package com.nocorp.scienceboard.ui.tabs.allarticlestab;
 
 import androidx.lifecycle.ViewModelProvider;
 
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -81,6 +82,7 @@ public class AllArticlesTabFragment extends Fragment implements FeedProvider.OnF
         super.onViewCreated(view, savedInstanceState);
         progressIndicator = binding.progressIndicatorAllArticlesTabFragment;
         swipeRefreshLayout = binding.swipeRefreshAllArticlesTabFragment;
+        swipeRefreshLayout.setColorSchemeResources(R.color.orange_light);
         adProvider = AdProvider.getInstance(); // is not guaranteed that
         feedProvider = new FeedProvider(this);
         viewModel = new ViewModelProvider(this).get(AllArticlesTabViewModel.class);
