@@ -116,6 +116,10 @@ public class AllArticlesTabFragment extends Fragment implements FeedProvider.OnF
 
         feedProvider.downloadRssSources_dom(requireContext());
         feedLoadedAtStartup = true;
+
+        // test crashalytics
+//        throw new RuntimeException("Test Crash"); // Force a crash
+
     }
 
     @Override

@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "767460243568",
+    "project_id": "science-board",
+    "storage_bucket": "science-board.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:767460243568:android:b09f4329d0d348db399cb5",
+        "android_client_info": {
+          "package_name": "com.nocorp.scienceboard"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "767460243568-nhsh78l0bn5qo591mijk1isp8p853ud4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfVnUSq706Ccweldvbj3MfZCLnJ8j_nKU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "767460243568-nhsh78l0bn5qo591mijk1isp8p853ud4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      },
+      "admob_app_id": "ca-app-pub-5571913923339240~6853624675"
+    }
+  ],
+  "configuration_version": "1"
+}

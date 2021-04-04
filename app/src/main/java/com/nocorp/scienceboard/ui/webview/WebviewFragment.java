@@ -53,6 +53,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private int currentTextSize;
     private final int UPPER_TEXT_SIZE_LIMIT = 200;
     private final int LOWER_TEXT_SIZE_LIMIT = 0;
+    private MenuItem stopMenuItem;
 
 
 
@@ -87,10 +88,10 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         toolbar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
         currentTextSize = DEFAULT_TEXT_SIZE;
 //        viewBinding.toolbarWebviewFragment.inflateMenu(R.menu.menu_webview);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            viewBinding.toolbarWebviewFragment.getMenu().setGroupDividerEnabled(true);
-        }
+        stopMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_stop);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+//            viewBinding.toolbarWebviewFragment.getMenu().setGroupDividerEnabled(true);
+//        }
 
         if (getArguments() != null) {
             // the url is always !=null and non-empty
@@ -314,13 +315,13 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     }
 
     private void hideStopIcon() {
-        MenuItem saveItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_stop);
-        saveItem.setVisible(false);
+        if(stopMenuItem !=null)
+            stopMenuItem.setVisible(false);
     }
 
     private void showStopIcon() {
-        MenuItem saveItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_stop);
-        saveItem.setVisible(true);
+        if(stopMenuItem !=null)
+            stopMenuItem.setVisible(true);
     }
 
 

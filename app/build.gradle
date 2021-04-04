@@ -1,9 +1,15 @@
 
 plugins {
     id 'com.android.application'
-}
-apply plugin: "androidx.navigation.safeargs"
+    id 'androidx.navigation.safeargs'
+    id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
+    id 'com.google.firebase.firebase-perf'
 
+}
+//apply plugin: "androidx.navigation.safeargs"
+//// firebase integration
+//apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 30
@@ -65,14 +71,25 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
+    // FIREBASE INTEGRATION
+    // Import the Firebase BoM
+    implementation platform('com.google.firebase:firebase-bom:26.8.0')
+    // Add the dependency for the Firebase SDK for Google Analytics
+    // When using the BoM, don't specify versions in Firebase dependencies
+    implementation 'com.google.firebase:firebase-analytics'
+    // Declare the dependencies for the Crashlytics and Analytics libraries
+    implementation 'com.google.firebase:firebase-crashlytics'
+    implementation 'com.google.firebase:firebase-analytics'
+    // Declare the dependency for the Performance Monitoring library
+    implementation 'com.google.firebase:firebase-perf'
 
-    // google admob
+    // GOOGLE ADMOB INTEGRATION
     implementation 'com.google.android.gms:play-services-ads:19.8.0'
     // for eu consent
     implementation 'com.google.android.ump:user-messaging-platform:1.0.0'
 
 
-    // room
+    // ROOM INTEGRATION
     def room_version = "2.2.6"
     implementation "androidx.room:room-runtime:2.2.6"
     annotationProcessor "androidx.room:room-compiler:$room_version"
