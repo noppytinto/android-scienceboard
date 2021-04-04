@@ -8,6 +8,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.MenuCompat;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -87,6 +88,9 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         currentTextSize = DEFAULT_TEXT_SIZE;
 //        viewBinding.toolbarWebviewFragment.inflateMenu(R.menu.menu_webview);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            viewBinding.toolbarWebviewFragment.getMenu().setGroupDividerEnabled(true);
+        }
 
         if (getArguments() != null) {
             // the url is always !=null and non-empty
@@ -151,7 +155,6 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 
         return false;
     }
-
 
     //------------------------------------------------------------------------------------ METHODS
 

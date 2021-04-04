@@ -2,6 +2,8 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+
+
     <item
         android:id="@+id/option_webviewMenu_stop"
         android:icon="@drawable/ic_stop"
@@ -20,23 +22,28 @@
         android:title="Share"
         app:showAsAction="always" />
 
-    <item
-        android:id="@+id/option_webviewMenu_increaseTextSize"
-        android:icon="@drawable/ic_add"
-        android:title="Increase text size"
-        app:showAsAction="ifRoom" />
+    <group android:id="@+id/group_menuWebview_textFormat">
+        <item
+            android:id="@+id/option_webviewMenu_increaseTextSize"
+            android:icon="@drawable/ic_add"
+            android:title="Increase text size"
+            app:showAsAction="ifRoom" />
 
-    <item
-        android:id="@+id/option_webviewMenu_decreaseTextSize"
-        android:icon="@drawable/ic_horizontal_line"
-        android:title="Decrease text size"
-        app:showAsAction="ifRoom" />
+        <item
+            android:id="@+id/option_webviewMenu_decreaseTextSize"
+            android:icon="@drawable/ic_horizontal_line"
+            android:title="Decrease text size"
+            app:showAsAction="ifRoom" />
 
-    <item
-        android:id="@+id/option_webviewMenu_defaultTextSize"
-        android:icon="@drawable/ic_underlined_text"
-        android:title="Default text size"
-        app:showAsAction="never" />
+        <item
+            android:id="@+id/option_webviewMenu_defaultTextSize"
+            android:icon="@drawable/ic_underlined_text"
+            android:title="Default text size"
+            app:showAsAction="never" />
+
+    </group>
+
+
 
 
     <item

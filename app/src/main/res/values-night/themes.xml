@@ -23,12 +23,21 @@
         <item name="colorPrimaryDark">@color/black</item>
         <item name="colorAccent">@color/orange_light</item>
         <item name="android:textColor">@color/black</item>
+
+        <!-- dropdown menu style -->
+<!--        <item name="android:dropDownListViewStyle">@style/ScienceBoard.PopupMenuListView</item>-->
     </style>
 
     <style name="Theme.ScienceBoard.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <!--        <item name="android:windowTranslucentStatus">true</item>-->
+    </style>
+
+
+    <style name="ScienceBoard.PopupMenuListView" parent="@style/Widget.AppCompat.ListView.DropDown">
+        <item name="android:divider">@color/light_gray</item>
+        <item name="android:dividerHeight">1dp</item>
     </style>
 
 </resources>
