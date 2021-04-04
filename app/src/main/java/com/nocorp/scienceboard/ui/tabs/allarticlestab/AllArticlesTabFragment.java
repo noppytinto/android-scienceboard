@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,7 @@ import android.widget.Toast;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.nocorp.scienceboard.MobileNavigationDirections;
+import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.AllArticlesTabFragmentBinding;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
@@ -45,13 +47,25 @@ public class AllArticlesTabFragment extends Fragment implements FeedProvider.OnF
     private boolean feedsLoading = false;
     private Toast toast;
 
+
+
+
+    //--------------------------------------------------------------------- CONSTRUCTORS
+
     public static AllArticlesTabFragment newInstance() {
         return new AllArticlesTabFragment();
     }
 
+
+
+
+
+    //--------------------------------------------------------------------- ANDROID METHODS
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
     }
 
     @Override
@@ -81,7 +95,7 @@ public class AllArticlesTabFragment extends Fragment implements FeedProvider.OnF
             if(articles==null || articles.size()==0) {
                 swipeRefreshLayout.setRefreshing(false);
                 progressIndicator.setVisibility(View.GONE);
-                Toast.makeText(requireContext(), "An error occurred during articles fetch, contact the developer.", Toast.LENGTH_SHORT).show();
+                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to dveloper
             }
             else {
                 swipeRefreshLayout.setRefreshing(false);
@@ -100,7 +114,6 @@ public class AllArticlesTabFragment extends Fragment implements FeedProvider.OnF
 
         feedProvider.downloadRssSources_dom(requireContext());
         feedLoadedAtStartup = true;
-        feedsLoading = true;
     }
 
     @Override
@@ -113,7 +126,7 @@ public class AllArticlesTabFragment extends Fragment implements FeedProvider.OnF
 
 
 
-    //---------------------------------------------------------------------
+    //--------------------------------------------------------------------- METHODS
 
     private void initRecycleView() {
         // defining Recycler view
@@ -128,13 +141,13 @@ public class AllArticlesTabFragment extends Fragment implements FeedProvider.OnF
             @Override
             public void onRefresh() {
                 Log.i(TAG, "onRefresh called from SwipeRefreshLayout");
-                if( ! feedsLoading) updateFeeds();
+                refreshAction();
             }
         });
     }
 
 
-    private void updateFeeds() {
+    private void refreshAction() {
         feedProvider.downloadRssSources_dom(requireContext());
     }
 
@@ -162,7 +175,7 @@ public class AllArticlesTabFragment extends Fragment implements FeedProvider.OnF
 
     @Override
     public void onFeedsDownloadFailed(String cause) {
-//        viewModel.setArticlesList(null);
+        viewModel.setArticlesList(null);
 
         // this (runOnUiThread) is unstable, can cause crashes, so better not use it
         Log.d(TAG, "SCIENCE_BOARD - onFeedsDownloadFailed: feeds not fetched, cause: $cause");
@@ -185,6 +198,13 @@ public class AllArticlesTabFragment extends Fragment implements FeedProvider.OnF
                 Navigation.findNavController(view).navigate(action);
             }
         }
+    }
+
+    private void showCenteredToast(String message) {
+        if(toast!=null) toast.cancel();
+        toast = Toast.makeText(requireContext(),message, Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
     }
 
 

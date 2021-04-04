@@ -8,4 +8,13 @@
     <string name="ad_attribution">Ad</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="string_retry">retry</string>
+    <string name="string_no_internet_connection">ERROR: no internet connection!</string>
+    <string name="string_ok">ok</string>
+    <string name="string_internet_available">Connection established! :)</string>
+    <string name="string_articles_fetch_fail_message">An error occurred during fetch, contact the developer.</string>
+    <string name="string_browsing_data_deleted">browsing data deleted</string>
+    <string name="string_refreshing_page">refreshing page</string>
+    <string name="string_page_load_stopped">loading stopped</string>
+    <string name="string_page_load_completed">Load completed.</string>
 </resources>

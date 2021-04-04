@@ -29,14 +29,12 @@ public class HomeFragment extends Fragment{
     private ViewPager2 viewPager;
     private HomeViewModel homeViewModel;
     private View view;
-    private AdProvider adProvider;
     private TabLayout tabLayout;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_home, container, false);
-        adProvider = AdProvider.getInstance(); // is not guaranteed that
         return root;
     }
 

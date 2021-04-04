@@ -101,8 +101,11 @@ public class FeedProvider {
                     if(source!=null) sources.add(source);
                 }
 
-                //
-                listener.onFeedsDownloadCompleted(sources);
+                if(sources!=null && sources.size()>0)
+                    listener.onFeedsDownloadCompleted(sources);
+                else
+                    listener.onFeedsDownloadFailed("");
+
 
             } catch (Exception e) {
                 e.printStackTrace();

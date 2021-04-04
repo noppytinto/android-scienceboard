@@ -1,5 +1,6 @@
 package com.nocorp.scienceboard.ui.webview;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -24,6 +26,7 @@ import android.widget.Toast;
 
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
+import com.nocorp.scienceboard.BuildConfig;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentWebviewBinding;
 
@@ -45,8 +48,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 
 
 
-    //-------------------------------------------------------------------------
-
+    //------------------------------------------------------------------------------------ ANDROID METHODS
 
 //    public static WebviewFragment newInstance(String param1, String param2) {
 //        WebviewFragment fragment = new WebviewFragment();
@@ -108,14 +110,12 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         }
     }
 
-
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         applyBrowsingRecommendedSettings(webView);
         webView.loadUrl(url);
     }
-
 
     @Override
     public void onDestroyView() {
@@ -129,39 +129,51 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         if(snackbar!=null) snackbar.dismiss();
     }
 
-
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         if(item.getItemId() == R.id.option_webviewMenu_stop) {
             if(snackbar!=null) snackbar.dismiss();
             webView.stopLoading();
-            showBottomToast("loading stopped");
+            showBottomToast(getString(R.string.string_page_load_stopped));
             return true;
         }
         else if(item.getItemId() == R.id.option_webviewMenu_refresh) {
             if(snackbar!=null) snackbar.dismiss();
             webView.loadUrl(url);
-            showBottomToast("refreshing page");
+            showBottomToast(getString(R.string.string_refreshing_page));
             return true;
         }
         else if(item.getItemId() == R.id.option_webviewMenu_share) {
-            //TODO
+            shareText(url);
             return true;
         }
         else if(item.getItemId() == R.id.option_webviewMenu_delete) {
             WebStorage.getInstance().deleteAllData();
-            showBottomToast("browsing data deleted");
+            showBottomToast(getString(R.string.string_browsing_data_deleted));
             return true;
         }
 
         return false;
     }
 
+    private void shareText(String message) {
+        try {
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(Intent.EXTRA_TEXT, message);
+            startActivity(Intent.createChooser(shareIntent, "Share"));
+        } catch(Exception e) {
+            e.printStackTrace();
+            Log.d(TAG, "onMenuItemClick: share failed");
+        }
+    }
+
+
+    //------------------------------------------------------------------------------------ METHODS
 
     /**
      * override back button behavior for webviews.
      * Back button will go back in case of webviews
-     * @param webView
      */
     private void setupBackButtonBehaviorForWebview(WebView webView) {
         webView.setOnKeyListener(new View.OnKeyListener()
@@ -184,12 +196,6 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
             }
         });
     }
-
-
-
-
-    //-------------------------------------------------------------------------
-
 
     private void applyBrowsingRecommendedSettings(WebView webView) {
         WebSettings webSettings = webView.getSettings();
@@ -246,7 +252,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     }
 
     private void showLoadCompletedSnackbar() {
-        String message = "Load completed.";
+        String message = getString(R.string.string_page_load_completed);
         snackbar = Snackbar.make(view, "",Snackbar.LENGTH_SHORT);
         snackbar.setText(message);
         snackbar.setText(message);

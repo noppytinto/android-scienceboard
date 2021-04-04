@@ -4,6 +4,9 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.snackbar.Snackbar;
+import com.nocorp.scienceboard.databinding.ActivityMainBinding;
+import com.nocorp.scienceboard.utility.ConnectionManager;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
 import androidx.annotation.NonNull;
@@ -17,25 +20,86 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NavController.OnDestinationChangedListener {
     private final String TAG = this.getClass().getSimpleName();
     private AdProvider adProvider;
     private NavController navController;
     private ActionBar actionBar;
     private BottomNavigationView bottomNavBar;
+    private ActivityMainBinding binding;
+    private View view;
+    private Snackbar snackbar;
+
+
+
+
+    //------------------------------------------------------------------------------ ANDROID METHODS
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initView();
-        AdProvider adProvider = AdProvider.getInstance();
-        adProvider.initAdMob(this);
-        adProvider.loadSomeAds(5, this);
+        initAdProvider();
+
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        boolean internetAvailable = ConnectionManager.getInternetStatus(this);
+        if(internetAvailable) {
+        }
+        else {
+            showErrorSnackbar(getString(R.string.string_no_internet_connection));
+        }
+    }
+
+    /**
+     * enable toolbar back button
+     */
+    @Override
+    public boolean onSupportNavigateUp() {
+        navController.navigateUp();
+        return super.onSupportNavigateUp();
+    }
+
+    /**
+     * listen for bottom navigation, destination changes
+     */
+    @Override
+    public void onDestinationChanged(@NonNull NavController controller,
+                                     @NonNull NavDestination destination, @Nullable Bundle arguments) {
+        if(destination.getId() == R.id.navigation_home) {
+            hideToolbar();
+            showBottomBar();
+        }
+        else if(destination.getId() == R.id.webviewFragment) {
+            hideToolbar();
+            hideBottomBar();
+        }
+        else {
+            showToolbar();
+            showBottomBar();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        binding = null;
+    }
+
+
+
+
+
+    //------------------------------------------------------------------------------ MY METHODS
+
     private void initView() {
-        setContentView(R.layout.activity_main);
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        view = binding.getRoot();
+        setContentView(view);
         bottomNavBar = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -45,45 +109,93 @@ public class MainActivity extends AppCompatActivity {
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(bottomNavBar, navController);
-
-        navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
-            @Override
-            public void onDestinationChanged(@NonNull NavController controller,
-                                             @NonNull NavDestination destination, @Nullable Bundle arguments) {
-                if(destination.getId() == R.id.navigation_home) {
-                    if(getSupportActionBar()!=null)
-                        getSupportActionBar().hide();
-
-                    if(bottomNavBar!=null)
-                        bottomNavBar.setVisibility(View.VISIBLE);
-                }
-                else if(destination.getId() == R.id.webviewFragment) {
-                    if(getSupportActionBar()!=null)
-                        getSupportActionBar().hide();
-                    if(bottomNavBar!=null)
-                        bottomNavBar.setVisibility(View.GONE);
-                }
-                else {
-                    if(getSupportActionBar()!=null)
-                        getSupportActionBar().show();
-
-                    if(bottomNavBar!=null)
-                        bottomNavBar.setVisibility(View.VISIBLE);
-                }
-            }
-        });
+        navController.addOnDestinationChangedListener(this);
 
         actionBar = getSupportActionBar();
-        getSupportActionBar().setShowHideAnimationEnabled(false);
+        getSupportActionBar().setShowHideAnimationEnabled(false);// TODO: investigate
 
     }
 
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        navController.navigateUp();
-        return super.onSupportNavigateUp();
+    private void initAdProvider() {
+        AdProvider adProvider = AdProvider.getInstance();
+        adProvider.initAdMob(this);
+        adProvider.loadSomeAds(5, this);
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    private void hideBottomBar() {
+        if(bottomNavBar!=null)
+            bottomNavBar.setVisibility(View.GONE);
+    }
+
+    private void showToolbar() {
+        if(getSupportActionBar()!=null)
+            getSupportActionBar().show();
+    }
+
+    private void showBottomBar() {
+        if(bottomNavBar!=null)
+            bottomNavBar.setVisibility(View.VISIBLE);
+    }
+
+    private void hideToolbar() {
+        if (getSupportActionBar() != null)
+            getSupportActionBar().hide();
+    }
+
+    private void showErrorSnackbar(String message) {
+        if(snackbar!=null) snackbar.dismiss(); // dismiss any previous snackbar
+        snackbar = Snackbar.make(view, message, Snackbar.LENGTH_INDEFINITE);
+        snackbar.setTextColor(getMyColor(R.color.white));
+        snackbar.setBackgroundTint(getMyColor(R.color.red));
+        snackbar.setAnchorView(binding.navView);
+        snackbar.setAction(R.string.string_retry, v -> {
+            snackbar.dismiss();
+            retryAction();
+        });
+        snackbar.setActionTextColor(getMyColor(R.color.white));
+        snackbar.show();
+    }
+
+    private int getMyColor(int resourceId) {
+        return getResources().getColor(resourceId);
+    }
+
+    private void retryAction() {
+        boolean internetAvailable = ConnectionManager.getInternetStatus(this);
+        if(internetAvailable) {
+            showGreenSnackbar(getString(R.string.string_internet_available));
+        }
+        else {
+            showErrorSnackbar(getString(R.string.string_no_internet_connection));
+        }
+    }
+
+
+    private void showGreenSnackbar(String message) {
+        if(snackbar!=null) snackbar.dismiss(); // dismiss any previous snackbar
+        snackbar = Snackbar.make(view, message,Snackbar.LENGTH_SHORT);
+        snackbar.setTextColor(getMyColor(R.color.white));
+        snackbar.setBackgroundTint(getMyColor(R.color.green));
+        snackbar.setAnchorView(binding.navView);
+        snackbar.setAction(R.string.string_ok, v -> snackbar.dismiss());
+        snackbar.setActionTextColor(getMyColor(R.color.white));
+        snackbar.show();
+    }
+
+
 
 
 }// end MainActivity
