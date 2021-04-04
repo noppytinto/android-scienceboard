@@ -56,6 +56,7 @@ public class AllArticlesTabFragment extends Fragment implements
     private boolean feedsLoading = false;
     private Toast toast;
     private SourceViewModel sourceViewModel;
+    private List<Source> sources;
 
 
 
@@ -128,8 +129,7 @@ public class AllArticlesTabFragment extends Fragment implements
 //            feedsLoading = true;
 //        }
 
-//        feedProvider.downloadRssSources_dom(requireContext());
-//        feedLoadedAtStartup = true;
+
 
         SourceRepository sourceRepository = new SourceRepository(this);
         sourceRepository.loadSources();
@@ -171,7 +171,7 @@ public class AllArticlesTabFragment extends Fragment implements
 
 
     private void refreshAction() {
-        feedProvider.downloadRssSources_dom(requireContext());
+        feedProvider.downloadRssSources_dom(sources, requireContext());
     }
 
     @Override
@@ -233,12 +233,17 @@ public class AllArticlesTabFragment extends Fragment implements
 
     @Override
     public void onSourcesFetchCompleted(List<Source> sources) {
-        showCenteredToast("sources fetched from remote db");
+        if(sources!=null || sources.size()>0) {
+            this.sources = sources;
+            feedProvider.downloadRssSources_dom(sources, requireContext());
+            feedLoadedAtStartup = true;
+        }
+
+        runToastOnUiThread("sources fetched from remote db");
     }
 
     @Override
     public void onSourcesFetchFailed(String cause) {
-        showCenteredToast("sources fetch failed! from remote db");
-
+        runToastOnUiThread("sources fetch failed! from remote db");
     }
 }// end AllArticlesTabFragment

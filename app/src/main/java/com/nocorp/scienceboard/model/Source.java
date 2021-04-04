@@ -16,6 +16,7 @@ public class Source implements Serializable{
     private List<Article> articles;
     private Date lastUpdate;
     private String language;
+    private String xmlCode;
 
 
     public String getName() {
@@ -88,5 +89,13 @@ public class Source implements Serializable{
 
     public void setLanguage(String language) {
         this.language = language;
+    }
+
+    public String getXmlCode() {
+        return xmlCode;
+    }
+
+    public void setXmlCode(String xmlCode) {
+        this.xmlCode = xmlCode;
     }
 }// end Source

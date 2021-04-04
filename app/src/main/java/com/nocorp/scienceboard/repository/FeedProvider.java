@@ -41,97 +41,25 @@ public class FeedProvider {
     public FeedProvider(OnFeedsDownloadedListener listener) {
         this.listener = listener;
         sourceUrls = new ArrayList<>();
-        loadRssUrls();
+//        loadRssUrls();
     }
 
 
 
     //------------------------------------------------------------
 
-
-    public void loadRssUrlsFromRemoteDb() {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection(SOURCES_COLLECTION_NAME)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-                            }
-                        } else {
-                            Log.w(TAG, "Error getting documents.", task.getException());
-                        }
-                    }
-                });
-    }
-
-    private void loadRssUrls() {
-        loadRssUrlsFromRemoteDb();
-
-
-        final String feedTag = "https://www.theverge.com/rss/index.xml";
-        final String rdfTag = "https://www.nature.com/nmat.rss"; // unsecure (HTTP)
-        final String rssTag = "https://home.cern/api/news/news/feed.rss";
-        final String malformedRss = "https://www.theverge.com/";
-
-        // space
-        final String esa_italy = "https://www.esa.int/rssfeed/Italy";
-        final String nytimes_space = "https://rss.nytimes.com/services/xml/rss/nyt/Space.xml";
-        final String cern = "https://home.cern/api/news/news/feed.rss";
-        final String spacenews = "https://spacenews.com/feed/";
-        final String space_com = "https://www.space.com/feeds/all";
-        final String phys_org_space = "https://phys.org/rss-feed/space-news/";
-        final String newscientist_space = "https://www.newscientist.com/subject/space/feed/";
-        final String esa_space_news = "https://www.esa.int/rssfeed/Our_Activities/Space_News";
-        final String nasa = "https://www.nasa.gov/rss/dyn/breaking_news.rss";
-
-        // tech
-        final String wired = "https://www.wired.com/feed/rss";
-        final String nvidiaBlog = "https://feeds.feedburner.com/nvidiablog";
-        final String hdblog = "https://www.hdblog.it/feed/";
-        final String theverge = "https://www.theverge.com/rss/index.xml";
-
-        // science
-        final String nature = "http://feeds.nature.com/nature/rss/current";
-        final String livescience = "https://www.livescience.com/feeds/all";
-
-
-        sourceUrls.add(esa_italy);
-        sourceUrls.add(nytimes_space);
-        sourceUrls.add(cern);
-        sourceUrls.add(space_com);
-//        sourceUrls.add(newscientist_space); // no thumbnails
-        sourceUrls.add(esa_space_news);
-        sourceUrls.add(hdblog);
-        sourceUrls.add(theverge);
-//        sourceUrls.add(nasa); // not https
-
-
-
-//        // ----------------- slow
-        sourceUrls.add(spacenews);
-//        sourceUrls.add(phys_org_space);
-//        sourceUrls.add(wired);
-//        sourceUrls.add(nvidiaBlog); // not https
-//        sourceUrls.add(nature); // no thumbnails, images not https
-        sourceUrls.add(livescience);
-
-    }
-
-    public List<Source> downloadRssSources_dom(Context context) {
+    public List<Source> downloadRssSources_dom(List<Source> givenSources, Context context) {
         sources = new ArrayList<>();
-        if(sourceUrls==null || sourceUrls.size()<=0) {
+        if(givenSources==null || givenSources.size()<=0) {
             listener.onFeedsDownloadFailed("url list is empty/null");
             return sources;
         }
 
         Runnable task = () -> {
             try {
-                for(String url : sourceUrls) {
-                    Source source = downloadSource_dom(url, context);
-                    if(source!=null) sources.add(source);
+                for(Source source : givenSources) {
+                    Source temp = downloadSource_dom(source.getRssUrl(), context);
+                    if(temp!=null) sources.add(temp);
                 }
 
                 if(sources!=null && sources.size()>0)

@@ -40,11 +40,11 @@ public class HttpUtilities {
         return protocol + DOUBLE_DASHES + domain;
     }
 
-//    private String inputStreamToString(InputStream inputStream) throws IOException {
-//        String result = org.apache.commons.io.IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-//
-//        return result;
-//    }
+    private String inputStreamToString(InputStream inputStream) throws IOException {
+        String result = org.apache.commons.io.IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+
+        return result;
+    }
 
 
     /**
