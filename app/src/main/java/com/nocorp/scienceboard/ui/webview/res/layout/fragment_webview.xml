@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
+        android:elevation="7dp"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
         app:layout_constraintEnd_toEndOf="parent"
@@ -20,14 +21,12 @@
         app:layout_constraintTop_toTopOf="parent"
         app:menu="@menu/menu_webview"
         app:navigationIcon="@drawable/ic_back_arrow"
-        app:titleTextColor="@color/black"
-        android:elevation="7dp"
-        />
+        app:titleTextColor="@color/black" />
 
 
     <WebView
         android:id="@+id/webView_webviewFragment"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

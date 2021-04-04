@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
@@ -24,11 +25,12 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
     private final String TAG = this.getClass().getSimpleName();
     private AdProvider adProvider;
     private NavController navController;
-    private ActionBar actionBar;
     private BottomNavigationView bottomNavBar;
     private ActivityMainBinding binding;
     private View view;
     private Snackbar snackbar;
+    private Toolbar toolbar;
+    private ActionBar appBar;
 
 
 
@@ -55,14 +57,14 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
         }
     }
 
-    /**
-     * enable toolbar back button
-     */
-    @Override
-    public boolean onSupportNavigateUp() {
-        navController.navigateUp();
-        return super.onSupportNavigateUp();
-    }
+//    /**
+//     * enable toolbar back button
+//     */
+//    @Override
+//    public boolean onSupportNavigateUp() {
+//        navController.navigateUp();
+//        return super.onSupportNavigateUp();
+//    }
 
     /**
      * listen for bottom navigation, destination changes
@@ -100,7 +102,15 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         view = binding.getRoot();
         setContentView(view);
-        bottomNavBar = findViewById(R.id.nav_view);
+        toolbar = binding.toolbarMainActivity;
+        setSupportActionBar(toolbar);
+        // Get a support ActionBar corresponding to this toolbar
+        appBar = getSupportActionBar();
+        // Enable the Up button
+        if(appBar!=null) appBar.setDisplayHomeAsUpEnabled(true);
+
+
+        bottomNavBar = binding.includeMainActivity.navView;
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
@@ -110,9 +120,6 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(bottomNavBar, navController);
         navController.addOnDestinationChangedListener(this);
-
-        actionBar = getSupportActionBar();
-        getSupportActionBar().setShowHideAnimationEnabled(false);// TODO: investigate
 
     }
 
@@ -141,8 +148,9 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
     }
 
     private void showToolbar() {
-        if(getSupportActionBar()!=null)
-            getSupportActionBar().show();
+        if (appBar != null)
+            appBar.show();
+//        toolbar.setVisibility(View.VISIBLE);
     }
 
     private void showBottomBar() {
@@ -151,8 +159,9 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
     }
 
     private void hideToolbar() {
-        if (getSupportActionBar() != null)
-            getSupportActionBar().hide();
+        if (appBar != null)
+            appBar.hide();
+//        toolbar.setVisibility(View.GONE);
     }
 
     private void showErrorSnackbar(String message) {
@@ -160,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
         snackbar = Snackbar.make(view, message, Snackbar.LENGTH_INDEFINITE);
         snackbar.setTextColor(getMyColor(R.color.white));
         snackbar.setBackgroundTint(getMyColor(R.color.red));
-        snackbar.setAnchorView(binding.navView);
+        snackbar.setAnchorView(binding.includeMainActivity.navView);
         snackbar.setAction(R.string.string_retry, v -> {
             snackbar.dismiss();
             retryAction();
@@ -189,7 +198,7 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
         snackbar = Snackbar.make(view, message,Snackbar.LENGTH_SHORT);
         snackbar.setTextColor(getMyColor(R.color.white));
         snackbar.setBackgroundTint(getMyColor(R.color.green));
-        snackbar.setAnchorView(binding.navView);
+        snackbar.setAnchorView(binding.includeMainActivity.navView);
         snackbar.setAction(R.string.string_ok, v -> snackbar.dismiss());
         snackbar.setActionTextColor(getMyColor(R.color.white));
         snackbar.show();

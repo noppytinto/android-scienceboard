@@ -26,4 +26,11 @@
         <item name="colorAccent">@color/orange_light</item>
         <item name="android:textColor">@color/black</item>
     </style>
+
+    <style name="Theme.ScienceBoard.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <!--        <item name="android:windowTranslucentStatus">true</item>-->
+    </style>
+
 </resources>

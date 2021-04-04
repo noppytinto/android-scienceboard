@@ -42,4 +42,9 @@
         app:exitAnim="@anim/fragment_close_exit"
         app:popEnterAnim="@anim/fragment_open_enter"
         app:popExitAnim="@anim/fragment_close_exit" />
+    <fragment
+        android:id="@+id/allArticlesTabFragment"
+        android:name="com.nocorp.scienceboard.ui.tabs.allarticlestab.AllArticlesTabFragment"
+        android:label="all_articles_tab_fragment"
+        tools:layout="@layout/all_articles_tab_fragment" />
 </navigation>
