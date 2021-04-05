@@ -1,31 +1,31 @@
 package com.nocorp.scienceboard.utility.room;
 
+
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
+import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.utility.rss.model.Entry;
 
 import java.util.List;
 
 @Dao
-public interface EntryDao {
-    @Query("SELECT * FROM entry")
-    List<Entry> selectAll();
+public interface ArticleDao {
+    @Query("SELECT * FROM article")
+    List<Article> selectAll();
 
-    @Query("SELECT * FROM entry WHERE webpage_url = :givenValue")
-    List<Entry> selectByWebsiteUrl(String givenValue);
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    void insertAll(Entry... entries);
+    @Query("SELECT * FROM article WHERE webpage_url = :givenValue")
+    List<Article> selectByWebsiteUrl(String givenValue);
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    void insert(Entry entry);
+    void insertAll(Article... articles);
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    void insert(Article article);
 
     @Delete
-    void delete(Entry entry);
-
-}// end EntryDao
+    void delete(Article article);
+}

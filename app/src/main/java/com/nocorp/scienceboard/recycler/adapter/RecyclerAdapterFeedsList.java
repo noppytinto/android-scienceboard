@@ -159,7 +159,7 @@ public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<RecyclerView.
 
     @NotNull
     private String buildPubDate(Article article) {
-        Date pubDate = article.getPublishDate();
+        Date pubDate = article.getPubDate();
         long pubDateInMillis = pubDate.getTime();
         return MyUtilities.convertMillisToReadableTimespan(pubDateInMillis);
     }

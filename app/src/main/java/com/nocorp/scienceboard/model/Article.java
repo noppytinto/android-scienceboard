@@ -1,26 +1,38 @@
 package com.nocorp.scienceboard.model;
 
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.utility.MyValues;
 
 import java.util.Date;
 
+@Entity
 public class Article extends ListItem implements Comparable<Article> {
     private String title;
     private String description;
     private String content;
+    @ColumnInfo(name = "thumbnail_url")
     private String thumbnailUrl;
+    @PrimaryKey
+    @ColumnInfo(name = "webpage_url")
+    @NonNull
     private String webpageUrl;
 //    private SyndEntry syndEntry;
+    @Ignore
     private Source source;
-    private Date publishDate;
-
+    @ColumnInfo(name = "pub_date")
+    private Date pubDate;
 
     public Article() {
         super(MyValues.ItemType.ARTICLE);
     }
 
-
+    @Ignore
     public Article(String title, String content, String thumbnailUrl) {
         this();
         this.title = title;
@@ -28,6 +40,7 @@ public class Article extends ListItem implements Comparable<Article> {
         this.thumbnailUrl = thumbnailUrl;
     }
 
+    @Ignore
     public Article(String title, String thumbnailUrl) {
         this();
         this.title = title;
@@ -90,12 +103,12 @@ public class Article extends ListItem implements Comparable<Article> {
         this.source = source;
     }
 
-    public Date getPublishDate() {
-        return publishDate;
+    public Date getPubDate() {
+        return pubDate;
     }
 
-    public void setPublishDate(Date publishDate) {
-        this.publishDate = publishDate;
+    public void setPubDate(Date pubDate) {
+        this.pubDate = pubDate;
     }
 
     public String getDescription() {
@@ -108,9 +121,9 @@ public class Article extends ListItem implements Comparable<Article> {
 
     @Override
     public int compareTo(Article another) {
-        if(this.publishDate.getTime() > another.publishDate.getTime())
+        if(this.pubDate.getTime() > another.pubDate.getTime())
             return -1;
-        else if(this.publishDate.getTime() < another.publishDate.getTime())
+        else if(this.pubDate.getTime() < another.pubDate.getTime())
             return 1;
 
         return 0;

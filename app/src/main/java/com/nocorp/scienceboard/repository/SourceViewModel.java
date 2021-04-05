@@ -1,5 +1,6 @@
 package com.nocorp.scienceboard.repository;
 
+import android.content.Context;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
@@ -70,9 +71,10 @@ public class SourceViewModel extends ViewModel implements SourceRepositoryListen
     }
 
 
-    public void loadSourcesFromRemoteDb() {
-        sourceRepository.loadSources();
+    public void loadSourcesFromRemoteDb(Context context) {
+        sourceRepository.loadSources(context);
     }
+
 
 
 

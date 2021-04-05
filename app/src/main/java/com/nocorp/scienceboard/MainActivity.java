@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
                 showCenteredToast("an error occurred when fetching sources from remote DB");
             }
         });
-        sourceViewModel.loadSourcesFromRemoteDb();
+        sourceViewModel.loadSourcesFromRemoteDb(this);
     }
 
     private void initView() {

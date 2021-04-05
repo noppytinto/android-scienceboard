@@ -96,7 +96,7 @@ public class ArticleRepository {
             article.setThumbnailUrl(thumbnailUrl);
             article.setTitle(title);
             article.setWebpageUrl(webpageUrl);
-            article.setPublishDate(pubDate);
+            article.setPubDate(pubDate);
             article.setSource(source);
         } catch (Exception e) {
             e.printStackTrace();

@@ -9,6 +9,7 @@ import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.utility.rss.DomXmlParser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -21,6 +22,8 @@ public class FeedProvider {
     private OnFeedsDownloadedListener listener;
     //
     private static List<Channel> channelsCache;
+    private final List<String> mainCategories = Arrays.asList("space", "physics", "tech", "medicine", "biology");
+    private SourceRepository sourceRepository;
 
     public interface OnFeedsDownloadedListener {
         public void onFeedsDownloadCompleted(List<Source> sources);
@@ -34,6 +37,8 @@ public class FeedProvider {
         this.listener = listener;
         sourceUrls = new ArrayList<>();
 //        loadRssUrls();
+        sourceRepository = new SourceRepository();
+
     }
 
 
@@ -41,15 +46,18 @@ public class FeedProvider {
     //------------------------------------------------------------
 
     public List<Source> downloadSources(List<Source> givenSources, Context context) {
-        sources = new ArrayList<>();
+        sources = null;
         if(givenSources==null || givenSources.size()<=0) {
             listener.onFeedsDownloadFailed("url list is empty/null");
             return sources;
         }
+        List<Source> sourceList = sourceRepository.getAsourceForEachMainCategory_randomly(givenSources, mainCategories);
+
+        sources = new ArrayList<>();
 
         Runnable task = () -> {
             try {
-                for(Source source : givenSources) {
+                for(Source source : sourceList) {
                     Source temp = downloadSource(source.getRssUrl(), context);
                     if(temp!=null) {
                         // add additional info
@@ -89,7 +97,6 @@ public class FeedProvider {
                 channel.setRssUrl(url);
                 source = buildSource(channel);
             }
-
         }
         catch (Exception e) {
             e.printStackTrace();

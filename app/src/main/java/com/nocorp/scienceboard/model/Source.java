@@ -1,21 +1,37 @@
 package com.nocorp.scienceboard.model;
 
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+
 import com.nocorp.scienceboard.utility.rss.model.Entry;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+@Entity
 public class Source implements Serializable{
+    @PrimaryKey
+    @NonNull
     private String name;
+    @ColumnInfo(name = "website_url")
     private String websiteUrl;
+    @ColumnInfo(name = "rss_url")
     private String rssUrl;
+    @Ignore
     private String logoUrl;
     private List<String> categories;
+    @Ignore
     private List<Entry> entries;
+    @Ignore
     private List<Article> articles;
+    @ColumnInfo(name = "last_update")
     private Date lastUpdate;
     private String language;
+    @ColumnInfo(name = "xml_code")
     private String xmlCode;
 
 

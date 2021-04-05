@@ -9,14 +9,12 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.nocorp.scienceboard.MobileNavigationDirections;
 import com.nocorp.scienceboard.R;
@@ -29,6 +27,7 @@ import com.nocorp.scienceboard.repository.SourceViewModel;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class AllArticlesTabFragment extends Fragment implements
@@ -50,6 +49,7 @@ public class AllArticlesTabFragment extends Fragment implements
     private Toast toast;
     private SourceViewModel sourceViewModel;
     private List<Source> sources;
+    private final List<String> mainCategories = Arrays.asList("space", "physics", "tech", "medicine", "biology");
 
 
 
@@ -101,6 +101,7 @@ public class AllArticlesTabFragment extends Fragment implements
             if(sources!=null && sources.size()>0) {
                 // TODO
                 this.sources = sources;
+
                 feedProvider.downloadSources(sources, requireContext());
                 feedLoadedAtStartup = true;
             }
@@ -167,7 +168,7 @@ public class AllArticlesTabFragment extends Fragment implements
 
     @Override
     public void onFeedsDownloadCompleted(List<Source> sources) {
-        allArticlesTabViewModel.fetchArticles(sources);
+        allArticlesTabViewModel.downloadArticles(sources);
         Log.d(TAG, "SCIENCE_BOARD - onFeedsDownloadCompleted: feeds fetched");
 
         // this (runOnUiThread) is unstable, can cause crashes, so better not use it
