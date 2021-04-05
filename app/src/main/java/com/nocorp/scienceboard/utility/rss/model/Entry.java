@@ -78,6 +78,8 @@ public class Entry implements Comparable<Entry> {
 
     @Override
     public int compareTo(Entry another) {
+        if(pubDate==null || another==null) return 0;
+
         if(this.pubDate.getTime() > another.pubDate.getTime())
             return -1;
         else if(this.pubDate.getTime() < another.pubDate.getTime())

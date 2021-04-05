@@ -125,6 +125,8 @@ public class Article extends ListItem implements Comparable<Article> {
 
     @Override
     public int compareTo(Article another) {
+        if(pubDate==null || another==null) return 0;
+
         if(this.pubDate.getTime() > another.pubDate.getTime())
             return -1;
         else if(this.pubDate.getTime() < another.pubDate.getTime())

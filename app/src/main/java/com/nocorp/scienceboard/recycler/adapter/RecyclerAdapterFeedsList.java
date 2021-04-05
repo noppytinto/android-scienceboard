@@ -117,26 +117,31 @@ public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<RecyclerView.
             holder.hideCardView();
         }
         else {
-            Glide.with(context)
-                    .load(thumbnailUrl)
-                    .fallback(R.drawable.broken_image)
-                    .placeholder(R.drawable.placeholder_image)
-                    .fitCenter()
-                    .listener(new RequestListener<Drawable>() {
-                                  @Override
-                                  public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                                      holder.hideCardView();
-                                      return false;
-                                  }
+            try {
+                // TODO: crahses on andorid 21 (resource "thumbnail" not found)
+                Glide.with(context)
+                        .load(thumbnailUrl)
+                        .fallback(R.drawable.broken_image)
+                        .placeholder(R.drawable.placeholder_image)
+                        .fitCenter()
+                        .listener(new RequestListener<Drawable>() {
+                                      @Override
+                                      public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                          holder.hideCardView();
+                                          return false;
+                                      }
 
-                                  @Override
-                                  public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                                      holder.showCardView();
-                                      return false;
+                                      @Override
+                                      public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                          holder.showCardView();
+                                          return false;
+                                      }
                                   }
-                              }
-                    )
-                    .into(holder.thumbnail);
+                        )
+                        .into(holder.thumbnail);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -160,6 +165,7 @@ public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<RecyclerView.
     @NotNull
     private String buildPubDate(Article article) {
         Date pubDate = article.getPubDate();
+        if(pubDate==null) return "0"; // TODO
         long pubDateInMillis = pubDate.getTime();
         return MyUtilities.convertMillisToReadableTimespan(pubDateInMillis);
     }
