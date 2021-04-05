@@ -25,9 +25,7 @@ import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterFeedsList;
 import com.nocorp.scienceboard.repository.FeedProvider;
-import com.nocorp.scienceboard.repository.SourceRepository;
 import com.nocorp.scienceboard.repository.SourceViewModel;
-import com.nocorp.scienceboard.repository.SourcesFetcher;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
 import java.util.ArrayList;
@@ -35,15 +33,13 @@ import java.util.List;
 
 public class AllArticlesTabFragment extends Fragment implements
         FeedProvider.OnFeedsDownloadedListener,
-        RecyclerAdapterFeedsList.OnArticleClickedListener,
-        SourcesFetcher
-
+        RecyclerAdapterFeedsList.OnArticleClickedListener
 {
     private final String TAG = this.getClass().getSimpleName();
     private RecyclerAdapterFeedsList recyclerAdapterFeedsList;
     private RecyclerView recyclerView;
     private CircularProgressIndicator progressIndicator;
-    private AllArticlesTabViewModel viewModel;
+    private AllArticlesTabViewModel allArticlesTabViewModel;
     private View view;
     private AdProvider adProvider;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -92,7 +88,8 @@ public class AllArticlesTabFragment extends Fragment implements
         swipeRefreshLayout.setColorSchemeResources(R.color.orange_light);
         adProvider = AdProvider.getInstance(); // is not guaranteed that
         feedProvider = new FeedProvider(this);
-        viewModel = new ViewModelProvider(this).get(AllArticlesTabViewModel.class);
+        sourceViewModel = new ViewModelProvider(requireActivity()).get(SourceViewModel.class);
+        allArticlesTabViewModel = new ViewModelProvider(this).get(AllArticlesTabViewModel.class);
         initRecycleView();
         setupSwipeDownToRefresh();
     }
@@ -100,16 +97,20 @@ public class AllArticlesTabFragment extends Fragment implements
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        sourceViewModel = new ViewModelProvider(requireActivity()).get(SourceViewModel.class);
-//        sourceViewModel.getObservableSources().observe(getViewLifecycleOwner(), sources -> {
-//            // TODO: Update the UI.
-//        });
+        sourceViewModel.getObservableSources().observe(getViewLifecycleOwner(), sources -> {
+            if(sources!=null && sources.size()>0) {
+                // TODO
+                this.sources = sources;
+                feedProvider.downloadSources(sources, requireContext());
+                feedLoadedAtStartup = true;
+            }
+        });
 
-        viewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), articles -> {
+        allArticlesTabViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), articles -> {
             if(articles==null || articles.size()==0) {
                 swipeRefreshLayout.setRefreshing(false);
                 progressIndicator.setVisibility(View.GONE);
-                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to dveloper
+                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
             }
             else {
                 swipeRefreshLayout.setRefreshing(false);
@@ -126,10 +127,6 @@ public class AllArticlesTabFragment extends Fragment implements
 //            feedsLoading = true;
 //        }
 
-
-
-        SourceRepository sourceRepository = new SourceRepository(this);
-        sourceRepository.loadSources();
 
         // test crashalytics
 //        throw new RuntimeException("Test Crash"); // Force a crash
@@ -157,12 +154,9 @@ public class AllArticlesTabFragment extends Fragment implements
     }
 
     private void setupSwipeDownToRefresh() {
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                Log.i(TAG, "onRefresh called from SwipeRefreshLayout");
-                refreshAction();
-            }
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            Log.i(TAG, "onRefresh called from SwipeRefreshLayout");
+            refreshAction();
         });
     }
 
@@ -173,7 +167,7 @@ public class AllArticlesTabFragment extends Fragment implements
 
     @Override
     public void onFeedsDownloadCompleted(List<Source> sources) {
-        viewModel.fetchArticles(sources);
+        allArticlesTabViewModel.fetchArticles(sources);
         Log.d(TAG, "SCIENCE_BOARD - onFeedsDownloadCompleted: feeds fetched");
 
         // this (runOnUiThread) is unstable, can cause crashes, so better not use it
@@ -195,7 +189,7 @@ public class AllArticlesTabFragment extends Fragment implements
 
     @Override
     public void onFeedsDownloadFailed(String cause) {
-        viewModel.setArticlesList(null);
+        allArticlesTabViewModel.setArticlesList(null);
 
         // this (runOnUiThread) is unstable, can cause crashes, so better not use it
         Log.d(TAG, "SCIENCE_BOARD - onFeedsDownloadFailed: feeds not fetched, cause: $cause");
@@ -228,19 +222,5 @@ public class AllArticlesTabFragment extends Fragment implements
     }
 
 
-    @Override
-    public void onSourcesFetchCompleted(List<Source> sources) {
-        if(sources!=null || sources.size()>0) {
-            this.sources = sources;
-            feedProvider.downloadSources(sources, requireContext());
-            feedLoadedAtStartup = true;
-        }
 
-        runToastOnUiThread("sources fetched from remote db");
-    }
-
-    @Override
-    public void onSourcesFetchFailed(String cause) {
-        runToastOnUiThread("sources fetch failed! from remote db");
-    }
 }// end AllArticlesTabFragment

@@ -1,7 +1,9 @@
 package com.nocorp.scienceboard;
 
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
@@ -34,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
     private Toolbar toolbar;
     private ActionBar appBar;
     private SourceViewModel sourceViewModel;
+    private Toast toast;
 
 
 
@@ -46,12 +49,10 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
         super.onCreate(savedInstanceState);
         initView();
         initAdProvider();
-
-        sourceViewModel = new ViewModelProvider(this).get(SourceViewModel.class);
-        sourceViewModel.getObservableSources().observe(this, sources -> {
-            // TODO: Update the UI.
-        });
+        fetchSourcesFromRemoteDb();
     }
+
+
 
     @Override
     protected void onResume() {
@@ -104,6 +105,19 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
 
 
     //------------------------------------------------------------------------------ MY METHODS
+
+    private void fetchSourcesFromRemoteDb() {
+        sourceViewModel = new ViewModelProvider(this).get(SourceViewModel.class);
+        sourceViewModel.getObservableSources().observe(this, sources -> {
+            if(sources!=null && sources.size()>0) {
+                showCenteredToast("sources fetched from remote DB");
+            }
+            else {
+                showCenteredToast("an error occurred when fetching sources from remote DB");
+            }
+        });
+        sourceViewModel.loadSourcesFromRemoteDb();
+    }
 
     private void initView() {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
@@ -211,6 +225,12 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
         snackbar.show();
     }
 
+    private void showCenteredToast(String message) {
+        if(toast!=null) toast.cancel();
+        toast = Toast.makeText(this, message, Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
+    }
 
 
 

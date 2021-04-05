@@ -31,17 +31,17 @@ public class SourceRepository {
 
     private List<Source> sources;
     private List<String> sourceUrls;
-    private SourcesFetcher listener;
+    private SourceRepositoryListener listener;
     private FirebaseFirestore db;
+    private static boolean firestoreFetchCompleted;
 
 
 
     //--------------------------------------------------------------------------- CONSTRUCTORS
 
-    public SourceRepository (SourcesFetcher listener) {
+    public SourceRepository (SourceRepositoryListener listener) {
         this.listener = listener;
         db = FirebaseFirestore.getInstance();
-        sources = new ArrayList<>();
     }
 
 
@@ -50,10 +50,17 @@ public class SourceRepository {
 
     public void loadSources() {
         loadSourcesBasicInfoFromRemoteDb();
+
+
+//        if( ! firestoreFetchCompleted)
+//            loadSourcesBasicInfoFromRemoteDb();
+//        else
+//            listener.onSourcesFetchCompleted(sources);
     }
 
 
-    public void loadSourcesBasicInfoFromRemoteDb() {
+    private void loadSourcesBasicInfoFromRemoteDb() {
+        sources = new ArrayList<>();
         db.collection(SOURCES_COLLECTION_NAME)
                 .get()
                 .addOnCompleteListener(task -> {
@@ -74,6 +81,7 @@ public class SourceRepository {
                         }
 
                         listener.onSourcesFetchCompleted(sources);
+                        firestoreFetchCompleted = true;
                     } else {
                         Log.w(TAG, "Error getting documents.", task.getException());
                         listener.onSourcesFetchFailed("Error getting documents." + task.getException().getMessage());
