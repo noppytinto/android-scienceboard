@@ -2,7 +2,6 @@ package com.nocorp.scienceboard.ui.tabs.allarticlestab;
 
 import androidx.lifecycle.ViewModelProvider;
 
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -171,7 +170,7 @@ public class AllArticlesTabFragment extends Fragment implements
 
 
     private void refreshAction() {
-        feedProvider.downloadRssSources_dom(sources, requireContext());
+        feedProvider.downloadSources(sources, requireContext());
     }
 
     @Override
@@ -215,7 +214,7 @@ public class AllArticlesTabFragment extends Fragment implements
             String url = article.getWebpageUrl();
             String sourceLogoUrl = article.getSource().getLogoUrl();
 
-            if(url!=null || !url.isEmpty()) {
+            if(url!=null && !url.isEmpty()) {
                 MobileNavigationDirections.ActionGlobalWebviewFragment action =
                         MobileNavigationDirections.actionGlobalWebviewFragment(url, sourceLogoUrl);
                 Navigation.findNavController(view).navigate(action);
@@ -235,7 +234,7 @@ public class AllArticlesTabFragment extends Fragment implements
     public void onSourcesFetchCompleted(List<Source> sources) {
         if(sources!=null || sources.size()>0) {
             this.sources = sources;
-            feedProvider.downloadRssSources_dom(sources, requireContext());
+            feedProvider.downloadSources(sources, requireContext());
             feedLoadedAtStartup = true;
         }
 

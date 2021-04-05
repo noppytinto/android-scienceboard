@@ -107,6 +107,26 @@ public class HttpUtilities {
         return HTTP_PROTOCOL + "://" + host;
     }
 
+    public static boolean urlIsSafe(String urlString) {
+        boolean result = false;
+        if(urlString==null || urlString.isEmpty()) return result;
+        String trimmedString = urlString.trim();
+
+        try {
+            URI uri = new URI(trimmedString);
+            String protocol = uri.getScheme();
+
+            if(protocol!=null || !protocol.isEmpty()) {
+                if(protocol.equals(HTTPS_PROTOCOL))
+                    result = true;
+            }
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+
+    }
 
 
 //    public static String buildUrl(String protocol, String host) {

@@ -1,9 +1,7 @@
 package com.nocorp.scienceboard.repository;
 
 import android.util.Log;
-
 import androidx.annotation.NonNull;
-
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -13,14 +11,11 @@ import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.utility.HttpUtilities;
 import com.nocorp.scienceboard.utility.MyOkHttpClient;
-import com.nocorp.scienceboard.utility.rss.model.Channel;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -35,11 +30,12 @@ public class SourceRepository {
     private final String WEBSITE_URL = "website_url";
     private final String LANGUAGE = "language";
     private final String CATEGORY = "category";
+    private final String ENABLED = "enabled";
+
     private List<Source> sources;
     private List<String> sourceUrls;
     private SourcesFetcher listener;
     private FirebaseFirestore db;
-
 
 
 
@@ -56,35 +52,34 @@ public class SourceRepository {
     //--------------------------------------------------------------------------- METHODS
 
     public void loadSources() {
-        Runnable task = () -> loadSourcesBasicInfoFromRemoteDb();
-        ThreadManager threadManager = ThreadManager.getInstance();
-        threadManager.runTask(task);
+        loadSourcesBasicInfoFromRemoteDb();
     }
 
 
     public void loadSourcesBasicInfoFromRemoteDb() {
         db.collection(SOURCES_COLLECTION_NAME)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, document.getId() + " => " + document.get(NAME));
-                                Log.d(TAG, document.getId() + " => " + document.get(WEBSITE_URL));
-                                Log.d(TAG, document.getId() + " => " + document.get(LANGUAGE));
-                                Log.d(TAG, document.getId() + " => " + document.get(RSS_URL));
-                                Log.d(TAG, document.getId() + " => " + document.get(CATEGORY));
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            Log.d(TAG, document.getId() + " => " + document.get(NAME));
+                            Log.d(TAG, document.getId() + " => " + document.get(WEBSITE_URL));
+                            Log.d(TAG, document.getId() + " => " + document.get(LANGUAGE));
+                            Log.d(TAG, document.getId() + " => " + document.get(RSS_URL));
+                            Log.d(TAG, document.getId() + " => " + document.get(CATEGORY));
+                            Log.d(TAG, document.getId() + " => " + document.get(ENABLED));
 
+                            Boolean enabled = (Boolean) document.get(ENABLED);
+                            if(enabled!=null && enabled) {
                                 Source source = buildBasicSourceObject(document);
                                 if(source!=null) sources.add(source);
                             }
-
-                            listener.onSourcesFetchCompleted(sources);
-                        } else {
-                            Log.w(TAG, "Error getting documents.", task.getException());
-                            listener.onSourcesFetchFailed("Error getting documents." + task.getException().getCause());
                         }
+
+                        listener.onSourcesFetchCompleted(sources);
+                    } else {
+                        Log.w(TAG, "Error getting documents.", task.getException());
+                        listener.onSourcesFetchFailed("Error getting documents." + task.getException().getMessage());
                     }
                 });
     }
@@ -145,6 +140,9 @@ public class SourceRepository {
         return result;
     }
 
+    public void isEnabled() {
+
+    }
 
 
     private void loadTestUrls() {

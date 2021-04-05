@@ -303,7 +303,12 @@ public class DomXmlParser implements XmlParser{
             title = getEntryTitle(entryNode);
             description = getDescription(entryNode);
             content = getContent(entryNode);
-            webpageUrl = getWebUrl(entryNode);
+            String unsafeUrl = getWebUrl(entryNode);
+            if( ! HttpUtilities.urlIsSafe(unsafeUrl))
+                webpageUrl = unsafeUrl.replace("http://", "https://");
+            else {
+                webpageUrl = unsafeUrl;
+            }
             String stringDate = getPubDate(entryNode);
             pubDate = convertStringToDate(stringDate);
             thumbnailUrl = getThumbnailUrl(entryNode, content, description);

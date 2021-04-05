@@ -1,15 +1,7 @@
 package com.nocorp.scienceboard.repository;
 
 import android.content.Context;
-import android.util.Log;
 
-import androidx.annotation.NonNull;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.nocorp.scienceboard.utility.rss.model.Channel;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.utility.rss.model.Entry;
@@ -48,7 +40,7 @@ public class FeedProvider {
 
     //------------------------------------------------------------
 
-    public List<Source> downloadRssSources_dom(List<Source> givenSources, Context context) {
+    public List<Source> downloadSources(List<Source> givenSources, Context context) {
         sources = new ArrayList<>();
         if(givenSources==null || givenSources.size()<=0) {
             listener.onFeedsDownloadFailed("url list is empty/null");
@@ -58,7 +50,7 @@ public class FeedProvider {
         Runnable task = () -> {
             try {
                 for(Source source : givenSources) {
-                    Source temp = downloadSource_dom(source.getRssUrl(), context);
+                    Source temp = downloadSource(source.getRssUrl(), context);
                     if(temp!=null) sources.add(temp);
                 }
 
@@ -66,7 +58,6 @@ public class FeedProvider {
                     listener.onFeedsDownloadCompleted(sources);
                 else
                     listener.onFeedsDownloadFailed("");
-
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -80,7 +71,7 @@ public class FeedProvider {
         return sources;
     }
 
-    private Source downloadSource_dom(String url, Context context) {
+    private Source downloadSource(String url, Context context) {
         Source source = null;
 
         try {
@@ -88,7 +79,7 @@ public class FeedProvider {
             Channel channel = domXmlParser.getChannel(url, context);
             if (channel!=null) {
                 channel.setRssUrl(url);
-                source = buildSource_dom(channel);
+                source = buildSource(channel);
             }
 
         }
@@ -100,7 +91,7 @@ public class FeedProvider {
     }
 
 
-    private Source buildSource_dom(Channel channel) {
+    private Source buildSource(Channel channel) {
         Source source = null;
 
         try {
