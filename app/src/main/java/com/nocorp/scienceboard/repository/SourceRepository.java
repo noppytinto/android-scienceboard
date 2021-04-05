@@ -1,12 +1,9 @@
 package com.nocorp.scienceboard.repository;
 
 import android.util.Log;
-import androidx.annotation.NonNull;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.utility.HttpUtilities;
@@ -29,7 +26,7 @@ public class SourceRepository {
     private final String RSS_URL = "rss_url";
     private final String WEBSITE_URL = "website_url";
     private final String LANGUAGE = "language";
-    private final String CATEGORY = "category";
+    private final String CATEGORY = "categories";
     private final String ENABLED = "enabled";
 
     private List<Source> sources;
@@ -94,7 +91,10 @@ public class SourceRepository {
         source.setWebsiteUrl((String) document.get(WEBSITE_URL));
         source.setRssUrl((String) document.get(RSS_URL));
         source.setLanguage((String) document.get(LANGUAGE));
-        source.setCategory((String) document.get(CATEGORY));
+
+        List<String> categories = (List<String>) document.get(CATEGORY);
+        if(categories!=null)
+            source.setCategories(categories);
 
         return source;
     }

@@ -206,27 +206,27 @@ public class DomXmlParser implements XmlParser{
         List<Entry> entries = null;
 
         if(channelNode != null) {
-            name = getChannelName(channelNode);
-            language = getLanguage(channelNode);
-            websiteUrl = getWebUrl(channelNode);
-            rssUrl = url;
+//            name = getChannelName(channelNode);
+//            language = getLanguage(channelNode);
+//            websiteUrl = getWebUrl(channelNode);
+//            rssUrl = url;
             String stringDate = getLastUpdate(channelNode);
             lastUpdate = convertStringToDate(stringDate);
 //            String stringDate_2 = getPubDate(channelNode);
 //            pubDate = convertStringToDate(stringDate_2);
 
             channel = new Channel();
-            channel.setName(name);
-            channel.setLanguage(language);
-            if(websiteUrl==null || websiteUrl.isEmpty()){
-                try {
-                    websiteUrl = HttpUtilities.getBaseUrl(url);
-                } catch (URISyntaxException e) {
-                    e.printStackTrace();
-                }
-            }
-            channel.setWebsiteUrl(websiteUrl);
-            channel.setRssUrl(rssUrl);
+//            channel.setName(name);
+//            channel.setLanguage(language);
+//            if(websiteUrl==null || websiteUrl.isEmpty()){
+//                try {
+//                    websiteUrl = HttpUtilities.getBaseUrl(url);
+//                } catch (URISyntaxException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//            channel.setWebsiteUrl(websiteUrl);
+//            channel.setRssUrl(rssUrl);
 
 
             entries = getEntries(channelNode, ENTRIES_LIMIT, context);

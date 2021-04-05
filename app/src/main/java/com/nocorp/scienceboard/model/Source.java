@@ -11,7 +11,7 @@ public class Source implements Serializable{
     private String websiteUrl;
     private String rssUrl;
     private String logoUrl;
-    private String category;
+    private List<String> categories;
     private List<Entry> entries;
     private List<Article> articles;
     private Date lastUpdate;
@@ -51,12 +51,12 @@ public class Source implements Serializable{
         this.logoUrl = logoUrl;
     }
 
-    public String getCategory() {
-        return category;
+    public List<String> getCategories() {
+        return categories;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
+    public void setCategories(List<String> categories) {
+        this.categories = categories;
     }
 
     public List<Entry> getEntries() {

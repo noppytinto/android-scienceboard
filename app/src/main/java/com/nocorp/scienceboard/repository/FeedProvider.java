@@ -51,7 +51,15 @@ public class FeedProvider {
             try {
                 for(Source source : givenSources) {
                     Source temp = downloadSource(source.getRssUrl(), context);
-                    if(temp!=null) sources.add(temp);
+                    if(temp!=null) {
+                        // add additional info
+                        temp.setName(source.getName());
+                        temp.setWebsiteUrl(source.getWebsiteUrl());
+                        temp.setRssUrl(source.getRssUrl());
+                        temp.setLanguage(source.getLanguage());
+                        temp.setCategories(source.getCategories());
+                        sources.add(temp);
+                    }
                 }
 
                 if(sources!=null && sources.size()>0)
@@ -96,14 +104,14 @@ public class FeedProvider {
 
         try {
             source = new Source();
-            String name = channel.getName();
-            String websiteUrl = channel.getWebsiteUrl();
+//            String name = channel.getName();
+//            String websiteUrl = channel.getWebsiteUrl();
             Date lastUpdate = channel.getLastUpdate();
             List<Entry> entries = channel.getEntries();
 //            List<Article> articles = preDownloadArticles(channel);
 
-            source.setName(name);
-            source.setWebsiteUrl(websiteUrl);
+//            source.setName(name);
+//            source.setWebsiteUrl(websiteUrl);
             source.setLastUpdate(lastUpdate);
             source.setEntries(entries);
 
