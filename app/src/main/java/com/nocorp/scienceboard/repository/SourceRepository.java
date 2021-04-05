@@ -63,12 +63,13 @@ public class SourceRepository {
         return cachedSources;
     }
 
-    public void loadSources(Context context) {
-//        loadSourcesBasicInfoFromRemoteDb();
-        if( ! firestoreFetchCompleted)
+    public void loadSources() {
+        if(cachedSources==null) {
             loadSourcesBasicInfoFromRemoteDb();
-        else
+        }
+        else {
             listener.onSourcesFetchCompleted(cachedSources);
+        }
     }
 
 
@@ -97,7 +98,6 @@ public class SourceRepository {
 
                         Collections.shuffle(cachedSources); // randomize collection
                         listener.onSourcesFetchCompleted(cachedSources);
-                        firestoreFetchCompleted = true;
                     } else {
                         Log.w(TAG, "Error getting documents.", task.getException());
                         listener.onSourcesFetchFailed("Error getting documents." + task.getException().getMessage());

@@ -71,8 +71,8 @@ public class SourceViewModel extends ViewModel implements SourceRepositoryListen
     }
 
 
-    public void loadSourcesFromRemoteDb(Context context) {
-        sourceRepository.loadSources(context);
+    public void loadSourcesFromRemoteDb() {
+        sourceRepository.loadSources();
     }
 
 
