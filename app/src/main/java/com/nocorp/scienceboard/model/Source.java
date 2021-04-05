@@ -6,6 +6,7 @@ import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
+import com.nocorp.scienceboard.utility.rss.model.Channel;
 import com.nocorp.scienceboard.utility.rss.model.Entry;
 
 import java.io.Serializable;
@@ -33,6 +34,8 @@ public class Source implements Serializable{
     private String language;
     @ColumnInfo(name = "xml_code")
     private String xmlCode;
+    @Ignore
+    private Channel channel;
 
 
     public String getName() {
@@ -113,5 +116,13 @@ public class Source implements Serializable{
 
     public void setXmlCode(String xmlCode) {
         this.xmlCode = xmlCode;
+    }
+
+    public Channel getChannel() {
+        return channel;
+    }
+
+    public void setChannel(Channel channel) {
+        this.channel = channel;
     }
 }// end Source

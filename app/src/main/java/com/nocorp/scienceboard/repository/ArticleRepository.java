@@ -1,8 +1,11 @@
 package com.nocorp.scienceboard.repository;
 
 
+import android.util.Log;
+
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
+import com.nocorp.scienceboard.utility.rss.DomXmlParser;
 import com.nocorp.scienceboard.utility.rss.model.Channel;
 import com.nocorp.scienceboard.utility.rss.model.Entry;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
@@ -16,18 +19,16 @@ public class ArticleRepository {
     private final String TAG = this.getClass().getSimpleName();
     private static ArticleRepository singletonInstance;
     private ArticlesFetcher articlesListener;
+    private List<ListItem> cachedArticles;
+    private SourceRepository sourceRepository;
 
 
 
     //----------------------------------------------------------- CONSTRUCTORS
 
     private ArticleRepository() {
-
+        sourceRepository = new SourceRepository();
     }
-
-
-
-    //----------------------------------------------------------- GETTER/SETTER
 
     public static ArticleRepository getInstance() {
         if(singletonInstance==null)
@@ -36,44 +37,65 @@ public class ArticleRepository {
         return singletonInstance;
     }
 
+
+
+    //----------------------------------------------------------- GETTER/SETTER
+
     // DOM strategy
-    public void getArticles_dom(List<Source> sources, int limit) {
-        List<ListItem> limitedArticlesList = new ArrayList<>();
+    public List<ListItem> getArticles(List<Source> givenSources, int limit) {
+        List<ListItem> resultArticles = null;
         int counter = 0;
 
-        List<Entry> fullList = combineEntries(sources);
-
-        // sort articles by publication date
-        Collections.sort(fullList);
-
-        try {
-            if (fullList!=null && fullList.size()>=0) {
-                for(Entry entry : fullList) {
-                    if(counter == limit) break;
-                    Article article = buildArticle(entry);
-                    if(article!=null) {
-                        limitedArticlesList.add((Article)article);
-                    }
-                    counter++;
-                }
+        if(cachedArticles==null) {
+            // download entries
+            for(Source currentSource: givenSources) {
+                currentSource = sourceRepository.downloadAdditionalSourceData(currentSource);
             }
 
-            // publish result
-            articlesListener.onFetchCompleted(limitedArticlesList);
+            //
+            List<Entry> fullEntriesList = combineEntries(givenSources);
+            // sort articles by publication date
+            Collections.sort(fullEntriesList);
 
-        } catch (Exception e) {
-            e.printStackTrace();
+            try {
+                resultArticles = new ArrayList<>();
+                if (fullEntriesList!=null && fullEntriesList.size()>=0) {
+                    for(Entry currentEntry : fullEntriesList) {
+                        if(counter == limit) break;
+                        Article article = buildArticle(currentEntry);
+                        if(article!=null) {
+                            resultArticles.add((Article)article);
+                        }
+                        counter++;
+                    }
+                }
+
+                // publish result
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.d(TAG, "SCIENCE_BOARD - getArticles: an error occurred when downloading Articles" + e.getMessage());
+            }
         }
-    }
+        else {
+            // TODO
+            resultArticles = cachedArticles;
+        }
+
+        return resultArticles;
+    }// end getArticles()
 
     // DOM strategy
     private List<Entry> combineEntries(List<Source> sources) {
         List<Entry> result = new ArrayList<>();
 
-        for(Source source: sources) {
-            List<Entry> temp = source.getEntries();
+        for(Source currentSource: sources) {
+            List<Entry> temp = currentSource.getEntries();
             if(temp!=null && temp.size()>0) {
-//                for(Entry entry: temp) entry.setSource(source);
+                for(Entry entry: temp) {
+                    entry.setSourceName(currentSource.getName());
+                    entry.setSourceUrl(currentSource.getWebsiteUrl());
+                }
                 result.addAll(temp);
             }
         }
@@ -90,14 +112,17 @@ public class ArticleRepository {
             String webpageUrl = entry.getWebpageUrl();
             String thumbnailUrl = entry.getThumbnailUrl();
             Date pubDate = entry.getPubDate();
-            Source source = buildSource_dom(entry.getChannel());
+            String sourceName = entry.getSourceName();
+            String sourceUrl = entry.getSourceUrl();
 
             article = new Article();
             article.setThumbnailUrl(thumbnailUrl);
             article.setTitle(title);
             article.setWebpageUrl(webpageUrl);
             article.setPubDate(pubDate);
-            article.setSource(source);
+            article.setSourceName(sourceName);
+            article.setSourceUrl(sourceUrl);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -105,7 +130,45 @@ public class ArticleRepository {
         return article;
     }
 
-    private Source buildSource_dom(Channel channel) {
+
+    public void setArticlesListener(ArticlesFetcher listener) {
+        this.articlesListener = listener;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    private Source buildSource(Channel channel) {
         Source source = null;
 
         try {
@@ -134,10 +197,61 @@ public class ArticleRepository {
         return source;
     }
 
-    public void setArticlesListener(ArticlesFetcher listener) {
-        this.articlesListener = listener;
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // DOM strategy
+    public void getArticles_old(List<Source> sources, int limit) {
+        List<ListItem> limitedArticlesList = new ArrayList<>();
+        int counter = 0;
+
+        List<Entry> fullList = combineEntries(sources);
+
+        // sort articles by publication date
+        Collections.sort(fullList);
+
+        try {
+            if (fullList!=null && fullList.size()>=0) {
+                for(Entry entry : fullList) {
+                    if(counter == limit) break;
+                    Article article = buildArticle(entry);
+                    if(article!=null) {
+                        limitedArticlesList.add((Article)article);
+                    }
+                    counter++;
+                }
+            }
+
+            // publish result
+            articlesListener.onFetchCompleted(limitedArticlesList);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
+    public List<ListItem> getArticles_old(Source sources, int limit) {
+        List<ListItem> result = null;
+        if(sources==null) return result;
+        if(limit<=0) return result;
+
+        int articlesDownloaded = 0;
+        result = new ArrayList<>();
+
+
+
+        return result;
+    }
 
 
 

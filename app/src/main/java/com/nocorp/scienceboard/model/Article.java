@@ -27,6 +27,10 @@ public class Article extends ListItem implements Comparable<Article> {
     private Source source;
     @ColumnInfo(name = "pub_date")
     private Date pubDate;
+    @ColumnInfo(name = "source_name")
+    private String sourceName;
+    @ColumnInfo(name = "source_url")
+    private String sourceUrl;
 
     public Article() {
         super(MyValues.ItemType.ARTICLE);
@@ -127,5 +131,21 @@ public class Article extends ListItem implements Comparable<Article> {
             return 1;
 
         return 0;
+    }
+
+    public String getSourceName() {
+        return sourceName;
+    }
+
+    public void setSourceName(String sourceName) {
+        this.sourceName = sourceName;
+    }
+
+    public String getSourceUrl() {
+        return sourceUrl;
+    }
+
+    public void setSourceUrl(String sourceUrl) {
+        this.sourceUrl = sourceUrl;
     }
 }// end Article

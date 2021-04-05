@@ -9,9 +9,11 @@ import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.utility.HttpUtilities;
 import com.nocorp.scienceboard.utility.MyOkHttpClient;
+import com.nocorp.scienceboard.utility.rss.DomXmlParser;
+import com.nocorp.scienceboard.utility.rss.model.Channel;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -122,6 +124,24 @@ public class SourceRepository {
         return source;
     }
 
+    /**
+     * download entries and lastUpdate
+     */
+    public Source downloadAdditionalSourceData(Source givenSource) {
+        Source result = givenSource;
+        if(givenSource==null) return result;
+
+        DomXmlParser domXmlParser = new DomXmlParser();
+        Channel channel = domXmlParser.downloadAdditionalSourceData(givenSource.getRssUrl());
+
+        if(channel!=null) {
+            givenSource.setEntries(channel.getEntries());
+            givenSource.setLastUpdate(channel.getLastUpdate());
+        }
+
+        return result;
+    }
+
     private void downloadXmlCode(List<Source> sources) {
         Runnable task = () -> loadSourcesBasicInfoFromRemoteDb();
         ThreadManager threadManager = ThreadManager.getInstance();
@@ -222,7 +242,7 @@ public class SourceRepository {
     }
 
 
-    public List<Source> getAsourceForEachMainCategory_randomly(List<Source> givenSources, List<String> givenCategories) {
+    public static List<Source> getAsourceForEachMainCategory_randomly(List<Source> givenSources, List<String> givenCategories) {
         List<Source> result = null;
         if(givenSources==null || givenSources.size()<=0) return result;
         if(givenCategories==null || givenCategories.size()<=0) return result;
@@ -244,7 +264,7 @@ public class SourceRepository {
 
 
 
-    private Source getTheFirstSourceFallingInThisCategory(List<Source> sources, String category) {
+    private static Source getTheFirstSourceFallingInThisCategory(List<Source> sources, String category) {
         Source result = null;
         if(sources==null || sources.size()<=0) return result;
         if(category==null || category.isEmpty()) return result;
@@ -261,7 +281,7 @@ public class SourceRepository {
 
 
 
-    private boolean sourcefallInThisCategory(Source source, String category) {
+    private static boolean sourcefallInThisCategory(Source source, String category) {
         boolean result = false;
         if(source==null) return result;
         if(category==null || category.isEmpty()) return result;

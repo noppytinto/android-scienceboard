@@ -23,6 +23,7 @@ import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterFeedsList;
 import com.nocorp.scienceboard.repository.FeedProvider;
+import com.nocorp.scienceboard.repository.SourceRepository;
 import com.nocorp.scienceboard.repository.SourceViewModel;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
@@ -102,8 +103,9 @@ public class AllArticlesTabFragment extends Fragment implements
                 // TODO
                 this.sources = sources;
 
-                feedProvider.downloadSources(sources, requireContext());
-                feedLoadedAtStartup = true;
+//                feedProvider.downloadSources(sources, requireContext());
+//                feedLoadedAtStartup = true;
+                allArticlesTabViewModel.downloadArticles(sources, 20);
             }
         });
 
@@ -168,11 +170,11 @@ public class AllArticlesTabFragment extends Fragment implements
 
     @Override
     public void onFeedsDownloadCompleted(List<Source> sources) {
-        allArticlesTabViewModel.downloadArticles(sources);
-        Log.d(TAG, "SCIENCE_BOARD - onFeedsDownloadCompleted: feeds fetched");
-
-        // this (runOnUiThread) is unstable, can cause crashes, so better not use it
-        runToastOnUiThread("feeds fetched");
+//        allArticlesTabViewModel.downloadArticles(sources);
+//        Log.d(TAG, "SCIENCE_BOARD - onFeedsDownloadCompleted: feeds fetched");
+//
+//        // this (runOnUiThread) is unstable, can cause crashes, so better not use it
+//        runToastOnUiThread("feeds fetched");
     }
 
     private void runToastOnUiThread(String message) {
@@ -205,11 +207,10 @@ public class AllArticlesTabFragment extends Fragment implements
         Article article = (Article) recyclerAdapterFeedsList.getItem(position);
         if(article!=null) {
             String url = article.getWebpageUrl();
-            String sourceLogoUrl = article.getSource().getLogoUrl();
 
             if(url!=null && !url.isEmpty()) {
                 MobileNavigationDirections.ActionGlobalWebviewFragment action =
-                        MobileNavigationDirections.actionGlobalWebviewFragment(url, sourceLogoUrl);
+                        MobileNavigationDirections.actionGlobalWebviewFragment(url, "");
                 Navigation.findNavController(view).navigate(action);
             }
         }

@@ -146,7 +146,7 @@ public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<RecyclerView.
         }
 
         //
-        String sourceName = item.getSource().getName();
+        String sourceName = item.getSourceName();
         if(sourceName != null) readablePubDate = sourceName + " / " + readablePubDate;
 
         holder.pubDate.setText(readablePubDate);

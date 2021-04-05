@@ -3,6 +3,7 @@ package com.nocorp.scienceboard.utility.rss;
 import android.content.Context;
 import android.util.Log;
 
+import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.utility.room.ChannelDao;
 import com.nocorp.scienceboard.utility.room.EntryDao;
@@ -87,6 +88,64 @@ public class DomXmlParser implements XmlParser{
 
     //-------------------------------------------------------------- GETTERS/SETTERS
 
+
+
+
+    public Channel downloadAdditionalSourceData(String rssUrl) {
+        Channel result = null;
+        if(rssUrl==null || rssUrl.isEmpty()) return result;
+
+        InputStream inputStream = null;
+        Response response = null;
+        try {
+            final OkHttpClient httpClient = MyOkHttpClient.getClient();
+            String sanitizedUrl = HttpUtilities.sanitizeUrl(rssUrl);
+            HttpUrl httpUrl = buildHttpURL(sanitizedUrl);
+            Request request = buildRequest(httpUrl);
+
+            // performing request
+            response = httpClient.newCall(request).execute();
+
+            // check response
+            if (response.isSuccessful()) {
+                try (ResponseBody responseBody = response.body()) {
+                    if(responseBody!=null) {
+                        inputStream = responseBody.byteStream();
+
+                        Document doc = buildDocument(inputStream);
+                        List<String> knownChannelTags = new ArrayList<>();
+                        knownChannelTags.add(CHANNEL_TAG);
+                        knownChannelTags.add(FEED_TAG);
+
+                        for(String candidateChannelTagName: knownChannelTags) {
+                            NodeList candidatesChannels = doc.getElementsByTagName(candidateChannelTagName);
+                            if(candidatesChannels!=null || candidatesChannels.getLength()>0) {
+                                Node candidateChannel = candidatesChannels.item(0);
+                                if(candidateChannel!=null && isElementNode(candidateChannel)){
+                                    result = buildChannelWithEntries(candidatesChannels.item(0));
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (response != null) {
+                response.close();
+            }
+        }
+
+        return result;
+    }
+
+
+
+
+
+
     @Override
     public Channel getChannel(String rssUrl, Context context) {
         Channel result = null;
@@ -118,7 +177,7 @@ public class DomXmlParser implements XmlParser{
                             if(candidatesChannels!=null || candidatesChannels.getLength()>0) {
                                 Node candidateChannel = candidatesChannels.item(0);
                                 if(candidateChannel!=null && isElementNode(candidateChannel)){
-                                    result = buildChannel(candidatesChannels.item(0), rssUrl, context);
+                                    result = buildChannelWithEntries(candidatesChannels.item(0), rssUrl, context);
                                     if(result!=null) {
                                         saveChannelInRoom(result, context);
                                     }
@@ -184,7 +243,9 @@ public class DomXmlParser implements XmlParser{
 
     //--------------------------------------------------------------
 
+
     private boolean checkChannelLastUpdate(Node nodeChannel) {
+        // TODO
         Date newDate = null;
         Date oldDate = null;
 
@@ -195,7 +256,51 @@ public class DomXmlParser implements XmlParser{
         return false;
     }
 
-    private Channel buildChannel(Node channelNode, String url, Context context) throws ParseException {
+
+    private Channel buildChannel(Node channelNode) {
+        Channel channel = null;
+        Date lastUpdate = null;
+
+        if(channelNode != null) {
+            String stringDate = getLastUpdate(channelNode);
+            lastUpdate = convertStringToDate(stringDate);
+
+            channel = new Channel();
+
+            Entry entry = getLatestEntry(channelNode);
+            if(lastUpdate==null) {
+                if(entry!=null)
+                    lastUpdate = entry.getPubDate();
+            }
+            channel.setLastUpdate(lastUpdate);
+        }
+
+        return channel;
+    }
+
+    private Channel buildChannelWithEntries(Node channelNode) {
+        Channel channel = null;
+        Date lastUpdate = null;
+        List<Entry> entries = null;
+
+        if(channelNode != null) {
+            String stringDate = getLastUpdate(channelNode);
+            lastUpdate = convertStringToDate(stringDate);
+            channel = new Channel();
+            entries = getEntries(channelNode, ENTRIES_LIMIT);
+            if(lastUpdate==null) {
+                if(entries!=null && entries.size()>0)
+                    lastUpdate = entries.get(0).getPubDate();
+            }
+            channel.setLastUpdate(lastUpdate);
+            channel.setEntries(entries);
+        }
+
+        return channel;
+    }
+
+
+    private Channel buildChannelWithEntries(Node channelNode, String url, Context context) throws ParseException {
         Channel channel = null;
         String name = null;
         String language = null;
@@ -254,6 +359,39 @@ public class DomXmlParser implements XmlParser{
         return entries;
     }
 
+    private Entry getLatestEntry(Node channelNode) {
+        Entry result = null;
+
+        try {
+            result = new Entry();
+            Document document = channelNode.getOwnerDocument();
+            List<String> knownEntryTags = new ArrayList<>();
+            knownEntryTags.add(ENTRY_TAG);
+            knownEntryTags.add(ITEM_TAG);
+
+            for(String candidateEntryTag: knownEntryTags) {
+                NodeList entryNodes = document.getElementsByTagName(candidateEntryTag);
+                if(entryNodes!=null) {
+                    for(int i=0; i<entryNodes.getLength(); i++) {
+                        Node entryNode = entryNodes.item(i);
+                        if(entryNode!=null && isElementNode(entryNode)){
+                            if(i>=1) break;
+                            Entry entry = buildEntry(entryNode);
+                            if(entry!=null) {
+                                result = entry;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(TAG, "SCIENCE_BOARD - getLatestEntry: failed to download latest entry " + e.getMessage());
+        }
+
+        return result;
+    }
+
     private List<Entry> getEntries(Node channelNode, int limit, Context context) {
         List<Entry> results = null;
 
@@ -289,12 +427,46 @@ public class DomXmlParser implements XmlParser{
         return results;
     }
 
+    private List<Entry> getEntries(Node channelNode, int limit) {
+        List<Entry> results = null;
+
+        try {
+            results = new ArrayList<>();
+            Document document = channelNode.getOwnerDocument();
+            List<String> knownEntryTags = new ArrayList<>();
+            knownEntryTags.add(ENTRY_TAG);
+            knownEntryTags.add(ITEM_TAG);
+
+            for(String candidateEntryTag: knownEntryTags) {
+                NodeList entryNodes = document.getElementsByTagName(candidateEntryTag);
+                if(entryNodes!=null) {
+                    for(int i=0; i<entryNodes.getLength(); i++) {
+                        Node entryNode = entryNodes.item(i);
+                        if(entryNode!=null && isElementNode(entryNode)){
+                            if(i>=limit) break;
+                            Entry entry = buildEntry(entryNode);
+                            if(entry!=null) {
+                                results.add(entry);
+                            }
+                        }
+                    }
+                }
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return results;
+    }
+
+
     private Entry buildEntry(Node entryNode) {
         Entry entry = null;
         String title = null;
         String description = null;
         String content = null;
-
         String webpageUrl = null;
         Date pubDate = null;
         String thumbnailUrl = null;

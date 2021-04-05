@@ -23,6 +23,10 @@ public class Entry implements Comparable<Entry> {
     private Date pubDate;
     @Ignore
     private Channel channel;
+    @ColumnInfo(name = "source_name")
+    private String sourceName;
+    @ColumnInfo(name = "source_url")
+    private String sourceUrl;
 
     public String getWebpageUrl() {
         return webpageUrl;
@@ -88,5 +92,21 @@ public class Entry implements Comparable<Entry> {
 
     public void setChannel(Channel channel) {
         this.channel = channel;
+    }
+
+    public String getSourceName() {
+        return sourceName;
+    }
+
+    public void setSourceName(String sourceName) {
+        this.sourceName = sourceName;
+    }
+
+    public String getSourceUrl() {
+        return sourceUrl;
+    }
+
+    public void setSourceUrl(String sourceUrl) {
+        this.sourceUrl = sourceUrl;
     }
 }// end Entry
