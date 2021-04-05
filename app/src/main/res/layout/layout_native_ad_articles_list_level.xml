@@ -47,7 +47,7 @@
             android:layout_marginBottom="4dp"
             android:background="@color/white"
             app:cardCornerRadius="3dp"
-            app:cardElevation="@dimen/default_card_elevation"
+            app:cardElevation="@dimen/default_elevation"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHeight_min="100dp"

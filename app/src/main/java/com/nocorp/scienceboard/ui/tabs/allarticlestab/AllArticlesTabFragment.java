@@ -32,7 +32,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class AllArticlesTabFragment extends Fragment implements
-        FeedProvider.OnFeedsDownloadedListener,
         RecyclerAdapterFeedsList.OnArticleClickedListener {
     private final String TAG = this.getClass().getSimpleName();
     private RecyclerAdapterFeedsList recyclerAdapterFeedsList;
@@ -43,7 +42,6 @@ public class AllArticlesTabFragment extends Fragment implements
     private AdProvider adProvider;
     private SwipeRefreshLayout swipeRefreshLayout;
     private AllArticlesTabFragmentBinding binding;
-    private FeedProvider feedProvider;
     private static boolean feedLoadedAtStartup = false;
     private boolean feedsLoading = false;
     private Toast toast;
@@ -86,7 +84,6 @@ public class AllArticlesTabFragment extends Fragment implements
         swipeRefreshLayout = binding.swipeRefreshAllArticlesTabFragment;
         swipeRefreshLayout.setColorSchemeResources(R.color.orange_light);
         adProvider = AdProvider.getInstance(); // is not guaranteed that
-        feedProvider = new FeedProvider(this);
         sourceViewModel = new ViewModelProvider(requireActivity()).get(SourceViewModel.class);
         allArticlesTabViewModel = new ViewModelProvider(this).get(AllArticlesTabViewModel.class);
         initRecycleView();
@@ -100,7 +97,7 @@ public class AllArticlesTabFragment extends Fragment implements
             if(sources!=null && sources.size()>0) {
                 // TODO
                 this.sources = sources;
-                downloadArticles();
+                allArticlesTabViewModel.downloadArticles(sources, 20, false);
             }
         });
 
@@ -144,11 +141,6 @@ public class AllArticlesTabFragment extends Fragment implements
 
     //--------------------------------------------------------------------- METHODS
 
-    private void downloadArticles() {
-        allArticlesTabViewModel.downloadArticles(sources, 20);
-
-    }
-
     private void initRecycleView() {
         // defining Recycler view
         recyclerView = binding.recyclerViewAllArticlesTabFragment;
@@ -166,16 +158,7 @@ public class AllArticlesTabFragment extends Fragment implements
 
 
     private void refreshAction() {
-        downloadArticles();
-    }
-
-    @Override
-    public void onFeedsDownloadCompleted(List<Source> sources) {
-//        allArticlesTabViewModel.downloadArticles(sources);
-//        Log.d(TAG, "SCIENCE_BOARD - onFeedsDownloadCompleted: feeds fetched");
-//
-//        // this (runOnUiThread) is unstable, can cause crashes, so better not use it
-//        runToastOnUiThread("feeds fetched");
+        allArticlesTabViewModel.downloadArticles(sources, 20, true);
     }
 
     private void runToastOnUiThread(String message) {
@@ -192,26 +175,15 @@ public class AllArticlesTabFragment extends Fragment implements
     }
 
     @Override
-    public void onFeedsDownloadFailed(String cause) {
-        allArticlesTabViewModel.setArticlesList(null);
-
-        // this (runOnUiThread) is unstable, can cause crashes, so better not use it
-        Log.d(TAG, "SCIENCE_BOARD - onFeedsDownloadFailed: feeds not fetched, cause: $cause");
-//        requireActivity().runOnUiThread(() ->
-//                Toast.makeText(requireContext(), "Cannot fetch feeds, contact the developer.\n$cause", Toast.LENGTH_SHORT).show()
-//        );
-    }
-
-
-    @Override
     public void onArticleClicked(int position) {
         Article article = (Article) recyclerAdapterFeedsList.getItem(position);
         if(article!=null) {
             String url = article.getWebpageUrl();
+            String sourceName = article.getSourceName();
 
             if(url!=null && !url.isEmpty()) {
                 MobileNavigationDirections.ActionGlobalWebviewFragment action =
-                        MobileNavigationDirections.actionGlobalWebviewFragment(url, "");
+                        MobileNavigationDirections.actionGlobalWebviewFragment(url, sourceName);
                 Navigation.findNavController(view).navigate(action);
             }
         }

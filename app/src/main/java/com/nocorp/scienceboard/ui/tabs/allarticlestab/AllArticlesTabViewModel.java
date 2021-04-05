@@ -29,13 +29,13 @@ public class AllArticlesTabViewModel extends ViewModel {
         return articlesList;
     }
 
-    public void downloadArticles(List<Source> givenSources, int limit) {
+    public void downloadArticles(List<Source> givenSources, int limit, boolean forced) {
         Runnable task = () -> {
             // pick sources for ALL tab, obly once
             if(targetSources==null || targetSources.size()<=0) {
                 targetSources = SourceRepository.getAsourceForEachMainCategory_randomly(givenSources, mainCategories);
             }
-            List<ListItem> articles = articleRepository.getArticles(targetSources, limit);
+            List<ListItem> articles = articleRepository.getArticles(targetSources, limit, forced);
 
             // publish results
             setArticlesList(articles);

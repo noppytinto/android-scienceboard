@@ -31,7 +31,7 @@
             android:name="url"
             app:argType="string" />
         <argument
-            android:name="sourceLogoUrl"
+            android:name="sourceName"
             app:argType="string"
             app:nullable="true" />
     </fragment>

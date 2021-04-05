@@ -39,6 +39,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private final String TAG = this.getClass().getSimpleName();
     private WebView webView;
     private String url;
+    private String sourceName;
     private String sourceLogoUrl;
     private LinearProgressIndicator progressIndicator;
     private View view;
@@ -46,7 +47,6 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private FragmentWebviewBinding viewBinding;
     private Toolbar toolbar;
     private Toast toast;
-    private ImageView imageViewSourceLogo;
     private WebSettings webSettings;
     private final int TEXT_SIZE_STEP = 20;
     private final int DEFAULT_TEXT_SIZE = 90;
@@ -96,6 +96,13 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         if (getArguments() != null) {
             // the url is always !=null and non-empty
             this.url = WebviewFragmentArgs.fromBundle(getArguments()).getUrl();
+            this.sourceName = WebviewFragmentArgs.fromBundle(getArguments()).getSourceName();
+
+            if(sourceName!=null && !sourceName.isEmpty()) {
+                //TODO
+//                toolbar.setTitleTextColor(getResources().getColor(R.color.white));
+                toolbar.setTitle(sourceName);
+            }
         }
     }
 

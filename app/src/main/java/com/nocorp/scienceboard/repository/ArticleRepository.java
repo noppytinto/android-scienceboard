@@ -42,45 +42,21 @@ public class ArticleRepository {
     //----------------------------------------------------------- GETTER/SETTER
 
     // DOM strategy
-    public List<ListItem> getArticles(List<Source> givenSources, int limit) {
+    public List<ListItem> getArticles(List<Source> givenSources, int limit, boolean forced) {
         List<ListItem> resultArticles = null;
         if(givenSources==null || givenSources.size()<=0) return resultArticles;
-        int counter = 0;
 
-        if(cachedArticles==null) {
-            // download entries
-            for(Source currentSource: givenSources) {
-                currentSource = sourceRepository.downloadAdditionalSourceData(currentSource);
-            }
-
-            //
-            List<Entry> fullEntriesList = combineEntries(givenSources);
-            // sort articles by publication date
-            Collections.sort(fullEntriesList);
-
-            try {
-                resultArticles = new ArrayList<>();
-                if (fullEntriesList!=null && fullEntriesList.size()>=0) {
-                    for(Entry currentEntry : fullEntriesList) {
-                        if(counter == limit) break;
-                        Article article = buildArticle(currentEntry);
-                        if(article!=null) {
-                            resultArticles.add((Article)article);
-                        }
-                        counter++;
-                    }
-                }
-
-                // publish result
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.d(TAG, "SCIENCE_BOARD - getArticles: an error occurred when downloading Articles" + e.getMessage());
-            }
+        if(forced) {
+            resultArticles = downloadArticlesFromInternet(givenSources, limit);
         }
         else {
-            // TODO
-            resultArticles = cachedArticles;
+            if(cachedArticles==null) {
+                resultArticles = downloadArticlesFromInternet(givenSources, limit);
+                cachedArticles = resultArticles;
+            }
+            else {
+                resultArticles = cachedArticles;
+            }
         }
 
         return resultArticles;
@@ -132,6 +108,43 @@ public class ArticleRepository {
     }
 
 
+    private List<ListItem> downloadArticlesFromInternet(List<Source> givenSources, int limit) {
+        List<ListItem> resultArticles = null;
+        if(givenSources==null || givenSources.size()<=0) return resultArticles;
+        int counter = 0;
+
+        // download entries
+        for(Source currentSource: givenSources) {
+            currentSource = sourceRepository.downloadAdditionalSourceData(currentSource);
+        }
+
+        //
+        List<Entry> fullEntriesList = combineEntries(givenSources);
+        // sort articles by publication date
+        Collections.sort(fullEntriesList);
+
+        try {
+            resultArticles = new ArrayList<>();
+            if (fullEntriesList!=null && fullEntriesList.size()>=0) {
+                for(Entry currentEntry : fullEntriesList) {
+                    if(counter == limit) break;
+                    Article article = buildArticle(currentEntry);
+                    if(article!=null) {
+                        resultArticles.add((Article)article);
+                    }
+                    counter++;
+                }
+            }
+
+            // publish result
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(TAG, "SCIENCE_BOARD - getArticles: an error occurred when downloading Articles" + e.getMessage());
+        }
+
+        return resultArticles;
+    }
 
 
 
