@@ -44,6 +44,7 @@ public class ArticleRepository {
     // DOM strategy
     public List<ListItem> getArticles(List<Source> givenSources, int limit) {
         List<ListItem> resultArticles = null;
+        if(givenSources==null || givenSources.size()<=0) return resultArticles;
         int counter = 0;
 
         if(cachedArticles==null) {
@@ -131,9 +132,6 @@ public class ArticleRepository {
     }
 
 
-    public void setArticlesListener(ArticlesFetcher listener) {
-        this.articlesListener = listener;
-    }
 
 
 
@@ -152,107 +150,81 @@ public class ArticleRepository {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    private Source buildSource(Channel channel) {
-        Source source = null;
-
-        try {
-            source = new Source();
-            String name = channel.getName();
-            String websiteUrl = channel.getWebsiteUrl();
-            Date lastUpdate = channel.getLastUpdate();
-            List<Entry> entries = channel.getEntries();
-//            List<Article> articles = preDownloadArticles(channel);
-
-            source.setName(name);
-            source.setWebsiteUrl(websiteUrl);
-            source.setLastUpdate(lastUpdate);
-            source.setEntries(entries);
-
-//            if(entries!=null && entries.size()>0) {
-//                for(Entry entry: entries)
-//                    entry.setSource(source);
+//    public void setArticlesListener(ArticlesFetcher listener) {
+//        this.articlesListener = listener;
+//    }
+//
+//    private Source buildSource(Channel channel) {
+//        Source source = null;
+//
+//        try {
+//            source = new Source();
+//            String name = channel.getName();
+//            String websiteUrl = channel.getWebsiteUrl();
+//            Date lastUpdate = channel.getLastUpdate();
+//            List<Entry> entries = channel.getEntries();
+////            List<Article> articles = preDownloadArticles(channel);
+//
+//            source.setName(name);
+//            source.setWebsiteUrl(websiteUrl);
+//            source.setLastUpdate(lastUpdate);
+//            source.setEntries(entries);
+//
+////            if(entries!=null && entries.size()>0) {
+////                for(Entry entry: entries)
+////                    entry.setSource(source);
+////            }
+////            source.setArticles(articles);
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        return source;
+//    }
+//
+//    // DOM strategy
+//    public void getArticles_old(List<Source> sources, int limit) {
+//        List<ListItem> limitedArticlesList = new ArrayList<>();
+//        int counter = 0;
+//
+//        List<Entry> fullList = combineEntries(sources);
+//
+//        // sort articles by publication date
+//        Collections.sort(fullList);
+//
+//        try {
+//            if (fullList!=null && fullList.size()>=0) {
+//                for(Entry entry : fullList) {
+//                    if(counter == limit) break;
+//                    Article article = buildArticle(entry);
+//                    if(article!=null) {
+//                        limitedArticlesList.add((Article)article);
+//                    }
+//                    counter++;
+//                }
 //            }
-//            source.setArticles(articles);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return source;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // DOM strategy
-    public void getArticles_old(List<Source> sources, int limit) {
-        List<ListItem> limitedArticlesList = new ArrayList<>();
-        int counter = 0;
-
-        List<Entry> fullList = combineEntries(sources);
-
-        // sort articles by publication date
-        Collections.sort(fullList);
-
-        try {
-            if (fullList!=null && fullList.size()>=0) {
-                for(Entry entry : fullList) {
-                    if(counter == limit) break;
-                    Article article = buildArticle(entry);
-                    if(article!=null) {
-                        limitedArticlesList.add((Article)article);
-                    }
-                    counter++;
-                }
-            }
-
-            // publish result
-            articlesListener.onFetchCompleted(limitedArticlesList);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public List<ListItem> getArticles_old(Source sources, int limit) {
-        List<ListItem> result = null;
-        if(sources==null) return result;
-        if(limit<=0) return result;
-
-        int articlesDownloaded = 0;
-        result = new ArrayList<>();
-
-
-
-        return result;
-    }
-
+//
+//            // publish result
+//            articlesListener.onFetchCompleted(limitedArticlesList);
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+//
+//    public List<ListItem> getArticles_old(Source sources, int limit) {
+//        List<ListItem> result = null;
+//        if(sources==null) return result;
+//        if(limit<=0) return result;
+//
+//        int articlesDownloaded = 0;
+//        result = new ArrayList<>();
+//
+//
+//
+//        return result;
+//    }
 
 
     //------------------------------------------------------------

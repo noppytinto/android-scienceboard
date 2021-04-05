@@ -18,16 +18,11 @@ public class AllArticlesTabViewModel extends ViewModel {
     private MutableLiveData<List<ListItem>> articlesList;
     private ArticleRepository articleRepository;
     private final List<String> mainCategories = Arrays.asList("space", "physics", "tech", "medicine", "biology");
-    private SourceRepository sourceRepository;
-    private static boolean randomMainCategoriesLoaded;
-    private static List<Source> mySources;
-    private List<ListItem> cachedArticles;
-
+    private static List<Source> targetSources;
 
     public AllArticlesTabViewModel() {
         articlesList = new MutableLiveData<>();
         articleRepository = ArticleRepository.getInstance();
-        sourceRepository = new SourceRepository();
     }
 
     public LiveData<List<ListItem>> getObservableArticlesList() {
@@ -36,8 +31,11 @@ public class AllArticlesTabViewModel extends ViewModel {
 
     public void downloadArticles(List<Source> givenSources, int limit) {
         Runnable task = () -> {
-            List<Source> sourceList = SourceRepository.getAsourceForEachMainCategory_randomly(givenSources, mainCategories);
-            List<ListItem> articles = articleRepository.getArticles(sourceList, limit);
+            // pick sources for ALL tab, obly once
+            if(targetSources==null || targetSources.size()<=0) {
+                targetSources = SourceRepository.getAsourceForEachMainCategory_randomly(givenSources, mainCategories);
+            }
+            List<ListItem> articles = articleRepository.getArticles(targetSources, limit);
 
             // publish results
             setArticlesList(articles);
@@ -50,12 +48,6 @@ public class AllArticlesTabViewModel extends ViewModel {
     public void setArticlesList(List<ListItem> articlesList) {
         this.articlesList.postValue(articlesList);
     }
-
-    public void loadSources() {
-
-    }
-
-
 
 
 }// end AllArticlesTabViewModel

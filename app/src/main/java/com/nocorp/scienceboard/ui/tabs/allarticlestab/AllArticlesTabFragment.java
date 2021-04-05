@@ -33,8 +33,7 @@ import java.util.List;
 
 public class AllArticlesTabFragment extends Fragment implements
         FeedProvider.OnFeedsDownloadedListener,
-        RecyclerAdapterFeedsList.OnArticleClickedListener
-{
+        RecyclerAdapterFeedsList.OnArticleClickedListener {
     private final String TAG = this.getClass().getSimpleName();
     private RecyclerAdapterFeedsList recyclerAdapterFeedsList;
     private RecyclerView recyclerView;
@@ -50,7 +49,6 @@ public class AllArticlesTabFragment extends Fragment implements
     private Toast toast;
     private SourceViewModel sourceViewModel;
     private List<Source> sources;
-    private final List<String> mainCategories = Arrays.asList("space", "physics", "tech", "medicine", "biology");
 
 
 
@@ -102,10 +100,7 @@ public class AllArticlesTabFragment extends Fragment implements
             if(sources!=null && sources.size()>0) {
                 // TODO
                 this.sources = sources;
-
-//                feedProvider.downloadSources(sources, requireContext());
-//                feedLoadedAtStartup = true;
-                allArticlesTabViewModel.downloadArticles(sources, 20);
+                downloadArticles();
             }
         });
 
@@ -121,6 +116,7 @@ public class AllArticlesTabFragment extends Fragment implements
                 progressIndicator.setVisibility(View.GONE);
                 articles = adProvider.populateListWithAds(articles, 5);
                 recyclerAdapterFeedsList.loadNewData(articles);
+                showCenteredToast("articles fetched");
             }
         });
 
@@ -148,6 +144,11 @@ public class AllArticlesTabFragment extends Fragment implements
 
     //--------------------------------------------------------------------- METHODS
 
+    private void downloadArticles() {
+        allArticlesTabViewModel.downloadArticles(sources, 20);
+
+    }
+
     private void initRecycleView() {
         // defining Recycler view
         recyclerView = binding.recyclerViewAllArticlesTabFragment;
@@ -165,7 +166,7 @@ public class AllArticlesTabFragment extends Fragment implements
 
 
     private void refreshAction() {
-        feedProvider.downloadSources(sources, requireContext());
+        downloadArticles();
     }
 
     @Override
