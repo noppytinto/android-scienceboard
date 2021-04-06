@@ -22,13 +22,10 @@ import com.nocorp.scienceboard.databinding.AllArticlesTabFragmentBinding;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterFeedsList;
-import com.nocorp.scienceboard.repository.FeedProvider;
-import com.nocorp.scienceboard.repository.SourceRepository;
 import com.nocorp.scienceboard.repository.SourceViewModel;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class AllArticlesTabFragment extends Fragment implements

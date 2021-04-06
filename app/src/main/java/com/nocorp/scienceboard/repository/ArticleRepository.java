@@ -14,7 +14,6 @@ import java.util.List;
 public class ArticleRepository {
     private final String TAG = this.getClass().getSimpleName();
     private static ArticleRepository singletonInstance;
-    private ArticlesFetcher articlesListener;
     private List<ListItem> cachedArticles;
     private SourceRepository sourceRepository;
 
@@ -22,13 +21,13 @@ public class ArticleRepository {
 
     //----------------------------------------------------------- CONSTRUCTORS
 
-    private ArticleRepository() {
-        sourceRepository = new SourceRepository();
+    private ArticleRepository(SourceRepository sourceRepository) {
+        this.sourceRepository = sourceRepository;
     }
 
-    public static ArticleRepository getInstance() {
+    public static ArticleRepository getInstance(SourceRepository sourceRepository) {
         if(singletonInstance==null)
-            return new ArticleRepository();
+            singletonInstance = new ArticleRepository(sourceRepository);
 
         return singletonInstance;
     }
@@ -39,24 +38,42 @@ public class ArticleRepository {
 
     // DOM strategy
     public List<ListItem> getArticles(List<Source> givenSources, int limit, boolean forced) {
-        List<ListItem> resultArticles = null;
-        if(givenSources==null || givenSources.size()<=0) return resultArticles;
+        List<ListItem> result = null;
+        if(givenSources==null || givenSources.size()<=0) return result;
 
         if(forced) {
-            resultArticles = downloadArticlesFromInternet(givenSources, limit);
+            result = downloadArticlesFromInternet(givenSources, limit);
         }
         else {
-            if(cachedArticles==null) {
-                resultArticles = downloadArticlesFromInternet(givenSources, limit);
-                cachedArticles = resultArticles;
-            }
-            else {
-                resultArticles = cachedArticles;
-            }
+            result = smartArticlesDownload(givenSources, limit);
         }
 
-        return resultArticles;
+        return result;
     }// end getArticles()
+
+
+
+
+
+
+
+
+
+
+
+    //----------------------------------------------------------- PRIVATE METHODS
+
+    private List<ListItem> smartArticlesDownload(List<Source> givenSources, int limit) {
+        List<ListItem> result;
+        if(cachedArticles==null) {
+            result = downloadArticlesFromInternet(givenSources, limit);
+            cachedArticles = result;
+        }
+        else {
+            result = cachedArticles;
+        }
+        return result;
+    }
 
     /**
      * TODO implemente real download limit
@@ -113,16 +130,6 @@ public class ArticleRepository {
 
         return result;
     }
-
-
-
-
-
-
-
-
-
-
 
 
 

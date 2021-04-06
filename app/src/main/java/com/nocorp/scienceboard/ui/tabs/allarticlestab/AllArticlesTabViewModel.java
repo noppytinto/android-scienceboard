@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel;
 
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.repository.ArticleRepository;
-import com.nocorp.scienceboard.repository.ArticlesFetcher;
 import com.nocorp.scienceboard.repository.SourceRepository;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
@@ -22,7 +21,7 @@ public class AllArticlesTabViewModel extends ViewModel {
 
     public AllArticlesTabViewModel() {
         articlesList = new MutableLiveData<>();
-        articleRepository = ArticleRepository.getInstance();
+        articleRepository = ArticleRepository.getInstance(new SourceRepository());
     }
 
     public LiveData<List<ListItem>> getObservableArticlesList() {
@@ -33,7 +32,7 @@ public class AllArticlesTabViewModel extends ViewModel {
         Runnable task = () -> {
             // pick sources for ALL tab, obly once
             if(targetSources==null || targetSources.size()<=0) {
-                targetSources = SourceRepository.getAsourceForEachMainCategory_randomly(givenSources, mainCategories);
+                targetSources = SourceRepository.getAsourceForEachMainCategory_randomly(givenSources, mainCategories);// TODO this should not be static
             }
             List<ListItem> articles = articleRepository.getArticles(targetSources, limit, forced);
 
