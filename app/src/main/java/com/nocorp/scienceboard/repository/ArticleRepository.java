@@ -5,8 +5,6 @@ import android.util.Log;
 
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
-import com.nocorp.scienceboard.utility.rss.DomXmlParser;
-import com.nocorp.scienceboard.utility.rss.model.Channel;
 import com.nocorp.scienceboard.utility.rss.model.Entry;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 
@@ -62,76 +60,32 @@ public class ArticleRepository {
         return resultArticles;
     }// end getArticles()
 
-    // DOM strategy
-    private List<Entry> combineEntries(List<Source> sources) {
-        List<Entry> result = new ArrayList<>();
-
-        for(Source currentSource: sources) {
-            List<Entry> temp = currentSource.getEntries();
-            if(temp!=null && temp.size()>0) {
-                for(Entry entry: temp) {
-                    entry.setSourceName(currentSource.getName());
-                    entry.setSourceUrl(currentSource.getWebsiteUrl());
-                }
-                result.addAll(temp);
-            }
-        }
-
-        return result;
-    }
-
-    // DOM strategy
-    private Article buildArticle(Entry entry) {
-        Article article = null;
-
-        try {
-            String title = entry.getTitle();
-            String webpageUrl = entry.getWebpageUrl();
-            String thumbnailUrl = entry.getThumbnailUrl();
-            Date pubDate = entry.getPubDate();
-            String sourceName = entry.getSourceName();
-            String sourceUrl = entry.getSourceUrl();
-
-            article = new Article();
-            article.setThumbnailUrl(thumbnailUrl);
-            article.setTitle(title);
-            article.setWebpageUrl(webpageUrl);
-            article.setPubDate(pubDate);
-            article.setSourceName(sourceName);
-            article.setSourceUrl(sourceUrl);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return article;
-    }
-
-
+    /**
+     * TODO implemente real download limit
+     * since this is a fake limit, because alla rticles are always downloaded regardless
+     */
     private List<ListItem> downloadArticlesFromInternet(List<Source> givenSources, int limit) {
-        List<ListItem> resultArticles = null;
-        if(givenSources==null || givenSources.size()<=0) return resultArticles;
+        List<ListItem> result = null;
+        if(givenSources==null || givenSources.size()<=0) return result;
         int counter = 0;
 
-        // download entries
+        // download articles
         for(Source currentSource: givenSources) {
-            currentSource = sourceRepository.downloadAdditionalSourceData(currentSource);
+            currentSource = sourceRepository.downloadAdditionalSourceData(currentSource);// TODO the real download limit is defined inside domXmlParser
         }
 
         //
-        List<Entry> fullEntriesList = combineEntries(givenSources);
-        // sort articles by publication date
-        Collections.sort(fullEntriesList);
+        List<Article> fullArticlesList = combineArticles(givenSources);
+        if(fullArticlesList==null || fullArticlesList.size()<=0) return result;
 
         try {
-            resultArticles = new ArrayList<>();
-            if (fullEntriesList!=null && fullEntriesList.size()>=0) {
-                for(Entry currentEntry : fullEntriesList) {
+            // sort articles by publication date
+            Collections.sort(fullArticlesList);
+            result = new ArrayList<>();
+            if (fullArticlesList!=null && fullArticlesList.size()>=0) {
+                for(Article currentArticle : fullArticlesList) {
                     if(counter == limit) break;
-                    Article article = buildArticle(currentEntry);
-                    if(article!=null) {
-                        resultArticles.add((Article)article);
-                    }
+                    result.add(currentArticle);
                     counter++;
                 }
             }
@@ -143,7 +97,23 @@ public class ArticleRepository {
             Log.d(TAG, "SCIENCE_BOARD - getArticles: an error occurred when downloading Articles" + e.getMessage());
         }
 
-        return resultArticles;
+        return result;
+    }
+
+    // DOM strategy
+    private List<Article> combineArticles(List<Source> sources) {
+        List<Article> result = null;
+        if(sources==null || sources.size()<=0) return result;
+
+        result = new ArrayList<>();
+        for(Source currentSource: sources) {
+            List<Article> temp = currentSource.getArticles();
+            if(temp!=null && temp.size()>0) {
+                result.addAll(temp);
+            }
+        }
+
+        return result;
     }
 
 
@@ -158,8 +128,32 @@ public class ArticleRepository {
 
 
 
-
-
+//    // DOM strategy
+//    private Article buildArticle(Entry entry) {
+//        Article article = null;
+//
+//        try {
+//            String title = entry.getTitle();
+//            String webpageUrl = entry.getWebpageUrl();
+//            String thumbnailUrl = entry.getThumbnailUrl();
+//            Date pubDate = entry.getPubDate();
+//            String sourceName = entry.getSourceName();
+//            String sourceUrl = entry.getSourceUrl();
+//
+//            article = new Article();
+//            article.setThumbnailUrl(thumbnailUrl);
+//            article.setTitle(title);
+//            article.setWebpageUrl(webpageUrl);
+//            article.setPubDate(pubDate);
+//            article.setSourceName(sourceName);
+//            article.setSourceUrl(sourceUrl);
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        return article;
+//    }
 
 
 

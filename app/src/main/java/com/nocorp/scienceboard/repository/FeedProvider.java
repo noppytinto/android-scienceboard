@@ -1,16 +1,9 @@
 package com.nocorp.scienceboard.repository;
 
-import android.content.Context;
-
 import com.nocorp.scienceboard.utility.rss.model.Channel;
 import com.nocorp.scienceboard.model.Source;
-import com.nocorp.scienceboard.utility.rss.model.Entry;
-import com.nocorp.scienceboard.system.ThreadManager;
-import com.nocorp.scienceboard.utility.rss.DomXmlParser;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 public class FeedProvider {

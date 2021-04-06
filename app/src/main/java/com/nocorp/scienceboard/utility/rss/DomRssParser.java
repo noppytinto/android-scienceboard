@@ -1,15 +1,9 @@
 package com.nocorp.scienceboard.utility.rss;
 
-import android.content.Context;
 import android.util.Log;
 
+import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
-import com.nocorp.scienceboard.system.ThreadManager;
-import com.nocorp.scienceboard.utility.room.ChannelDao;
-import com.nocorp.scienceboard.utility.room.EntryDao;
-import com.nocorp.scienceboard.utility.room.ScienceBoardRoomDatabase;
-import com.nocorp.scienceboard.utility.rss.model.Channel;
-import com.nocorp.scienceboard.utility.rss.model.Entry;
 import com.nocorp.scienceboard.utility.HttpUtilities;
 import com.nocorp.scienceboard.utility.MyOkHttpClient;
 
@@ -42,7 +36,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
-public class DomXmlParser implements XmlParser{
+public class DomRssParser implements RssParser {
     private final String TAG = this.getClass().getSimpleName();
     private final String TITLE_TAG = "title";
     private final String DESCRIPTION_TAG = "description";
@@ -77,22 +71,29 @@ public class DomXmlParser implements XmlParser{
     private final String SRC_ATTRIBUTE = "src";
     private final String IMG_ATTRIBUTE = "img";
 
-    private final int ENTRIES_LIMIT = 10;
+    private final int ARTICLES_LIMIT = 10;
 
 
 
     //-------------------------------------------------------------- CONSTRUCTORS
 
+    public DomRssParser() {
+    }
 
 
 
-    //-------------------------------------------------------------- GETTERS/SETTERS
 
 
+    //-------------------------------------------------------------- PUBLIC METHODS
 
-
-    public Channel downloadAdditionalSourceData(String rssUrl) {
-        Channel result = null;
+    /**
+     * download articles and last update date
+     */
+    @Override
+    public Source updateSource(Source givenSource) {
+        Source result = givenSource;
+        if(givenSource==null) return result;
+        String rssUrl = givenSource.getRssUrl();
         if(rssUrl==null || rssUrl.isEmpty()) return result;
 
         InputStream inputStream = null;
@@ -122,7 +123,7 @@ public class DomXmlParser implements XmlParser{
                             if(candidatesChannels!=null || candidatesChannels.getLength()>0) {
                                 Node candidateChannel = candidatesChannels.item(0);
                                 if(candidateChannel!=null && isElementNode(candidateChannel)){
-                                    result = buildChannelWithEntries(candidatesChannels.item(0));
+                                    result = downloadAdditionalSourceData(givenSource, candidatesChannels.item(0));
                                     break;
                                 }
                             }
@@ -132,6 +133,7 @@ public class DomXmlParser implements XmlParser{
             }
         } catch (Exception e) {
             e.printStackTrace();
+            Log.d(TAG, "SCIENCE_BOARD - downloadAdditionalSourceData: cannot download additional source data " + e.getMessage());
         } finally {
             if (response != null) {
                 response.close();
@@ -141,17 +143,19 @@ public class DomXmlParser implements XmlParser{
         return result;
     }
 
-
-
-
-
-
+    /**
+     * download the latest N articles
+     */
     @Override
-    public Channel getChannel(String rssUrl, Context context) {
-        Channel result = null;
+    public List<Article> downloadArticles(Source givenSource, int limit) {
+        List<Article> results = null;
+        if(givenSource==null) return results;
+        if(limit<=0) return results;
+        String rssUrl = givenSource.getRssUrl();
+        if(rssUrl==null || rssUrl.isEmpty()) return results;
+
         InputStream inputStream = null;
         Response response = null;
-
         try {
             final OkHttpClient httpClient = MyOkHttpClient.getClient();
             String sanitizedUrl = HttpUtilities.sanitizeUrl(rssUrl);
@@ -177,10 +181,7 @@ public class DomXmlParser implements XmlParser{
                             if(candidatesChannels!=null || candidatesChannels.getLength()>0) {
                                 Node candidateChannel = candidatesChannels.item(0);
                                 if(candidateChannel!=null && isElementNode(candidateChannel)){
-                                    result = buildChannelWithEntries(candidatesChannels.item(0), rssUrl, context);
-                                    if(result!=null) {
-                                        saveChannelInRoom(result, context);
-                                    }
+                                    results = downloadArticles(candidatesChannels.item(0), limit, givenSource);
                                     break;
                                 }
                             }
@@ -190,210 +191,65 @@ public class DomXmlParser implements XmlParser{
             }
         } catch (Exception e) {
             e.printStackTrace();
+            Log.d(TAG, "SCIENCE_BOARD - downloadArticles: cannot download articles " + e.getMessage());
         } finally {
             if (response != null) {
                 response.close();
             }
         }
 
-        return result;
+        return results;
     }
 
-    private void saveChannelInRoom(Channel channel, Context context) {
-        ChannelDao channelDao = getChannelDao(context);
-        Runnable task = () -> {
-            channelDao.insert(channel);
-        };
-
-        ThreadManager t = ThreadManager.getInstance();
-        try {
-            t.runTask(task);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private ChannelDao getChannelDao(Context context) {
-        ScienceBoardRoomDatabase roomDatabase = ScienceBoardRoomDatabase.getInstance(context);
-        ChannelDao dao = roomDatabase.getChannelDao();
-        return dao;
-    }
-
-    private void saveEntryInRoom(Entry entry, Context context) {
-        EntryDao entryDao = getEntryDao(context);
-        Runnable task = () -> {
-            entryDao.insert(entry);
-        };
-
-        ThreadManager t = ThreadManager.getInstance();
-        try {
-            t.runTask(task);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private EntryDao getEntryDao(Context context) {
-        ScienceBoardRoomDatabase roomDatabase = ScienceBoardRoomDatabase.getInstance(context);
-        EntryDao dao = roomDatabase.getEntryDao();
-        return dao;
+    @Override
+    public Source downloadSourceData(String rssUrl) {
+        // ignore
+        return null;
     }
 
 
 
-    //--------------------------------------------------------------
-
-
-    private boolean checkChannelLastUpdate(Node nodeChannel) {
-        // TODO
-        Date newDate = null;
-        Date oldDate = null;
 
 
 
 
 
-        return false;
-    }
+    //-------------------------------------------------------------- PRIVATE METHODS
 
-
-    private Channel buildChannel(Node channelNode) {
-        Channel channel = null;
-        Date lastUpdate = null;
+    private Source downloadAdditionalSourceData(Source source, Node channelNode) {
+        Source result = source;
+        if(channelNode==null) return result;
 
         if(channelNode != null) {
-            String stringDate = getLastUpdate(channelNode);
-            lastUpdate = convertStringToDate(stringDate);
-
-            channel = new Channel();
-
-            Entry entry = getLatestEntry(channelNode);
-            if(lastUpdate==null) {
-                if(entry!=null)
-                    lastUpdate = entry.getPubDate();
+            String stringDate = downloadLastUpdate(channelNode);
+            Date lastUpdate = convertStringToDate(stringDate);
+            List<Article> articles = downloadArticles(channelNode, ARTICLES_LIMIT, source);
+            if(lastUpdate==null) { // use the latest Article pubdate ad last update date for a Source
+                if(articles!=null && articles.size()>0)
+                    lastUpdate = articles.get(0).getPubDate();
             }
-            channel.setLastUpdate(lastUpdate);
-        }
 
-        return channel;
-    }
-
-    private Channel buildChannelWithEntries(Node channelNode) {
-        Channel channel = null;
-        Date lastUpdate = null;
-        List<Entry> entries = null;
-
-        if(channelNode != null) {
-            String stringDate = getLastUpdate(channelNode);
-            lastUpdate = convertStringToDate(stringDate);
-            channel = new Channel();
-            entries = getEntries(channelNode, ENTRIES_LIMIT);
-            if(lastUpdate==null) {
-                if(entries!=null && entries.size()>0)
-                    lastUpdate = entries.get(0).getPubDate();
-            }
-            channel.setLastUpdate(lastUpdate);
-            channel.setEntries(entries);
-        }
-
-        return channel;
-    }
-
-
-    private Channel buildChannelWithEntries(Node channelNode, String url, Context context) throws ParseException {
-        Channel channel = null;
-        String name = null;
-        String language = null;
-        String websiteUrl = null;
-        String rssUrl = null;
-        Date lastUpdate = null;
-        Date pubDate = null;
-        List<Entry> entries = null;
-
-        if(channelNode != null) {
-//            name = getChannelName(channelNode);
-//            language = getLanguage(channelNode);
-//            websiteUrl = getWebUrl(channelNode);
-//            rssUrl = url;
-            String stringDate = getLastUpdate(channelNode);
-            lastUpdate = convertStringToDate(stringDate);
-//            String stringDate_2 = getPubDate(channelNode);
-//            pubDate = convertStringToDate(stringDate_2);
-
-            channel = new Channel();
-//            channel.setName(name);
-//            channel.setLanguage(language);
-//            if(websiteUrl==null || websiteUrl.isEmpty()){
-//                try {
-//                    websiteUrl = HttpUtilities.getBaseUrl(url);
-//                } catch (URISyntaxException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//            channel.setWebsiteUrl(websiteUrl);
-//            channel.setRssUrl(rssUrl);
-
-
-            entries = getEntries(channelNode, ENTRIES_LIMIT, context);
-            if(lastUpdate==null) {
-                if(entries!=null && entries.size()>0)
-                    lastUpdate = entries.get(0).getPubDate();
-            }
-            channel.setLastUpdate(lastUpdate);
-//            channel.setPubDate(pubDate);
-            entries = setChannel(entries, channel);
-            channel.setEntries(entries);
-        }
-
-
-        return channel;
-    }
-
-    private List<Entry> setChannel(List<Entry> entries, Channel channel) {
-        if(entries!=null && entries.size()>0){
-            for(Entry entry: entries){
-                entry.setChannel(channel);
-            }
-        }
-
-        return entries;
-    }
-
-    private Entry getLatestEntry(Node channelNode) {
-        Entry result = null;
-
-        try {
-            result = new Entry();
-            Document document = channelNode.getOwnerDocument();
-            List<String> knownEntryTags = new ArrayList<>();
-            knownEntryTags.add(ENTRY_TAG);
-            knownEntryTags.add(ITEM_TAG);
-
-            for(String candidateEntryTag: knownEntryTags) {
-                NodeList entryNodes = document.getElementsByTagName(candidateEntryTag);
-                if(entryNodes!=null) {
-                    for(int i=0; i<entryNodes.getLength(); i++) {
-                        Node entryNode = entryNodes.item(i);
-                        if(entryNode!=null && isElementNode(entryNode)){
-                            if(i>=1) break;
-                            Entry entry = buildEntry(entryNode);
-                            if(entry!=null) {
-                                result = entry;
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.d(TAG, "SCIENCE_BOARD - getLatestEntry: failed to download latest entry " + e.getMessage());
+            result.setLastUpdate(lastUpdate);
+            result.setArticles(articles);
         }
 
         return result;
     }
 
-    private List<Entry> getEntries(Node channelNode, int limit, Context context) {
-        List<Entry> results = null;
+    private String downloadLastUpdate(Node channelNode) {
+        String result = null;
+        if(channelNode==null) return result;
+        NodeList childNodes = channelNode.getChildNodes();
+        if(childNodes==null || childNodes.getLength()<=0) return result;
+        return getNodeValue(childNodes, LAST_BUILD_DATE_TAG, UPDATE_TAG);
+    }
+
+    /**
+     * an Article is represented by an Entry/Item element in an rss
+     */
+    private List<Article> downloadArticles(Node channelNode, int limit, Source source) {
+        List<Article> results = null;
+        if(channelNode==null || limit<=0) return results;
 
         try {
             results = new ArrayList<>();
@@ -409,10 +265,9 @@ public class DomXmlParser implements XmlParser{
                         Node entryNode = entryNodes.item(i);
                         if(entryNode!=null && isElementNode(entryNode)){
                             if(i>=limit) break;
-                            Entry entry = buildEntry(entryNode);
-                            if(entry!=null) {
-                                results.add(entry);
-                                saveEntryInRoom(entry, context);
+                            Article article = buildArticle(entryNode, source);
+                            if(article!=null) {
+                                results.add(article);
                             }
                         }
                     }
@@ -422,79 +277,53 @@ public class DomXmlParser implements XmlParser{
 
         } catch (Exception e) {
             e.printStackTrace();
+            Log.d(TAG, "SCIENCE_BOARD - getArticles: cannot build article " + e.getMessage());
         }
 
         return results;
     }
 
-    private List<Entry> getEntries(Node channelNode, int limit) {
-        List<Entry> results = null;
-
-        try {
-            results = new ArrayList<>();
-            Document document = channelNode.getOwnerDocument();
-            List<String> knownEntryTags = new ArrayList<>();
-            knownEntryTags.add(ENTRY_TAG);
-            knownEntryTags.add(ITEM_TAG);
-
-            for(String candidateEntryTag: knownEntryTags) {
-                NodeList entryNodes = document.getElementsByTagName(candidateEntryTag);
-                if(entryNodes!=null) {
-                    for(int i=0; i<entryNodes.getLength(); i++) {
-                        Node entryNode = entryNodes.item(i);
-                        if(entryNode!=null && isElementNode(entryNode)){
-                            if(i>=limit) break;
-                            Entry entry = buildEntry(entryNode);
-                            if(entry!=null) {
-                                results.add(entry);
-                            }
-                        }
-                    }
-                }
-            }
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return results;
-    }
-
-
-    private Entry buildEntry(Node entryNode) {
-        Entry entry = null;
-        String title = null;
-        String description = null;
-        String content = null;
-        String webpageUrl = null;
-        Date pubDate = null;
-        String thumbnailUrl = null;
+    private Article buildArticle(Node entryNode, Source source) {
+        Article result = null;
+        if(entryNode==null) return result;
 
         if(entryNode != null) {
-            title = getEntryTitle(entryNode);
-            description = getDescription(entryNode);
-            content = getContent(entryNode);
+            String title = getEntryTitle(entryNode);
+            String description = getDescription(entryNode);
+            String content = getContent(entryNode);
             String unsafeUrl = getWebUrl(entryNode);
-            if( ! HttpUtilities.urlIsSafe(unsafeUrl))
-                webpageUrl = unsafeUrl.replace("http://", "https://");
-            else {
-                webpageUrl = unsafeUrl;
-            }
+            String webpageUrl = buildSafeUrl(unsafeUrl);
             String stringDate = getPubDate(entryNode);
-            pubDate = convertStringToDate(stringDate);
-            thumbnailUrl = getThumbnailUrl(entryNode, content, description);
+            Date pubDate = convertStringToDate(stringDate);
+            String thumbnailUrl = getThumbnailUrl(entryNode, content, description);
 
-            entry = new Entry();
-            entry.setTitle(title);
-            entry.setDescription(description);
-            entry.setContent(content);
-            entry.setWebpageUrl(webpageUrl);
-            entry.setPubDate(pubDate);
-            entry.setThumbnailUrl(thumbnailUrl);
+            result = new Article();
+            result.setTitle(title);
+            result.setDescription(description);
+            result.setContent(content);
+            result.setWebpageUrl(webpageUrl);
+            result.setPubDate(pubDate);
+            result.setThumbnailUrl(thumbnailUrl);
+            if(source==null) {
+                result.setSourceUrl(source.getWebsiteUrl());
+                result.setSourceName(source.getName());
+            }
         }
 
-        return entry;
+        return result;
+    }
+
+    private String buildSafeUrl(String unsafeUrl) {
+        String result = null;
+        if(unsafeUrl==null) return result;
+
+        if( ! HttpUtilities.urlIsSafe(unsafeUrl))
+            result = unsafeUrl.replace("http://", "https://");
+        else {
+            result = unsafeUrl;
+        }
+
+        return result;
     }
 
     private String getThumbnailUrl(Node entryNode, String content, String description) {
@@ -653,14 +482,6 @@ public class DomXmlParser implements XmlParser{
 //        }
 //
         return getNodeValue(childNodes, LINK_TAG, ID_TAG);
-    }
-
-    private String getLastUpdate(Node channelNode) {
-        String result = null;
-        if(channelNode==null) return result;
-        NodeList childNodes = channelNode.getChildNodes();
-        if(childNodes==null || childNodes.getLength()<=0) return result;
-        return getNodeValue(childNodes, LAST_BUILD_DATE_TAG, UPDATE_TAG);
     }
 
     private String getPubDate(Node node) {
@@ -853,6 +674,272 @@ public class DomXmlParser implements XmlParser{
 
         return request;
     }
+
+    //    private void saveChannelInRoom(Channel channel, Context context) {
+//        ChannelDao channelDao = getChannelDao(context);
+//        Runnable task = () -> {
+//            channelDao.insert(channel);
+//        };
+//
+//        ThreadManager t = ThreadManager.getInstance();
+//        try {
+//            t.runTask(task);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+//
+//
+//    private void saveEntryInRoom(Entry entry, Context context) {
+//        EntryDao entryDao = getEntryDao(context);
+//        Runnable task = () -> {
+//            entryDao.insert(entry);
+//        };
+//
+//        ThreadManager t = ThreadManager.getInstance();
+//        try {
+//            t.runTask(task);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+
+
+//    private EntryDao getEntryDao(Context context) {
+//        ScienceBoardRoomDatabase roomDatabase = ScienceBoardRoomDatabase.getInstance(context);
+//        EntryDao dao = roomDatabase.getEntryDao();
+//        return dao;
+//    }
+//
+//
+//
+//    private ChannelDao getChannelDao(Context context) {
+//        ScienceBoardRoomDatabase roomDatabase = ScienceBoardRoomDatabase.getInstance(context);
+//        ChannelDao dao = roomDatabase.getChannelDao();
+//        return dao;
+//    }
+
+
+//    @Override
+//    public Channel downloadSourceData(String rssUrl) {
+//        Channel result = null;
+//        InputStream inputStream = null;
+//        Response response = null;
+//
+//        try {
+//            final OkHttpClient httpClient = MyOkHttpClient.getClient();
+//            String sanitizedUrl = HttpUtilities.sanitizeUrl(rssUrl);
+//            HttpUrl httpUrl = buildHttpURL(sanitizedUrl);
+//            Request request = buildRequest(httpUrl);
+//
+//            // performing request
+//            response = httpClient.newCall(request).execute();
+//
+//            // check response
+//            if (response.isSuccessful()) {
+//                try (ResponseBody responseBody = response.body()) {
+//                    if(responseBody!=null) {
+//                        inputStream = responseBody.byteStream();
+//
+//                        Document doc = buildDocument(inputStream);
+//                        List<String> knownChannelTags = new ArrayList<>();
+//                        knownChannelTags.add(CHANNEL_TAG);
+//                        knownChannelTags.add(FEED_TAG);
+//
+//                        for(String candidateChannelTagName: knownChannelTags) {
+//                            NodeList candidatesChannels = doc.getElementsByTagName(candidateChannelTagName);
+//                            if(candidatesChannels!=null || candidatesChannels.getLength()>0) {
+//                                Node candidateChannel = candidatesChannels.item(0);
+//                                if(candidateChannel!=null && isElementNode(candidateChannel)){
+////                                    result = buildChannelWithEntries(candidatesChannels.item(0), rssUrl, context);
+//                                    if(result!=null) {
+////                                        saveChannelInRoom(result, context);
+//                                    }
+//                                    break;
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        } finally {
+//            if (response != null) {
+//                response.close();
+//            }
+//        }
+//
+//        return result;
+//    }
+
+
+//    private boolean checkChannelLastUpdate(Node nodeChannel) {
+//        // TODO
+//        Date newDate = null;
+//        Date oldDate = null;
+//
+//
+//
+//
+//
+//        return false;
+//    }
+
+//
+//    private Channel buildChannel(Node channelNode) {
+//        Channel channel = null;
+//        Date lastUpdate = null;
+//
+//        if(channelNode != null) {
+//            String stringDate = downloadLastUpdate(channelNode);
+//            lastUpdate = convertStringToDate(stringDate);
+//
+//            channel = new Channel();
+//
+//            Entry entry = getLatestEntry(channelNode);
+//            if(lastUpdate==null) {
+//                if(entry!=null)
+//                    lastUpdate = entry.getPubDate();
+//            }
+//            channel.setLastUpdate(lastUpdate);
+//        }
+//
+//        return channel;
+//    }
+//
+//
+//
+//    private Channel updateSource(Node channelNode, String url, Context context) throws ParseException {
+//        Channel channel = null;
+//        String name = null;
+//        String language = null;
+//        String websiteUrl = null;
+//        String rssUrl = null;
+//        Date lastUpdate = null;
+//        Date pubDate = null;
+//        List<Entry> entries = null;
+//
+//        if(channelNode != null) {
+////            name = getChannelName(channelNode);
+////            language = getLanguage(channelNode);
+////            websiteUrl = getWebUrl(channelNode);
+////            rssUrl = url;
+//            String stringDate = downloadLastUpdate(channelNode);
+//            lastUpdate = convertStringToDate(stringDate);
+////            String stringDate_2 = getPubDate(channelNode);
+////            pubDate = convertStringToDate(stringDate_2);
+//
+//            channel = new Channel();
+////            channel.setName(name);
+////            channel.setLanguage(language);
+////            if(websiteUrl==null || websiteUrl.isEmpty()){
+////                try {
+////                    websiteUrl = HttpUtilities.getBaseUrl(url);
+////                } catch (URISyntaxException e) {
+////                    e.printStackTrace();
+////                }
+////            }
+////            channel.setWebsiteUrl(websiteUrl);
+////            channel.setRssUrl(rssUrl);
+//
+//
+//            entries = downloadArticles(channelNode, ARTICLES_LIMIT, context);
+//            if(lastUpdate==null) {
+//                if(entries!=null && entries.size()>0)
+//                    lastUpdate = entries.get(0).getPubDate();
+//            }
+//            channel.setLastUpdate(lastUpdate);
+////            channel.setPubDate(pubDate);
+//            entries = setChannel(entries, channel);
+//            channel.setEntries(entries);
+//        }
+//
+//
+//        return channel;
+//    }
+
+//    private List<Entry> setChannel(List<Entry> entries, Channel channel) {
+//        if(entries!=null && entries.size()>0){
+//            for(Entry entry: entries){
+//                entry.setChannel(channel);
+//            }
+//        }
+//
+//        return entries;
+//    }
+
+//    private Entry getLatestEntry(Node channelNode) {
+//        Entry result = null;
+//
+//        try {
+//            result = new Entry();
+//            Document document = channelNode.getOwnerDocument();
+//            List<String> knownEntryTags = new ArrayList<>();
+//            knownEntryTags.add(ENTRY_TAG);
+//            knownEntryTags.add(ITEM_TAG);
+//
+//            for(String candidateEntryTag: knownEntryTags) {
+//                NodeList entryNodes = document.getElementsByTagName(candidateEntryTag);
+//                if(entryNodes!=null) {
+//                    for(int i=0; i<entryNodes.getLength(); i++) {
+//                        Node entryNode = entryNodes.item(i);
+//                        if(entryNode!=null && isElementNode(entryNode)){
+//                            if(i>=1) break;
+//                            Entry entry = buildArticle(entryNode);
+//                            if(entry!=null) {
+//                                result = entry;
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            Log.d(TAG, "SCIENCE_BOARD - getLatestEntry: failed to download latest entry " + e.getMessage());
+//        }
+//
+//        return result;
+//    }
+
+
+
+
+
+//    private List<Entry> getArticles(Node channelNode, int limit, Context context) {
+//        List<Entry> results = null;
+//
+//        try {
+//            results = new ArrayList<>();
+//            Document document = channelNode.getOwnerDocument();
+//            List<String> knownEntryTags = new ArrayList<>();
+//            knownEntryTags.add(ENTRY_TAG);
+//            knownEntryTags.add(ITEM_TAG);
+//
+//            for(String candidateEntryTag: knownEntryTags) {
+//                NodeList entryNodes = document.getElementsByTagName(candidateEntryTag);
+//                if(entryNodes!=null) {
+//                    for(int i=0; i<entryNodes.getLength(); i++) {
+//                        Node entryNode = entryNodes.item(i);
+//                        if(entryNode!=null && isElementNode(entryNode)){
+//                            if(i>=limit) break;
+//                            Entry entry = buildEntry(entryNode);
+//                            if(entry!=null) {
+//                                results.add(entry);
+//                                saveEntryInRoom(entry, context);
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        return results;
+//    }
 
 
 }// end DomXmlParser

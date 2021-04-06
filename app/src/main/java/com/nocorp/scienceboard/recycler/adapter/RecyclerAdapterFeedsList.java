@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +35,7 @@ import java.util.Date;
 import java.util.List;
 
 public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    private final String TAG = this.getClass().getSimpleName();
     private List<ListItem> recyclerList;
     private Context context;
     private OnArticleClickedListener listener;
@@ -141,6 +143,7 @@ public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<RecyclerView.
                         .into(holder.thumbnail);
             } catch (Exception e) {
                 e.printStackTrace();
+                Log.d(TAG, "SCIENCE_BOARD - buildArticleItem: cannot set thumbnail in recycler " + e.getMessage());
             }
         }
 

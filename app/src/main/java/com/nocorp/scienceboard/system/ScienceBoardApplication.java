@@ -10,6 +10,6 @@ public class ScienceBoardApplication extends Application {
         super.onCreate();
         ThreadManager.init();
         MyOkHttpClient.init(this);
-        Log.d(ScienceBoardApplication.class.getSimpleName(), "SCIENCEBOARD - onCreate(): application initilized");
+        Log.d(ScienceBoardApplication.class.getSimpleName(), "SCIENCE_BOARD - onCreate(): application initilized");
     }
 }
