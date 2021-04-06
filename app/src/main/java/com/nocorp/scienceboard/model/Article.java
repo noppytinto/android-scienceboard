@@ -13,14 +13,15 @@ import java.util.Date;
 
 @Entity
 public class Article extends ListItem implements Comparable<Article> {
+    @PrimaryKey
+    @NonNull
+    private String identifier;
     private String title;
     private String description;
     private String content;
     @ColumnInfo(name = "thumbnail_url")
     private String thumbnailUrl;
-    @PrimaryKey
     @ColumnInfo(name = "webpage_url")
-    @NonNull
     private String webpageUrl;
 //    private SyndEntry syndEntry;
     @Ignore
@@ -31,6 +32,11 @@ public class Article extends ListItem implements Comparable<Article> {
     private String sourceName;
     @ColumnInfo(name = "source_url")
     private String sourceUrl;
+
+
+    public Article(MyValues.ItemType itemType) {
+        super(itemType);
+    }
 
     public Article() {
         super(MyValues.ItemType.ARTICLE);
@@ -149,5 +155,14 @@ public class Article extends ListItem implements Comparable<Article> {
 
     public void setSourceUrl(String sourceUrl) {
         this.sourceUrl = sourceUrl;
+    }
+
+    @NonNull
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(@NonNull String identifier) {
+        this.identifier = identifier;
     }
 }// end Article

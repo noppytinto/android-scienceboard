@@ -163,6 +163,11 @@ public class ArticleRepository {
         }
     }
 
+    private ArticleDao getArticleDao(Context context) {
+        ScienceBoardRoomDatabase roomDatabase = ScienceBoardRoomDatabase.getInstance(context);
+        return roomDatabase.getArticleDao();
+    }
+
     private void saveSourcesInRoom(@NotNull ArrayList<Source> sources, Context context) {
         SourceDao sourceDao = getSourceDao(context);
 
@@ -177,11 +182,6 @@ public class ArticleRepository {
             e.printStackTrace();
             Log.d(TAG, "SCIENCE_BOARD - saveSourcesInRoom: cannot start thread " + e.getMessage());
         }
-    }
-
-    private ArticleDao getArticleDao(Context context) {
-        ScienceBoardRoomDatabase roomDatabase = ScienceBoardRoomDatabase.getInstance(context);
-        return roomDatabase.getArticleDao();
     }
 
     private SourceDao getSourceDao(Context context) {

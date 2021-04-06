@@ -1,19 +1,85 @@
 package com.nocorp.scienceboard.ui.history;
 
+import android.app.Application;
+import android.util.Log;
+
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
-public class HistoryViewModel extends ViewModel {
+import com.nocorp.scienceboard.model.Article;
+import com.nocorp.scienceboard.model.Source;
+import com.nocorp.scienceboard.repository.HistoryRepository;
+import com.nocorp.scienceboard.repository.HistoryRepositoryListener;
+import com.nocorp.scienceboard.repository.SourceRepository;
+import com.nocorp.scienceboard.system.ThreadManager;
+import com.nocorp.scienceboard.ui.viewholder.ListItem;
 
-    private MutableLiveData<String> mText;
+import java.util.List;
 
-    public HistoryViewModel() {
-        mText = new MutableLiveData<>();
-        mText.setValue("This is history fragment");
+public class HistoryViewModel extends AndroidViewModel implements HistoryRepositoryListener {
+    private final String TAG = this.getClass().getSimpleName();
+    private MutableLiveData<List<ListItem>> articlesList;
+    private HistoryRepository historyRepository;
+    private static boolean taskIsRunning;
+
+
+    //------------------------------------------------------------ CONSTRUCTORS
+
+
+    public HistoryViewModel(Application application) {
+        super(application);
+        articlesList = new MutableLiveData<>();
+        historyRepository = new HistoryRepository(this);
     }
 
-    public LiveData<String> getText() {
-        return mText;
+
+
+    //------------------------------------------------------------ GETTERS/SETTERS
+
+    public LiveData<List<ListItem>> getObservableArticlesList() {
+        return articlesList;
     }
-}
+
+    public void setArticlesList(List<ListItem> articlesList) {
+        this.articlesList.postValue(articlesList);
+    }
+
+
+    //------------------------------------------------------------ METHODS
+
+    public void fetchHistory(int limit) {
+        Runnable task = () -> {
+            if( ! taskIsRunning) {
+                taskIsRunning = true;
+                // pick sources for ALL tab, only once
+                historyRepository.fetchArticles(limit, getApplication());
+
+                taskIsRunning = false;
+            }
+        };
+
+        ThreadManager threadManager = ThreadManager.getInstance();
+        threadManager.runTask(task);
+    }
+
+
+    @Override
+    public void onHistoryFetchCompleted(List<ListItem> articles) {
+        if(articles != null && articles.size()>0) {
+            setArticlesList(articles);
+            Log.d(TAG, "SCIENCE_BOARD - onHistoryFetchCompleted: articles fetched from ROOM");
+        }
+        else {
+            setArticlesList(null);
+            Log.d(TAG, "SCIENCE_BOARD - onHistoryFetchCompleted: article list is empty");
+        }
+    }
+
+    @Override
+    public void onHistoryFetchFailed(String cause) {
+        Log.d(TAG, "SCIENCE_BOARD - onHistoryFetchFailed: articles fetching failed" + cause);
+    }
+
+
+}// end HistoryViewModel

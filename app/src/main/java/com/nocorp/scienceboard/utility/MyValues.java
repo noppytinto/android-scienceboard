@@ -5,6 +5,8 @@ public class MyValues {
     public enum ItemType {
         ARTICLE,
         LIST_AD,
+        VISITED_ARTICLE,
+        BOOKMARKED_ARTICLE
     }
 
     public enum SourceCategory {

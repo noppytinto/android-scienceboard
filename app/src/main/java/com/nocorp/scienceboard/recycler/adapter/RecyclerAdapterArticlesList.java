@@ -44,6 +44,8 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
 
     private static final int ARTICLE_TYPE = 1;
     private static final int LIST_AD_TYPE = 2;
+    private static final int VISITED_ARTICLE_TYPE = 3;
+    private static final int BOOKMARKED_ARTICLE_TYPE = 4;
 
     public interface OnArticleClickedListener {
         public void onArticleClicked(int position);
@@ -71,6 +73,8 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
                 return ARTICLE_TYPE;
             case LIST_AD:
                 return LIST_AD_TYPE;
+            case BOOKMARKED_ARTICLE:
+                return BOOKMARKED_ARTICLE_TYPE;
             default:
                 return 0;
         }
@@ -89,6 +93,11 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_native_ad_articles_list_level, parent, false);
             return new ListAdViewHolder(view);
         }
+        else if(viewType == VISITED_ARTICLE_TYPE) {
+            //TODO create visited article view holder
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_article_viewholder, parent, false);
+            return new ArticleViewHolder(view, listener);
+        }
         else {
             return new ArticleViewHolder(null, listener);
         }
@@ -103,6 +112,13 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
             buildArticleItem((ArticleViewHolder) holder, article);
         }
         else if(getItemViewType(position) == LIST_AD_TYPE) {
+            ListAd listAd = (ListAd) recyclerList.get(position);
+
+            //
+            buildListAdItem((ListAdViewHolder) holder, listAd);
+        }
+        else if(getItemViewType(position) == VISITED_ARTICLE_TYPE) {
+            //TODO create visited article view holder
             ListAd listAd = (ListAd) recyclerList.get(position);
 
             //

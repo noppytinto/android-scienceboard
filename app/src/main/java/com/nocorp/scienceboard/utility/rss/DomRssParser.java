@@ -44,7 +44,6 @@ public class DomRssParser implements RssParser {
     private final String CONTENT_ENCODED_TAG = "content:encoded";
     private final String LANGUAGE_TAG = "language";
     private final String LINK_TAG = "link";
-    private final String ID_TAG = "id";
     private final String CHANNEL_TAG = "channel";
     private final String FEED_TAG = "feed";
     private final String ITEM_TAG = "item";
@@ -54,6 +53,7 @@ public class DomRssParser implements RssParser {
     private final String DC_DATE_TAG = "dc:date";
     private final String LAST_BUILD_DATE_TAG = "lastBuildDate";
     private final String UPDATE_TAG = "update";
+    // thumbnails tags
     private final String MEDIA_CONTENT_TAG = "media:content";
     private final String CONTENT_MEDIUM_TAG = "content:medium";
     private final String MEDIA_THUMBNAIL_TAG = "media:thumbnail";
@@ -63,8 +63,12 @@ public class DomRssParser implements RssParser {
     private final String THUMBNAIL_TAG = "thumbnail";
     private final String TMB_TAG = "tmb";
     private final String ENCLOSURE_TAG = "enclosure";
-
-    //
+    // article identifiers tags
+    private final String GUID_TAG = "guid";
+    private final String ID_TAG = "id";
+    private final String DC_IDENTIFIER_TAG = "dc:identifier";
+    private final String PRISM_DOI_TAG = "prism:doi";
+    // thumbnails attributres
     private final String HREF_ATTRIBUTE = "href";
     private final String URL_ATTRIBUTE = "url";
     private final String IMAGE_TYPE = "image";
@@ -296,6 +300,8 @@ public class DomRssParser implements RssParser {
             String stringDate = getPubDate(entryNode);
             Date pubDate = convertStringToDate(stringDate);
             String thumbnailUrl = getThumbnailUrl(entryNode, content, description);
+            String identifier = getIdentifier(entryNode);
+            if(identifier==null || identifier.isEmpty()) identifier = new String(webpageUrl);
 
             result = new Article();
             result.setTitle(title);
@@ -304,6 +310,7 @@ public class DomRssParser implements RssParser {
             result.setWebpageUrl(webpageUrl);
             result.setPubDate(pubDate);
             result.setThumbnailUrl(thumbnailUrl);
+            result.setIdentifier(identifier);
             if(source!=null) {
                 result.setSourceUrl(source.getWebsiteUrl());
                 result.setSourceName(source.getName());
@@ -356,6 +363,14 @@ public class DomRssParser implements RssParser {
         NodeList childNodes = entryNode.getChildNodes();
         if(childNodes==null || childNodes.getLength()<=0) return result;
         return getNodeValue(childNodes, DESCRIPTION_TAG);
+    }
+
+    private String getIdentifier(Node entryNode) {
+        String result = null;
+        if(entryNode==null) return result;
+        NodeList childNodes = entryNode.getChildNodes();
+        if(childNodes==null || childNodes.getLength()<=0) return result;
+        return getNodeValue(childNodes, GUID_TAG, ID_TAG, DC_IDENTIFIER_TAG, PRISM_DOI_TAG);
     }
 
     private String getContent(Node entryNode) {

@@ -24,15 +24,31 @@ public class AllArticlesTabViewModel extends AndroidViewModel {
     private static List<Source> targetSources;
     private static boolean taskIsRunning;
 
+
+
+    //------------------------------------------------------------ CONSTRUCTORS
+
     public AllArticlesTabViewModel(Application application) {
         super(application);
         articlesList = new MutableLiveData<>();
         articleRepository = new ArticleRepository(new DomRssParser());
     }
 
+
+
+    //------------------------------------------------------------ GETTERS/SETTERS
+
     public LiveData<List<ListItem>> getObservableArticlesList() {
         return articlesList;
     }
+
+    public void setArticlesList(List<ListItem> articlesList) {
+        this.articlesList.postValue(articlesList);
+    }
+
+
+
+    //------------------------------------------------------------ METHODS
 
     public void downloadArticles(List<Source> givenSources, int limit, boolean forced) {
         Runnable task = () -> {
@@ -54,10 +70,4 @@ public class AllArticlesTabViewModel extends AndroidViewModel {
         ThreadManager threadManager = ThreadManager.getInstance();
         threadManager.runTask(task);
     }
-
-    public void setArticlesList(List<ListItem> articlesList) {
-        this.articlesList.postValue(articlesList);
-    }
-
-
 }// end AllArticlesTabViewModel
