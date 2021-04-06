@@ -10,10 +10,8 @@ import androidx.room.TypeConverters;
 
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
-import com.nocorp.scienceboard.utility.rss.model.Channel;
-import com.nocorp.scienceboard.utility.rss.model.Entry;
 
-@Database(entities = {Channel.class, Entry.class, Source.class, Article.class}, version = 1, exportSchema = false)
+@Database(entities = {Source.class, Article.class}, version = 1, exportSchema = false)
 @TypeConverters({DateConverter.class, StringListConverter.class})
 public abstract class ScienceBoardRoomDatabase extends RoomDatabase {
     private static volatile ScienceBoardRoomDatabase singletonInstance;
@@ -25,9 +23,8 @@ public abstract class ScienceBoardRoomDatabase extends RoomDatabase {
     public ScienceBoardRoomDatabase() {}
 
     //--------------------------------- GETTERS/SETTERS
-
-    public abstract ChannelDao getChannelDao();
-    public abstract EntryDao getEntryDao();
+    public abstract SourceDao getSourceDao();
+    public abstract ArticleDao getArticleDao();
 
     public static synchronized ScienceBoardRoomDatabase getInstance(Context context) {
         if (singletonInstance == null) {

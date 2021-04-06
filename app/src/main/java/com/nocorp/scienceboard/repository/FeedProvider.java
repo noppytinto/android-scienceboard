@@ -1,6 +1,5 @@
 package com.nocorp.scienceboard.repository;
 
-import com.nocorp.scienceboard.utility.rss.model.Channel;
 import com.nocorp.scienceboard.model.Source;
 
 import java.util.ArrayList;
@@ -13,7 +12,6 @@ public class FeedProvider {
     private List<String> sourceUrls;
     private OnFeedsDownloadedListener listener;
     //
-    private static List<Channel> channelsCache;
     private SourceRepository sourceRepository;
 
     public interface OnFeedsDownloadedListener {

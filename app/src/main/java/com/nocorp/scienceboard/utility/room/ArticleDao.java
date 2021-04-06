@@ -8,7 +8,6 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
 import com.nocorp.scienceboard.model.Article;
-import com.nocorp.scienceboard.utility.rss.model.Entry;
 
 import java.util.List;
 

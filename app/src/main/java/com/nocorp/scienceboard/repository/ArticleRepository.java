@@ -5,12 +5,10 @@ import android.util.Log;
 
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
-import com.nocorp.scienceboard.utility.rss.model.Entry;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 public class ArticleRepository {

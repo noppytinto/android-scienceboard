@@ -6,9 +6,6 @@ import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
-import com.nocorp.scienceboard.utility.rss.model.Channel;
-import com.nocorp.scienceboard.utility.rss.model.Entry;
-
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -26,16 +23,12 @@ public class Source implements Serializable{
     private String logoUrl;
     private List<String> categories;
     @Ignore
-    private List<Entry> entries;
-    @Ignore
     private List<Article> articles;
     @ColumnInfo(name = "last_update")
     private Date lastUpdate;
     private String language;
     @ColumnInfo(name = "xml_code")
     private String xmlCode;
-    @Ignore
-    private Channel channel;
 
 
     public String getName() {
@@ -78,14 +71,6 @@ public class Source implements Serializable{
         this.categories = categories;
     }
 
-    public List<Entry> getEntries() {
-        return entries;
-    }
-
-    public void setEntries(List<Entry> entries) {
-        this.entries = entries;
-    }
-
     public List<Article> getArticles() {
         return articles;
     }
@@ -118,11 +103,4 @@ public class Source implements Serializable{
         this.xmlCode = xmlCode;
     }
 
-    public Channel getChannel() {
-        return channel;
-    }
-
-    public void setChannel(Channel channel) {
-        this.channel = channel;
-    }
 }// end Source
