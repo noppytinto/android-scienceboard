@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import com.nocorp.scienceboard.model.Source;
+import com.nocorp.scienceboard.utility.rss.DomRssParser;
 
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class SourceViewModel extends ViewModel implements SourceRepositoryListen
     public SourceViewModel() {
         rssUrls = new MutableLiveData<>();
         sources = new MutableLiveData<>();
-        sourceRepository = new SourceRepository(this);
+        sourceRepository = new SourceRepository(this, new DomRssParser());
     }
 
 

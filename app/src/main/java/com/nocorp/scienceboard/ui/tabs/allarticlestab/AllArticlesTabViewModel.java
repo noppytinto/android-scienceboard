@@ -9,6 +9,7 @@ import com.nocorp.scienceboard.repository.ArticleRepository;
 import com.nocorp.scienceboard.repository.SourceRepository;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
+import com.nocorp.scienceboard.utility.rss.DomRssParser;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,7 +22,7 @@ public class AllArticlesTabViewModel extends ViewModel {
 
     public AllArticlesTabViewModel() {
         articlesList = new MutableLiveData<>();
-        articleRepository = ArticleRepository.getInstance(new SourceRepository());
+        articleRepository = ArticleRepository.getInstance(new SourceRepository(new DomRssParser()));
     }
 
     public LiveData<List<ListItem>> getObservableArticlesList() {

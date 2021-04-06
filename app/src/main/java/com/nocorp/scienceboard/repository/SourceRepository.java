@@ -5,7 +5,7 @@ import android.util.Log;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.nocorp.scienceboard.model.Source;
-import com.nocorp.scienceboard.utility.rss.DomRssParser;
+import com.nocorp.scienceboard.utility.rss.RssParser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,18 +28,20 @@ public class SourceRepository {
     private FirebaseFirestore db;
     private static boolean firestoreFetchCompleted;
     private final List<String> mainCategories = Arrays.asList("space", "physics", "tech", "medicine", "biology");
+    private RssParser rssParser;
 
 
 
     //--------------------------------------------------------------------------- CONSTRUCTORS
 
-    public SourceRepository () {
+    public SourceRepository (RssParser rssParser) {
         db = FirebaseFirestore.getInstance();
+        this.rssParser = rssParser;
     }
 
-    public SourceRepository (SourceRepositoryListener listener) {
+    public SourceRepository (SourceRepositoryListener listener, RssParser rssParser) {
+        this(rssParser);
         this.listener = listener;
-        db = FirebaseFirestore.getInstance();
     }
 
 
@@ -114,10 +116,7 @@ public class SourceRepository {
     public Source downloadAdditionalSourceData(Source givenSource) {
         Source result = givenSource;
         if(givenSource==null) return result;
-
-        DomRssParser domXmlParser = new DomRssParser();
-        result = domXmlParser.updateSource(givenSource);
-
+        result = rssParser.updateSource(givenSource);
         return result;
     }
 
