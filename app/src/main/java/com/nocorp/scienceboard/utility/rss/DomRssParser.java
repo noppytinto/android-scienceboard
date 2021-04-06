@@ -304,7 +304,7 @@ public class DomRssParser implements RssParser {
             result.setWebpageUrl(webpageUrl);
             result.setPubDate(pubDate);
             result.setThumbnailUrl(thumbnailUrl);
-            if(source==null) {
+            if(source!=null) {
                 result.setSourceUrl(source.getWebsiteUrl());
                 result.setSourceName(source.getName());
             }

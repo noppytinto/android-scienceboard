@@ -19,6 +19,7 @@ public class AllArticlesTabViewModel extends ViewModel {
     private ArticleRepository articleRepository;
     private final List<String> mainCategories = Arrays.asList("space", "physics", "tech", "medicine", "biology");
     private static List<Source> targetSources;
+    private static boolean taskIsRunning;
 
     public AllArticlesTabViewModel() {
         articlesList = new MutableLiveData<>();
@@ -31,14 +32,19 @@ public class AllArticlesTabViewModel extends ViewModel {
 
     public void downloadArticles(List<Source> givenSources, int limit, boolean forced) {
         Runnable task = () -> {
-            // pick sources for ALL tab, obly once
-            if(targetSources==null || targetSources.size()<=0) {
-                targetSources = SourceRepository.getAsourceForEachMainCategory_randomly(givenSources, mainCategories);// TODO this should not be static
-            }
-            List<ListItem> articles = articleRepository.getArticles(targetSources, limit, forced);
+            if( ! taskIsRunning) {
+                taskIsRunning = true;
+                // pick sources for ALL tab, obly once
+                if(targetSources==null || targetSources.size()<=0) {
+                    targetSources = SourceRepository.getAsourceForEachMainCategory_randomly(givenSources, mainCategories);// TODO this should not be static
+                }
+                List<ListItem> articles = articleRepository.getArticles(targetSources, limit, forced);
 
-            // publish results
-            setArticlesList(articles);
+                taskIsRunning = false;
+
+                // publish results
+                setArticlesList(articles);
+            }
         };
 
         ThreadManager threadManager = ThreadManager.getInstance();

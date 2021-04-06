@@ -29,6 +29,7 @@ public class SourceRepository {
     private static boolean firestoreFetchCompleted;
     private final List<String> mainCategories = Arrays.asList("space", "physics", "tech", "medicine", "biology");
     private RssParser rssParser;
+    private static boolean taskIsRunning;
 
 
 
@@ -50,11 +51,15 @@ public class SourceRepository {
 
 
     public void loadSources() {
-        if(cachedSources==null) {
-            loadSourcesBasicInfoFromRemoteDb();
-        }
-        else {
-            listener.onSourcesFetchCompleted(cachedSources);
+        if( ! taskIsRunning) {
+            taskIsRunning = true;
+            if(cachedSources==null) {
+                loadSourcesBasicInfoFromRemoteDb();
+            }
+            else {
+                taskIsRunning = false;
+                listener.onSourcesFetchCompleted(cachedSources);
+            }
         }
     }
 
@@ -83,6 +88,7 @@ public class SourceRepository {
                         }
 
                         Collections.shuffle(cachedSources); // randomize collection
+                        taskIsRunning = false;
                         listener.onSourcesFetchCompleted(cachedSources);
                     } else {
                         Log.w(TAG, "Error getting documents.", task.getException());
