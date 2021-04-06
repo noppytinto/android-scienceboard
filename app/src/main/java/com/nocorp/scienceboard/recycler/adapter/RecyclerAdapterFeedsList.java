@@ -15,9 +15,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.DrawableCrossFadeFactory;
+import com.bumptech.glide.signature.ObjectKey;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.model.Article;
@@ -33,6 +37,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
 import java.util.List;
+
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
 public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final String TAG = this.getClass().getSimpleName();
@@ -123,9 +129,11 @@ public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<RecyclerView.
                 // TODO: crahses on andorid 21 (resource "thumbnail" not found)
                 Glide.with(context)
                         .load(thumbnailUrl)
+                        .transition(withCrossFade())
                         .fallback(R.drawable.broken_image)
                         .placeholder(R.drawable.placeholder_image)
                         .fitCenter()
+                        .thumbnail(/*sizeMultiplier=*/ 0.25f)
                         .listener(new RequestListener<Drawable>() {
                                       @Override
                                       public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {

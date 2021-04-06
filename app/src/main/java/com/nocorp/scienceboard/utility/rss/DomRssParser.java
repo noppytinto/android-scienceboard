@@ -5,7 +5,7 @@ import android.util.Log;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.utility.HttpUtilities;
-import com.nocorp.scienceboard.utility.MyOkHttpClient;
+import com.nocorp.scienceboard.system.MyOkHttpClient;
 
 import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;

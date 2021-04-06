@@ -1,8 +1,9 @@
-package com.nocorp.scienceboard.utility;
+package com.nocorp.scienceboard.system;
 
 import android.content.Context;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
@@ -11,6 +12,8 @@ public class MyOkHttpClient {
     private static MyOkHttpClient singletonInstance;
     private static OkHttpClient client;
     private final int CACHE_SIZE_IN_MBYTE = 50 * 1024 * 1024; //50mb cache
+    private final int TIMEOUT = 5;
+    private final TimeUnit TIME_UNIT = TimeUnit.SECONDS;
 
 
 
@@ -21,6 +24,9 @@ public class MyOkHttpClient {
         Cache cache = new Cache(httpCacheDirectory, CACHE_SIZE_IN_MBYTE);
         client = new OkHttpClient.Builder()
                 .cache(cache)
+                .connectTimeout(TIMEOUT, TIME_UNIT)
+                .writeTimeout(TIMEOUT, TIME_UNIT)
+                .readTimeout(TIMEOUT, TIME_UNIT)
                 .build();
 
         // DON'T FORGET TO MAKE RETROFIT TO USE IT, OTW A SOCKET EXCEPTION CAN OCCUR

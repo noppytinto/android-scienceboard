@@ -5,24 +5,12 @@ import android.util.Log;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.nocorp.scienceboard.model.Source;
-import com.nocorp.scienceboard.system.ThreadManager;
-import com.nocorp.scienceboard.utility.HttpUtilities;
-import com.nocorp.scienceboard.utility.MyOkHttpClient;
 import com.nocorp.scienceboard.utility.rss.DomRssParser;
-import com.nocorp.scienceboard.utility.rss.model.Channel;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
 
 public class SourceRepository {
     private final String TAG = this.getClass().getSimpleName();

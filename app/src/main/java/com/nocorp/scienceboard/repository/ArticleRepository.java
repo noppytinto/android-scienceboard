@@ -755,7 +755,7 @@ public class ArticleRepository {
 //        try {
 //            // build httpurl and request for remote db
 //            HttpUrl httpUrl = buildHttpURL(url);
-//            final OkHttpClient httpClient = com.nocorp.scienceboard.utility.MyOkHttpClient.getClient();
+//            final OkHttpClient httpClient = com.nocorp.scienceboard.system.MyOkHttpClient.getClient();
 //            Request request = buildRequest(httpUrl);
 //
 //            // performing request

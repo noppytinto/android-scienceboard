@@ -2,7 +2,6 @@ package com.nocorp.scienceboard.system;
 
 import android.app.Application;
 import android.util.Log;
-import com.nocorp.scienceboard.utility.MyOkHttpClient;
 
 public class ScienceBoardApplication extends Application {
     @Override
