@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
@@ -127,13 +128,20 @@ public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<RecyclerView.
         else {
             try {
                 // TODO: crahses on andorid 21 (resource "thumbnail" not found)
-                Glide.with(context)
-                        .load(thumbnailUrl)
-                        .transition(withCrossFade())
+                RequestOptions gildeOptions = new RequestOptions()
                         .fallback(R.drawable.broken_image)
                         .placeholder(R.drawable.placeholder_image)
                         .fitCenter()
-                        .thumbnail(/*sizeMultiplier=*/ 0.25f)
+                        .placeholder(R.drawable.placeholder_image);
+//                        .error(R.drawable.default_avatar)
+//                        .diskCacheStrategy(DiskCacheStrategy.ALL);
+//                        .priority(Priority.HIGH);
+
+                Glide.with(context)
+                        .load(thumbnailUrl)
+                        .apply(gildeOptions)
+                        .transition(withCrossFade())
+                        .thumbnail(/*sizeMultiplier = 0.25% less than original*/ 0.25f)
                         .listener(new RequestListener<Drawable>() {
                                       @Override
                                       public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
