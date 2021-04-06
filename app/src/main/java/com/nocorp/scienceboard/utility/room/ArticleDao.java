@@ -9,6 +9,7 @@ import androidx.room.Query;
 
 import com.nocorp.scienceboard.model.Article;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Dao
@@ -20,7 +21,7 @@ public interface ArticleDao {
     List<Article> selectByWebsiteUrl(String givenValue);
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    void insertAll(Article... articles);
+    void insertAll(List<Article> articles);
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insert(Article article);

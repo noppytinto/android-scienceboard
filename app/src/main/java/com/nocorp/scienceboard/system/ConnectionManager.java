@@ -21,7 +21,7 @@ public class ConnectionManager {
 
     public static ConnectionManager getInstance() {
         if(singletonInstance==null)
-            return new ConnectionManager();
+            singletonInstance = new ConnectionManager();
 
         return singletonInstance;
     }

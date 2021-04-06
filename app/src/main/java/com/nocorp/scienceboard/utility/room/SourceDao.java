@@ -9,6 +9,7 @@ import androidx.room.Query;
 
 import com.nocorp.scienceboard.model.Source;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Dao
@@ -20,7 +21,7 @@ public interface SourceDao {
     List<Source> selectByName(String givenValue);
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    void insertAll(Source... sources);
+    void insertAll(List<Source> sources);
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insert(Source source);

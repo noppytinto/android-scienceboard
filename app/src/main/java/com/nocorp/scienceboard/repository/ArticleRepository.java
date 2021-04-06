@@ -1,12 +1,19 @@
 package com.nocorp.scienceboard.repository;
 
 
+import android.content.Context;
 import android.util.Log;
 
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
+import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
+import com.nocorp.scienceboard.utility.room.ArticleDao;
+import com.nocorp.scienceboard.utility.room.ScienceBoardRoomDatabase;
+import com.nocorp.scienceboard.utility.room.SourceDao;
 import com.nocorp.scienceboard.utility.rss.RssParser;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,38 +22,32 @@ import java.util.List;
 public class ArticleRepository {
     private final String TAG = this.getClass().getSimpleName();
     private static ArticleRepository singletonInstance;
-    private List<ListItem> cachedArticles;
+    private static List<ListItem> cachedArticles;
     private RssParser rssParser;
 
 
 
     //----------------------------------------------------------- CONSTRUCTORS
 
-    private ArticleRepository(RssParser rssParser) {
+    public ArticleRepository(RssParser rssParser) {
         this.rssParser = rssParser;
     }
 
-    public static ArticleRepository getInstance(RssParser rssParser) {
-        if(singletonInstance==null)
-            singletonInstance = new ArticleRepository(rssParser);
-
-        return singletonInstance;
-    }
 
 
 
     //----------------------------------------------------------- GETTER/SETTER
 
     // DOM strategy
-    public List<ListItem> getArticles(List<Source> givenSources, int limit, boolean forced) {
+    public List<ListItem> getArticles(List<Source> givenSources, int limit, boolean forced, Context context) {
         List<ListItem> result = null;
         if(givenSources==null || givenSources.size()<=0) return result;
 
         if(forced) {
-            result = downloadArticlesFromInternet(givenSources, limit);
+            result = downloadArticlesFromInternet(givenSources, limit, context);
         }
         else {
-            result = smartArticlesDownload(givenSources, limit);
+            result = smartArticlesDownload(givenSources, limit, context);
         }
 
         return result;
@@ -64,10 +65,10 @@ public class ArticleRepository {
 
     //----------------------------------------------------------- PRIVATE METHODS
 
-    private List<ListItem> smartArticlesDownload(List<Source> givenSources, int limit) {
+    private List<ListItem> smartArticlesDownload(List<Source> givenSources, int limit, Context context) {
         List<ListItem> result;
         if(cachedArticles==null) {
-            result = downloadArticlesFromInternet(givenSources, limit);
+            result = downloadArticlesFromInternet(givenSources, limit, context);
             cachedArticles = result;
         }
         else {
@@ -80,7 +81,7 @@ public class ArticleRepository {
      * TODO implemente real download limit
      * since this is a fake limit, because alla rticles are always downloaded regardless
      */
-    private List<ListItem> downloadArticlesFromInternet(List<Source> givenSources, int limit) {
+    private List<ListItem> downloadArticlesFromInternet(List<Source> givenSources, int limit, Context context) {
         List<ListItem> result = null;
         if(givenSources==null || givenSources.size()<=0) return result;
         int counter = 0;
@@ -93,6 +94,9 @@ public class ArticleRepository {
         //
         List<Article> fullArticlesList = combineArticles(givenSources);
         if(fullArticlesList==null || fullArticlesList.size()<=0) return result;
+
+        //
+        saveArticlesInRoom(fullArticlesList, context);
 
         try {
             // sort articles by publication date
@@ -143,9 +147,47 @@ public class ArticleRepository {
     }
 
 
+    private void saveArticlesInRoom(@NotNull List<Article> articles, Context context) {
+        ArticleDao articleDao = getArticleDao(context);
 
+        Runnable task = () -> {
+            articleDao.insertAll(articles);
+        };
 
+        ThreadManager t = ThreadManager.getInstance();
+        try {
+            t.runTask(task);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(TAG, "SCIENCE_BOARD - saveArticlesInRoom: cannot start thread " + e.getMessage());
+        }
+    }
 
+    private void saveSourcesInRoom(@NotNull ArrayList<Source> sources, Context context) {
+        SourceDao sourceDao = getSourceDao(context);
+
+        Runnable task = () -> {
+            sourceDao.insertAll(sources);
+        };
+
+        ThreadManager t = ThreadManager.getInstance();
+        try {
+            t.runTask(task);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(TAG, "SCIENCE_BOARD - saveSourcesInRoom: cannot start thread " + e.getMessage());
+        }
+    }
+
+    private ArticleDao getArticleDao(Context context) {
+        ScienceBoardRoomDatabase roomDatabase = ScienceBoardRoomDatabase.getInstance(context);
+        return roomDatabase.getArticleDao();
+    }
+
+    private SourceDao getSourceDao(Context context) {
+        ScienceBoardRoomDatabase roomDatabase = ScienceBoardRoomDatabase.getInstance(context);
+        return roomDatabase.getSourceDao();
+    }
 
 
 

@@ -21,7 +21,7 @@ import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.AllArticlesTabFragmentBinding;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
-import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterFeedsList;
+import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 import com.nocorp.scienceboard.repository.SourceViewModel;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
@@ -29,9 +29,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AllArticlesTabFragment extends Fragment implements
-        RecyclerAdapterFeedsList.OnArticleClickedListener {
+        RecyclerAdapterArticlesList.OnArticleClickedListener {
     private final String TAG = this.getClass().getSimpleName();
-    private RecyclerAdapterFeedsList recyclerAdapterFeedsList;
+    private RecyclerAdapterArticlesList recyclerAdapterArticlesList;
     private RecyclerView recyclerView;
     private CircularProgressIndicator progressIndicator;
     private AllArticlesTabViewModel allArticlesTabViewModel;
@@ -39,8 +39,6 @@ public class AllArticlesTabFragment extends Fragment implements
     private AdProvider adProvider;
     private SwipeRefreshLayout swipeRefreshLayout;
     private AllArticlesTabFragmentBinding binding;
-    private static boolean feedLoadedAtStartup = false;
-    private boolean feedsLoading = false;
     private Toast toast;
     private SourceViewModel sourceViewModel;
     private List<Source> sources;
@@ -106,10 +104,9 @@ public class AllArticlesTabFragment extends Fragment implements
             }
             else {
                 swipeRefreshLayout.setRefreshing(false);
-                feedsLoading = false;
                 progressIndicator.setVisibility(View.GONE);
                 articles = adProvider.populateListWithAds(articles, 5);
-                recyclerAdapterFeedsList.loadNewData(articles);
+                recyclerAdapterArticlesList.loadNewData(articles);
                 showCenteredToast("articles fetched");
             }
         });
@@ -142,8 +139,8 @@ public class AllArticlesTabFragment extends Fragment implements
         // defining Recycler view
         recyclerView = binding.recyclerViewAllArticlesTabFragment;
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerAdapterFeedsList = new RecyclerAdapterFeedsList(new ArrayList<>(), requireContext(), this);
-        recyclerView.setAdapter(recyclerAdapterFeedsList);
+        recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this);
+        recyclerView.setAdapter(recyclerAdapterArticlesList);
     }
 
     private void setupSwipeDownToRefresh() {
@@ -173,7 +170,7 @@ public class AllArticlesTabFragment extends Fragment implements
 
     @Override
     public void onArticleClicked(int position) {
-        Article article = (Article) recyclerAdapterFeedsList.getItem(position);
+        Article article = (Article) recyclerAdapterArticlesList.getItem(position);
         if(article!=null) {
             String url = article.getWebpageUrl();
             String sourceName = article.getSourceName();
@@ -188,8 +185,14 @@ public class AllArticlesTabFragment extends Fragment implements
 
     private void showCenteredToast(String message) {
         if(toast!=null) toast.cancel();
-        toast = Toast.makeText(requireContext(),message, Toast.LENGTH_LONG);
+        toast = Toast.makeText(requireContext(),message, Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
+    }
+
+    private void showToast(String message) {
+        if(toast!=null) toast.cancel();
+        toast = Toast.makeText(requireContext(),message, Toast.LENGTH_SHORT);
         toast.show();
     }
 

@@ -52,8 +52,6 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
         fetchSourcesFromRemoteDb();
     }
 
-
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -227,10 +225,17 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
 
     private void showCenteredToast(String message) {
         if(toast!=null) toast.cancel();
-        toast = Toast.makeText(this, message, Toast.LENGTH_LONG);
+        toast = Toast.makeText(this,message, Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.CENTER, 0, 0);
         toast.show();
     }
+
+    private void showToast(String message) {
+        if(toast!=null) toast.cancel();
+        toast = Toast.makeText(this,message, Toast.LENGTH_SHORT);
+        toast.show();
+    }
+
 
 
 

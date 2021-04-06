@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 import com.nocorp.scienceboard.R;
-import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterFeedsList;
+import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 
 public class ArticleViewHolder extends RecyclerView.ViewHolder  {
     public ImageView thumbnail;
@@ -15,10 +15,10 @@ public class ArticleViewHolder extends RecyclerView.ViewHolder  {
     public TextView pubDate;
     public CardView cardViewThumbnail;
     public CardView cardViewTitle;
-    public RecyclerAdapterFeedsList.OnArticleClickedListener listener;
+    public RecyclerAdapterArticlesList.OnArticleClickedListener listener;
 
 
-    public ArticleViewHolder(@NonNull View itemView, RecyclerAdapterFeedsList.OnArticleClickedListener listener) {
+    public ArticleViewHolder(@NonNull View itemView, RecyclerAdapterArticlesList.OnArticleClickedListener listener) {
         super(itemView);
         this.listener = listener;
         this.thumbnail = itemView.findViewById(R.id.imageView_articleViewholder_thumbnail);

@@ -1,11 +1,17 @@
 package com.nocorp.scienceboard.repository;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.nocorp.scienceboard.model.Source;
+import com.nocorp.scienceboard.system.ThreadManager;
+import com.nocorp.scienceboard.utility.room.ScienceBoardRoomDatabase;
+import com.nocorp.scienceboard.utility.room.SourceDao;
 import com.nocorp.scienceboard.utility.rss.RssParser;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,8 +53,9 @@ public class SourceRepository {
 
 
 
-    //--------------------------------------------------------------------------- METHODS
 
+
+    //--------------------------------------------------------------------------- PUBLIC METHODS
 
     public void loadSources() {
         if( ! taskIsRunning) {
@@ -63,6 +70,34 @@ public class SourceRepository {
         }
     }
 
+    public static List<Source> getAsourceForEachMainCategory_randomly(List<Source> givenSources, List<String> givenCategories) {
+        List<Source> result = null;
+        if(givenSources==null || givenSources.size()<=0) return result;
+        if(givenCategories==null || givenCategories.size()<=0) return result;
+
+        List<Source> allSources = new ArrayList<>(givenSources);
+        List<String> mainCategories = new ArrayList<>(givenCategories);
+
+        result = new ArrayList<>();
+        for(int i=0; i < mainCategories.size(); i++) {
+            Source source = getTheFirstSourceFallingInThisCategory(allSources, mainCategories.get(i));
+            if(source!=null) {
+                result.add(source);
+                allSources.remove(source);
+            }
+        }
+
+        return result;
+    }
+
+    public List<Source> getCachedSources() {
+        return cachedSources;
+    }
+
+
+
+
+    //--------------------------------------------------------------------------- PRIVATE METHODS
 
     private void loadSourcesBasicInfoFromRemoteDb() {
         cachedSources = new ArrayList<>();
@@ -97,7 +132,6 @@ public class SourceRepository {
                 });
     }
 
-
     private Source buildBasicSourceObject(QueryDocumentSnapshot document) {
         Source source = null;
         if(document==null) return source;
@@ -116,29 +150,6 @@ public class SourceRepository {
         return source;
     }
 
-
-
-    public static List<Source> getAsourceForEachMainCategory_randomly(List<Source> givenSources, List<String> givenCategories) {
-        List<Source> result = null;
-        if(givenSources==null || givenSources.size()<=0) return result;
-        if(givenCategories==null || givenCategories.size()<=0) return result;
-
-        List<Source> allSources = new ArrayList<>(givenSources);
-        List<String> mainCategories = new ArrayList<>(givenCategories);
-
-        result = new ArrayList<>();
-        for(int i=0; i < mainCategories.size(); i++) {
-            Source source = getTheFirstSourceFallingInThisCategory(allSources, mainCategories.get(i));
-            if(source!=null) {
-                result.add(source);
-                allSources.remove(source);
-            }
-        }
-
-        return result;
-    }
-
-
     private static Source getTheFirstSourceFallingInThisCategory(List<Source> sources, String category) {
         Source result = null;
         if(sources==null || sources.size()<=0) return result;
@@ -154,11 +165,6 @@ public class SourceRepository {
         return result;
     }
 
-
-
-
-
-
     private static boolean sourcefallInThisCategory(Source source, String category) {
         boolean result = false;
         if(source==null) return result;
@@ -170,10 +176,26 @@ public class SourceRepository {
         return result;
     }
 
-    public List<Source> getCachedSources() {
-        return cachedSources;
+    private void saveSourcesInRoom(@NotNull ArrayList<Source> sources, Context context) {
+        SourceDao sourceDao = getSourceDao(context);
+
+        Runnable task = () -> {
+            sourceDao.insertAll(sources);
+        };
+
+        ThreadManager t = ThreadManager.getInstance();
+        try {
+            t.runTask(task);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(TAG, "SCIENCE_BOARD - saveSourcesInRoom: cannot start thread " + e.getMessage());
+        }
     }
 
+    private SourceDao getSourceDao(Context context) {
+        ScienceBoardRoomDatabase roomDatabase = ScienceBoardRoomDatabase.getInstance(context);
+        return roomDatabase.getSourceDao();
+    }
 
 
 

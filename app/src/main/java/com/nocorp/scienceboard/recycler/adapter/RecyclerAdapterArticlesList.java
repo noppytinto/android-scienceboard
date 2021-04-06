@@ -14,15 +14,11 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
-import com.bumptech.glide.request.transition.DrawableCrossFadeFactory;
-import com.bumptech.glide.signature.ObjectKey;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.model.Article;
@@ -41,10 +37,9 @@ import java.util.List;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
-public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final String TAG = this.getClass().getSimpleName();
     private List<ListItem> recyclerList;
-    private Context context;
     private OnArticleClickedListener listener;
 
     private static final int ARTICLE_TYPE = 1;
@@ -56,16 +51,17 @@ public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<RecyclerView.
 
 
     //------------------------------------------------------------------------CONSTRUCTORS
-    public RecyclerAdapterFeedsList(List<ListItem> recyclerList, Context context, OnArticleClickedListener listener) {
+
+    public RecyclerAdapterArticlesList(List<ListItem> recyclerList, OnArticleClickedListener listener) {
         this.recyclerList = recyclerList;
-        this.context = context;
         this.listener = listener;
     }
 
 
 
-    //------------------------------------------------------------------------ METHODS
 
+
+    //------------------------------------------------------------------------ METHODS
 
     @Override
     public int getItemViewType(int position) {
@@ -79,7 +75,6 @@ public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<RecyclerView.
                 return 0;
         }
     }
-
 
     @NonNull
     @Override
@@ -137,7 +132,7 @@ public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<RecyclerView.
 //                        .diskCacheStrategy(DiskCacheStrategy.ALL);
 //                        .priority(Priority.HIGH);
 
-                Glide.with(context)
+                Glide.with(holder.itemView.getContext())
                         .load(thumbnailUrl)
                         .apply(gildeOptions)
                         .transition(withCrossFade())
@@ -194,7 +189,6 @@ public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<RecyclerView.
         return ( (recyclerList != null) && (recyclerList.size() != 0) ? recyclerList.size() : 0);
     }
 
-
     public ListItem getItem(int position) {
         return ( (recyclerList != null) && (recyclerList.size() != 0) ? recyclerList.get(position) : null);
     }
@@ -203,8 +197,6 @@ public class RecyclerAdapterFeedsList extends RecyclerView.Adapter<RecyclerView.
         recyclerList = newList;
         notifyDataSetChanged();
     }
-
-
 
 
 }// end RecyclerAdapterFeedsList
