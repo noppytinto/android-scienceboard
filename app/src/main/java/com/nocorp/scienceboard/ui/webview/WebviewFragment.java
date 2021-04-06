@@ -20,6 +20,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebStorage;
 import android.webkit.WebView;
@@ -228,7 +229,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private void applyBrowsingRecommendedSettings(WebView webView) {
         webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
-        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+//        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);// TODO: allow youtube to set a video fullscreen
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setUseWideViewPort(true);
         webSettings.setSupportZoom(true);
@@ -248,7 +249,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 
     private void defineWebclientBehavior(WebView webView) {
         setupBackButtonBehaviorForWebview(webView);
-
+        webView.setWebChromeClient(new WebChromeClient());
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
