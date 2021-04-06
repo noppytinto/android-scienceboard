@@ -23,7 +23,7 @@ public class AllArticlesTabViewModel extends ViewModel {
 
     public AllArticlesTabViewModel() {
         articlesList = new MutableLiveData<>();
-        articleRepository = ArticleRepository.getInstance(new SourceRepository(new DomRssParser()));
+        articleRepository = ArticleRepository.getInstance(new DomRssParser());
     }
 
     public LiveData<List<ListItem>> getObservableArticlesList() {

@@ -116,15 +116,7 @@ public class SourceRepository {
         return source;
     }
 
-    /**
-     * download entries and lastUpdate
-     */
-    public Source downloadAdditionalSourceData(Source givenSource) {
-        Source result = givenSource;
-        if(givenSource==null) return result;
-        result = rssParser.updateSource(givenSource);
-        return result;
-    }
+
 
     public static List<Source> getAsourceForEachMainCategory_randomly(List<Source> givenSources, List<String> givenCategories) {
         List<Source> result = null;

@@ -6,6 +6,7 @@ import android.util.Log;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
+import com.nocorp.scienceboard.utility.rss.RssParser;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,19 +16,19 @@ public class ArticleRepository {
     private final String TAG = this.getClass().getSimpleName();
     private static ArticleRepository singletonInstance;
     private List<ListItem> cachedArticles;
-    private SourceRepository sourceRepository;
+    private RssParser rssParser;
 
 
 
     //----------------------------------------------------------- CONSTRUCTORS
 
-    private ArticleRepository(SourceRepository sourceRepository) {
-        this.sourceRepository = sourceRepository;
+    private ArticleRepository(RssParser rssParser) {
+        this.rssParser = rssParser;
     }
 
-    public static ArticleRepository getInstance(SourceRepository sourceRepository) {
+    public static ArticleRepository getInstance(RssParser rssParser) {
         if(singletonInstance==null)
-            singletonInstance = new ArticleRepository(sourceRepository);
+            singletonInstance = new ArticleRepository(rssParser);
 
         return singletonInstance;
     }
@@ -86,7 +87,7 @@ public class ArticleRepository {
 
         // download articles
         for(Source currentSource: givenSources) {
-            currentSource = sourceRepository.downloadAdditionalSourceData(currentSource);// TODO the real download limit is defined inside domXmlParser
+            currentSource = downloadAdditionalSourceData(currentSource);// TODO the real download limit is defined inside domXmlParser
         }
 
         //
@@ -130,6 +131,25 @@ public class ArticleRepository {
 
         return result;
     }
+
+    /**
+     * download entries and lastUpdate
+     */
+    public Source downloadAdditionalSourceData(Source givenSource) {
+        Source result = givenSource;
+        if(givenSource==null) return result;
+        result = rssParser.updateSource(givenSource);
+        return result;
+    }
+
+
+
+
+
+
+
+
+
 
 
 
