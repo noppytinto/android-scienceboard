@@ -151,7 +151,12 @@ public class ArticleRepository {
         ArticleDao articleDao = getArticleDao(context);
 
         Runnable task = () -> {
-            articleDao.insertAll(articles);
+            try {
+                articleDao.insertAll(articles);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.d(TAG, "saveArticlesInRoom: cannot insert articles " + e.getMessage());
+            }
         };
 
         ThreadManager t = ThreadManager.getInstance();

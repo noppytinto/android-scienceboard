@@ -143,8 +143,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
                 RequestOptions gildeOptions = new RequestOptions()
                         .fallback(R.drawable.broken_image)
                         .placeholder(R.drawable.placeholder_image)
-                        .fitCenter()
-                        .placeholder(R.drawable.placeholder_image);
+                        .fitCenter();
 //                        .error(R.drawable.default_avatar)
 //                        .diskCacheStrategy(DiskCacheStrategy.ALL);
 //                        .priority(Priority.HIGH);
@@ -175,7 +174,6 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
                     Glide.with(holder.itemView.getContext())
                             .load(thumbnailUrl)
                             .apply(gildeOptions)
-                            .transition(withCrossFade())
                             .thumbnail(/*sizeMultiplier = 0.25% less than original*/ 0.25f)
                             .into(holder.thumbnail);
                 }

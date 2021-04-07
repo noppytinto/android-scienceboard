@@ -2,7 +2,6 @@ package com.nocorp.scienceboard.ui.tabs.allarticlestab;
 
 import androidx.lifecycle.ViewModelProvider;
 
-import android.content.Context;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,16 +22,9 @@ import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.AllArticlesTabFragmentBinding;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
-import com.nocorp.scienceboard.model.VisitedArticle;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 import com.nocorp.scienceboard.repository.SourceViewModel;
-import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
-import com.nocorp.scienceboard.utility.room.ArticleDao;
-import com.nocorp.scienceboard.utility.room.HistoryDao;
-import com.nocorp.scienceboard.utility.room.ScienceBoardRoomDatabase;
-
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -175,39 +167,14 @@ public class AllArticlesTabFragment extends Fragment implements
     public void onArticleClicked(int position) {
         Article article = (Article) recyclerAdapterArticlesList.getItem(position);
         if(article!=null) {
-            saveInHistory(article, requireContext());
+            allArticlesTabViewModel.smartSaveInHistory(article);
             MobileNavigationDirections.ActionGlobalWebviewFragment action =
                     MobileNavigationDirections.actionGlobalWebviewFragment(article);
             Navigation.findNavController(view).navigate(action);
         }
     }
 
-    private void saveInHistory(@NotNull Article givenArticle, Context context) {
-        HistoryDao dao = getHistoryDao(context);
 
-        Runnable task = () -> {
-            // TODO null checks
-            long millis=System.currentTimeMillis();
-            java.util.Date date=new java.util.Date(millis);
-
-            VisitedArticle visitedArticle = new VisitedArticle(givenArticle);
-            visitedArticle.setVisitedDate(date);
-            dao.insert(visitedArticle);
-        };
-
-        ThreadManager t = ThreadManager.getInstance();
-        try {
-            t.runTask(task);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.d(TAG, "SCIENCE_BOARD - saveInHistory: cannot start thread " + e.getMessage());
-        }
-    }
-
-    private HistoryDao getHistoryDao(Context context) {
-        ScienceBoardRoomDatabase roomDatabase = ScienceBoardRoomDatabase.getInstance(context);
-        return roomDatabase.getHistoryDao();
-    }
 
     private void showCenteredToast(String message) {
         if(toast!=null) toast.cancel();

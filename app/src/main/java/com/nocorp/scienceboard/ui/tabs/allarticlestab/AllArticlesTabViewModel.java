@@ -1,28 +1,40 @@
 package com.nocorp.scienceboard.ui.tabs.allarticlestab;
 
 import android.app.Application;
+import android.content.Context;
+import android.util.Log;
 
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
+import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
+import com.nocorp.scienceboard.model.VisitedArticle;
 import com.nocorp.scienceboard.repository.ArticleRepository;
 import com.nocorp.scienceboard.repository.SourceRepository;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
+import com.nocorp.scienceboard.utility.room.HistoryDao;
+import com.nocorp.scienceboard.utility.room.ScienceBoardRoomDatabase;
 import com.nocorp.scienceboard.utility.rss.DomRssParser;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 public class AllArticlesTabViewModel extends AndroidViewModel {
+    private final String TAG = this.getClass().getSimpleName();
     private MutableLiveData<List<ListItem>> articlesList;
     private ArticleRepository articleRepository;
     private final List<String> mainCategories = Arrays.asList("space", "physics", "tech", "medicine", "biology");
     private static List<Source> targetSources;
     private static boolean taskIsRunning;
+    private static boolean saveInHistoryTaskIsRunning;
+    private static String lastVisitedArticleId;
+    private static Date oldVisitedDate;
 
 
 
@@ -70,4 +82,85 @@ public class AllArticlesTabViewModel extends AndroidViewModel {
         ThreadManager threadManager = ThreadManager.getInstance();
         threadManager.runTask(task);
     }
+
+    public void smartSaveInHistory(@NotNull Article givenArticle) {
+        if(lastVisitedArticleId==null || lastVisitedArticleId.isEmpty()) {
+            saveInHistory(givenArticle);
+        }
+        else if(lastVisitedArticleId.equals(givenArticle.getIdentifier())){
+            updateHistory(givenArticle);
+        }
+        else {
+            saveInHistory(givenArticle);
+        }
+        // TODO: improve this branching
+    }
+
+    private void updateHistory(@NotNull Article givenArticle) {
+        HistoryDao dao = getHistoryDao(getApplication());
+
+        // TODO: prevent multiple thread spawning?
+        Runnable task = () -> {
+            // TODO null checks
+            long millis=System.currentTimeMillis();
+            java.util.Date newDate=new java.util.Date(millis);
+
+            VisitedArticle visitedArticle = new VisitedArticle(givenArticle);
+            visitedArticle.setVisitedDate(newDate);
+            int result = dao.update(newDate, lastVisitedArticleId, oldVisitedDate);
+
+            if(result>0) {
+                oldVisitedDate = newDate;
+                Log.d(TAG, "SCIENCE_BOARD - updateHistory: updateed to the latest vidited date \n" + lastVisitedArticleId + "\n" + millis);
+            }
+            else {
+                Log.d(TAG, "SCIENCE_BOARD - updateHistory: cannot update history \n" + lastVisitedArticleId + "\n" + millis);
+            }
+        };
+
+        ThreadManager t = ThreadManager.getInstance();
+        try {
+            t.runTask(task);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(TAG, "SCIENCE_BOARD - updateHistory: cannot start thread " + e.getMessage());
+        }
+    }
+
+    private void saveInHistory(@NotNull Article givenArticle) {
+        HistoryDao dao = getHistoryDao(getApplication());
+
+        Runnable task = () -> {
+            // TODO null checks
+            saveInHistoryTaskIsRunning = true;
+            long millis=System.currentTimeMillis();
+            java.util.Date date=new java.util.Date(millis);
+
+            VisitedArticle visitedArticle = new VisitedArticle(givenArticle);
+            visitedArticle.setVisitedDate(date);
+            dao.insert(visitedArticle);
+            lastVisitedArticleId = givenArticle.getIdentifier();
+            oldVisitedDate = date;
+            saveInHistoryTaskIsRunning = false;
+        };
+
+        if( ! saveInHistoryTaskIsRunning) {
+            ThreadManager t = ThreadManager.getInstance();
+            try {
+                t.runTask(task);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.d(TAG, "SCIENCE_BOARD - saveInHistory: cannot start thread " + e.getMessage());
+            }
+        }
+    }
+
+    private HistoryDao getHistoryDao(Context context) {
+        ScienceBoardRoomDatabase roomDatabase = ScienceBoardRoomDatabase.getInstance(context);
+        return roomDatabase.getHistoryDao();
+    }
+
+
+
+
 }// end AllArticlesTabViewModel

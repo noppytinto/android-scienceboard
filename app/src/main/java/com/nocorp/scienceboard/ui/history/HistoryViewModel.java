@@ -26,7 +26,6 @@ public class HistoryViewModel extends AndroidViewModel implements HistoryReposit
 
     //------------------------------------------------------------ CONSTRUCTORS
 
-
     public HistoryViewModel(Application application) {
         super(application);
         articlesList = new MutableLiveData<>();
