@@ -28,12 +28,8 @@
         android:label=" "
         tools:layout="@layout/fragment_webview" >
         <argument
-            android:name="url"
-            app:argType="string" />
-        <argument
-            android:name="sourceName"
-            app:argType="string"
-            app:nullable="true" />
+            android:name="article_argument"
+            app:argType="com.nocorp.scienceboard.model.Article" />
     </fragment>
     <action
         android:id="@+id/action_global_webviewFragment"

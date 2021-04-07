@@ -14,7 +14,7 @@
         android:layout_marginStart="8dp"
         app:cardCornerRadius="3dp"
         app:cardElevation="0dp"
-        app:layout_constraintDimensionRatio="w,16:9"
+        app:layout_constraintDimensionRatio="w,16:10"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/cardView_articleViewholder_title"
         app:layout_constraintWidth_min="150dp">

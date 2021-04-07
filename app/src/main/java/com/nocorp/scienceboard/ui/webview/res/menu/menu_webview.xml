@@ -17,10 +17,16 @@
         app:showAsAction="always" />
 
     <item
+        android:id="@+id/option_webviewMenu_bookmark"
+        android:icon="@drawable/ic_bookmark_outlined"
+        android:title="Save in bookmarks"
+        app:showAsAction="always" />
+
+    <item
         android:id="@+id/option_webviewMenu_share"
         android:icon="@drawable/ic_share"
         android:title="Share"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
 
     <group android:id="@+id/group_menuWebview_textFormat">
         <item

@@ -91,16 +91,16 @@ public class HistoryFragment extends Fragment implements
         historyViewModel.fetchHistory(0);
     }
 
-
-
-
-    //--------------------------------------------------------------------- My METHODS
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
     }
+
+
+
+    //--------------------------------------------------------------------- My METHODS
+
 
     private void initRecycleView() {
         // defining Recycler view
@@ -118,21 +118,16 @@ public class HistoryFragment extends Fragment implements
     }
 
     private void refreshAction() {
-        // TODO
+        historyViewModel.fetchHistory(0);
     }
 
     @Override
     public void onArticleClicked(int position) {
         Article article = (Article) recyclerAdapterArticlesList.getItem(position);
-        if(article!=null) {
-            String url = article.getWebpageUrl();
-            String sourceName = article.getSourceName();
-
-            if(url!=null && !url.isEmpty()) {
-                MobileNavigationDirections.ActionGlobalWebviewFragment action =
-                        MobileNavigationDirections.actionGlobalWebviewFragment(url, sourceName);
-                Navigation.findNavController(view).navigate(action);
-            }
+        if (article != null) {
+            MobileNavigationDirections.ActionGlobalWebviewFragment action =
+                    MobileNavigationDirections.actionGlobalWebviewFragment(article);
+            Navigation.findNavController(view).navigate(action);
         }
     }
 

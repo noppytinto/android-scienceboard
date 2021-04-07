@@ -175,15 +175,10 @@ public class AllArticlesTabFragment extends Fragment implements
     public void onArticleClicked(int position) {
         Article article = (Article) recyclerAdapterArticlesList.getItem(position);
         if(article!=null) {
-            String url = article.getWebpageUrl();
-            String sourceName = article.getSourceName();
-
-            if(url!=null && !url.isEmpty()) {
-                saveInHistory(article, requireContext());
-                MobileNavigationDirections.ActionGlobalWebviewFragment action =
-                        MobileNavigationDirections.actionGlobalWebviewFragment(url, sourceName);
-                Navigation.findNavController(view).navigate(action);
-            }
+            saveInHistory(article, requireContext());
+            MobileNavigationDirections.ActionGlobalWebviewFragment action =
+                    MobileNavigationDirections.actionGlobalWebviewFragment(article);
+            Navigation.findNavController(view).navigate(action);
         }
     }
 

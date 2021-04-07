@@ -4,36 +4,34 @@ import android.content.Context;
 import android.util.Log;
 
 import com.nocorp.scienceboard.model.Article;
-import com.nocorp.scienceboard.model.VisitedArticle;
+import com.nocorp.scienceboard.model.BookmarkedArticle;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
-import com.nocorp.scienceboard.utility.room.HistoryDao;
+import com.nocorp.scienceboard.utility.room.BookmarkDao;
 import com.nocorp.scienceboard.utility.room.ScienceBoardRoomDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
 
-
-public class HistoryRepository{
+public class BookmarksRepository {
     private final String TAG = this.getClass().getSimpleName();
-    private HistoryRepositoryListener listener;
-
+    private BookmarkRepositoryListener listener;
 
 
 
     //------------------------------------------------------------ CONSTRUCTORS
-
-    public HistoryRepository(Context context) {
+    public BookmarksRepository(Context context) {
 
     }
 
-    public HistoryRepository(HistoryRepositoryListener listener) {
+    public BookmarksRepository(BookmarkRepositoryListener listener) {
         this.listener = listener;
     }
 
 
 
     //------------------------------------------------------------ GETTERS/SETTERS
+
 
 
 
@@ -44,20 +42,20 @@ public class HistoryRepository{
     }
 
     private void getFromRoom(Context context) {
-        HistoryDao dao = getHistoryDao(context);
+        BookmarkDao dao = getBookmarkDao(context);
 
         Runnable task = () -> {
-            List<VisitedArticle> temp = dao.selectAll();
+            List<BookmarkedArticle> temp = dao.selectAll();
             List<ListItem> result = null;
 
             if(temp!=null && temp.size()>0) {
                 result = new ArrayList<>();
                 for(Article article : temp) {
-                    result.add((VisitedArticle) article);
+                    result.add((BookmarkedArticle) article);
                 }
             }
 
-            listener.onHistoryFetchCompleted(result);
+            listener.onBookmarksFetchCompleted(result);
         };
 
         ThreadManager t = ThreadManager.getInstance();
@@ -69,10 +67,11 @@ public class HistoryRepository{
         }
     }
 
-    private HistoryDao getHistoryDao(Context context) {
+    private BookmarkDao getBookmarkDao(Context context) {
         ScienceBoardRoomDatabase roomDatabase = ScienceBoardRoomDatabase.getInstance(context);
-        return roomDatabase.getHistoryDao();
+        return roomDatabase.getBookmarkDao();
     }
 
 
-}// end HistoryRepository
+
+}// end BookmarksRepository

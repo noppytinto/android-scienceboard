@@ -1,5 +1,6 @@
 package com.nocorp.scienceboard.ui.webview;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -8,15 +9,12 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.MenuCompat;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,13 +23,19 @@ import android.webkit.WebSettings;
 import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentWebviewBinding;
+import com.nocorp.scienceboard.model.Article;
+import com.nocorp.scienceboard.model.BookmarkedArticle;
+import com.nocorp.scienceboard.system.ThreadManager;
+import com.nocorp.scienceboard.utility.room.BookmarkDao;
+import com.nocorp.scienceboard.utility.room.ScienceBoardRoomDatabase;
+
+import org.jetbrains.annotations.NotNull;
 
 import static android.view.View.SCROLLBARS_INSIDE_OVERLAY;
 
@@ -39,9 +43,8 @@ import static android.view.View.SCROLLBARS_INSIDE_OVERLAY;
 public class WebviewFragment extends Fragment implements androidx.appcompat.widget.Toolbar.OnMenuItemClickListener {
     private final String TAG = this.getClass().getSimpleName();
     private WebView webView;
-    private String url;
+    private String webpageUrl;
     private String sourceName;
-    private String sourceLogoUrl;
     private LinearProgressIndicator progressIndicator;
     private View view;
     private Snackbar snackbar;
@@ -55,6 +58,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private final int UPPER_TEXT_SIZE_LIMIT = 200;
     private final int LOWER_TEXT_SIZE_LIMIT = 0;
     private MenuItem stopMenuItem;
+    private Article currentArticle;
 
 
 
@@ -95,9 +99,10 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 //        }
 
         if (getArguments() != null) {
-            // the url is always !=null and non-empty
-            this.url = WebviewFragmentArgs.fromBundle(getArguments()).getUrl();
-            this.sourceName = WebviewFragmentArgs.fromBundle(getArguments()).getSourceName();
+            // the article is always non-null
+            this.currentArticle = WebviewFragmentArgs.fromBundle(getArguments()).getArticleArgument();
+            this.webpageUrl = currentArticle.getWebpageUrl();
+            this.sourceName = currentArticle.getSourceName();
 
             if(sourceName!=null && !sourceName.isEmpty()) {
                 //TODO
@@ -111,7 +116,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         applyBrowsingRecommendedSettings(webView);
-        webView.loadUrl(url);
+        webView.loadUrl(webpageUrl);
     }
 
     @Override
@@ -136,8 +141,17 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         }
         else if(item.getItemId() == R.id.option_webviewMenu_refresh) {
             if(snackbar!=null) snackbar.dismiss();
-            webView.loadUrl(url);
+            webView.loadUrl(webpageUrl);
             showBottomToast(getString(R.string.string_refreshing_page));
+            return true;
+        }
+        else if(item.getItemId() == R.id.option_webviewMenu_bookmark) {
+            saveInBookmarks(currentArticle, requireContext());
+            showCenteredToast("saved in bookmarks");
+            return true;
+        }
+        else if(item.getItemId() == R.id.option_webviewMenu_share) {
+            shareText(webpageUrl);
             return true;
         }
         else if(item.getItemId() == R.id.option_webviewMenu_increaseTextSize) {
@@ -152,10 +166,6 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
             setDefaultTextSize();
             return true;
         }
-        else if(item.getItemId() == R.id.option_webviewMenu_share) {
-            shareText(url);
-            return true;
-        }
         else if(item.getItemId() == R.id.option_webviewMenu_delete) {
             WebStorage.getInstance().deleteAllData();
             showBottomToast(getString(R.string.string_browsing_data_deleted));
@@ -166,6 +176,35 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     }
 
     //------------------------------------------------------------------------------------ METHODS
+
+    private void saveInBookmarks(@NotNull Article givenArticle, Context context) {
+        BookmarkDao dao = getBookmarkDao(context);
+
+        Runnable task = () -> {
+            // TODO null checks
+            long millis=System.currentTimeMillis();
+            java.util.Date date=new java.util.Date(millis);
+
+            BookmarkedArticle bookmarkedArticle = new BookmarkedArticle(givenArticle);
+            bookmarkedArticle.setSavedDate(date);
+            dao.insert(bookmarkedArticle);
+        };
+
+        ThreadManager t = ThreadManager.getInstance();
+        try {
+            t.runTask(task);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(TAG, "SCIENCE_BOARD - saveInBookmarks: cannot start thread " + e.getMessage());
+        }
+    }
+
+    private BookmarkDao getBookmarkDao(Context context) {
+        ScienceBoardRoomDatabase roomDatabase = ScienceBoardRoomDatabase.getInstance(context);
+        return roomDatabase.getBookmarkDao();
+    }
+
+
 
     private void shareText(String message) {
         try {
@@ -303,7 +342,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         snackbar.setAnchorView(R.id.nav_view);
         snackbar.setAction("retry", v -> {
             snackbar.dismiss();
-            webView.loadUrl(url);
+            webView.loadUrl(webpageUrl);
         });
         snackbar.setActionTextColor(getResources().getColor(R.color.white));
         snackbar.show();

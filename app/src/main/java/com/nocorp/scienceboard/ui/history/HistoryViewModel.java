@@ -49,23 +49,24 @@ public class HistoryViewModel extends AndroidViewModel implements HistoryReposit
     //------------------------------------------------------------ METHODS
 
     public void fetchHistory(int limit) {
+        // TODO: implement limit?
         Runnable task = () -> {
-            if( ! taskIsRunning) {
-                taskIsRunning = true;
-                // pick sources for ALL tab, only once
-                historyRepository.fetchArticles(limit, getApplication());
-
-                taskIsRunning = false;
-            }
+            taskIsRunning = true;
+            // pick sources for ALL tab, only once
+            historyRepository.fetchArticles(limit, getApplication());
         };
 
-        ThreadManager threadManager = ThreadManager.getInstance();
-        threadManager.runTask(task);
+        if( ! taskIsRunning) {
+            ThreadManager threadManager = ThreadManager.getInstance();
+            threadManager.runTask(task);
+        }
+
     }
 
 
     @Override
     public void onHistoryFetchCompleted(List<ListItem> articles) {
+        taskIsRunning = false;
         if(articles != null && articles.size()>0) {
             setArticlesList(articles);
             Log.d(TAG, "SCIENCE_BOARD - onHistoryFetchCompleted: articles fetched from ROOM");
@@ -78,6 +79,7 @@ public class HistoryViewModel extends AndroidViewModel implements HistoryReposit
 
     @Override
     public void onHistoryFetchFailed(String cause) {
+        taskIsRunning = false;
         Log.d(TAG, "SCIENCE_BOARD - onHistoryFetchFailed: articles fetching failed" + cause);
     }
 

@@ -4,9 +4,11 @@ import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 
+import com.nocorp.scienceboard.utility.MyValues;
+
 import java.util.Date;
 
-@Entity(primaryKeys = {"identifier", "saved_date"})
+@Entity
 public class BookmarkedArticle extends Article {
     @ColumnInfo(name = "saved_date")
     @NonNull
@@ -14,6 +16,19 @@ public class BookmarkedArticle extends Article {
 
 
     public BookmarkedArticle() {
+    }
+
+    public BookmarkedArticle(Article article) {
+        setItemType(MyValues.ItemType.BOOKMARKED_ARTICLE);
+        setIdentifier(article.getIdentifier());
+        setTitle(article.getTitle());
+        setDescription(article.getDescription());
+        setContent(article.getContent());
+        setThumbnailUrl(article.getThumbnailUrl());
+        setWebpageUrl(article.getWebpageUrl());
+        setPubDate(article.getPubDate());
+        setSourceName(article.getSourceName());
+        setSourceUrl(article.getSourceUrl());
     }
 
     @NonNull

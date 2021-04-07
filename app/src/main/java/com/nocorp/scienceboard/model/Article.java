@@ -9,10 +9,11 @@ import androidx.room.PrimaryKey;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.utility.MyValues;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @Entity
-public class Article extends ListItem implements Comparable<Article> {
+public class Article extends ListItem implements Comparable<Article>, Serializable {
     @PrimaryKey
     @NonNull
     private String identifier;
@@ -23,9 +24,6 @@ public class Article extends ListItem implements Comparable<Article> {
     private String thumbnailUrl;
     @ColumnInfo(name = "webpage_url")
     private String webpageUrl;
-//    private SyndEntry syndEntry;
-    @Ignore
-    private Source source;
     @ColumnInfo(name = "pub_date")
     private Date pubDate;
     @ColumnInfo(name = "source_name")
@@ -104,14 +102,6 @@ public class Article extends ListItem implements Comparable<Article> {
 //    public void setSyndEntry(SyndEntry syndEntry) {
 //        this.syndEntry = syndEntry;
 //    }
-
-    public Source getSource() {
-        return source;
-    }
-
-    public void setSource(Source source) {
-        this.source = source;
-    }
 
     public Date getPubDate() {
         return pubDate;
