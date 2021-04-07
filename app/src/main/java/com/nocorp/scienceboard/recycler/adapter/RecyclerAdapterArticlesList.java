@@ -137,6 +137,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
             holder.hideCardView();
         }
         else {
+            holder.showCardView();
             try {
                 // TODO: crahses on andorid 21 (resource "thumbnail" not found)
                 RequestOptions gildeOptions = new RequestOptions()
@@ -162,7 +163,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
 
                                       @Override
                                       public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                                          holder.showCardView();
+//                                          holder.showCardView();
                                           return false;
                                       }
                                   }
