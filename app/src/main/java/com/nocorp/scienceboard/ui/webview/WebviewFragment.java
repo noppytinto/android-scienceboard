@@ -27,7 +27,7 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
 import com.nocorp.scienceboard.R;
@@ -61,6 +61,11 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private boolean articleAlreadyInBookmarks;
 
 
+    private WebSettings webSettingsBottomSheet;
+    private WebView webViewBottomSheet;
+    private Button showButton;
+    private View bottomSheet;
+
 
     //------------------------------------------------------------------------------------ ANDROID METHODS
 
@@ -86,30 +91,31 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        webViewMain = viewBinding.webViewWebviewFragment;
-        progressIndicator = viewBinding.progressIndicatorWebviewFragment;
         toolbar = viewBinding.toolbarWebviewFragment;
         toolbar.setOnMenuItemClickListener(this);
         toolbar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
+        webViewMain = viewBinding.webViewWebviewFragment;
+        progressIndicator = viewBinding.progressIndicatorWebviewFragment;
         currentTextSize = DEFAULT_TEXT_SIZE;
         stopMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_stop);
         bookmarkMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_bookmark);
         webviewViewModel = new ViewModelProvider(this).get(WebviewViewModel.class);
 
-        Button showButton = view.findViewById(R.id.button_webviewFragment_bottomSheet);
+        // webview botomsheet
+        webViewBottomSheet = viewBinding.includeWebviewFragment.webviewBottomSheetWebview;
+        showButton = viewBinding.includeWebviewFragment.buttonWebviewFragmentBottomSheet;
+        bottomSheet = view.findViewById(R.id.include_webviewFragment);
+//        bottomSheet.setOnFocusChangeListener((v, hasFocus) -> {
+//            if(hasFocus) {
+//                setupBackButtonBehaviorForWebviewMain(webViewBottomSheet);
+//            }
+//            else {
+//                ignoreBackButton(webViewBottomSheet);
+//            }
+//        });
 
-        showButton.setOnClickListener(v -> {
-            GoogleSearchFragment bottomSheet = new GoogleSearchFragment();
-            bottomSheet.show(requireActivity().getSupportFragmentManager(),
-                    "GoogleSearchFragment");
-        });
 
-
-
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-//            viewBinding.toolbarWebviewFragment.getMenu().setGroupDividerEnabled(true);
-//        }
-
+        //
         if (getArguments() != null) {
             // the article is always non-null
             this.currentArticle = WebviewFragmentArgs.fromBundle(getArguments()).getArticleArgument();
@@ -127,14 +133,122 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         }
     }
 
-
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        // main webview
         applyBrowsingRecommendedSettingsMain(webViewMain);
         webViewMain.loadUrl(webpageUrl);
 
+        // bottom sheet webview
+        applyBrowsingRecommendedSettingsBottomSheet(webViewBottomSheet);
+        webViewBottomSheet.loadUrl("https://www.google.com");
+        final BottomSheetBehavior behavior = BottomSheetBehavior.from(bottomSheet);
+        behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                if (newState == BottomSheetBehavior.STATE_HALF_EXPANDED) {
+                    setupBackButtonBehaviorForWebviewMain(webViewBottomSheet);
+                    behavior.setDraggable(false);
+                    showButton.setText("close");
+//                    showButton.setTextColor(getResources().getColor(R.color.orange_light));
+//                    showButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_clear, 0, 0, 0);
+                    showButton.setOnClickListener(v -> {
+                        if (behavior.getState() == BottomSheetBehavior.STATE_HALF_EXPANDED) {
+                            behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                            behavior.setDraggable(true);
+                        }
+                    });
+                } else if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    ignoreBackButton(webViewBottomSheet);
+                    showButton.setText("search");
+                    showButton.setOnClickListener(v -> {
+                        if (behavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+                            behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+                            behavior.setDraggable(true);
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                // ignore
+            }
+        });
+
+        showButton.setOnClickListener(v -> {
+            if (behavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+                behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+                behavior.setDraggable(true);
+            }
+        });
     }
+
+
+
+
+
+    private void applyBrowsingRecommendedSettingsBottomSheet(WebView webView) {
+        webSettingsBottomSheet = webView.getSettings();
+        webSettingsBottomSheet.setJavaScriptEnabled(true);
+        webSettingsBottomSheet.setLoadWithOverviewMode(true);
+        webSettingsBottomSheet.setUseWideViewPort(true);
+        webSettingsBottomSheet.setSupportZoom(true);
+        webSettingsBottomSheet.setBuiltInZoomControls(true);
+        webSettingsBottomSheet.setDisplayZoomControls(false);
+        webSettingsBottomSheet.setDomStorageEnabled(true);
+        webSettingsBottomSheet.setDatabaseEnabled(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            webSettingsBottomSheet.setSafeBrowsingEnabled(true);
+        }
+        webView.setScrollBarStyle(SCROLLBARS_INSIDE_OVERLAY);
+        webView.setScrollbarFadingEnabled(false);
+        webView.setFocusable(true);
+        webView.setFocusableInTouchMode(true);
+        defineWebclientBehaviorBottomSheet(webView);
+    }
+
+    private void defineWebclientBehaviorBottomSheet(WebView webView) {
+        webView.setWebChromeClient(new WebChromeClient());
+        webView.setWebViewClient(new WebViewClient() {
+            //TODO
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                view.loadUrl(url);
+                return true;
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+            }
+
+            @Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                super.onPageStarted(view, url, favicon);
+            }
+
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                super.onReceivedError(view, errorCode, description, failingUrl);
+            }
+
+        });
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     @Override
     public void onDestroyView() {
@@ -205,10 +319,14 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 
 
 
+
+
+
+
+
+
+
     //------------------------------------------------------------------------------------ METHODS
-
-
-
 
     private void checkIfAlreadyInBookmarks() {
         webviewViewModel.getObservableBookmarkDuplicationResponse().observe(getViewLifecycleOwner(), alreadyInBookmarks -> {
@@ -220,7 +338,6 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         });
         webviewViewModel.checkIsInBookmarks(currentArticle);
     }
-
 
     private void shareText(String message) {
         try {
@@ -279,6 +396,11 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         });
     }
 
+    private void ignoreBackButton(WebView webView) {
+        webView.setOnKeyListener(null);
+    }
+
+
     private void applyBrowsingRecommendedSettingsMain(WebView webView) {
         webSettingsMain = webView.getSettings();
         webSettingsMain.setJavaScriptEnabled(true);
@@ -299,8 +421,6 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         webView.setFocusableInTouchMode(true);
         defineWebclientBehaviorMain(webView);
     }
-
-
 
     private void defineWebclientBehaviorMain(WebView webView) {
         setupBackButtonBehaviorForWebviewMain(webView);
@@ -336,7 +456,6 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 
         });
     }
-
 
     private void showLoadCompletedSnackbar() {
         String message = getString(R.string.string_page_load_completed);

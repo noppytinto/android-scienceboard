@@ -14,4 +14,51 @@
         <item name="android:height">15dp</item>
     </style>
 
+
+
+
+
+
+
+    <!-- CINEMATES BUTTON ROUNDED -->
+    <style name="ScienceBoard.Button.Rounded" parent="Widget.MaterialComponents.Button">
+        <item name="android:textColor">@color/black</item>
+<!--        <item name="android:textAppearance">@style/Cinemates.Button.Rounded.TextAppearance</item>-->
+        <item name="shapeAppearance">@style/cinemates_shape_rounded</item>
+        <item name="backgroundTint">?colorSecondary</item>
+        <item name="rippleColor">?colorSecondaryVariant</item>
+    </style>
+<!--    <style name="Cinemates.Button.Rounded.TextAppearance" parent="TextAppearance.MdcTypographyStyles.Button">-->
+<!--        <item name="fontFamily">@font/poppins_semibold</item>-->
+<!--        <item name="android:textSize">16sp</item>-->
+<!--    </style>-->
+
+
+
+    <style name="cinemates_shape_rounded">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">35dp</item>
+    </style>
+
+
+
+
+
+<!--    <style name="TextAppearance.MdcTypographyStyles.Button" parent="TextAppearance.MaterialComponents.Button">-->
+<!--        <item name="fontFamily">@font/poppins</item>-->
+<!--        <item name="android:fontFamily">@font/poppins</item>-->
+<!--        <item name="android:textSize">14sp</item>-->
+<!--    </style>-->
+<!--    -->
+
+
+
+
+
+
+
+
+
+
+
 </resources>
