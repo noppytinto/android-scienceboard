@@ -25,12 +25,15 @@
 
     <WebView
         android:id="@+id/webView_webviewFragment"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
+        android:paddingBottom="50dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/progressIndicator_webviewFragment" />
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_webviewFragment">
+
+    </WebView>
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/progressIndicator_webviewFragment"
@@ -42,4 +45,22 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar_webviewFragment" />
+
+    <Button
+        android:id="@+id/button_webviewFragment_bottomSheet"
+        android:layout_width="wrap_content"
+        android:layout_height="35dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/shape_bottom_sheet_webview"
+        android:backgroundTint="@color/orange_light"
+        android:paddingLeft="10dp"
+        android:text="search"
+        android:textSize="10sp"
+        app:icon="@drawable/ic_up_arrow"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:rippleColor="@color/orange_light" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

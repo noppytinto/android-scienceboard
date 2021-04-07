@@ -21,8 +21,8 @@ public interface HistoryDao {
     void insert(VisitedArticle article);
 
     @Query("UPDATE VisitedArticle " +
-            "SET visited_date = :lastVisitedDate " +
+            "SET visited_date = :newVisitedDate " +
             "WHERE identifier = :targetIdentifier AND visited_date = :oldVisitedDate")
-    int update(Date lastVisitedDate, String targetIdentifier, Date oldVisitedDate);
+    int update(Date newVisitedDate, String targetIdentifier, Date oldVisitedDate);
 
 }

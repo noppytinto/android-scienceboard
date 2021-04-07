@@ -24,24 +24,22 @@ import android.webkit.WebSettings;
 import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentWebviewBinding;
 import com.nocorp.scienceboard.model.Article;
-import com.nocorp.scienceboard.repository.BookmarkRepositoryListener;
-import com.nocorp.scienceboard.ui.viewholder.ListItem;
-
-import java.util.List;
 
 import static android.view.View.SCROLLBARS_INSIDE_OVERLAY;
 
 
 public class WebviewFragment extends Fragment implements androidx.appcompat.widget.Toolbar.OnMenuItemClickListener {
     private final String TAG = this.getClass().getSimpleName();
-    private WebView webView;
+    private WebView webViewMain;
     private String webpageUrl;
     private String sourceName;
     private LinearProgressIndicator progressIndicator;
@@ -50,7 +48,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private FragmentWebviewBinding viewBinding;
     private Toolbar toolbar;
     private Toast toast;
-    private WebSettings webSettings;
+    private WebSettings webSettingsMain;
     private final int TEXT_SIZE_STEP = 20;
     private final int DEFAULT_TEXT_SIZE = 90;
     private int currentTextSize;
@@ -88,7 +86,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        webView = viewBinding.webViewWebviewFragment;
+        webViewMain = viewBinding.webViewWebviewFragment;
         progressIndicator = viewBinding.progressIndicatorWebviewFragment;
         toolbar = viewBinding.toolbarWebviewFragment;
         toolbar.setOnMenuItemClickListener(this);
@@ -97,6 +95,16 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         stopMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_stop);
         bookmarkMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_bookmark);
         webviewViewModel = new ViewModelProvider(this).get(WebviewViewModel.class);
+
+        Button showButton = view.findViewById(R.id.button_webviewFragment_bottomSheet);
+
+        showButton.setOnClickListener(v -> {
+            GoogleSearchFragment bottomSheet = new GoogleSearchFragment();
+            bottomSheet.show(requireActivity().getSupportFragmentManager(),
+                    "GoogleSearchFragment");
+        });
+
+
 
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
 //            viewBinding.toolbarWebviewFragment.getMenu().setGroupDividerEnabled(true);
@@ -123,8 +131,9 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        applyBrowsingRecommendedSettings(webView);
-        webView.loadUrl(webpageUrl);
+        applyBrowsingRecommendedSettingsMain(webViewMain);
+        webViewMain.loadUrl(webpageUrl);
+
     }
 
     @Override
@@ -143,13 +152,13 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     public boolean onMenuItemClick(MenuItem item) {
         if(item.getItemId() == R.id.option_webviewMenu_stop) {
             if(snackbar!=null) snackbar.dismiss();
-            webView.stopLoading();
+            webViewMain.stopLoading();
             showBottomToast(getString(R.string.string_page_load_stopped));
             return true;
         }
         else if(item.getItemId() == R.id.option_webviewMenu_refresh) {
             if(snackbar!=null) snackbar.dismiss();
-            webView.loadUrl(webpageUrl);
+            webViewMain.loadUrl(webpageUrl);
             showBottomToast(getString(R.string.string_refreshing_page));
             return true;
         }
@@ -228,27 +237,27 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private void increaseTextSize() {
         if(currentTextSize <= UPPER_TEXT_SIZE_LIMIT) {
             currentTextSize = currentTextSize + TEXT_SIZE_STEP;
-            webSettings.setTextZoom(currentTextSize);// where 90 is 90%; default value is ... 100
+            webSettingsMain.setTextZoom(currentTextSize);// where 90 is 90%; default value is ... 100
         }
     }
 
     private void decreaseTextSize() {
         if(currentTextSize >= LOWER_TEXT_SIZE_LIMIT){
             currentTextSize = currentTextSize - TEXT_SIZE_STEP;
-            webSettings.setTextZoom(currentTextSize);
+            webSettingsMain.setTextZoom(currentTextSize);
         }
     }
 
     private void setDefaultTextSize() {
         currentTextSize = DEFAULT_TEXT_SIZE;
-        webSettings.setTextZoom(currentTextSize);
+        webSettingsMain.setTextZoom(currentTextSize);
     }
 
     /**
      * override back button behavior for webviews.
      * Back button will go back in case of webviews
      */
-    private void setupBackButtonBehaviorForWebview(WebView webView) {
+    private void setupBackButtonBehaviorForWebviewMain(WebView webView) {
         webView.setOnKeyListener(new View.OnKeyListener()
         {
             @Override
@@ -270,29 +279,31 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         });
     }
 
-    private void applyBrowsingRecommendedSettings(WebView webView) {
-        webSettings = webView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
+    private void applyBrowsingRecommendedSettingsMain(WebView webView) {
+        webSettingsMain = webView.getSettings();
+        webSettingsMain.setJavaScriptEnabled(true);
 //        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);// TODO: allow youtube to set a video fullscreen
-        webSettings.setLoadWithOverviewMode(true);
-        webSettings.setUseWideViewPort(true);
-        webSettings.setSupportZoom(true);
-        webSettings.setBuiltInZoomControls(true);
-        webSettings.setDisplayZoomControls(false);
-        webSettings.setDomStorageEnabled(true);
-        webSettings.setDatabaseEnabled(true);
+        webSettingsMain.setLoadWithOverviewMode(true);
+        webSettingsMain.setUseWideViewPort(true);
+        webSettingsMain.setSupportZoom(true);
+        webSettingsMain.setBuiltInZoomControls(true);
+        webSettingsMain.setDisplayZoomControls(false);
+        webSettingsMain.setDomStorageEnabled(true);
+        webSettingsMain.setDatabaseEnabled(true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            webSettings.setSafeBrowsingEnabled(true);
+            webSettingsMain.setSafeBrowsingEnabled(true);
         }
         webView.setScrollBarStyle(SCROLLBARS_INSIDE_OVERLAY);
         webView.setScrollbarFadingEnabled(false);
         webView.setFocusable(true);
         webView.setFocusableInTouchMode(true);
-        defineWebclientBehavior(webView);
+        defineWebclientBehaviorMain(webView);
     }
 
-    private void defineWebclientBehavior(WebView webView) {
-        setupBackButtonBehaviorForWebview(webView);
+
+
+    private void defineWebclientBehaviorMain(WebView webView) {
+        setupBackButtonBehaviorForWebviewMain(webView);
         webView.setWebChromeClient(new WebChromeClient());
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -326,6 +337,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         });
     }
 
+
     private void showLoadCompletedSnackbar() {
         String message = getString(R.string.string_page_load_completed);
         snackbar = Snackbar.make(view, "",Snackbar.LENGTH_SHORT);
@@ -347,7 +359,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         snackbar.setAnchorView(R.id.nav_view);
         snackbar.setAction("retry", v -> {
             snackbar.dismiss();
-            webView.loadUrl(webpageUrl);
+            webViewMain.loadUrl(webpageUrl);
         });
         snackbar.setActionTextColor(getResources().getColor(R.color.white));
         snackbar.show();
