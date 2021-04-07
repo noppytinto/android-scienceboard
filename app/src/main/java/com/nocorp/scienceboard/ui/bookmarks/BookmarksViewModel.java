@@ -81,7 +81,15 @@ public class BookmarksViewModel extends AndroidViewModel implements BookmarkRepo
         Log.d(TAG, "SCIENCE_BOARD - onBookmarksFetchFailed: articles fetching failed" + cause);
     }
 
+    @Override
+    public void onBookmarksDuplicationCheckCompleted(boolean result) {
+        // ignore
+    }
 
+    @Override
+    public void onBookmarksDuplicationCheckFailed(String cause) {
+        // ignore
+    }
 
 
 }// end BookmarksViewModel

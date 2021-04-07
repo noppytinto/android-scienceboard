@@ -9,6 +9,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -31,16 +33,20 @@ import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentWebviewBinding;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.BookmarkedArticle;
+import com.nocorp.scienceboard.repository.BookmarkRepositoryListener;
 import com.nocorp.scienceboard.system.ThreadManager;
+import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.utility.room.BookmarkDao;
 import com.nocorp.scienceboard.utility.room.ScienceBoardRoomDatabase;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 import static android.view.View.SCROLLBARS_INSIDE_OVERLAY;
 
 
-public class WebviewFragment extends Fragment implements androidx.appcompat.widget.Toolbar.OnMenuItemClickListener {
+public class WebviewFragment extends Fragment implements androidx.appcompat.widget.Toolbar.OnMenuItemClickListener, BookmarkRepositoryListener {
     private final String TAG = this.getClass().getSimpleName();
     private WebView webView;
     private String webpageUrl;
@@ -59,6 +65,8 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private final int LOWER_TEXT_SIZE_LIMIT = 0;
     private MenuItem stopMenuItem;
     private Article currentArticle;
+    private MenuItem bookmarkMenuItem;
+    private static boolean taskIsRunning;
 
 
 
@@ -94,6 +102,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         currentTextSize = DEFAULT_TEXT_SIZE;
 //        viewBinding.toolbarWebviewFragment.inflateMenu(R.menu.menu_webview);
         stopMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_stop);
+        bookmarkMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_bookmark);
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
 //            viewBinding.toolbarWebviewFragment.getMenu().setGroupDividerEnabled(true);
 //        }
@@ -109,6 +118,9 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 //                toolbar.setTitleTextColor(getResources().getColor(R.color.white));
                 toolbar.setTitle(sourceName);
             }
+
+            //
+            checkIsInBookmarks(currentArticle, requireContext());
         }
     }
 
@@ -148,6 +160,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         else if(item.getItemId() == R.id.option_webviewMenu_bookmark) {
             saveInBookmarks(currentArticle, requireContext());
             showCenteredToast("saved in bookmarks");
+            changeBookmarkIcon();
             return true;
         }
         else if(item.getItemId() == R.id.option_webviewMenu_share) {
@@ -176,6 +189,27 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     }
 
     //------------------------------------------------------------------------------------ METHODS
+
+    private void checkIsInBookmarks(Article givenArticle, Context context) {
+        BookmarkDao dao = getBookmarkDao(context);
+
+        Runnable task = () -> {
+            taskIsRunning = true;
+            boolean result = dao.checkDuplication(givenArticle.getIdentifier());
+            onBookmarksDuplicationCheckCompleted(result);
+        };
+
+        if( ! taskIsRunning) {
+            ThreadManager t = ThreadManager.getInstance();
+            try {
+                t.runTask(task);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.d(TAG, "SCIENCE_BOARD - checkIsInBookmarks: cannot start thread " + e.getMessage());
+            }
+        }
+
+    }
 
     private void saveInBookmarks(@NotNull Article givenArticle, Context context) {
         BookmarkDao dao = getBookmarkDao(context);
@@ -371,6 +405,37 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
             stopMenuItem.setVisible(true);
     }
 
+    private void changeBookmarkIcon() {
+        if(bookmarkMenuItem !=null)
+            bookmarkMenuItem.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_bookmark_added_white, null));
+    }
 
 
+    @Override
+    public void onBookmarksDuplicationCheckCompleted(boolean result) {
+        taskIsRunning = false;
+        if(result == true) {
+            changeBookmarkIcon();
+            Log.d(TAG, "SCIENCE_BOARD - onBookmarksDuplicationCheckCompleted: article bookmarked");
+        }
+        else {
+            Log.d(TAG, "SCIENCE_BOARD - onBookmarksDuplicationCheckCompleted: article already in bookmarks");
+        }
+    }
+
+    @Override
+    public void onBookmarksDuplicationCheckFailed(String cause) {
+        taskIsRunning = false;
+        Log.d(TAG, "SCIENCE_BOARD - onBookmarksFetchFailed: articles fetching failed" + cause);
+    }
+
+    @Override
+    public void onBookmarksFetchCompleted(List<ListItem> articles) {
+        // ignore
+    }
+
+    @Override
+    public void onBookmarksFetchFailed(String cause) {
+        // ignore
+    }
 }// end WebviewFragment
