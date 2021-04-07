@@ -27,24 +27,23 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:fontFamily="@font/playfair_display_black"
-                android:text="Discover"
+                android:text="ScienceBoard"
                 android:textColor="@color/black"
-                android:textSize="24sp" />
+                android:textSize="@dimen/fragment_title_text_size" />
 
         </androidx.appcompat.widget.Toolbar>
-
 
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tablayout_homeFragment"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="40dp"
+            android:minHeight="30dp"
             app:layout_scrollFlags="snap"
             app:tabIndicatorColor="@color/orange"
-            app:tabIndicatorHeight="5dp"
+            app:tabIndicatorHeight="@dimen/tab_indicator_height"
             app:tabMode="scrollable"
-            app:tabRippleColor="@color/orange"
-            >
+            app:tabRippleColor="@color/orange">
 
             <com.google.android.material.tabs.TabItem
                 android:layout_width="wrap_content"
