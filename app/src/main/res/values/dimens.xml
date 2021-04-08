@@ -7,4 +7,7 @@
     <dimen name="default_card_corner_radius">7dp</dimen>
     <dimen name="tab_indicator_height">4dp</dimen>
     <dimen name="fragment_title_text_size">20sp</dimen>
+
+    <dimen name="bottom_sheet_corner_radius">10dp</dimen>
+
 </resources>

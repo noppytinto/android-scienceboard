@@ -28,6 +28,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
 import com.nocorp.scienceboard.R;
@@ -63,7 +64,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 
     private WebSettings webSettingsBottomSheet;
     private WebView webViewBottomSheet;
-    private Button showButton;
+    private ExtendedFloatingActionButton showButton;
     private View bottomSheet;
 
 
@@ -142,33 +143,33 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 
         // bottom sheet webview
         applyBrowsingRecommendedSettingsBottomSheet(webViewBottomSheet);
-        webViewBottomSheet.loadUrl("https://www.google.com");
+        webViewBottomSheet.loadUrl(getString(R.string.string_google_search_website));
         final BottomSheetBehavior behavior = BottomSheetBehavior.from(bottomSheet);
+        behavior.setDraggable(false);
         behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
                 if (newState == BottomSheetBehavior.STATE_HALF_EXPANDED) {
                     setupBackButtonBehaviorForWebviewMain(webViewBottomSheet);
-                    behavior.setDraggable(false);
-                    showButton.setText("close");
-//                    showButton.setTextColor(getResources().getColor(R.color.orange_light));
-//                    showButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_clear, 0, 0, 0);
+                    showButton.setText(R.string.string_close);
                     showButton.setOnClickListener(v -> {
                         if (behavior.getState() == BottomSheetBehavior.STATE_HALF_EXPANDED) {
                             behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                            behavior.setDraggable(true);
-                        }
-                    });
-                } else if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                    ignoreBackButton(webViewBottomSheet);
-                    showButton.setText("search");
-                    showButton.setOnClickListener(v -> {
-                        if (behavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
-                            behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
-                            behavior.setDraggable(true);
                         }
                     });
                 }
+                else if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    ignoreBackButton(webViewBottomSheet);
+                    showButton.setText(R.string.string_search);
+                    showButton.setOnClickListener(v -> {
+                        if (behavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+                            behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+                        }
+                    });
+                }
+//                else if (newState == BottomSheetBehavior.STATE_DRAGGING) {
+//                    behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+//                }
             }
 
             @Override
@@ -180,7 +181,6 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         showButton.setOnClickListener(v -> {
             if (behavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
                 behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
-                behavior.setDraggable(true);
             }
         });
     }

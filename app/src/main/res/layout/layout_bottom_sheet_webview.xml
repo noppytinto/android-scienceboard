@@ -7,28 +7,37 @@
     android:layout_height="match_parent">
 
 
-    <Button
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="15dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/gradient_vertical_dark"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_webviewFragment_bottomSheet" />
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/button_webviewFragment_bottomSheet"
-        style="@style/ScienceBoard.Button.Rounded"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:elevation="10dp"
+        android:layout_width="85dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="8dp"
+        android:paddingEnd="12dp"
+        android:paddingRight="12dp"
         android:text="search"
-        android:textColor="@color/white"
+        android:textAlignment="center"
         android:textSize="12sp"
+        app:elevation="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/cardView3"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
         android:backgroundTint="@color/darkSemiTransparent"
-        app:cardCornerRadius="5dp"
-        app:cardElevation="10dp"
+        app:cardCornerRadius="@dimen/bottom_sheet_corner_radius"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -39,13 +48,10 @@
         <WebView
             android:id="@+id/webview_bottomSheetWebview"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="3dp" />
+            android:layout_height="match_parent" />
 
 
     </androidx.cardview.widget.CardView>
-
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
