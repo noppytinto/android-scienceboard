@@ -149,34 +149,40 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
 //                        .priority(Priority.HIGH);
 
 
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
-                    Glide.with(holder.itemView.getContext())
-                            .load(thumbnailUrl)
-                            .apply(gildeOptions)
-                            .transition(withCrossFade())
-                            .thumbnail(/*sizeMultiplier = 0.25% less than original*/ 0.25f)
-                            .listener(new RequestListener<Drawable>() {
-                                          @Override
-                                          public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                                              holder.hideCardView();
-                                              return false;
-                                          }
-
-                                          @Override
-                                          public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-//                                          holder.showCardView();
-                                              return false;
-                                          }
-                                      }
-                            )
-                            .into(holder.thumbnail);
-                } else {
-                    Glide.with(holder.itemView.getContext())
-                            .load(thumbnailUrl)
-                            .apply(gildeOptions)
-                            .thumbnail(/*sizeMultiplier = 0.25% less than original*/ 0.25f)
-                            .into(holder.thumbnail);
-                }
+//                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+//                    Glide.with(holder.itemView.getContext())
+//                            .load(thumbnailUrl)
+//                            .apply(gildeOptions)
+//                            .transition(withCrossFade())
+//                            .thumbnail(/*sizeMultiplier = 0.25% less than original*/ 0.25f)
+//                            .listener(new RequestListener<Drawable>() {
+//                                          @Override
+//                                          public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+//                                              holder.hideCardView();
+//                                              return false;
+//                                          }
+//
+//                                          @Override
+//                                          public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+////                                          holder.showCardView();
+//                                              return false;
+//                                          }
+//                                      }
+//                            )
+//                            .into(holder.thumbnail);
+//                } else {
+//                    Glide.with(holder.itemView.getContext())
+//                            .load(thumbnailUrl)
+//                            .apply(gildeOptions)
+//                            .thumbnail(/*sizeMultiplier = 0.25% less than original*/ 0.25f)
+//                            .into(holder.thumbnail);
+//                }
+                Glide.with(holder.itemView.getContext())
+                        .load(thumbnailUrl)
+                        .apply(gildeOptions)
+                        .thumbnail(/*sizeMultiplier = 0.25% less than original*/ 0.25f)
+                        .transition(withCrossFade())
+                        .into(holder.thumbnail);
 
             } catch (Exception e) {
                 e.printStackTrace();

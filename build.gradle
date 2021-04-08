@@ -27,6 +27,11 @@ allprojects {
     repositories {
         google()
         jcenter()
+
+        // appodeal
+        maven {
+            url "https://artifactory.appodeal.com/appodeal"
+        }
     }
 }
 

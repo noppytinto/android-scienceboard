@@ -112,9 +112,6 @@ dependencies {
     // OkHttp network libraries
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
 
-    // cloudinary
-    implementation group: 'com.cloudinary', name: 'cloudinary-android', version: '1.30.0'
-
     // rxjava
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
     implementation 'io.reactivex.rxjava3:rxjava:3.0.4'
@@ -133,6 +130,9 @@ dependencies {
 //    testImplementation 'org.robolectric:robolectric:4.4'
 
 
+
+    // APPODEAL
+    implementation 'com.appodeal.ads:sdk:2.9.2.+'
 
 
 
