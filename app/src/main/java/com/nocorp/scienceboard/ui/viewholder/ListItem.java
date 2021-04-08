@@ -8,8 +8,7 @@ public abstract class ListItem {
     @Ignore
     private ItemType itemType;
 
-    public ListItem(ItemType itemType) {
-        this.itemType = itemType;
+    public ListItem() {
     }
 
     public ItemType getItemType() {

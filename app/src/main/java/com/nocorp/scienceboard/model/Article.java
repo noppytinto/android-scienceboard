@@ -32,12 +32,9 @@ public class Article extends ListItem implements Comparable<Article>, Serializab
     private String sourceUrl;
 
 
-    public Article(MyValues.ItemType itemType) {
-        super(itemType);
-    }
 
     public Article() {
-        super(MyValues.ItemType.ARTICLE);
+        setItemType(MyValues.ItemType.ARTICLE);
     }
 
     @Ignore
