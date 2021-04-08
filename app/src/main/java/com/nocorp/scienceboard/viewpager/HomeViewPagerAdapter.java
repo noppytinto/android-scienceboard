@@ -1,15 +1,13 @@
 package com.nocorp.scienceboard.viewpager;
 
-import android.os.Bundle;
-import android.widget.FrameLayout;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-import com.nocorp.scienceboard.ui.tabs.allarticlestab.AllArticlesTabFragment;
+import com.nocorp.scienceboard.ui.tabs.alltab.AllTabFragment;
+import com.nocorp.scienceboard.ui.tabs.techtab.TechTabFragment;
 
 public class HomeViewPagerAdapter extends FragmentStateAdapter {
 
@@ -20,19 +18,16 @@ public class HomeViewPagerAdapter extends FragmentStateAdapter {
     @NonNull
     @Override
     public Fragment createFragment(int position) {
-
         switch (position) {
             case 0: {
-                Fragment allArticlesTabFragment = AllArticlesTabFragment.newInstance();
+                Fragment allArticlesTabFragment = AllTabFragment.newInstance();
 //                Bundle args = new Bundle();
 //                // Our object is just an integer :-P
 //                args.putInt(allArticlesTabFragment.ARG_OBJECT, position + 1);
-
                 return allArticlesTabFragment;
             }
-
             default:
-                return AllArticlesTabFragment.newInstance();
+                return TechTabFragment.newInstance();
         }
     }
 

@@ -4,6 +4,7 @@ import android.util.Patterns;
 
 import org.apache.commons.validator.routines.UrlValidator;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -40,11 +41,28 @@ public class HttpUtilities {
         return protocol + DOUBLE_DASHES + domain;
     }
 
-    private String inputStreamToString(InputStream inputStream) throws IOException {
-        String result = org.apache.commons.io.IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-
+    public static InputStream stringToInputStream(String string) {
+        InputStream result = null;
+        if(string==null || string.isEmpty()) return result;
+        try {
+            result = new ByteArrayInputStream(string.getBytes());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return result;
     }
+
+    public static String inputStreamToString(InputStream inputStream) {
+        String result = null;
+        if(inputStream==null) return result;
+        try {
+            result = org.apache.commons.io.IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
 
 
     /**

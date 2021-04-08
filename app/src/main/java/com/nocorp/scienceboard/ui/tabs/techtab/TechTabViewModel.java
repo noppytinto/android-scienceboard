@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.ui.tabs.allarticlestab;
+package com.nocorp.scienceboard.ui.tabs.techtab;
 
 import android.app.Application;
 import android.content.Context;
@@ -25,11 +25,12 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-public class AllArticlesTabViewModel extends AndroidViewModel {
+public class TechTabViewModel extends AndroidViewModel {
     private final String TAG = this.getClass().getSimpleName();
     private MutableLiveData<List<ListItem>> articlesList;
     private ArticleRepository articleRepository;
-    private final List<String> mainCategories = Arrays.asList("space", "physics", "tech", "medicine", "biology");
+    private final List<String> mainCategories = Arrays.asList("tech");
+    private final String TECH_CATEGORY = "tech";
     private static List<Source> targetSources;
     private static boolean taskIsRunning;
     private static boolean saveInHistoryTaskIsRunning;
@@ -40,12 +41,11 @@ public class AllArticlesTabViewModel extends AndroidViewModel {
 
     //------------------------------------------------------------ CONSTRUCTORS
 
-    public AllArticlesTabViewModel(Application application) {
+    public TechTabViewModel(Application application) {
         super(application);
         articlesList = new MutableLiveData<>();
         articleRepository = new ArticleRepository(new DomRssParser());
     }
-
 
 
     //------------------------------------------------------------ GETTERS/SETTERS
@@ -68,9 +68,9 @@ public class AllArticlesTabViewModel extends AndroidViewModel {
                 taskIsRunning = true;
                 // pick sources for ALL tab, only once
                 if(targetSources==null || targetSources.size()<=0) {
-                    targetSources = SourceRepository.getAsourceForEachMainCategory_randomly(givenSources, mainCategories);// TODO this should not be static
+                    targetSources = SourceRepository.getAllSourcesOfThisCategory(givenSources, TECH_CATEGORY);// TODO this should not be static
                 }
-                List<ListItem> articles = articleRepository.getArticles(targetSources, limit, forced, getApplication());
+                List<ListItem> articles = articleRepository.getTechArticles(targetSources, limit, forced, getApplication());
 
                 taskIsRunning = false;
 
@@ -163,4 +163,11 @@ public class AllArticlesTabViewModel extends AndroidViewModel {
 
 
 
-}// end AllArticlesTabViewModel
+
+
+
+
+
+
+
+}// end TechTabViewModel

@@ -1,8 +1,9 @@
-package com.nocorp.scienceboard.ui.tabs.allarticlestab;
+package com.nocorp.scienceboard.ui.tabs.techtab;
 
 import androidx.lifecycle.ViewModelProvider;
 
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -10,16 +11,18 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.nocorp.scienceboard.MobileNavigationDirections;
 import com.nocorp.scienceboard.R;
-import com.nocorp.scienceboard.databinding.AllArticlesTabFragmentBinding;
+import com.nocorp.scienceboard.databinding.FragmentTechTabBinding;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
@@ -29,17 +32,17 @@ import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AllArticlesTabFragment extends Fragment implements
+public class TechTabFragment extends Fragment implements
         RecyclerAdapterArticlesList.OnArticleClickedListener {
     private final String TAG = this.getClass().getSimpleName();
+    private TechTabViewModel techTabViewModel;
     private RecyclerAdapterArticlesList recyclerAdapterArticlesList;
     private RecyclerView recyclerView;
     private CircularProgressIndicator progressIndicator;
-    private AllArticlesTabViewModel allArticlesTabViewModel;
     private View view;
     private AdProvider adProvider;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private AllArticlesTabFragmentBinding binding;
+    private FragmentTechTabBinding binding;
     private Toast toast;
     private SourceViewModel sourceViewModel;
     private List<Source> sources;
@@ -49,11 +52,9 @@ public class AllArticlesTabFragment extends Fragment implements
 
     //--------------------------------------------------------------------- CONSTRUCTORS
 
-    public static AllArticlesTabFragment newInstance() {
-        return new AllArticlesTabFragment();
+    public static TechTabFragment newInstance() {
+        return new TechTabFragment();
     }
-
-
 
 
 
@@ -62,7 +63,7 @@ public class AllArticlesTabFragment extends Fragment implements
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        binding = AllArticlesTabFragmentBinding.inflate(getLayoutInflater());
+        binding = FragmentTechTabBinding.inflate(getLayoutInflater());
         view = binding.getRoot();
         return view;
     }
@@ -70,12 +71,12 @@ public class AllArticlesTabFragment extends Fragment implements
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        progressIndicator = binding.progressIndicatorAllArticlesTabFragment;
-        swipeRefreshLayout = binding.swipeRefreshAllArticlesTabFragment;
+        progressIndicator = binding.progressIndicatorTechTabFragment;
+        swipeRefreshLayout = binding.swipeRefreshTechTabFragment;
         swipeRefreshLayout.setColorSchemeResources(R.color.orange_light);
         adProvider = AdProvider.getInstance(); // is not guaranteed that
         sourceViewModel = new ViewModelProvider(requireActivity()).get(SourceViewModel.class);
-        allArticlesTabViewModel = new ViewModelProvider(this).get(AllArticlesTabViewModel.class);
+        techTabViewModel = new ViewModelProvider(this).get(TechTabViewModel.class);
         initRecycleView();
         setupSwipeDownToRefresh();
     }
@@ -83,15 +84,15 @@ public class AllArticlesTabFragment extends Fragment implements
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        sourceViewModel.getObservableSources().observe(getViewLifecycleOwner(), sources -> {
+        sourceViewModel.getObservableAllSources().observe(getViewLifecycleOwner(), sources -> {
             if(sources!=null && sources.size()>0) {
                 // TODO
                 this.sources = sources;
-                allArticlesTabViewModel.downloadArticles(sources, 20, false);
+                techTabViewModel.downloadArticles(sources, 20, false);
             }
         });
 
-        allArticlesTabViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), articles -> {
+        techTabViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), articles -> {
             if(articles==null || articles.size()==0) {
                 swipeRefreshLayout.setRefreshing(false);
                 progressIndicator.setVisibility(View.GONE);
@@ -132,7 +133,7 @@ public class AllArticlesTabFragment extends Fragment implements
 
     private void initRecycleView() {
         // defining Recycler view
-        recyclerView = binding.recyclerViewAllArticlesTabFragment;
+        recyclerView = binding.recyclerViewTechTabFragment;
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this);
         recyclerView.setAdapter(recyclerAdapterArticlesList);
@@ -145,10 +146,25 @@ public class AllArticlesTabFragment extends Fragment implements
         });
     }
 
-
     private void refreshAction() {
-        allArticlesTabViewModel.downloadArticles(sources, 20, true);
+        techTabViewModel.downloadArticles(sources, 20, true);
     }
+
+    @Override
+    public void onArticleClicked(int position) {
+        Article article = (Article) recyclerAdapterArticlesList.getItem(position);
+        if(article!=null) {
+            techTabViewModel.smartSaveInHistory(article);
+            MobileNavigationDirections.ActionGlobalWebviewFragment action =
+                    MobileNavigationDirections.actionGlobalWebviewFragment(article);
+            Navigation.findNavController(view).navigate(action);
+        }
+    }
+
+
+
+
+
 
     private void runToastOnUiThread(String message) {
         requireActivity().runOnUiThread(() -> {
@@ -162,19 +178,6 @@ public class AllArticlesTabFragment extends Fragment implements
                 }
         );
     }
-
-    @Override
-    public void onArticleClicked(int position) {
-        Article article = (Article) recyclerAdapterArticlesList.getItem(position);
-        if(article!=null) {
-            allArticlesTabViewModel.smartSaveInHistory(article);
-            MobileNavigationDirections.ActionGlobalWebviewFragment action =
-                    MobileNavigationDirections.actionGlobalWebviewFragment(article);
-            Navigation.findNavController(view).navigate(action);
-        }
-    }
-
-
 
     private void showCenteredToast(String message) {
         if(toast!=null) toast.cancel();
@@ -191,4 +194,4 @@ public class AllArticlesTabFragment extends Fragment implements
 
 
 
-}// end AllArticlesTabFragment
+}// end TechTabFragment

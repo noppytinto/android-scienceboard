@@ -22,8 +22,9 @@ import java.util.List;
 public class ArticleRepository {
     private final String TAG = this.getClass().getSimpleName();
     private static ArticleRepository singletonInstance;
-    private static List<ListItem> cachedArticles;
+    private static List<ListItem> cachedAllArticles;
     private RssParser rssParser;
+    private static List<ListItem> cachedTechArticles;
 
 
 
@@ -39,7 +40,7 @@ public class ArticleRepository {
     //----------------------------------------------------------- GETTER/SETTER
 
     // DOM strategy
-    public List<ListItem> getArticles(List<Source> givenSources, int limit, boolean forced, Context context) {
+    public List<ListItem> getAllArticles(List<Source> givenSources, int limit, boolean forced, Context context) {
         List<ListItem> result = null;
         if(givenSources==null || givenSources.size()<=0) return result;
 
@@ -47,7 +48,23 @@ public class ArticleRepository {
             result = downloadArticlesFromInternet(givenSources, limit, context);
         }
         else {
-            result = smartArticlesDownload(givenSources, limit, context);
+            result = smartAllArticlesDownload(givenSources, limit, context);
+        }
+
+        return result;
+    }// end getArticles()
+
+
+    // DOM strategy
+    public List<ListItem> getTechArticles(List<Source> givenSources, int limit, boolean forced, Context context) {
+        List<ListItem> result = null;
+        if(givenSources==null || givenSources.size()<=0) return result;
+
+        if(forced) {
+            result = downloadArticlesFromInternet(givenSources, limit, context);
+        }
+        else {
+            result = smartTechArticlesDownload(givenSources, limit, context);
         }
 
         return result;
@@ -61,18 +78,28 @@ public class ArticleRepository {
 
 
 
-
-
     //----------------------------------------------------------- PRIVATE METHODS
 
-    private List<ListItem> smartArticlesDownload(List<Source> givenSources, int limit, Context context) {
+    private List<ListItem> smartAllArticlesDownload(List<Source> givenSources, int limit, Context context) {
         List<ListItem> result;
-        if(cachedArticles==null) {
+        if(cachedAllArticles ==null) {
             result = downloadArticlesFromInternet(givenSources, limit, context);
-            cachedArticles = result;
+            cachedAllArticles = result;
         }
         else {
-            result = cachedArticles;
+            result = cachedAllArticles;
+        }
+        return result;
+    }
+
+    private List<ListItem> smartTechArticlesDownload(List<Source> givenSources, int limit, Context context) {
+        List<ListItem> result;
+        if(cachedTechArticles ==null) {
+            result = downloadArticlesFromInternet(givenSources, limit, context);
+            cachedTechArticles = result;
+        }
+        else {
+            result = cachedTechArticles;
         }
         return result;
     }

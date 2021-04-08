@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
 
     private void fetchSourcesFromRemoteDb() {
         sourceViewModel = new ViewModelProvider(this).get(SourceViewModel.class);
-        sourceViewModel.getObservableSources().observe(this, sources -> {
+        sourceViewModel.getObservableAllSources().observe(this, sources -> {
             if(sources!=null && sources.size()>0) {
                 showCenteredToast("sources fetched from remote DB");
             }
@@ -147,19 +147,6 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
         adProvider.initAdMob(this);
         adProvider.loadSomeAds(5, this);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     private void hideBottomBar() {
         if(bottomNavBar!=null)

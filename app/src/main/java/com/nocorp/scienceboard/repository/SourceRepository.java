@@ -61,11 +61,11 @@ public class SourceRepository {
         if( ! taskIsRunning) {
             taskIsRunning = true;
             if(cachedSources==null) {
-                loadSourcesBasicInfoFromRemoteDb();
+                loadSourcesFromRemoteDb();
             }
             else {
                 taskIsRunning = false;
-                listener.onSourcesFetchCompleted(cachedSources);
+                listener.onAllSourcesFetchCompleted(cachedSources);
             }
         }
     }
@@ -99,21 +99,32 @@ public class SourceRepository {
 
     //--------------------------------------------------------------------------- PRIVATE METHODS
 
-    private void loadSourcesBasicInfoFromRemoteDb() {
+    private void loadSourcesFromRemoteDb() {
         cachedSources = new ArrayList<>();
         db.collection(SOURCES_COLLECTION_NAME)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            Log.d(TAG, document.getId() + " => " + document.get(NAME));
-                            Log.d(TAG, document.getId() + " => " + document.get(WEBSITE_URL));
-                            Log.d(TAG, document.getId() + " => " + document.get(LANGUAGE));
-                            Log.d(TAG, document.getId() + " => " + document.get(RSS_URL));
-                            Log.d(TAG, document.getId() + " => " + document.get(CATEGORY));
-                            Log.d(TAG, document.getId() + " => " + document.get(ENABLED));
+//                            Log.d(TAG, document.getId() + " => " + document.get(NAME));
+//                            Log.d(TAG, document.getId() + " => " + document.get(WEBSITE_URL));
+//                            Log.d(TAG, document.getId() + " => " + document.get(LANGUAGE));
+//                            Log.d(TAG, document.getId() + " => " + document.get(RSS_URL));
+//                            Log.d(TAG, document.getId() + " => " + document.get(CATEGORY));
+//                            Log.d(TAG, document.getId() + " => " + document.get(ENABLED));
 
                             Boolean enabled = (Boolean) document.get(ENABLED);
+
+                            // testing code
+//                            String name = (String) document.get(NAME);
+//                            String testname = "lifehacker";
+//                            if(enabled!=null && enabled && name.equals(testname)) {
+//                                Source source = buildBasicSourceObject(document);
+//                                if(source!=null)  {
+//                                    cachedSources.add(source);
+//                                }
+//                            }
+
                             if(enabled!=null && enabled) {
                                 Source source = buildBasicSourceObject(document);
                                 if(source!=null)  {
@@ -124,10 +135,10 @@ public class SourceRepository {
 
                         Collections.shuffle(cachedSources); // randomize collection
                         taskIsRunning = false;
-                        listener.onSourcesFetchCompleted(cachedSources);
+                        listener.onAllSourcesFetchCompleted(cachedSources);
                     } else {
                         Log.w(TAG, "Error getting documents.", task.getException());
-                        listener.onSourcesFetchFailed("Error getting documents." + task.getException().getMessage());
+                        listener.onAllSourcesFetchFailed("Error getting documents." + task.getException().getMessage());
                     }
                 });
     }
@@ -149,6 +160,24 @@ public class SourceRepository {
 
         return source;
     }
+
+
+    public static List<Source> getAllSourcesOfThisCategory(List<Source> sources, String category) {
+        List<Source> result = null;
+        if(sources==null || sources.size()<=0) return result;
+        if(category==null || category.isEmpty()) return result;
+
+        result = new ArrayList<>();
+        for(Source currentSource: sources) {
+            if(sourcefallInThisCategory(currentSource, category)) {
+                result.add(currentSource);
+            }
+        }
+
+        return result;
+    }
+
+
 
     private static Source getTheFirstSourceFallingInThisCategory(List<Source> sources, String category) {
         Source result = null;

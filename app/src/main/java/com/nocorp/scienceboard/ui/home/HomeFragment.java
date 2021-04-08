@@ -60,29 +60,26 @@ public class HomeFragment extends Fragment{
         viewPager.setAdapter(viewPagerAdapter);
 
 
-        TabLayoutMediator tabLayoutMediator = new TabLayoutMediator(tabLayout, viewPager, new TabLayoutMediator.TabConfigurationStrategy() {
-            @Override
-            public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
-                switch (position) {
-                    case 0:
-                        tab.setText("ALL");
-                        break;
-                    case 1:
-                        tab.setText("Tech");
-                        break;
-                    case 2:
-                        tab.setText("Physics");
-                        break;
-                    case 3:
-                        tab.setText("Space");
-                        break;
-                    case 4:
-                        tab.setText("Biology");
-                        break;
-                    case 5:
-                        tab.setText("Medicine");
-                        break;
-                }
+        TabLayoutMediator tabLayoutMediator = new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
+            switch (position) {
+                case 0:
+                    tab.setText("ALL");
+                    break;
+                case 1:
+                    tab.setText("Tech");
+                    break;
+                case 2:
+                    tab.setText("Physics");
+                    break;
+                case 3:
+                    tab.setText("Space");
+                    break;
+                case 4:
+                    tab.setText("Biology");
+                    break;
+                case 5:
+                    tab.setText("Medicine");
+                    break;
             }
         });
         tabLayoutMediator.attach();

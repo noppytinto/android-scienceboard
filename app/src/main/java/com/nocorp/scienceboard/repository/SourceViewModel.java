@@ -1,6 +1,5 @@
 package com.nocorp.scienceboard.repository;
 
-import android.content.Context;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
@@ -14,15 +13,17 @@ import java.util.List;
 public class SourceViewModel extends ViewModel implements SourceRepositoryListener {
     private final String TAG = this.getClass().getSimpleName();
     private MutableLiveData<List<String>> rssUrls;
-    private MutableLiveData<List<Source>> sources;
+    private MutableLiveData<List<Source>> allSources;
     private SourceRepository sourceRepository;
+    private MutableLiveData<List<Source>> techSources;
 
 
     //------------------------------------------------------------ CONSTRUCTORS
 
     public SourceViewModel() {
         rssUrls = new MutableLiveData<>();
-        sources = new MutableLiveData<>();
+        allSources = new MutableLiveData<>();
+        techSources = new MutableLiveData<>();
         sourceRepository = new SourceRepository(this, new DomRssParser());
     }
 
@@ -34,17 +35,27 @@ public class SourceViewModel extends ViewModel implements SourceRepositoryListen
         return rssUrls;
     }
 
-    public LiveData<List<Source>> getObservableSources() {
-        return sources;
-    }
 
     public void setRssUrls(List<String> rssUrls) {
         this.rssUrls.postValue(rssUrls);
     }
 
-    public void setSources(List<Source> sources) {
-        this.sources.postValue(sources);
+    public LiveData<List<Source>> getObservableAllSources() {
+        return allSources;
     }
+
+    public void setAllSources(List<Source> allSources) {
+        this.allSources.postValue(allSources);
+    }
+
+    public LiveData<List<Source>> getObservableTechSources() {
+        return techSources;
+    }
+
+    public void setTechSources(List<Source> allSources) {
+        this.techSources.postValue(allSources);
+    }
+
 
 
 
@@ -52,24 +63,24 @@ public class SourceViewModel extends ViewModel implements SourceRepositoryListen
 
     //------------------------------------------------------------ METHODS
 
-
-    @Override
-    public void onSourcesFetchCompleted(List<Source> sources) {
+    public void onAllSourcesFetchCompleted(List<Source> sources) {
         if(sources != null && sources.size()>0) {
-            setSources(sources);
-            Log.d(TAG, "SCIENCE_BOARD - onSourcesFetchCompleted: sources fetched from remote db");
+            setAllSources(sources);
+            Log.d(TAG, "SCIENCE_BOARD - onAllSourcesFetchCompleted: sources fetched from remote db");
         }
         else {
-            setSources(null);
-            Log.d(TAG, "SCIENCE_BOARD - onSourcesFetchCompleted: sources list is empty");
+            setAllSources(null);
+            Log.d(TAG, "SCIENCE_BOARD - onAllSourcesFetchCompleted: sources list is empty");
         }
     }
 
     @Override
-    public void onSourcesFetchFailed(String cause) {
-        setSources(null);
-        Log.d(TAG, "SCIENCE_BOARD - onSourcesFetchFailed: sources fetching failed" + cause);
+    public void onAllSourcesFetchFailed(String cause) {
+        setAllSources(null);
+        Log.d(TAG, "SCIENCE_BOARD - onAllSourcesFetchFailed: sources fetching failed" + cause);
     }
+
+
 
 
     public void loadSourcesFromRemoteDb() {
@@ -77,6 +88,27 @@ public class SourceViewModel extends ViewModel implements SourceRepositoryListen
     }
 
 
+
+
+
+
+    @Override
+    public void onTechSourcesFetchCompleted(List<Source> sources) {
+        if(sources != null && sources.size()>0) {
+            setAllSources(sources);
+            Log.d(TAG, "SCIENCE_BOARD - onTechSourcesFetchCompleted: sources fetched from remote db");
+        }
+        else {
+            setAllSources(null);
+            Log.d(TAG, "SCIENCE_BOARD - onTechSourcesFetchCompleted: sources list is empty");
+        }
+    }
+
+    @Override
+    public void onTechSourcesFetchFailed(String cause) {
+        setAllSources(null);
+        Log.d(TAG, "SCIENCE_BOARD - onTechSourcesFetchFailed: sources fetching failed" + cause);
+    }
 
 
 }// end SourceViewModel
