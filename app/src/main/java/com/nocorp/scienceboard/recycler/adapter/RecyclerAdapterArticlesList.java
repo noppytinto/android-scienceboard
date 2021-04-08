@@ -22,6 +22,9 @@ import com.bumptech.glide.request.target.Target;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.model.Article;
+import com.nocorp.scienceboard.model.BookmarkedArticle;
+import com.nocorp.scienceboard.model.VisitedArticle;
+import com.nocorp.scienceboard.ui.viewholder.HistoryViewHolder;
 import com.nocorp.scienceboard.utility.ad.admob.model.ListAd;
 import com.nocorp.scienceboard.ui.viewholder.ArticleViewHolder;
 import com.nocorp.scienceboard.ui.viewholder.ListAdViewHolder;
@@ -73,6 +76,8 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
                 return ARTICLE_TYPE;
             case LIST_AD:
                 return LIST_AD_TYPE;
+            case VISITED_ARTICLE:
+                return VISITED_ARTICLE_TYPE;
             case BOOKMARKED_ARTICLE:
                 return BOOKMARKED_ARTICLE_TYPE;
             default:
@@ -94,6 +99,10 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
             return new ListAdViewHolder(view);
         }
         else if(viewType == VISITED_ARTICLE_TYPE) {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_history_viewholder, parent, false);
+            return new HistoryViewHolder(view, listener);
+        }
+        else if(viewType == BOOKMARKED_ARTICLE_TYPE) {
             //TODO create visited article view holder
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_article_viewholder, parent, false);
             return new ArticleViewHolder(view, listener);
@@ -118,13 +127,18 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
             buildListAdItem((ListAdViewHolder) holder, listAd);
         }
         else if(getItemViewType(position) == VISITED_ARTICLE_TYPE) {
-            //TODO create visited article view holder
-            ListAd listAd = (ListAd) recyclerList.get(position);
+            VisitedArticle article = (VisitedArticle) recyclerList.get(position);
 
             //
-            buildListAdItem((ListAdViewHolder) holder, listAd);
+            buildHistoryItem((HistoryViewHolder) holder, article);
         }
+        else if(getItemViewType(position) == BOOKMARKED_ARTICLE_TYPE) {
+            //TODO create BookmarkedArticle view holder
+            BookmarkedArticle article = (BookmarkedArticle) recyclerList.get(position);
 
+            //
+            buildArticleItem((ArticleViewHolder) holder, article);
+        }
 
     }
 
@@ -202,6 +216,50 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
 
         holder.pubDate.setText(readablePubDate);
     }
+
+    private void buildHistoryItem(HistoryViewHolder holder, Article item) {
+        String thumbnailUrl = item.getThumbnailUrl();
+        String readablePubDate = buildPubDate(item);
+        String title = item.getTitle();
+
+        if(thumbnailUrl==null) {
+            holder.hideCardView();
+        }
+        else {
+            holder.showCardView();
+            try {
+                // TODO: crahses on andorid 21 (resource "thumbnail" not found)
+                RequestOptions gildeOptions = new RequestOptions()
+                        .fallback(R.drawable.broken_image)
+                        .placeholder(R.drawable.placeholder_image)
+                        .fitCenter();
+
+                Glide.with(holder.itemView.getContext())
+                        .load(thumbnailUrl)
+                        .apply(gildeOptions)
+                        .thumbnail(/*sizeMultiplier = 0.25% less than original*/ 0.25f)
+                        .transition(withCrossFade())
+                        .into(holder.thumbnail);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.d(TAG, "SCIENCE_BOARD - buildHistoryItem: cannot set thumbnail in recycler " + e.getMessage());
+            }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            holder.title.setText(Html.fromHtml(title, Html.FROM_HTML_MODE_COMPACT));
+        } else {
+            holder.title.setText(Html.fromHtml(title));
+        }
+
+        //
+        String sourceName = item.getSourceName();
+        if(sourceName != null) readablePubDate = sourceName + " / " + readablePubDate;
+
+        holder.pubDate.setText(readablePubDate);
+    }
+
 
     private void buildListAdItem(ListAdViewHolder holder, ListAd item) {
         NativeAd nativeAd = item.getAd();

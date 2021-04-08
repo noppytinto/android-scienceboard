@@ -61,14 +61,9 @@ public class HistoryFragment extends Fragment implements
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        progressIndicator = binding.progressIndicatorHistoryFragment;
-        swipeRefreshLayout = binding.swipeRefreshHistoryFragment;
-        swipeRefreshLayout.setColorSchemeResources(R.color.orange_light);
-        historyViewModel = new ViewModelProvider(this).get(HistoryViewModel.class);
-        initRecycleView();
-        setupSwipeDownToRefresh();
-
+        initView();
     }
+
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -84,7 +79,7 @@ public class HistoryFragment extends Fragment implements
                 swipeRefreshLayout.setRefreshing(false);
                 progressIndicator.setVisibility(View.GONE);
                 recyclerAdapterArticlesList.loadNewData(articles);
-                showCenteredToast("history fetched");
+                showCenteredToast(getString(R.string.string_history_fetched));
             }
         });
 
@@ -99,7 +94,18 @@ public class HistoryFragment extends Fragment implements
 
 
 
+
+
     //--------------------------------------------------------------------- My METHODS
+
+    private void initView() {
+        progressIndicator = binding.progressIndicatorHistoryFragment;
+        swipeRefreshLayout = binding.swipeRefreshHistoryFragment;
+        swipeRefreshLayout.setColorSchemeResources(R.color.orange_light);
+        historyViewModel = new ViewModelProvider(this).get(HistoryViewModel.class);
+        initRecycleView();
+        setupSwipeDownToRefresh();
+    }
 
 
     private void initRecycleView() {

@@ -17,6 +17,7 @@ public class VisitedArticle extends Article {
 
 
     public VisitedArticle() {
+        setItemType(MyValues.ItemType.VISITED_ARTICLE);
     }
 
     public VisitedArticle(Article article) {

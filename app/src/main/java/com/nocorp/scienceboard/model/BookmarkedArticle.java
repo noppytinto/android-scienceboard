@@ -16,6 +16,7 @@ public class BookmarkedArticle extends Article {
 
 
     public BookmarkedArticle() {
+        setItemType(MyValues.ItemType.BOOKMARKED_ARTICLE);
     }
 
     public BookmarkedArticle(Article article) {

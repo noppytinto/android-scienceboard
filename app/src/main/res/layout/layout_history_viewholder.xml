@@ -8,19 +8,19 @@
     android:background="@color/light_gray">
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/cardView_articleViewholder_thumbnail"
+        android:id="@+id/cardView_historyViewHolder_thumbnail"
         android:layout_width="0dp"
-        android:layout_height="100dp"
+        android:layout_height="70dp"
         android:layout_marginStart="8dp"
         app:cardCornerRadius="3dp"
         app:cardElevation="0dp"
         app:layout_constraintDimensionRatio="w,16:10"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/cardView_articleViewholder_title"
-        app:layout_constraintWidth_min="150dp">
+        app:layout_constraintTop_toTopOf="@+id/cardView_historyViewHolder_title"
+        app:layout_constraintWidth_min="100dp">
 
         <ImageView
-            android:id="@+id/imageView_articleViewholder_thumbnail"
+            android:id="@+id/imageView_historyViewHolder_thumbnail"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
@@ -29,7 +29,7 @@
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/cardView_articleViewholder_title"
+        android:id="@+id/cardView_historyViewHolder_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -41,17 +41,17 @@
         app:cardElevation="@dimen/default_elevation"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_min="100dp"
-        app:layout_constraintStart_toEndOf="@+id/cardView_articleViewholder_thumbnail"
+        app:layout_constraintHeight_min="70dp"
+        app:layout_constraintStart_toEndOf="@+id/cardView_historyViewHolder_thumbnail"
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:background="@color/white">
 
             <TextView
-                android:id="@+id/textView_articleViewholder_title"
+                android:id="@+id/textView_historyViewHolder_title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
@@ -70,10 +70,10 @@
                 tools:text="Is my phone compatible with Boost Mobile?" />
 
             <TextView
-                android:id="@+id/textView_articleViewholder_info"
+                android:id="@+id/textView_historyViewHolder_info"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="8dp"
                 android:text="@string/test"
@@ -81,21 +81,9 @@
                 android:textSize="12sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView_articleViewholder_title"
-                app:layout_constraintVertical_bias="1.0"
+                app:layout_constraintTop_toBottomOf="@+id/textView_historyViewHolder_title"
                 tools:text="Physics / 1h" />
 
-            <!-- TODO -->
-            <ImageView
-                android:id="@+id/imageView_articleViewholder_markedAsRead"
-                android:layout_width="15dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:visibility="invisible"
-                app:layout_constraintBottom_toBottomOf="@+id/textView_articleViewholder_info"
-                app:layout_constraintEnd_toStartOf="@+id/textView_articleViewholder_info"
-                app:layout_constraintTop_toTopOf="@+id/textView_articleViewholder_info"
-                app:srcCompat="@drawable/ic_outlined_eye_gray" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.cardview.widget.CardView>
