@@ -26,6 +26,8 @@ public class WebviewViewModel extends AndroidViewModel {
     private MutableLiveData<Boolean> markAsVisitedResponse;
     private MutableLiveData<Boolean> bookmarkDuplicationResponse;
     private static boolean addingToBookmarksTaskIsRunning;
+    private MutableLiveData<Boolean> removedFromBookmarksResponse;
+    private static boolean removeFromBookmarksTaskIsRunning;
 
 
 
@@ -38,6 +40,7 @@ public class WebviewViewModel extends AndroidViewModel {
         addToBookmarksResponse = new MutableLiveData<>();
         markAsVisitedResponse = new MutableLiveData<>();
         bookmarkDuplicationResponse = new MutableLiveData<>();
+        removedFromBookmarksResponse = new MutableLiveData<>();
 
     }
 
@@ -53,6 +56,14 @@ public class WebviewViewModel extends AndroidViewModel {
 
     public void setAddToBookmarksResponse(boolean response) {
         this.addToBookmarksResponse.postValue(response);
+    }
+
+    public LiveData<Boolean> getObservableRemovedFromBookmarksResponse() {
+        return removedFromBookmarksResponse;
+    }
+
+    public void setRemovedFromBookmarksResponse(boolean response) {
+        this.removedFromBookmarksResponse.postValue(response);
     }
 
     public LiveData<Boolean> getObservableMarkAsVisitedResponse() {
@@ -97,8 +108,7 @@ public class WebviewViewModel extends AndroidViewModel {
         }
     }
 
-
-    public void saveInBookmarks(@NotNull Article givenArticle) {
+    public void addToBookmarks(@NotNull Article givenArticle) {
         BookmarkDao dao = getBookmarkDao(getApplication());
 
         Runnable task = () -> {
@@ -114,7 +124,7 @@ public class WebviewViewModel extends AndroidViewModel {
                 setAddToBookmarksResponse(true);
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.d(TAG, "saveInBookmarks: cannot insert in bookmarks " + e.getMessage());
+                Log.d(TAG, "SCEINCE_BOARD - addToBookmarks: cannot insert in bookmarks " + e.getMessage());
                 setAddToBookmarksResponse(false);
             }
             addingToBookmarksTaskIsRunning = false;
@@ -131,6 +141,36 @@ public class WebviewViewModel extends AndroidViewModel {
         }
 
     }
+
+    public void removeFromBookmarks(@NotNull String articleId) {
+        BookmarkDao dao = getBookmarkDao(getApplication());
+
+        Runnable task = () -> {
+            // TODO null checks
+            try {
+                removeFromBookmarksTaskIsRunning = true;
+                dao.delete(articleId);
+                setRemovedFromBookmarksResponse(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.d(TAG, "SCEINCE_BOARD - removeFromBookmarks: cannot remove from bookmarks " + e.getMessage());
+                setRemovedFromBookmarksResponse(false);
+            }
+            removeFromBookmarksTaskIsRunning = false;
+        };
+
+        if( ! removeFromBookmarksTaskIsRunning) {
+            ThreadManager t = ThreadManager.getInstance();
+            try {
+                t.runTask(task);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.d(TAG, "SCIENCE_BOARD - removeFromBookmarks: cannot start thread " + e.getMessage());
+                setRemovedFromBookmarksResponse(false);
+            }
+        }
+    }
+
 
     private BookmarkDao getBookmarkDao(Context context) {
         ScienceBoardRoomDatabase roomDatabase = ScienceBoardRoomDatabase.getInstance(context);

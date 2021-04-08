@@ -24,7 +24,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -185,9 +184,107 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         });
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        viewBinding = null;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        if(snackbar!=null) snackbar.dismiss();
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        if(item.getItemId() == R.id.option_webviewMenu_stop) {
+            stopPageLoadingAction();
+            return true;
+        }
+        else if(item.getItemId() == R.id.option_webviewMenu_refresh) {
+            refreshPageAction();
+            return true;
+        }
+        else if(item.getItemId() == R.id.option_webviewMenu_bookmark) {
+            if(articleAlreadyInBookmarks) {
+                removeFromBookmarksAction(currentArticle.getIdentifier());
+            }
+            else {
+                addToBookmarksAction(currentArticle);
+            }
+            return true;
+        }
+        else if(item.getItemId() == R.id.option_webviewMenu_share) {
+            shareTextAction(webpageUrl);
+            return true;
+        }
+        else if(item.getItemId() == R.id.option_webviewMenu_increaseTextSize) {
+            increaseTextSizeAction();
+            return true;
+        }
+        else if(item.getItemId() == R.id.option_webviewMenu_decreaseTextSize) {
+            decreaseTextSizeAction();
+            return true;
+        }
+        else if(item.getItemId() == R.id.option_webviewMenu_defaultTextSize) {
+            setDefaultTextSizeAction();
+            return true;
+        }
+        else if(item.getItemId() == R.id.option_webviewMenu_delete) {
+            deleteBrowsingDataAction();
+            return true;
+        }
+        return false;
+    }
+
+    private void deleteBrowsingDataAction() {
+        WebStorage.getInstance().deleteAllData();
+        showBottomToast(getString(R.string.string_browsing_data_deleted));
+    }
+
+    private void stopPageLoadingAction() {
+        if(snackbar!=null) snackbar.dismiss();
+        webViewMain.stopLoading();
+        showBottomToast(getString(R.string.string_page_load_stopped));
+    }
+
+    private void refreshPageAction() {
+        if(snackbar!=null) snackbar.dismiss();
+        webViewMain.loadUrl(webpageUrl);
+        showBottomToast(getString(R.string.string_refreshing_page));
+    }
+
+    private void addToBookmarksAction(Article article) {
+        webviewViewModel.getObservableAddToBookmarksResponse().observe(getViewLifecycleOwner(), addedToBookmarks -> {
+            if(addedToBookmarks) {
+                showCenteredToast("saved in bookmarks");
+                changeBookmarkIcon();
+                articleAlreadyInBookmarks = true;
+            }
+            else {
+                // TODO: fail message
+            }
+        });
+        webviewViewModel.addToBookmarks(article);
+    }
+
+    private void removeFromBookmarksAction(String articleId) {
+        webviewViewModel.getObservableRemovedFromBookmarksResponse().observe(getViewLifecycleOwner(), removedFromBookmarks -> {
+            if(removedFromBookmarks) {
+                showCenteredToast("removed from bookmarks");
+                restoreBookmarkIcon();
+                articleAlreadyInBookmarks = false;
+            }
+            else {
+                // TODO: fail message
+            }
+        });
+        webviewViewModel.removeFromBookmarks(articleId);
+    }
 
 
-
+    //------------------------------------------------------------------------------------ METHODS
 
     private void applyBrowsingRecommendedSettingsBottomSheet(WebView webView) {
         webSettingsBottomSheet = webView.getSettings();
@@ -237,97 +334,6 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         });
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        viewBinding = null;
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        if(snackbar!=null) snackbar.dismiss();
-    }
-
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        if(item.getItemId() == R.id.option_webviewMenu_stop) {
-            if(snackbar!=null) snackbar.dismiss();
-            webViewMain.stopLoading();
-            showBottomToast(getString(R.string.string_page_load_stopped));
-            return true;
-        }
-        else if(item.getItemId() == R.id.option_webviewMenu_refresh) {
-            if(snackbar!=null) snackbar.dismiss();
-            webViewMain.loadUrl(webpageUrl);
-            showBottomToast(getString(R.string.string_refreshing_page));
-            return true;
-        }
-        else if(item.getItemId() == R.id.option_webviewMenu_bookmark) {
-            if( ! articleAlreadyInBookmarks) {
-                webviewViewModel.getObservableAddToBookmarksResponse().observe(getViewLifecycleOwner(), addedToBookmarks -> {
-                    if(addedToBookmarks) {
-                        showCenteredToast("saved in bookmarks");
-                        changeBookmarkIcon();
-                    }
-                    else {
-                        // TODO: fail message
-                    }
-                });
-                webviewViewModel.saveInBookmarks(currentArticle);
-            }
-            return true;
-        }
-        else if(item.getItemId() == R.id.option_webviewMenu_share) {
-            shareText(webpageUrl);
-            return true;
-        }
-        else if(item.getItemId() == R.id.option_webviewMenu_increaseTextSize) {
-            increaseTextSize();
-            return true;
-        }
-        else if(item.getItemId() == R.id.option_webviewMenu_decreaseTextSize) {
-            decreaseTextSize();
-            return true;
-        }
-        else if(item.getItemId() == R.id.option_webviewMenu_defaultTextSize) {
-            setDefaultTextSize();
-            return true;
-        }
-        else if(item.getItemId() == R.id.option_webviewMenu_delete) {
-            WebStorage.getInstance().deleteAllData();
-            showBottomToast(getString(R.string.string_browsing_data_deleted));
-            return true;
-        }
-        return false;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-    //------------------------------------------------------------------------------------ METHODS
-
     private void checkIfAlreadyInBookmarks() {
         webviewViewModel.getObservableBookmarkDuplicationResponse().observe(getViewLifecycleOwner(), alreadyInBookmarks -> {
             if(alreadyInBookmarks) {
@@ -339,7 +345,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         webviewViewModel.checkIsInBookmarks(currentArticle);
     }
 
-    private void shareText(String message) {
+    private void shareTextAction(String message) {
         try {
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.setType("text/plain");
@@ -351,21 +357,21 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         }
     }
 
-    private void increaseTextSize() {
+    private void increaseTextSizeAction() {
         if(currentTextSize <= UPPER_TEXT_SIZE_LIMIT) {
             currentTextSize = currentTextSize + TEXT_SIZE_STEP;
             webSettingsMain.setTextZoom(currentTextSize);// where 90 is 90%; default value is ... 100
         }
     }
 
-    private void decreaseTextSize() {
+    private void decreaseTextSizeAction() {
         if(currentTextSize >= LOWER_TEXT_SIZE_LIMIT){
             currentTextSize = currentTextSize - TEXT_SIZE_STEP;
             webSettingsMain.setTextZoom(currentTextSize);
         }
     }
 
-    private void setDefaultTextSize() {
+    private void setDefaultTextSizeAction() {
         currentTextSize = DEFAULT_TEXT_SIZE;
         webSettingsMain.setTextZoom(currentTextSize);
     }
@@ -399,7 +405,6 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private void ignoreBackButton(WebView webView) {
         webView.setOnKeyListener(null);
     }
-
 
     private void applyBrowsingRecommendedSettingsMain(WebView webView) {
         webSettingsMain = webView.getSettings();
@@ -486,13 +491,13 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 
     private void showBottomToast(String message) {
         if(toast!=null) toast.cancel();
-        toast = Toast.makeText(requireContext(),message, Toast.LENGTH_LONG);
+        toast = Toast.makeText(requireContext(),message, Toast.LENGTH_SHORT);
         toast.show();
     }
 
     private void showCenteredToast(String message) {
         if(toast!=null) toast.cancel();
-        toast = Toast.makeText(requireContext(),message, Toast.LENGTH_LONG);
+        toast = Toast.makeText(requireContext(),message, Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.CENTER, 0, 0);
         toast.show();
     }
@@ -509,7 +514,13 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 
     private void changeBookmarkIcon() {
         if(bookmarkMenuItem !=null)
-            bookmarkMenuItem.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_bookmark_added_white, null));
+            bookmarkMenuItem.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_bookmark_added_orange, null));
     }
+
+    private void restoreBookmarkIcon() {
+        if(bookmarkMenuItem !=null)
+            bookmarkMenuItem.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_bookmark_outlined, null));
+    }
+
 
 }// end WebviewFragment

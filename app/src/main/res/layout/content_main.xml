@@ -24,10 +24,10 @@
         android:background="@drawable/shape_bottom_navbar"
         app:itemIconTint="@color/bottom_nav_state_colors"
         app:itemTextColor="@color/bottom_nav_state_colors"
-        app:labelVisibilityMode="unlabeled"
+        app:labelVisibilityMode="selected"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:menu="@menu/bottom_nav_menu" />
+        app:menu="@menu/menu_bottom_nav" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

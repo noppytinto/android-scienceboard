@@ -17,6 +17,9 @@ public interface BookmarkDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insert(BookmarkedArticle article);
 
+    @Query("DELETE FROM bookmarkedarticle WHERE identifier = :givenIdentifier")
+    void delete(String givenIdentifier);
+
     @Query("SELECT 1 FROM bookmarkedarticle WHERE identifier = :givenIdentifier")
     boolean checkDuplication(String givenIdentifier);
 }

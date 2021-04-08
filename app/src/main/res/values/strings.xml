@@ -20,4 +20,7 @@
     <string name="string_close">close</string>
     <string name="string_search">search</string>
     <string name="string_google_search_website">https://www.google.com</string>
+    <string name="explore">Explore</string>
+    <string name="bookmarks">Bookmarks</string>
+    <string name="history">History</string>
 </resources>
