@@ -42,5 +42,5 @@
         android:id="@+id/allArticlesTabFragment"
         android:name="com.nocorp.scienceboard.ui.tabs.alltab.AllTabFragment"
         android:label="all_articles_tab_fragment"
-        tools:layout="@layout/all_articles_tab_fragment" />
+        tools:layout="@layout/fragment_all_tab" />
 </navigation>

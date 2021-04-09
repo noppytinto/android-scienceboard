@@ -6,7 +6,8 @@ public class MyValues {
         ARTICLE,
         LIST_AD,
         VISITED_ARTICLE,
-        BOOKMARKED_ARTICLE
+        BOOKMARKED_ARTICLE,
+        PROGRESS_INDICATOR
     }
 
     public enum SourceCategory {

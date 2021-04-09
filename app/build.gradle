@@ -52,7 +52,8 @@ android {
         main.res.srcDirs += [
                 'src/main/java/com/nocorp/scienceboard/res',
                 'src/main/java/com/nocorp/scienceboard/ui/viewholder/res',
-                'src/main/java/com/nocorp/scienceboard/ui/webview/res'
+                'src/main/java/com/nocorp/scienceboard/ui/webview/res',
+                'src/main/java/com/nocorp/scienceboard/recycler/viewholder/res'
 
         ]
     }
@@ -166,7 +167,6 @@ dependencies {
     // TODO: implement this in it's own dedicated server
     // https://mvnrepository.com/artifact/edu.stanford.nlp/stanford-corenlp
 //    implementation group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '4.2.0'
-
-
+//    implementation 'edu.stanford.nlp:stanford-corenlp:4.2.0:models'
 
 }

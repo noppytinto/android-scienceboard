@@ -24,6 +24,7 @@ import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.BookmarkedArticle;
 import com.nocorp.scienceboard.model.VisitedArticle;
+import com.nocorp.scienceboard.recycler.viewholder.LoadingViewHolder;
 import com.nocorp.scienceboard.ui.viewholder.HistoryViewHolder;
 import com.nocorp.scienceboard.utility.ad.admob.model.ListAd;
 import com.nocorp.scienceboard.ui.viewholder.ArticleViewHolder;
@@ -45,6 +46,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
     private List<ListItem> recyclerList;
     private OnArticleClickedListener listener;
 
+    private static final int PROGRESS_INDICATOR_TYPE = 0;
     private static final int ARTICLE_TYPE = 1;
     private static final int LIST_AD_TYPE = 2;
     private static final int VISITED_ARTICLE_TYPE = 3;
@@ -72,6 +74,8 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
     public int getItemViewType(int position) {
         MyValues.ItemType type = recyclerList.get(position).getItemType();
         switch (type) {
+            case PROGRESS_INDICATOR:
+                return PROGRESS_INDICATOR_TYPE;
             case ARTICLE:
                 return ARTICLE_TYPE;
             case LIST_AD:
@@ -90,6 +94,10 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = null;
 
+        if(viewType == PROGRESS_INDICATOR_TYPE) {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layour_loading_viewholder, parent, false);
+            return new LoadingViewHolder(view);
+        }
         if(viewType == ARTICLE_TYPE) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_article_viewholder, parent, false);
             return new ArticleViewHolder(view, listener);
@@ -114,6 +122,12 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        if(getItemViewType(position) == PROGRESS_INDICATOR_TYPE) {
+//            Article article = (Article) recyclerList.get(position);
+//
+//            //
+//            buildArticleItem((ArticleViewHolder) holder, article);
+        }
         if(getItemViewType(position) == ARTICLE_TYPE) {
             Article article = (Article) recyclerList.get(position);
 
