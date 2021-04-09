@@ -148,7 +148,7 @@ public class TechTabFragment extends Fragment implements
     }
 
     private void refreshAction() {
-        techTabViewModel.downloadArticles(sources, 20, true);
+        techTabViewModel.downloadArticles(sources, NUM_ARTICLES_FOR_EACH_SOURCE, true);
     }
 
     @Override

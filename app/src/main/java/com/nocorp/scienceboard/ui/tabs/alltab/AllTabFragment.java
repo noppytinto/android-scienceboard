@@ -148,7 +148,7 @@ public class AllTabFragment extends Fragment implements
 
 
     private void refreshAction() {
-        allTabViewModel.downloadArticles(sources, 20, true);
+        allTabViewModel.downloadArticles(sources, NUM_ARTICLES_FOR_EACH_SOURCE, true);
     }
 
 
