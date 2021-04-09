@@ -70,6 +70,9 @@ public class TechTabViewModel extends AndroidViewModel {
                 if(targetSources==null || targetSources.size()<=0) {
                     targetSources = SourceRepository.getAllSourcesOfThisCategory(givenSources, TECH_CATEGORY);// TODO this should not be static
                 }
+
+
+
                 List<ListItem> articles = articleRepository.getTechArticles(targetSources, limit, forced, getApplication());
 
                 taskIsRunning = false;

@@ -14,6 +14,7 @@ import com.nocorp.scienceboard.utility.room.SourceDao;
 import com.nocorp.scienceboard.utility.rss.RssParser;
 
 import org.jetbrains.annotations.NotNull;
+import org.w3c.dom.Node;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,6 +26,7 @@ public class ArticleRepository {
     private static List<ListItem> cachedAllArticles;
     private RssParser rssParser;
     private static List<ListItem> cachedTechArticles;
+    private SourceRepository sourceRepository;
 
 
 
@@ -32,6 +34,7 @@ public class ArticleRepository {
 
     public ArticleRepository(RssParser rssParser) {
         this.rssParser = rssParser;
+        sourceRepository = new SourceRepository(rssParser);
     }
 
 
@@ -40,15 +43,15 @@ public class ArticleRepository {
     //----------------------------------------------------------- GETTER/SETTER
 
     // DOM strategy
-    public List<ListItem> getAllArticles(List<Source> givenSources, int limit, boolean forced, Context context) {
+    public List<ListItem> getArticles(List<Source> givenSources, int numArticlesForEachSource, boolean forced, Context context) {
         List<ListItem> result = null;
         if(givenSources==null || givenSources.size()<=0) return result;
 
         if(forced) {
-            result = downloadArticlesFromInternet(givenSources, limit, context);
+            result = downloadArticlesFromInternet(givenSources, numArticlesForEachSource, context);
         }
         else {
-            result = smartAllArticlesDownload(givenSources, limit, context);
+            result = smartAllArticlesDownload(givenSources, numArticlesForEachSource, context);
         }
 
         return result;
@@ -108,40 +111,28 @@ public class ArticleRepository {
      * TODO implemente real download limit
      * since this is a fake limit, because alla rticles are always downloaded regardless
      */
-    private List<ListItem> downloadArticlesFromInternet(List<Source> givenSources, int limit, Context context) {
+    private List<ListItem> downloadArticlesFromInternet(List<Source> givenSources, int numArticlesForEachSource, Context context) {
         List<ListItem> result = null;
         if(givenSources==null || givenSources.size()<=0) return result;
         int counter = 0;
 
-        // download articles
+        // download source data
         for(Source currentSource: givenSources) {
-            currentSource = downloadAdditionalSourceData(currentSource);// TODO the real download limit is defined inside domXmlParser
+            currentSource = sourceRepository.downloadAdditionalSourceData(currentSource, context);// TODO the real download limit is defined inside domXmlParser
         }
 
-        //
-        List<Article> fullArticlesList = combineArticles(givenSources);
-        if(fullArticlesList==null || fullArticlesList.size()<=0) return result;
-
-        //
-        saveArticlesInRoom(fullArticlesList, context);
-
-        try {
-            // sort articles by publication date
-            Collections.sort(fullArticlesList);
-            result = new ArrayList<>();
-            if (fullArticlesList!=null && fullArticlesList.size()>=0) {
-                for(Article currentArticle : fullArticlesList) {
-                    if(counter == limit) break;
-                    result.add(currentArticle);
-                    counter++;
+        // extract articles from xml code
+        result = new ArrayList<>();
+        for(int i=0; i<givenSources.size(); i++) {
+            Source currentSource = givenSources.get(i);
+            if(currentSource!=null){
+                List<Article> tempResult = rssParser.extractArticles(currentSource, numArticlesForEachSource);
+                if(tempResult!=null && tempResult.size()>0) {
+                    saveArticlesInRoom(tempResult, context);
+                    for(Article tempArticle: tempResult)
+                        result.add((ListItem) tempArticle);
                 }
             }
-
-            // publish result
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.d(TAG, "SCIENCE_BOARD - getArticles: an error occurred when downloading Articles" + e.getMessage());
         }
 
         return result;
@@ -163,15 +154,7 @@ public class ArticleRepository {
         return result;
     }
 
-    /**
-     * download entries and lastUpdate
-     */
-    public Source downloadAdditionalSourceData(Source givenSource) {
-        Source result = givenSource;
-        if(givenSource==null) return result;
-        result = rssParser.updateSource(givenSource);
-        return result;
-    }
+
 
 
     private void saveArticlesInRoom(@NotNull List<Article> articles, Context context) {

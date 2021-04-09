@@ -46,6 +46,7 @@ public class TechTabFragment extends Fragment implements
     private Toast toast;
     private SourceViewModel sourceViewModel;
     private List<Source> sources;
+    private final int NUM_ARTICLES_FOR_EACH_SOURCE = 2;
 
 
 
@@ -88,7 +89,7 @@ public class TechTabFragment extends Fragment implements
             if(sources!=null && sources.size()>0) {
                 // TODO
                 this.sources = sources;
-                techTabViewModel.downloadArticles(sources, 20, false);
+                techTabViewModel.downloadArticles(sources, NUM_ARTICLES_FOR_EACH_SOURCE, false);
             }
         });
 

@@ -15,10 +15,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -91,7 +93,7 @@ public class DomRssParser implements RssParser {
     //-------------------------------------------------------------- PUBLIC METHODS
 
     /**
-     * download articles and last update date
+     * download last update date and xml code
      */
     @Override
     public Source updateSource(Source givenSource) {
@@ -116,7 +118,8 @@ public class DomRssParser implements RssParser {
                 try (ResponseBody responseBody = response.body()) {
                     if(responseBody!=null) {
                         inputStream = responseBody.byteStream();
-
+                        String xmlCode = inputStreamToString(inputStream);
+                        result.setXmlCode(xmlCode);
                         Document doc = buildDocument(inputStream);
                         List<String> knownChannelTags = new ArrayList<>();
                         knownChannelTags.add(CHANNEL_TAG);
@@ -127,7 +130,7 @@ public class DomRssParser implements RssParser {
                             if(candidatesChannels!=null || candidatesChannels.getLength()>0) {
                                 Node candidateChannel = candidatesChannels.item(0);
                                 if(candidateChannel!=null && isElementNode(candidateChannel)){
-                                    result = downloadAdditionalSourceData(givenSource, candidatesChannels.item(0));
+                                    result = getAdditionalSourceData(givenSource, candidatesChannels.item(0));
                                     break;
                                 }
                             }
@@ -137,7 +140,7 @@ public class DomRssParser implements RssParser {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Log.d(TAG, "SCIENCE_BOARD - downloadAdditionalSourceData: cannot download additional source data " + e.getMessage());
+            Log.d(TAG, "SCIENCE_BOARD - updateSource: cannot download additional source data " + e.getMessage());
         } finally {
             if (response != null) {
                 response.close();
@@ -146,6 +149,104 @@ public class DomRssParser implements RssParser {
 
         return result;
     }
+
+    @Override
+    public List<Article> extractArticles(Source givenSource, int limit) {
+        List<Article> result = null;
+        if(givenSource==null) return result;
+        String xmlCode = givenSource.getXmlCode();
+        if(xmlCode==null || xmlCode.isEmpty()) return result;
+
+        InputStream inputStream = stringToInputStream(xmlCode);
+
+        if(inputStream!=null) {
+            try {
+                Document doc = buildDocument(inputStream);
+                List<String> knownChannelTags = new ArrayList<>();
+                knownChannelTags.add(CHANNEL_TAG);
+                knownChannelTags.add(FEED_TAG);
+
+                for(String candidateChannelTagName: knownChannelTags) {
+                    NodeList candidatesChannels = doc.getElementsByTagName(candidateChannelTagName);
+                    if(candidatesChannels!=null || candidatesChannels.getLength()>0) {
+                        Node candidateChannel = candidatesChannels.item(0);
+                        if(candidateChannel!=null && isElementNode(candidateChannel)){
+                            result = getArticles(candidatesChannels.item(0), limit, givenSource);
+                            break;
+                        }
+                    }
+                }
+            } catch (ParserConfigurationException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (SAXException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return result;
+    }
+
+
+//    /**
+//     * download articles and last update date
+//     */
+//    @Override
+//    public Source updateSource(Source givenSource) {
+//        Source result = givenSource;
+//        if(givenSource==null) return result;
+//        String rssUrl = givenSource.getRssUrl();
+//        if(rssUrl==null || rssUrl.isEmpty()) return result;
+//
+//        InputStream inputStream = null;
+//        Response response = null;
+//        try {
+//            final OkHttpClient httpClient = MyOkHttpClient.getClient();
+//            String sanitizedUrl = HttpUtilities.sanitizeUrl(rssUrl);
+//            HttpUrl httpUrl = buildHttpURL(sanitizedUrl);
+//            Request request = buildRequest(httpUrl);
+//
+//            // performing request
+//            response = httpClient.newCall(request).execute();
+//
+//            // check response
+//            if (response.isSuccessful()) {
+//                try (ResponseBody responseBody = response.body()) {
+//                    if(responseBody!=null) {
+//                        inputStream = responseBody.byteStream();
+//
+//                        Document doc = buildDocument(inputStream);
+//                        List<String> knownChannelTags = new ArrayList<>();
+//                        knownChannelTags.add(CHANNEL_TAG);
+//                        knownChannelTags.add(FEED_TAG);
+//
+//                        for(String candidateChannelTagName: knownChannelTags) {
+//                            NodeList candidatesChannels = doc.getElementsByTagName(candidateChannelTagName);
+//                            if(candidatesChannels!=null || candidatesChannels.getLength()>0) {
+//                                Node candidateChannel = candidatesChannels.item(0);
+//                                if(candidateChannel!=null && isElementNode(candidateChannel)){
+//                                    result = downloadAdditionalSourceData(givenSource, candidatesChannels.item(0));
+//                                    break;
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            Log.d(TAG, "SCIENCE_BOARD - downloadAdditionalSourceData: cannot download additional source data " + e.getMessage());
+//        } finally {
+//            if (response != null) {
+//                response.close();
+//            }
+//        }
+//
+//        return result;
+//    }
+//
+
 
     /**
      * download the latest N articles
@@ -185,7 +286,7 @@ public class DomRssParser implements RssParser {
                             if(candidatesChannels!=null || candidatesChannels.getLength()>0) {
                                 Node candidateChannel = candidatesChannels.item(0);
                                 if(candidateChannel!=null && isElementNode(candidateChannel)){
-                                    results = downloadArticles(candidatesChannels.item(0), limit, givenSource);
+                                    results = getArticles(candidatesChannels.item(0), limit, givenSource);
                                     break;
                                 }
                             }
@@ -206,10 +307,134 @@ public class DomRssParser implements RssParser {
     }
 
     @Override
-    public Source downloadSourceData(String rssUrl) {
-        // ignore
-        return null;
+    public String downloadXmlData(String rssUrl) {
+        String result = null;
+        if(rssUrl==null || rssUrl.isEmpty()) return result;
+
+        InputStream inputStream = null;
+        Response response = null;
+        try {
+            final OkHttpClient httpClient = MyOkHttpClient.getClient();
+            String sanitizedUrl = HttpUtilities.sanitizeUrl(rssUrl);
+            HttpUrl httpUrl = buildHttpURL(sanitizedUrl);
+            Request request = buildRequest(httpUrl);
+
+            // performing request
+            response = httpClient.newCall(request).execute();
+
+            // check response
+            if (response.isSuccessful()) {
+                try (ResponseBody responseBody = response.body()) {
+                    if(responseBody!=null) {
+                        inputStream = responseBody.byteStream();
+                        result = inputStreamToString(inputStream);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(TAG, "SCIENCE_BOARD - downloadXmlData: cannot download xml data " + e.getMessage());
+        } finally {
+            if (response != null) {
+                response.close();
+            }
+        }
+
+        return result;
     }
+
+
+//    public List<Article> extractArticles(String xmlData, int limit) {
+//        List<Article> result = null;
+//        if(xmlData==null || xmlData.isEmpty()) return result;
+//
+//        InputStream inputStream = stringToInputStream(xmlData);
+//
+//        if(inputStream!=null) {
+//            try {
+//                Document doc = buildDocument(inputStream);
+//                List<String> knownChannelTags = new ArrayList<>();
+//                knownChannelTags.add(CHANNEL_TAG);
+//                knownChannelTags.add(FEED_TAG);
+//
+//                for(String candidateChannelTagName: knownChannelTags) {
+//                    NodeList candidatesChannels = doc.getElementsByTagName(candidateChannelTagName);
+//                    if(candidatesChannels!=null || candidatesChannels.getLength()>0) {
+//                        Node candidateChannel = candidatesChannels.item(0);
+//                        if(candidateChannel!=null && isElementNode(candidateChannel)){
+//                            result = downloadAdditionalSourceData(givenSource, candidatesChannels.item(0));
+//                            break;
+//                        }
+//                    }
+//                }
+//            } catch (ParserConfigurationException e) {
+//                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            } catch (SAXException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        return result;
+//    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    private InputStream stringToInputStream(String string) {
+        InputStream result = null;
+        if(string==null || string.isEmpty()) return result;
+        try {
+            result = new ByteArrayInputStream(string.getBytes());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    private String inputStreamToString(InputStream inputStream) {
+        String result = null;
+        if(inputStream==null) return result;
+        try {
+            result = org.apache.commons.io.IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -220,27 +445,52 @@ public class DomRssParser implements RssParser {
 
     //-------------------------------------------------------------- PRIVATE METHODS
 
-    private Source downloadAdditionalSourceData(Source source, Node channelNode) {
+    /**
+     * download the last update
+     * @param source
+     * @param channelNode
+     * @return
+     */
+    private Source getAdditionalSourceData(Source source, Node channelNode) {
         Source result = source;
         if(channelNode==null) return result;
 
         if(channelNode != null) {
-            String stringDate = downloadLastUpdate(channelNode);
+            String stringDate = getLastUpdate_companion(channelNode);
             Date lastUpdate = convertStringToDate(stringDate);
-            List<Article> articles = downloadArticles(channelNode, ARTICLES_LIMIT, source);
+            List<Article> articles = getArticles(channelNode, 1, source);
             if(lastUpdate==null) { // use the latest Article pubdate ad last update date for a Source
                 if(articles!=null && articles.size()>0)
                     lastUpdate = articles.get(0).getPubDate();
             }
 
             result.setLastUpdate(lastUpdate);
-            result.setArticles(articles);
         }
 
         return result;
     }
 
-    private String downloadLastUpdate(Node channelNode) {
+//    private Source downloadAdditionalSourceData(Source source, Node channelNode) {
+//        Source result = source;
+//        if(channelNode==null) return result;
+//
+//        if(channelNode != null) {
+//            String stringDate = downloadLastUpdate(channelNode);
+//            Date lastUpdate = convertStringToDate(stringDate);
+//            List<Article> articles = downloadArticles(channelNode, ARTICLES_LIMIT, source);
+//            if(lastUpdate==null) { // use the latest Article pubdate ad last update date for a Source
+//                if(articles!=null && articles.size()>0)
+//                    lastUpdate = articles.get(0).getPubDate();
+//            }
+//
+//            result.setLastUpdate(lastUpdate);
+//            result.setArticles(articles);
+//        }
+//
+//        return result;
+//    }
+
+    private String getLastUpdate_companion(Node channelNode) {
         String result = null;
         if(channelNode==null) return result;
         NodeList childNodes = channelNode.getChildNodes();
@@ -248,10 +498,11 @@ public class DomRssParser implements RssParser {
         return getNodeValue(childNodes, LAST_BUILD_DATE_TAG, UPDATE_TAG);
     }
 
+
     /**
      * an Article is represented by an Entry/Item element in an rss
      */
-    private List<Article> downloadArticles(Node channelNode, int limit, Source source) {
+    private List<Article> getArticles(Node channelNode, int limit, Source source) {
         List<Article> results = null;
         if(channelNode==null || limit<=0) return results;
 

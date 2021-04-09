@@ -43,6 +43,7 @@ public class AllTabFragment extends Fragment implements
     private Toast toast;
     private SourceViewModel sourceViewModel;
     private List<Source> sources;
+    private final int NUM_ARTICLES_FOR_EACH_SOURCE = 3;
 
 
 
@@ -87,7 +88,7 @@ public class AllTabFragment extends Fragment implements
             if(sources!=null && sources.size()>0) {
                 // TODO
                 this.sources = sources;
-                allTabViewModel.downloadArticles(sources, 20, false);
+                allTabViewModel.downloadArticles(sources, NUM_ARTICLES_FOR_EACH_SOURCE, false);
             }
         });
 

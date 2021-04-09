@@ -94,6 +94,31 @@ public class SourceRepository {
         return cachedSources;
     }
 
+    public static List<Source> getAllSourcesOfThisCategory(List<Source> sources, String category) {
+        List<Source> result = null;
+        if(sources==null || sources.size()<=0) return result;
+        if(category==null || category.isEmpty()) return result;
+
+        result = new ArrayList<>();
+        for(Source currentSource: sources) {
+            if(sourcefallInThisCategory(currentSource, category)) {
+                result.add(currentSource);
+            }
+        }
+
+        return result;
+    }
+
+    public String downloadXmlData(Source source) {
+        String result = null;
+        if(source==null) return result;
+
+        result = rssParser.downloadXmlData(source.getRssUrl());
+
+        return result;
+    }
+
+
 
 
 
@@ -161,24 +186,6 @@ public class SourceRepository {
         return source;
     }
 
-
-    public static List<Source> getAllSourcesOfThisCategory(List<Source> sources, String category) {
-        List<Source> result = null;
-        if(sources==null || sources.size()<=0) return result;
-        if(category==null || category.isEmpty()) return result;
-
-        result = new ArrayList<>();
-        for(Source currentSource: sources) {
-            if(sourcefallInThisCategory(currentSource, category)) {
-                result.add(currentSource);
-            }
-        }
-
-        return result;
-    }
-
-
-
     private static Source getTheFirstSourceFallingInThisCategory(List<Source> sources, String category) {
         Source result = null;
         if(sources==null || sources.size()<=0) return result;
@@ -225,6 +232,41 @@ public class SourceRepository {
         ScienceBoardRoomDatabase roomDatabase = ScienceBoardRoomDatabase.getInstance(context);
         return roomDatabase.getSourceDao();
     }
+
+    /**
+     * download lastUpdate adn xml code
+     */
+    public Source downloadAdditionalSourceData(Source givenSource, Context context) {
+        Source result = givenSource;
+        if(givenSource==null) return result;
+
+        result = rssParser.updateSource(givenSource);
+
+        cacheSourceInRoom(result, context);
+
+        return result;
+    }
+
+    private void cacheSourceInRoom(Source source, Context context) {
+        if(source==null) {
+            Log.d(TAG, "SCIENCE_BOARD - cacheSourceInRoom: cannot ccahe source in Room, source is null");
+        }
+        SourceDao sourceDao = getSourceDao(context);
+
+        Runnable task = () -> {
+            sourceDao.insert(source);
+        };
+
+        ThreadManager t = ThreadManager.getInstance();
+        try {
+            t.runTask(task);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(TAG, "SCIENCE_BOARD - cacheSourceInRoom: cannot start thread " + e.getMessage());
+        }
+    }
+
+
 
 
 

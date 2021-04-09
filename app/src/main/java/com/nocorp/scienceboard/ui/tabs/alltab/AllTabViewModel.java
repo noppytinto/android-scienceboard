@@ -62,7 +62,7 @@ public class AllTabViewModel extends AndroidViewModel {
 
     //------------------------------------------------------------ METHODS
 
-    public void downloadArticles(List<Source> givenSources, int limit, boolean forced) {
+    public void downloadArticles(List<Source> givenSources, int numArticlesForEachSource, boolean forced) {
         Runnable task = () -> {
             if( ! taskIsRunning) {
                 taskIsRunning = true;
@@ -70,7 +70,7 @@ public class AllTabViewModel extends AndroidViewModel {
                 if(targetSources==null || targetSources.size()<=0) {
                     targetSources = SourceRepository.getAsourceForEachMainCategory_randomly(givenSources, mainCategories);// TODO this should not be static
                 }
-                List<ListItem> articles = articleRepository.getAllArticles(targetSources, limit, forced, getApplication());
+                List<ListItem> articles = articleRepository.getArticles(targetSources, numArticlesForEachSource, forced, getApplication());
 
                 taskIsRunning = false;
 
