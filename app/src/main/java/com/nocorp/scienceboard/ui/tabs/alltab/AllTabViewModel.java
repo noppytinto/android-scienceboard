@@ -73,15 +73,13 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
     private void downloadArticles(List<Source> givenSources, int numArticlesForEachSource) {
         if( ! taskIsRunning) {
             Runnable task = () -> {
-                if( ! taskIsRunning) {
-                    cachedArticles = new ArrayList<>();
-                    taskIsRunning = true;
-                    // pick sources for ALL tab, only once
-                    if(targetSources==null || targetSources.size()<=0) {
-                        targetSources = sourceRepository.getAsourceForEachMainCategory_randomly(givenSources, mainCategories);
-                    }
-                    articleRepository.getArticles(targetSources, numArticlesForEachSource, getApplication());
+                cachedArticles = new ArrayList<>();
+                taskIsRunning = true;
+                // pick sources for ALL tab, only once
+                if(targetSources==null || targetSources.size()<=0) {
+                    targetSources = sourceRepository.getAsourceForEachMainCategory_randomly(givenSources, mainCategories);
                 }
+                articleRepository.getArticles(targetSources, numArticlesForEachSource, getApplication());
             };
 
             ThreadManager threadManager = ThreadManager.getInstance();

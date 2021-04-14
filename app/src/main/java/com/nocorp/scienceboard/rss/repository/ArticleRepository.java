@@ -20,7 +20,6 @@ import java.util.List;
 public class ArticleRepository {
     private final String TAG = this.getClass().getSimpleName();
     private final String ARTICLES_COLLECTION_NAME = "articles";
-    private final String ID = "id";
     private final String PUB_DATE = "pub_date";
     private final String SOURCE_ID = "source_id";
     private final String SOURCE_REAL_NAME = "source_real_name";
@@ -69,8 +68,6 @@ public class ArticleRepository {
      * since this is a fake limit, because alla rticles are always downloaded regardless
      */
     private void downloadArticlesFromRemoteDb(List<Source> givenSources, int numArticlesForEachSource, Context context) {
-        if(givenSources==null || givenSources.size()<=0) return;
-
         // download source data
         sourcesToFetch = givenSources.size();
         sourcesFetched = 0;
