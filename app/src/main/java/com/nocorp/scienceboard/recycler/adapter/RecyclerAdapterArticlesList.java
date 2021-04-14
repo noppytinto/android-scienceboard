@@ -1,7 +1,5 @@
 package com.nocorp.scienceboard.recycler.adapter;
 
-import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.Html;
 import android.util.Log;
@@ -10,15 +8,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
-import com.bumptech.glide.request.target.Target;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.model.Article;
@@ -225,7 +218,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
         }
 
         //
-        String sourceName = item.getSourceName();
+        String sourceName = item.getSourceRealName();
         if(sourceName != null) readablePubDate = sourceName + " / " + readablePubDate;
 
         holder.pubDate.setText(readablePubDate);
@@ -268,7 +261,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
         }
 
         //
-        String sourceName = item.getSourceName();
+        String sourceName = item.getSourceRealName();
         if(sourceName != null) readablePubDate = sourceName + " / " + readablePubDate;
 
         holder.pubDate.setText(readablePubDate);
@@ -282,10 +275,8 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
 
     @NotNull
     private String buildPubDate(Article article) {
-        Date pubDate = article.getPubDate();
-        if(pubDate==null) return "0"; // TODO
-        long pubDateInMillis = pubDate.getTime();
-        return MyUtilities.convertMillisToReadableTimespan(pubDateInMillis);
+        long pubDate = article.getPubDate();
+        return MyUtilities.convertMillisToReadableTimespan(pubDate);
     }
 
     @Override

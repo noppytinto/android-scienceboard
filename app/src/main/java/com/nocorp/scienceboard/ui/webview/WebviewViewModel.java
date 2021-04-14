@@ -12,8 +12,8 @@ import androidx.lifecycle.MutableLiveData;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.BookmarkedArticle;
 import com.nocorp.scienceboard.system.ThreadManager;
-import com.nocorp.scienceboard.utility.room.BookmarkDao;
-import com.nocorp.scienceboard.utility.room.ScienceBoardRoomDatabase;
+import com.nocorp.scienceboard.rss.room.BookmarkDao;
+import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -92,7 +92,7 @@ public class WebviewViewModel extends AndroidViewModel {
 
         Runnable task = () -> {
             checkingIsInBookmarksTaskIsRunning = true;
-            boolean result = dao.checkDuplication(givenArticle.getIdentifier());
+            boolean result = dao.checkDuplication(givenArticle.getId());
             setBookmarkDuplicationResponse(result);
             checkingIsInBookmarksTaskIsRunning = false;
         };

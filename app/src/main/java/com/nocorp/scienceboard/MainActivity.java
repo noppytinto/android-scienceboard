@@ -8,7 +8,7 @@ import android.widget.Toast;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.nocorp.scienceboard.databinding.ActivityMainBinding;
-import com.nocorp.scienceboard.repository.SourceViewModel;
+import com.nocorp.scienceboard.rss.repository.SourceViewModel;
 import com.nocorp.scienceboard.system.ConnectionManager;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 

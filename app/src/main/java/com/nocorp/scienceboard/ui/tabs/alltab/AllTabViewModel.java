@@ -3,29 +3,26 @@ package com.nocorp.scienceboard.ui.tabs.alltab;
 import android.app.Application;
 import android.content.Context;
 import android.util.Log;
-
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.model.VisitedArticle;
-import com.nocorp.scienceboard.repository.ArticleRepository;
-import com.nocorp.scienceboard.repository.SourceRepository;
+import com.nocorp.scienceboard.rss.repository.ArticleRepository;
+import com.nocorp.scienceboard.rss.repository.ArticlesRepositoryListener;
+import com.nocorp.scienceboard.rss.repository.SourceRepository;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
-import com.nocorp.scienceboard.utility.room.HistoryDao;
-import com.nocorp.scienceboard.utility.room.ScienceBoardRoomDatabase;
-import com.nocorp.scienceboard.utility.rss.DomRssParser;
-
+import com.nocorp.scienceboard.rss.room.HistoryDao;
+import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
 import org.jetbrains.annotations.NotNull;
-
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-public class AllTabViewModel extends AndroidViewModel {
+public class AllTabViewModel extends AndroidViewModel implements ArticlesRepositoryListener {
     private final String TAG = this.getClass().getSimpleName();
     private MutableLiveData<List<ListItem>> articlesList;
     private ArticleRepository articleRepository;
@@ -35,6 +32,8 @@ public class AllTabViewModel extends AndroidViewModel {
     private static boolean saveInHistoryTaskIsRunning;
     private static String lastVisitedArticleId;
     private static Date oldVisitedDate;
+    private SourceRepository sourceRepository;
+    private static List<ListItem> cachedArticles;
 
 
 
@@ -43,7 +42,8 @@ public class AllTabViewModel extends AndroidViewModel {
     public AllTabViewModel(Application application) {
         super(application);
         articlesList = new MutableLiveData<>();
-        articleRepository = new ArticleRepository(new DomRssParser());
+        articleRepository = new ArticleRepository(this);
+        sourceRepository = new SourceRepository();
     }
 
 
@@ -63,31 +63,44 @@ public class AllTabViewModel extends AndroidViewModel {
     //------------------------------------------------------------ METHODS
 
     public void downloadArticles(List<Source> givenSources, int numArticlesForEachSource, boolean forced) {
-        Runnable task = () -> {
-            if( ! taskIsRunning) {
-                taskIsRunning = true;
-                // pick sources for ALL tab, only once
-                if(targetSources==null || targetSources.size()<=0) {
-                    targetSources = SourceRepository.getAsourceForEachMainCategory_randomly(givenSources, mainCategories);// TODO this should not be static
+        if(forced) {
+            Runnable task = () -> {
+                if( ! taskIsRunning) {
+                    cachedArticles = new ArrayList<>();
+                    taskIsRunning = true;
+                    // pick sources for ALL tab, only once
+                    if(targetSources==null || targetSources.size()<=0) {
+                        targetSources = sourceRepository.getAsourceForEachMainCategory_randomly(givenSources, mainCategories);
+                    }
+                    articleRepository.getArticles(targetSources, numArticlesForEachSource, getApplication());
                 }
-                List<ListItem> articles = articleRepository.getArticles(targetSources, numArticlesForEachSource, forced, getApplication());
+            };
 
-                taskIsRunning = false;
+            ThreadManager threadManager = ThreadManager.getInstance();
+            threadManager.runTask(task);
+        }
+        else {
+            smartArticlesDownload(givenSources, numArticlesForEachSource);
+        }
+    }
 
-                // publish results
-                setArticlesList(articles);
+    private void smartArticlesDownload(List<Source> givenSources, int numArticlesForEachSource) {
+        if(cachedArticles ==null) {
+            if(targetSources==null || targetSources.size()<=0) {
+                targetSources = sourceRepository.getAsourceForEachMainCategory_randomly(givenSources, mainCategories);
             }
-        };
-
-        ThreadManager threadManager = ThreadManager.getInstance();
-        threadManager.runTask(task);
+            articleRepository.getArticles(targetSources, numArticlesForEachSource, getApplication());
+        }
+        else {
+            setArticlesList(cachedArticles);
+        }
     }
 
     public void smartSaveInHistory(@NotNull Article givenArticle) {
         if(lastVisitedArticleId==null || lastVisitedArticleId.isEmpty()) {
             saveInHistory(givenArticle);
         }
-        else if(lastVisitedArticleId.equals(givenArticle.getIdentifier())){
+        else if(lastVisitedArticleId.equals(givenArticle.getId())){
             updateHistory(givenArticle);
         }
         else {
@@ -139,7 +152,7 @@ public class AllTabViewModel extends AndroidViewModel {
             VisitedArticle visitedArticle = new VisitedArticle(givenArticle);
             visitedArticle.setVisitedDate(date);
             dao.insert(visitedArticle);
-            lastVisitedArticleId = givenArticle.getIdentifier();
+            lastVisitedArticleId = givenArticle.getId();
             oldVisitedDate = date;
             saveInHistoryTaskIsRunning = false;
         };
@@ -161,6 +174,36 @@ public class AllTabViewModel extends AndroidViewModel {
     }
 
 
+    @Override
+    public void onArticlesFetchCompleted(List<ListItem> articles) {
+        taskIsRunning = false;
 
+        // publish results
+        setArticlesList(articles);
+    }
 
+    @Override
+    public void onArticlesFetchFailed(String cause) {
+
+    }
+
+    @Override
+    public void onAllArticlesFetchCompleted(List<Article> articles) {
+
+    }
+
+    @Override
+    public void onAllArticlesFetchFailed(String cause) {
+
+    }
+
+    @Override
+    public void onTechArticlesFetchCompleted(List<Article> articles) {
+
+    }
+
+    @Override
+    public void onTechArticlesFetchFailed(String cause) {
+
+    }
 }// end AllArticlesTabViewModel

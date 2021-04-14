@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.utility.room;
+package com.nocorp.scienceboard.rss.room;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
@@ -17,9 +17,9 @@ public interface BookmarkDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insert(BookmarkedArticle article);
 
-    @Query("DELETE FROM bookmarkedarticle WHERE identifier = :givenIdentifier")
+    @Query("DELETE FROM bookmarkedarticle WHERE id = :givenIdentifier")
     void delete(String givenIdentifier);
 
-    @Query("SELECT 1 FROM bookmarkedarticle WHERE identifier = :givenIdentifier")
+    @Query("SELECT 1 FROM bookmarkedarticle WHERE id = :givenIdentifier")
     boolean checkDuplication(String givenIdentifier);
 }

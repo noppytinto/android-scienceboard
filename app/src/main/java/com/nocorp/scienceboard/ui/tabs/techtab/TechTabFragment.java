@@ -26,7 +26,7 @@ import com.nocorp.scienceboard.databinding.FragmentTechTabBinding;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
-import com.nocorp.scienceboard.repository.SourceViewModel;
+import com.nocorp.scienceboard.rss.repository.SourceViewModel;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
 import java.util.ArrayList;

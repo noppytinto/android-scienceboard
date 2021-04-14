@@ -23,7 +23,7 @@ import com.nocorp.scienceboard.databinding.FragmentAllTabBinding;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
-import com.nocorp.scienceboard.repository.SourceViewModel;
+import com.nocorp.scienceboard.rss.repository.SourceViewModel;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
@@ -74,6 +74,10 @@ public class AllTabFragment extends Fragment implements
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        initView();
+    }
+
+    private void initView() {
         progressIndicator = binding.progressIndicatorAllArticlesTabFragment;
         swipeRefreshLayout = binding.swipeRefreshAllArticlesTabFragment;
         swipeRefreshLayout.setColorSchemeResources(R.color.orange_light);

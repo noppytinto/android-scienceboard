@@ -9,7 +9,7 @@ import com.nocorp.scienceboard.utility.MyValues;
 
 import java.util.Date;
 
-@Entity(primaryKeys = {"identifier", "visited_date"})
+@Entity(primaryKeys = {"id", "visited_date"})
 public class VisitedArticle extends Article {
     @ColumnInfo(name = "visited_date")
     @NonNull
@@ -22,15 +22,14 @@ public class VisitedArticle extends Article {
 
     public VisitedArticle(Article article) {
         setItemType(MyValues.ItemType.VISITED_ARTICLE);
-        setIdentifier(article.getIdentifier());
+        setId(article.getId());
         setTitle(article.getTitle());
-        setDescription(article.getDescription());
-        setContent(article.getContent());
         setThumbnailUrl(article.getThumbnailUrl());
         setWebpageUrl(article.getWebpageUrl());
         setPubDate(article.getPubDate());
-        setSourceName(article.getSourceName());
-        setSourceUrl(article.getSourceUrl());
+        setSourceRealName(article.getSourceRealName());
+        setSourceWebsiteUrl(article.getSourceWebsiteUrl());
+        setSourceId(article.getSourceId());
     }
 
 

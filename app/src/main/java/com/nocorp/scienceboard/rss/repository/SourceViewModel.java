@@ -1,16 +1,16 @@
-package com.nocorp.scienceboard.repository;
+package com.nocorp.scienceboard.rss.repository;
 
+import android.app.Application;
 import android.util.Log;
 
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 import com.nocorp.scienceboard.model.Source;
-import com.nocorp.scienceboard.utility.rss.DomRssParser;
 
 import java.util.List;
 
-public class SourceViewModel extends ViewModel implements SourceRepositoryListener {
+public class SourceViewModel extends AndroidViewModel implements SourceRepositoryListener {
     private final String TAG = this.getClass().getSimpleName();
     private MutableLiveData<List<String>> rssUrls;
     private MutableLiveData<List<Source>> allSources;
@@ -20,11 +20,12 @@ public class SourceViewModel extends ViewModel implements SourceRepositoryListen
 
     //------------------------------------------------------------ CONSTRUCTORS
 
-    public SourceViewModel() {
+    public SourceViewModel(Application application) {
+        super(application);
         rssUrls = new MutableLiveData<>();
         allSources = new MutableLiveData<>();
         techSources = new MutableLiveData<>();
-        sourceRepository = new SourceRepository(this, new DomRssParser());
+        sourceRepository = new SourceRepository(this);
     }
 
 
@@ -84,7 +85,7 @@ public class SourceViewModel extends ViewModel implements SourceRepositoryListen
 
 
     public void loadSourcesFromRemoteDb() {
-        sourceRepository.loadSources();
+        sourceRepository.loadSources(getApplication());
     }
 
 

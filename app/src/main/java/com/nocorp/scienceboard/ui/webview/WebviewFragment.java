@@ -120,7 +120,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
             // the article is always non-null
             this.currentArticle = WebviewFragmentArgs.fromBundle(getArguments()).getArticleArgument();
             this.webpageUrl = currentArticle.getWebpageUrl();
-            this.sourceName = currentArticle.getSourceName();
+            this.sourceName = currentArticle.getSourceRealName();
 
             if(sourceName!=null && !sourceName.isEmpty()) {
                 //TODO
@@ -208,7 +208,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         }
         else if(item.getItemId() == R.id.option_webviewMenu_bookmark) {
             if(articleAlreadyInBookmarks) {
-                removeFromBookmarksAction(currentArticle.getIdentifier());
+                removeFromBookmarksAction(currentArticle.getId());
             }
             else {
                 addToBookmarksAction(currentArticle);

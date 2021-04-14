@@ -14,12 +14,12 @@ import java.util.List;
 public class Source implements Serializable{
     @PrimaryKey
     @NonNull
-    private String name;
+    private String id;
     @ColumnInfo(name = "website_url")
     private String websiteUrl;
     @ColumnInfo(name = "rss_url")
     private String rssUrl;
-    @Ignore
+    @ColumnInfo(name = "logo_url")
     private String logoUrl;
     private List<String> categories;
     @Ignore
@@ -27,16 +27,17 @@ public class Source implements Serializable{
     @ColumnInfo(name = "last_update")
     private Date lastUpdate;
     private String language;
-    @ColumnInfo(name = "xml_code")
-    private String xmlCode;
+    @ColumnInfo(name = "real_name")
+    private String realName;
 
 
-    public String getName() {
-        return name;
+
+    public String getId() {
+        return id;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getWebsiteUrl() {
@@ -95,12 +96,12 @@ public class Source implements Serializable{
         this.language = language;
     }
 
-    public String getXmlCode() {
-        return xmlCode;
+    public String getRealName() {
+        return realName;
     }
 
-    public void setXmlCode(String xmlCode) {
-        this.xmlCode = xmlCode;
+    public void setRealName(String realName) {
+        this.realName = realName;
     }
 
 }// end Source

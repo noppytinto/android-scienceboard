@@ -7,9 +7,8 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.nocorp.scienceboard.repository.BookmarkRepositoryListener;
-import com.nocorp.scienceboard.repository.BookmarksRepository;
-import com.nocorp.scienceboard.repository.HistoryRepository;
+import com.nocorp.scienceboard.rss.repository.BookmarkRepositoryListener;
+import com.nocorp.scienceboard.rss.repository.BookmarksRepository;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 

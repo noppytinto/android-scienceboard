@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.repository;
+package com.nocorp.scienceboard.rss.repository;
 
 import android.content.Context;
 import android.util.Log;
@@ -7,8 +7,8 @@ import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.VisitedArticle;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
-import com.nocorp.scienceboard.utility.room.HistoryDao;
-import com.nocorp.scienceboard.utility.room.ScienceBoardRoomDatabase;
+import com.nocorp.scienceboard.rss.room.HistoryDao;
+import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.repository;
+package com.nocorp.scienceboard.rss.repository;
 
 import com.nocorp.scienceboard.model.Source;
 import java.util.List;

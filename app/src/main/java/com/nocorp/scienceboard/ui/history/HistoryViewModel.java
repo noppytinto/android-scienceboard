@@ -7,11 +7,8 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.nocorp.scienceboard.model.Article;
-import com.nocorp.scienceboard.model.Source;
-import com.nocorp.scienceboard.repository.HistoryRepository;
-import com.nocorp.scienceboard.repository.HistoryRepositoryListener;
-import com.nocorp.scienceboard.repository.SourceRepository;
+import com.nocorp.scienceboard.rss.repository.HistoryRepository;
+import com.nocorp.scienceboard.rss.repository.HistoryRepositoryListener;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 

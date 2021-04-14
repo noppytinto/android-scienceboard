@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.utility.room;
+package com.nocorp.scienceboard.rss.room;
 
 
 import androidx.room.Dao;
@@ -18,7 +18,7 @@ public interface ArticleDao {
     @Query("SELECT * FROM article")
     List<Article> selectAll();
 
-    @Query("SELECT * FROM article WHERE identifier = :givenValue")
+    @Query("SELECT * FROM article WHERE id = :givenValue")
     List<Article> selectById(String givenValue);
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)

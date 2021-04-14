@@ -21,15 +21,15 @@ public class BookmarkedArticle extends Article {
 
     public BookmarkedArticle(Article article) {
         setItemType(MyValues.ItemType.BOOKMARKED_ARTICLE);
-        setIdentifier(article.getIdentifier());
+        setId(article.getId());
         setTitle(article.getTitle());
-        setDescription(article.getDescription());
-        setContent(article.getContent());
         setThumbnailUrl(article.getThumbnailUrl());
         setWebpageUrl(article.getWebpageUrl());
         setPubDate(article.getPubDate());
-        setSourceName(article.getSourceName());
-        setSourceUrl(article.getSourceUrl());
+        setSourceRealName(article.getSourceRealName());
+        setSourceWebsiteUrl(article.getSourceWebsiteUrl());
+        setSourceId(article.getSourceId());
+
     }
 
     @NonNull

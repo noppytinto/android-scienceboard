@@ -3,7 +3,6 @@ package com.nocorp.scienceboard.model;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
-import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
@@ -16,39 +15,24 @@ import java.util.Date;
 public class Article extends ListItem implements Comparable<Article>, Serializable {
     @PrimaryKey
     @NonNull
-    private String identifier;
+    private String id;
     private String title;
-    private String description;
-    private String content;
     @ColumnInfo(name = "thumbnail_url")
     private String thumbnailUrl;
     @ColumnInfo(name = "webpage_url")
     private String webpageUrl;
     @ColumnInfo(name = "pub_date")
-    private Date pubDate;
-    @ColumnInfo(name = "source_name")
-    private String sourceName;
-    @ColumnInfo(name = "source_url")
-    private String sourceUrl;
-
+    private long pubDate;
+    @ColumnInfo(name = "source_id")
+    private String sourceId;
+    @ColumnInfo(name = "source_website_url")
+    private String sourceWebsiteUrl;
+    @ColumnInfo(name = "source_real_name")
+    private String sourceRealName;
 
 
     public Article() {
         setItemType(MyValues.ItemType.ARTICLE);
-    }
-
-    @Ignore
-    public Article(String title, String content, String thumbnailUrl) {
-        this();
-        this.title = title;
-        this.content = content;
-        this.thumbnailUrl = thumbnailUrl;
-    }
-
-    @Ignore
-    public Article(String title, String thumbnailUrl) {
-        this();
-        this.title = title;
     }
 
 
@@ -66,14 +50,6 @@ public class Article extends ListItem implements Comparable<Article>, Serializab
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
     }
 
     public String getThumbnailUrl() {
@@ -100,56 +76,57 @@ public class Article extends ListItem implements Comparable<Article>, Serializab
 //        this.syndEntry = syndEntry;
 //    }
 
-    public Date getPubDate() {
+    public long getPubDate() {
         return pubDate;
     }
 
-    public void setPubDate(Date pubDate) {
+    public void setPubDate(Long pubDate) {
         this.pubDate = pubDate;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     @Override
     public int compareTo(Article another) {
-        if(pubDate==null || another==null || another.pubDate==null) return 0;
+        if(another==null) return 0;
 
-        if(this.pubDate.getTime() > another.pubDate.getTime())
+        if(this.pubDate > another.pubDate)
             return -1;
-        else if(this.pubDate.getTime() < another.pubDate.getTime())
+        else if(this.pubDate < another.pubDate)
             return 1;
 
         return 0;
     }
 
-    public String getSourceName() {
-        return sourceName;
+    public String getSourceRealName() {
+        return sourceRealName;
     }
 
-    public void setSourceName(String sourceName) {
-        this.sourceName = sourceName;
+    public void setSourceRealName(String sourceRealName) {
+        this.sourceRealName = sourceRealName;
     }
 
-    public String getSourceUrl() {
-        return sourceUrl;
+    public String getSourceWebsiteUrl() {
+        return sourceWebsiteUrl;
     }
 
-    public void setSourceUrl(String sourceUrl) {
-        this.sourceUrl = sourceUrl;
+    public void setSourceWebsiteUrl(String sourceWebsiteUrl) {
+        this.sourceWebsiteUrl = sourceWebsiteUrl;
     }
 
     @NonNull
-    public String getIdentifier() {
-        return identifier;
+    public String getId() {
+        return id;
     }
 
-    public void setIdentifier(@NonNull String identifier) {
-        this.identifier = identifier;
+    public void setId(@NonNull String id) {
+        this.id = id;
     }
+
+    public String getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(String sourceId) {
+        this.sourceId = sourceId;
+    }
+
 }// end Article

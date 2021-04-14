@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.utility.room;
+package com.nocorp.scienceboard.rss.room;
 
 
 import androidx.room.Dao;
@@ -22,7 +22,7 @@ public interface HistoryDao {
 
     @Query("UPDATE VisitedArticle " +
             "SET visited_date = :newVisitedDate " +
-            "WHERE identifier = :targetIdentifier AND visited_date = :oldVisitedDate")
+            "WHERE id = :targetIdentifier AND visited_date = :oldVisitedDate")
     int update(Date newVisitedDate, String targetIdentifier, Date oldVisitedDate);
 
 }

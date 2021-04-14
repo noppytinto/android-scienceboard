@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.utility.room;
+package com.nocorp.scienceboard.rss.room;
 
 import androidx.room.TypeConverter;
 
