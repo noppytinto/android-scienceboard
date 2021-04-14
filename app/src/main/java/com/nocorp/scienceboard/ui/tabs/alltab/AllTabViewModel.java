@@ -144,15 +144,19 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
         HistoryDao dao = getHistoryDao(getApplication());
 
         Runnable task = () -> {
-            // TODO null checks
-            saveInHistoryTaskIsRunning = true;
-            long millis=System.currentTimeMillis();
-            VisitedArticle visitedArticle = new VisitedArticle(givenArticle);
-            visitedArticle.setVisitedDate(millis);
-            dao.insert(visitedArticle);
-            lastVisitedArticleId = givenArticle.getId();
-            oldVisitedDate = millis;
-            saveInHistoryTaskIsRunning = false;
+            try {
+                // TODO null checks
+                saveInHistoryTaskIsRunning = true;
+                long millis=System.currentTimeMillis();
+                VisitedArticle visitedArticle = new VisitedArticle(givenArticle);
+                visitedArticle.setVisitedDate(millis);
+                dao.insert(visitedArticle);
+                lastVisitedArticleId = givenArticle.getId();
+                oldVisitedDate = millis;
+                saveInHistoryTaskIsRunning = false;
+            } catch (Exception e) {
+                Log.e(TAG, "SCIENCE_BOARD - saveInHistory: cannot save in history, " + e.getMessage());
+            }
         };
 
         if( ! saveInHistoryTaskIsRunning) {
@@ -161,7 +165,7 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
                 t.runTask(task);
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.d(TAG, "SCIENCE_BOARD - saveInHistory: cannot start thread " + e.getMessage());
+                Log.e(TAG, "SCIENCE_BOARD - saveInHistory: cannot start thread " + e.getMessage());
             }
         }
     }

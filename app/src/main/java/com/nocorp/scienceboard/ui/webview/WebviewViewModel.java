@@ -122,7 +122,7 @@ public class WebviewViewModel extends AndroidViewModel {
                 setAddToBookmarksResponse(true);
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.d(TAG, "SCEINCE_BOARD - addToBookmarks: cannot insert in bookmarks " + e.getMessage());
+                Log.e(TAG, "SCEINCE_BOARD - addToBookmarks: cannot insert in bookmarks " + e.getMessage());
                 setAddToBookmarksResponse(false);
             }
             addingToBookmarksTaskIsRunning = false;
@@ -134,7 +134,7 @@ public class WebviewViewModel extends AndroidViewModel {
                 t.runTask(task);
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.d(TAG, "SCIENCE_BOARD - saveInBookmarks: cannot start thread " + e.getMessage());
+                Log.e(TAG, "SCIENCE_BOARD - saveInBookmarks: cannot start thread " + e.getMessage());
             }
         }
 

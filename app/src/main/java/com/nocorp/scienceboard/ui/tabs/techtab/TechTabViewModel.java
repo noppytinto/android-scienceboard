@@ -146,15 +146,20 @@ public class TechTabViewModel extends AndroidViewModel implements ArticlesReposi
         HistoryDao dao = getHistoryDao(getApplication());
 
         Runnable task = () -> {
-            // TODO null checks
-            saveInHistoryTaskIsRunning = true;
-            long millis=System.currentTimeMillis();
-            VisitedArticle visitedArticle = new VisitedArticle(givenArticle);
-            visitedArticle.setVisitedDate(millis);
-            dao.insert(visitedArticle);
-            lastVisitedArticleId = givenArticle.getId();
-            oldVisitedDate = millis;
-            saveInHistoryTaskIsRunning = false;
+            try {
+                // TODO null checks
+                saveInHistoryTaskIsRunning = true;
+                long millis=System.currentTimeMillis();
+                VisitedArticle visitedArticle = new VisitedArticle(givenArticle);
+                visitedArticle.setVisitedDate(millis);
+                dao.insert(visitedArticle);
+                lastVisitedArticleId = givenArticle.getId();
+                oldVisitedDate = millis;
+                saveInHistoryTaskIsRunning = false;
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.e(TAG, "SCIENCE_BOARD - saveInHistory: cannot save in history, " + e.getMessage());
+            }
         };
 
         if( ! saveInHistoryTaskIsRunning) {

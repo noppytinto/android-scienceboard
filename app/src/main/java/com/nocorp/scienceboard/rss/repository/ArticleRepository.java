@@ -155,10 +155,9 @@ public class ArticleRepository {
 
         Runnable task = () -> {
             try {
-                articleDao.insertAll(articles);
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.d(TAG, "SCIENCE_BOARD - saveArticlesInRoom: cannot insert articles " + e.getMessage());
+                Log.e(TAG, "SCIENCE_BOARD - saveArticlesInRoom: cannot insert articles " + e.getMessage());
             }
         };
 
@@ -167,7 +166,7 @@ public class ArticleRepository {
             t.runTask(task);
         } catch (Exception e) {
             e.printStackTrace();
-            Log.d(TAG, "SCIENCE_BOARD - saveArticlesInRoom: cannot start thread " + e.getMessage());
+            Log.e(TAG, "SCIENCE_BOARD - saveArticlesInRoom: cannot start thread " + e.getMessage());
         }
     }
 

@@ -211,7 +211,7 @@ public class SourceRepository {
                 sourceDao.insertAll(sources);
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.d(TAG, "SCIENCE_BOARD - saveSourcesInRoom: cannot save sources in Room, cause:" + e.getMessage());
+                Log.e(TAG, "SCIENCE_BOARD - saveSourcesInRoom: cannot save sources in Room, cause:" + e.getMessage());
             }
         };
 
@@ -220,33 +220,13 @@ public class SourceRepository {
             t.runTask(task);
         } catch (Exception e) {
             e.printStackTrace();
-            Log.d(TAG, "SCIENCE_BOARD - saveSourcesInRoom: cannot start thread " + e.getMessage());
+            Log.e(TAG, "SCIENCE_BOARD - saveSourcesInRoom: cannot start thread " + e.getMessage());
         }
     }
 
     private SourceDao getSourceDao(Context context) {
         ScienceBoardRoomDatabase roomDatabase = ScienceBoardRoomDatabase.getInstance(context);
         return roomDatabase.getSourceDao();
-    }
-
-
-    private void cacheSourceInRoom(Source source, Context context) {
-        if(source==null) {
-            Log.d(TAG, "SCIENCE_BOARD - cacheSourceInRoom: cannot ccahe source in Room, source is null");
-        }
-        SourceDao sourceDao = getSourceDao(context);
-
-        Runnable task = () -> {
-            sourceDao.insert(source);
-        };
-
-        ThreadManager t = ThreadManager.getInstance();
-        try {
-            t.runTask(task);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.d(TAG, "SCIENCE_BOARD - cacheSourceInRoom: cannot start thread " + e.getMessage());
-        }
     }
 
 
