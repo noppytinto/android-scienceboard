@@ -13,7 +13,7 @@ import java.util.Date;
 public class VisitedArticle extends Article {
     @ColumnInfo(name = "visited_date")
     @NonNull
-    private Date visitedDate;
+    private long visitedDate;
 
 
     public VisitedArticle() {
@@ -33,11 +33,11 @@ public class VisitedArticle extends Article {
     }
 
 
-    public Date getVisitedDate() {
+    public long getVisitedDate() {
         return visitedDate;
     }
 
-    public void setVisitedDate(Date visitedDate) {
+    public void setVisitedDate(long visitedDate) {
         this.visitedDate = visitedDate;
     }
 

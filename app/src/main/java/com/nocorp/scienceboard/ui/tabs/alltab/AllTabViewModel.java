@@ -31,7 +31,7 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
     private static boolean taskIsRunning;
     private static boolean saveInHistoryTaskIsRunning;
     private static String lastVisitedArticleId;
-    private static Date oldVisitedDate;
+    private static long oldVisitedDate;
     private SourceRepository sourceRepository;
     private static List<ListItem> cachedArticles;
 
@@ -118,14 +118,12 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
         Runnable task = () -> {
             // TODO null checks
             long millis=System.currentTimeMillis();
-            java.util.Date newDate=new java.util.Date(millis);
-
             VisitedArticle visitedArticle = new VisitedArticle(givenArticle);
-            visitedArticle.setVisitedDate(newDate);
-            int result = dao.update(newDate, lastVisitedArticleId, oldVisitedDate);
+            visitedArticle.setVisitedDate(millis);
+            int result = dao.update(millis, lastVisitedArticleId, oldVisitedDate);
 
             if(result>0) {
-                oldVisitedDate = newDate;
+                oldVisitedDate = millis;
                 Log.d(TAG, "SCIENCE_BOARD - updateHistory: updateed to the latest vidited date \n" + lastVisitedArticleId + "\n" + millis);
             }
             else {
@@ -149,13 +147,11 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
             // TODO null checks
             saveInHistoryTaskIsRunning = true;
             long millis=System.currentTimeMillis();
-            java.util.Date date=new java.util.Date(millis);
-
             VisitedArticle visitedArticle = new VisitedArticle(givenArticle);
-            visitedArticle.setVisitedDate(date);
+            visitedArticle.setVisitedDate(millis);
             dao.insert(visitedArticle);
             lastVisitedArticleId = givenArticle.getId();
-            oldVisitedDate = date;
+            oldVisitedDate = millis;
             saveInHistoryTaskIsRunning = false;
         };
 

@@ -24,8 +24,6 @@ public class Source implements Serializable{
     private List<String> categories;
     @Ignore
     private List<Article> articles;
-    @ColumnInfo(name = "last_update")
-    private Date lastUpdate;
     private String language;
     @ColumnInfo(name = "real_name")
     private String realName;
@@ -78,14 +76,6 @@ public class Source implements Serializable{
 
     public void setArticles(List<Article> articles) {
         this.articles = articles;
-    }
-
-    public Date getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(Date lastUpdate) {
-        this.lastUpdate = lastUpdate;
     }
 
     public String getLanguage() {

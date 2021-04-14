@@ -12,7 +12,7 @@ import java.util.Date;
 public class BookmarkedArticle extends Article {
     @ColumnInfo(name = "saved_date")
     @NonNull
-    private Date savedDate;
+    private long savedDate;
 
 
     public BookmarkedArticle() {
@@ -33,11 +33,11 @@ public class BookmarkedArticle extends Article {
     }
 
     @NonNull
-    public Date getSavedDate() {
+    public long getSavedDate() {
         return savedDate;
     }
 
-    public void setSavedDate(@NonNull Date savedDate) {
+    public void setSavedDate(@NonNull long savedDate) {
         this.savedDate = savedDate;
     }
 }// end BookmarkedArticle

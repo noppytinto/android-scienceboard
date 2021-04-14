@@ -17,7 +17,7 @@ import com.nocorp.scienceboard.model.VisitedArticle;
         entities = {Source.class, Article.class, VisitedArticle.class, BookmarkedArticle.class},
         version = 1,
         exportSchema = false)
-@TypeConverters({DateConverter.class, StringListConverter.class})
+@TypeConverters({StringListConverter.class})
 public abstract class ScienceBoardRoomDatabase extends RoomDatabase {
     private static volatile ScienceBoardRoomDatabase singletonInstance;
     private static final String DB_NAME = "scienceboard-room-db";

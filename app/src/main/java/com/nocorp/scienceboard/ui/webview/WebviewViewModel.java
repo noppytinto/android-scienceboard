@@ -116,10 +116,8 @@ public class WebviewViewModel extends AndroidViewModel {
             try {
                 addingToBookmarksTaskIsRunning = true;
                 long millis=System.currentTimeMillis();
-                java.util.Date date=new java.util.Date(millis);
-
                 BookmarkedArticle bookmarkedArticle = new BookmarkedArticle(givenArticle);
-                bookmarkedArticle.setSavedDate(date);
+                bookmarkedArticle.setSavedDate(millis);
                 dao.insert(bookmarkedArticle);
                 setAddToBookmarksResponse(true);
             } catch (Exception e) {
