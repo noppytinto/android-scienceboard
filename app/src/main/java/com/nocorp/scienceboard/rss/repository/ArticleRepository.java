@@ -83,7 +83,7 @@ public class ArticleRepository {
     // get the latest <limit> articles
     private void downloadArticlesFromRemoteDb_companion(String sourceName, int limit, Context context) {
         List<Article> result = new ArrayList<>();
-        db.collection(ARTICLES_COLLECTION_NAME).whereEqualTo(SOURCE_ID, (String)sourceName).orderBy(PUB_DATE, Query.Direction.ASCENDING).limit(limit)
+        db.collection(ARTICLES_COLLECTION_NAME).whereEqualTo(SOURCE_ID, (String)sourceName).orderBy(PUB_DATE, Query.Direction.DESCENDING).limit(limit)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
