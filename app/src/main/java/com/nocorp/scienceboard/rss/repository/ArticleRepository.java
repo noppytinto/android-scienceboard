@@ -41,7 +41,6 @@ public class ArticleRepository {
     public ArticleRepository(ArticlesRepositoryListener listener) {
         this.listener = listener;
         db = FirebaseFirestore.getInstance();
-        cachedArticles = new ArrayList<>();
     }
 
 
@@ -52,8 +51,7 @@ public class ArticleRepository {
     // DOM strategy
     public void getArticles(List<Source> givenSources, int numArticlesForEachSource, Context context) {
         if(givenSources==null || givenSources.size()<=0) return;
-
-        sourcesToFetch = givenSources.size();
+        cachedArticles = new ArrayList<>();
         downloadArticlesFromRemoteDb(givenSources, numArticlesForEachSource, context);
     }// end getArticles()
 
@@ -74,6 +72,7 @@ public class ArticleRepository {
         if(givenSources==null || givenSources.size()<=0) return;
 
         // download source data
+        sourcesToFetch = givenSources.size();
         sourcesFetched = 0;
         for(Source currentSource: givenSources) {
             downloadArticlesFromRemoteDb_companion(currentSource.getId(), numArticlesForEachSource, context);
