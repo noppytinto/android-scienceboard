@@ -109,3 +109,4 @@ lint/tmp/
 
 # Android Profiling
 *.hprof
+.idea/jarRepositories.xml
