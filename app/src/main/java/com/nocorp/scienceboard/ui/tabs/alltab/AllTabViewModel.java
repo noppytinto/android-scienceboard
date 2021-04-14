@@ -19,7 +19,6 @@ import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
 import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 public class AllTabViewModel extends AndroidViewModel implements ArticlesRepositoryListener {
