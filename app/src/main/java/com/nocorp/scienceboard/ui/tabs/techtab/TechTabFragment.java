@@ -89,7 +89,7 @@ public class TechTabFragment extends Fragment implements
             if(sources!=null && sources.size()>0) {
                 // TODO
                 this.sources = sources;
-                techTabViewModel.downloadArticles(sources, NUM_ARTICLES_FOR_EACH_SOURCE, false);
+                techTabViewModel.fetchArticles(sources, NUM_ARTICLES_FOR_EACH_SOURCE, false);
             }
         });
 
@@ -148,7 +148,7 @@ public class TechTabFragment extends Fragment implements
     }
 
     private void refreshAction() {
-        techTabViewModel.downloadArticles(sources, NUM_ARTICLES_FOR_EACH_SOURCE, true);
+        techTabViewModel.fetchArticles(sources, NUM_ARTICLES_FOR_EACH_SOURCE, true);
     }
 
     @Override

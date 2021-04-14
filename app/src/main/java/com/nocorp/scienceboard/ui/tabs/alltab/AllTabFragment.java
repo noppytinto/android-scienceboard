@@ -95,7 +95,7 @@ public class AllTabFragment extends Fragment implements
             if(sources!=null && sources.size()>0) {
                 // TODO
                 this.sources = sources;
-                allTabViewModel.downloadArticles(sources, NUM_ARTICLES_FOR_EACH_SOURCE, false);
+                allTabViewModel.fetchArticles(sources, NUM_ARTICLES_FOR_EACH_SOURCE, false);
             }
         });
 
@@ -194,7 +194,7 @@ public class AllTabFragment extends Fragment implements
     }
 
     private void refreshAction() {
-        allTabViewModel.downloadArticles(sources, NUM_ARTICLES_FOR_EACH_SOURCE, true);
+        allTabViewModel.fetchArticles(sources, NUM_ARTICLES_FOR_EACH_SOURCE, true);
     }
 
     @Override

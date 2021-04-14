@@ -63,15 +63,24 @@ public class TechTabViewModel extends AndroidViewModel implements ArticlesReposi
 
     //------------------------------------------------------------ METHODS
 
-    public void downloadArticles(List<Source> givenSources, int numArticlesForEachSource, boolean forced) {
+    public void fetchArticles(List<Source> givenSources, int numArticlesForEachSource, boolean forced) {
         if(forced) {
+            downloadArticles(givenSources, numArticlesForEachSource);
+        }
+        else {
+            smartArticlesDownload(givenSources, numArticlesForEachSource);
+        }
+    }
+
+    private void downloadArticles(List<Source> givenSources, int numArticlesForEachSource) {
+        if( ! taskIsRunning) {
             Runnable task = () -> {
                 if( ! taskIsRunning) {
                     cachedArticles = new ArrayList<>();
                     taskIsRunning = true;
                     // pick sources for ALL tab, only once
                     if(targetSources==null || targetSources.size()<=0) {
-                        targetSources = sourceRepository.getAsourceForEachMainCategory_randomly(givenSources, mainCategories);
+                        targetSources = sourceRepository.getAllSourcesOfThisCategory(givenSources, TECH_CATEGORY);
                     }
                     articleRepository.getArticles(targetSources, numArticlesForEachSource, getApplication());
                 }
@@ -80,17 +89,11 @@ public class TechTabViewModel extends AndroidViewModel implements ArticlesReposi
             ThreadManager threadManager = ThreadManager.getInstance();
             threadManager.runTask(task);
         }
-        else {
-            smartArticlesDownload(givenSources, numArticlesForEachSource);
-        }
     }
 
     private void smartArticlesDownload(List<Source> givenSources, int numArticlesForEachSource) {
-        if(cachedArticles ==null) {
-            if(targetSources==null || targetSources.size()<=0) {
-                targetSources = sourceRepository.getAsourceForEachMainCategory_randomly(givenSources, mainCategories);
-            }
-            articleRepository.getArticles(targetSources, numArticlesForEachSource, getApplication());
+        if(cachedArticles == null) {
+            downloadArticles(givenSources, numArticlesForEachSource);
         }
         else {
             setArticlesList(cachedArticles);

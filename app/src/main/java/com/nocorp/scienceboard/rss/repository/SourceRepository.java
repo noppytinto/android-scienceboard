@@ -91,7 +91,7 @@ public class SourceRepository {
         return cachedSources;
     }
 
-    public static List<Source> getAllSourcesOfThisCategory(List<Source> sources, String category) {
+    public List<Source> getAllSourcesOfThisCategory(List<Source> sources, String category) {
         List<Source> result = null;
         if(sources==null || sources.size()<=0) return result;
         if(category==null || category.isEmpty()) return result;
