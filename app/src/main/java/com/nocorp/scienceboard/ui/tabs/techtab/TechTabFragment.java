@@ -72,6 +72,10 @@ public class TechTabFragment extends Fragment implements
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        initiView();
+    }
+
+    private void initiView() {
         progressIndicator = binding.progressIndicatorTechTabFragment;
         swipeRefreshLayout = binding.swipeRefreshTechTabFragment;
         swipeRefreshLayout.setColorSchemeResources(R.color.orange_light);
@@ -85,7 +89,9 @@ public class TechTabFragment extends Fragment implements
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        Log.d(TAG, "SCIENCE_BOARD - onActivityCreated: called");
         sourceViewModel.getObservableAllSources().observe(getViewLifecycleOwner(), sources -> {
+            Log.d(TAG, "SCIENCE_BOARD - observe: called");
             if(sources!=null && sources.size()>0) {
                 // TODO
                 this.sources = sources;
@@ -107,17 +113,6 @@ public class TechTabFragment extends Fragment implements
                 showCenteredToast("articles fetched");
             }
         });
-
-//        if(feedLoadedAtStartup == false) {
-//            feedProvider.downloadRssSources_dom();
-//            feedLoadedAtStartup = true;
-//            feedsLoading = true;
-//        }
-
-
-        // test crashalytics
-//        throw new RuntimeException("Test Crash"); // Force a crash
-
     }
 
     @Override

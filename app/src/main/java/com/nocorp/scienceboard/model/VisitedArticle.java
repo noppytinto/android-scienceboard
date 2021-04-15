@@ -10,7 +10,8 @@ import com.nocorp.scienceboard.utility.MyValues;
 import java.util.Date;
 
 @Entity(primaryKeys = {"id", "visited_date"})
-public class VisitedArticle extends Article {
+public
+class VisitedArticle extends Article {
     @ColumnInfo(name = "visited_date")
     @NonNull
     private long visitedDate;

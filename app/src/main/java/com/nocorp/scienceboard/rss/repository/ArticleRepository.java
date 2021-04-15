@@ -2,6 +2,7 @@ package com.nocorp.scienceboard.rss.repository;
 
 
 import android.content.Context;
+import android.os.ConditionVariable;
 import android.util.Log;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -32,6 +33,7 @@ public class ArticleRepository {
     private ArticlesRepositoryListener listener;
     private int sourcesFetched;
     private int sourcesToFetch;
+    private final ConditionVariable releaseThread = new ConditionVariable();
 
 
 
@@ -45,12 +47,11 @@ public class ArticleRepository {
 
 
 
-    //----------------------------------------------------------- GETTER/SETTER
+    //----------------------------------------------------------- PUBLIC METHODS
 
     // DOM strategy
     public void getArticles(List<Source> givenSources, int numArticlesForEachSource, Context context) {
         if(givenSources==null || givenSources.size()<=0) return;
-        cachedArticles = new ArrayList<>();
         downloadArticlesFromRemoteDb(givenSources, numArticlesForEachSource, context);
     }// end getArticles()
 
@@ -69,11 +70,17 @@ public class ArticleRepository {
      */
     private void downloadArticlesFromRemoteDb(List<Source> givenSources, int numArticlesForEachSource, Context context) {
         // download source data
+        cachedArticles = new ArrayList<>();
         sourcesToFetch = givenSources.size();
         sourcesFetched = 0;
+        Log.d(TAG, "SCIENCE_BOARD - sources to fetch: " + sourcesToFetch);
         for(Source currentSource: givenSources) {
             downloadArticlesFromRemoteDb_companion(currentSource.getId(), numArticlesForEachSource, context);
         }
+        Log.d(TAG, "SCIENCE_BOARD - blocking on this thread until sources are all fetched");
+        releaseThread.block();
+        Log.d(TAG, "SCIENCE_BOARD - thread released");
+        listener.onArticlesFetchCompleted(cachedArticles);
     }
 
     // get the latest <limit> articles
@@ -105,9 +112,10 @@ public class ArticleRepository {
         cachedArticles.addAll(articles);
         saveArticlesInRoom(articles, context);
         sourcesFetched++;
-
+        Log.d(TAG, "SCIENCE_BOARD - sources fetched: " + sourcesFetched);
         if(sourcesFetched >= sourcesToFetch) {
-            listener.onArticlesFetchCompleted(cachedArticles);
+            releaseThread.open();
+            Log.d(TAG, "SCIENCE_BOARD - condition verified, releasing thread");
         }
     }
 
@@ -152,6 +160,7 @@ public class ArticleRepository {
 
         Runnable task = () -> {
             try {
+                articleDao.insertAll(articles);
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.e(TAG, "SCIENCE_BOARD - saveArticlesInRoom: cannot insert articles " + e.getMessage());
