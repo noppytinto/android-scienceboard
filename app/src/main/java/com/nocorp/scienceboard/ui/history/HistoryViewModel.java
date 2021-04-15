@@ -85,4 +85,7 @@ public class HistoryViewModel extends AndroidViewModel implements HistoryReposit
     }
 
 
+    public void clearHistory() {
+        historyRepository.nukeHistory(getApplication());
+    }
 }// end HistoryViewModel

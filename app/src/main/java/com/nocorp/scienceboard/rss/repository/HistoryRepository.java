@@ -62,7 +62,7 @@ public class HistoryRepository{
         }
     }
 
-    private void nukeHistory(Context context) {
+    public void nukeHistory(Context context) {
         HistoryDao dao = getHistoryDao(context);
 
         Runnable task = () -> {
@@ -83,6 +83,7 @@ public class HistoryRepository{
         ScienceBoardRoomDatabase roomDatabase = ScienceBoardRoomDatabase.getInstance(context);
         return roomDatabase.getHistoryDao();
     }
+
 
 
 }// end HistoryRepository

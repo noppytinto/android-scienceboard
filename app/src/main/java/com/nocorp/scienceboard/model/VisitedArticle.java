@@ -3,11 +3,8 @@ package com.nocorp.scienceboard.model;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
-
-
 import com.nocorp.scienceboard.utility.MyValues;
 
-import java.util.Date;
 
 @Entity(primaryKeys = {"id", "visited_date"})
 public

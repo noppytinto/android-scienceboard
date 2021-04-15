@@ -4,6 +4,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -17,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.nocorp.scienceboard.MobileNavigationDirections;
 import com.nocorp.scienceboard.R;
@@ -50,6 +54,13 @@ public class HistoryFragment extends Fragment implements
 
     //--------------------------------------------------------------------- ANDROID METHODS
 
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
@@ -71,9 +82,10 @@ public class HistoryFragment extends Fragment implements
 
         historyViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), articles -> {
             if(articles==null || articles.size()==0) {
+                recyclerAdapterArticlesList.clearList();
                 swipeRefreshLayout.setRefreshing(false);
                 progressIndicator.setVisibility(View.GONE);
-                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
+//                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
             }
             else {
                 swipeRefreshLayout.setRefreshing(false);
@@ -87,6 +99,23 @@ public class HistoryFragment extends Fragment implements
     }
 
     @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_history_fragment, menu);
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if(item.getItemId() == R.id.option_webviewMenu_stop) {
+            clearHistoryAction();
+            return true;
+        }
+        return false;
+    }
+
+
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
@@ -96,7 +125,30 @@ public class HistoryFragment extends Fragment implements
 
 
 
-    //--------------------------------------------------------------------- My METHODS
+    //-------------------------------------------------------------- MY METHODS
+    private void clearHistoryAction() {
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Do you want clear the history?")
+                .setPositiveButton("yes", (dialog, listener) -> {
+                    //
+                    clearHistory();
+                    dialog.dismiss();
+                    showCenteredToast("history deleted");
+
+                })
+                .setNegativeButton("no", (dialog, listener)-> {
+                    //
+                    dialog.dismiss();
+//                    showCenteredToast("operation aborted");
+
+                })
+                .show();
+    }
+
+    private void clearHistory() {
+        historyViewModel.clearHistory();
+    }
+
 
     private void initView() {
         progressIndicator = binding.progressIndicatorHistoryFragment;

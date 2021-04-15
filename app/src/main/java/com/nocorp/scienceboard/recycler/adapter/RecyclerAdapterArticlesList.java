@@ -46,6 +46,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
     private static final int VISITED_ARTICLE_TYPE = 3;
     private static final int BOOKMARKED_ARTICLE_TYPE = 4;
 
+
     public interface OnArticleClickedListener {
         public void onArticleClicked(int position);
     }
@@ -293,6 +294,15 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
         recyclerList = newList;
         notifyDataSetChanged();
     }
+
+    public void clearList() {
+        if(recyclerList!=null) {
+            recyclerList.clear();
+            notifyDataSetChanged();
+        }
+    }
+
+
 
 
 }// end RecyclerAdapterFeedsList
