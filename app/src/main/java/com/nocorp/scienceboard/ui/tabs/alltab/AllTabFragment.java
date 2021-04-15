@@ -10,6 +10,8 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import android.os.Handler;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -21,6 +23,7 @@ import com.nocorp.scienceboard.MobileNavigationDirections;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentAllTabBinding;
 import com.nocorp.scienceboard.model.Article;
+import com.nocorp.scienceboard.model.LoadingViewItem;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
@@ -44,7 +47,7 @@ public class AllTabFragment extends Fragment implements
     private Toast toast;
     private SourceViewModel sourceViewModel;
     private List<Source> sources;
-    private final int NUM_ARTICLES_FOR_EACH_SOURCE = 3;
+    private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 3;
     private boolean isLoading = false;
     private List<ListItem> articlesToDisplay;
 
@@ -77,16 +80,6 @@ public class AllTabFragment extends Fragment implements
         initView();
     }
 
-    private void initView() {
-        progressIndicator = binding.progressIndicatorAllArticlesTabFragment;
-        swipeRefreshLayout = binding.swipeRefreshAllArticlesTabFragment;
-        swipeRefreshLayout.setColorSchemeResources(R.color.orange_light);
-        adProvider = AdProvider.getInstance(); // is not guaranteed that
-        sourceViewModel = new ViewModelProvider(requireActivity()).get(SourceViewModel.class);
-        allTabViewModel = new ViewModelProvider(this).get(AllTabViewModel.class);
-        initRecycleView();
-        setupSwipeDownToRefresh();
-    }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -95,21 +88,21 @@ public class AllTabFragment extends Fragment implements
             if(sources!=null && sources.size()>0) {
                 // TODO
                 this.sources = sources;
-                allTabViewModel.fetchArticles(sources, NUM_ARTICLES_FOR_EACH_SOURCE, false);
+                allTabViewModel.fetchArticles(sources, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, false);
             }
         });
 
-        allTabViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), articles -> {
-            if(articles==null || articles.size()==0) {
+        allTabViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), resultArticles -> {
+            if(resultArticles==null || resultArticles.size()==0) {
                 swipeRefreshLayout.setRefreshing(false);
                 progressIndicator.setVisibility(View.GONE);
-                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
+//                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
             }
             else {
                 swipeRefreshLayout.setRefreshing(false);
                 progressIndicator.setVisibility(View.GONE);
-                articles = adProvider.populateListWithAds(articles, 5);
-                articlesToDisplay = articles;
+                resultArticles = adProvider.populateListWithAds(resultArticles, 5);
+                articlesToDisplay = new ArrayList<>(resultArticles);
                 recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
                 showCenteredToast("articles fetched");
             }
@@ -128,12 +121,24 @@ public class AllTabFragment extends Fragment implements
 
     //--------------------------------------------------------------------- METHODS
 
+    private void initView() {
+        progressIndicator = binding.progressIndicatorAllArticlesTabFragment;
+        swipeRefreshLayout = binding.swipeRefreshAllArticlesTabFragment;
+        swipeRefreshLayout.setColorSchemeResources(R.color.orange_light);
+        adProvider = AdProvider.getInstance(); // is not guaranteed that
+        sourceViewModel = new ViewModelProvider(requireActivity()).get(SourceViewModel.class);
+        allTabViewModel = new ViewModelProvider(this).get(AllTabViewModel.class);
+        initRecycleView();
+        setupSwipeDownToRefresh();
+    }
+
     private void initRecycleView() {
         // defining Recycler view
         recyclerView = binding.recyclerViewAllArticlesTabFragment;
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this);
         recyclerView.setAdapter(recyclerAdapterArticlesList);
+        initScrollListener();
     }
 
     private void initScrollListener() {
@@ -152,35 +157,42 @@ public class AllTabFragment extends Fragment implements
                 if (!isLoading) {
                     if (linearLayoutManager != null && linearLayoutManager.findLastCompletelyVisibleItemPosition() == articlesToDisplay.size() - 1) {
                         //bottom of list!
+                        Log.d(TAG, "SCIENCE_BOARD - loadMore: reached the end of the recycler");
                         loadMore();
                         isLoading = true;
                     }
                 }
             }
         });
-
-
     }
 
     private void loadMore() {
-        // add loading view
-        articlesToDisplay.add(null);
-        recyclerAdapterArticlesList.notifyItemInserted(articlesToDisplay.size() - 1);
+        // adding loading view
+        recyclerAdapterArticlesList.addLoadingView(articlesToDisplay);
 
-        // remove loading view
-        articlesToDisplay.remove(articlesToDisplay.size() - 1);
-        int scrollPosition = articlesToDisplay.size();
-        recyclerAdapterArticlesList.notifyItemRemoved(scrollPosition);
-        int currentSize = scrollPosition;
-        int nextLimit = currentSize + 10;
+        // TODO: load new items (asynchronously)
+        // recyclerAdapterArticlesList.notifyDataSetChanged();
 
-        //
-        while (currentSize - 1 < nextLimit) {
-//            articlesToDisplay.add("Item " + currentSize); //TODO
-            currentSize++;
-        }
+        // TODO: removing loading view
+//        recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
 
-        recyclerAdapterArticlesList.notifyDataSetChanged();
+
+//        final Handler handler = new Handler();
+//        handler.postDelayed(() -> {
+//            // Do something after 5s
+//
+//        }, 5000);
+
+
+//        int currentSize = scrollPosition;
+//        int nextLimit = currentSize + 10;
+//
+//        //
+//        while (currentSize - 1 < nextLimit) {
+////            articlesToDisplay.add("Item " + currentSize); //TODO
+//            currentSize++;
+//        }
+
         isLoading = false;
 
         //TODO
@@ -194,7 +206,7 @@ public class AllTabFragment extends Fragment implements
     }
 
     private void refreshAction() {
-        allTabViewModel.fetchArticles(sources, NUM_ARTICLES_FOR_EACH_SOURCE, true);
+        allTabViewModel.fetchArticles(sources, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, true);
     }
 
     @Override

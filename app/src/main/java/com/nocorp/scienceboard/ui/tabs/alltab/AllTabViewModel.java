@@ -6,6 +6,8 @@ import android.util.Log;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.model.VisitedArticle;
@@ -33,6 +35,7 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
     private static long oldVisitedDate;
     private SourceRepository sourceRepository;
     private static List<ListItem> cachedArticles;
+    private static List<DocumentSnapshot> oldestArticlesBySource;
 
 
 

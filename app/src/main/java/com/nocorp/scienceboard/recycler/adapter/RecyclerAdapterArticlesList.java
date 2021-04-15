@@ -16,6 +16,7 @@ import com.google.android.gms.ads.nativead.NativeAd;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.BookmarkedArticle;
+import com.nocorp.scienceboard.model.LoadingViewItem;
 import com.nocorp.scienceboard.model.VisitedArticle;
 import com.nocorp.scienceboard.recycler.viewholder.LoadingViewHolder;
 import com.nocorp.scienceboard.ui.viewholder.HistoryViewHolder;
@@ -29,7 +30,6 @@ import com.nocorp.scienceboard.utility.MyValues;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Date;
 import java.util.List;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
@@ -40,7 +40,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
     private OnArticleClickedListener listener;
     private final float THUMBNAIL_SIZE_MULTIPLIER = 0.50f;
 
-    private static final int PROGRESS_INDICATOR_TYPE = 0;
+    private static final int LOADING_VIEW_TYPE = 0;
     private static final int ARTICLE_TYPE = 1;
     private static final int LIST_AD_TYPE = 2;
     private static final int VISITED_ARTICLE_TYPE = 3;
@@ -69,8 +69,8 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
     public int getItemViewType(int position) {
         MyValues.ItemType type = recyclerList.get(position).getItemType();
         switch (type) {
-            case PROGRESS_INDICATOR:
-                return PROGRESS_INDICATOR_TYPE;
+            case LOADING_VIEW:
+                return LOADING_VIEW_TYPE;
             case ARTICLE:
                 return ARTICLE_TYPE;
             case LIST_AD:
@@ -89,7 +89,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = null;
 
-        if(viewType == PROGRESS_INDICATOR_TYPE) {
+        if(viewType == LOADING_VIEW_TYPE) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layour_loading_viewholder, parent, false);
             return new LoadingViewHolder(view);
         }
@@ -117,11 +117,8 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        if(getItemViewType(position) == PROGRESS_INDICATOR_TYPE) {
-//            Article article = (Article) recyclerList.get(position);
-//
-//            //
-//            buildArticleItem((ArticleViewHolder) holder, article);
+        if(getItemViewType(position) == LOADING_VIEW_TYPE) {
+            showLoadingView((LoadingViewHolder) holder, position);
         }
         if(getItemViewType(position) == ARTICLE_TYPE) {
             Article article = (Article) recyclerList.get(position);
@@ -149,6 +146,10 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
             buildArticleItem((ArticleViewHolder) holder, article);
         }
 
+    }
+
+    private void showLoadingView(LoadingViewHolder holder, int position) {
+        // TODO: progressbar would be displayed
     }
 
     private void buildArticleItem(ArticleViewHolder holder, Article item) {
@@ -269,7 +270,6 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
         holder.pubDate.setText(readablePubDate);
     }
 
-
     private void buildListAdItem(ListAdViewHolder holder, ListAd item) {
         NativeAd nativeAd = item.getAd();
         holder.displayNativeAd(nativeAd);
@@ -301,6 +301,27 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
             notifyDataSetChanged();
         }
     }
+
+    /**
+     * NOTE: the articles must be given outside
+     * cannot be the recyclerList !
+     */
+    public void addLoadingView(List<ListItem> articles) {
+        articles.add(new LoadingViewItem());
+        notifyItemInserted(articles.size() - 1);
+        Log.d(TAG, "SCIENCE_BOARD - loding view added");
+    }
+
+    /**
+     * NOTE: the articles must be given outside
+     * cannot be the recyclerList !
+     */
+    public void removeLoadingView(List<ListItem> articles) {
+        articles.remove(articles.size() - 1);
+        int scrollPosition = articles.size();
+        notifyItemRemoved(scrollPosition);
+    }
+
 
 
 
