@@ -28,7 +28,7 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
     private MutableLiveData<List<ListItem>> articlesList;
     private ArticleRepository articleRepository;
     private final List<String> mainCategories = Arrays.asList("space", "physics", "tech", "medicine", "biology");
-    private static List<Source> targetSources;
+    private static List<Source> pickedSources;
     private static boolean taskIsRunning;
     private static boolean saveInHistoryTaskIsRunning;
     private static String lastVisitedArticleId;
@@ -69,7 +69,7 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
             downloadArticles(givenSources, numArticlesForEachSource);
         }
         else {
-            smartArticlesDownload(givenSources, numArticlesForEachSource);
+            tryCachedArticles(givenSources, numArticlesForEachSource);
         }
     }
 
@@ -79,10 +79,10 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
                 cachedArticles = new ArrayList<>();
                 taskIsRunning = true;
                 // pick sources for ALL tab, only once
-                if(targetSources==null || targetSources.size()<=0) {
-                    targetSources = sourceRepository.getAsourceForEachMainCategory_randomly(givenSources, mainCategories);
+                if(pickedSources ==null || pickedSources.isEmpty()) {
+                    pickedSources = sourceRepository.getAsourceForEachMainCategory_randomly(givenSources, mainCategories);
                 }
-                articleRepository.getArticles(targetSources, numArticlesForEachSource, getApplication());
+                articleRepository.getArticles(pickedSources, numArticlesForEachSource, getApplication());
             };
 
             ThreadManager threadManager = ThreadManager.getInstance();
@@ -90,7 +90,16 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
         }
     }
 
-    private void smartArticlesDownload(List<Source> givenSources, int numArticlesForEachSource) {
+    public void fetchNextArticles(int numArticlesForEachSource) {
+        Runnable task = () -> {
+            articleRepository.getNextArticles(oldestArticlesBySource, numArticlesForEachSource, getApplication());
+        };
+
+        ThreadManager threadManager = ThreadManager.getInstance();
+        threadManager.runTask(task);
+    }
+
+    private void tryCachedArticles(List<Source> givenSources, int numArticlesForEachSource) {
         if(cachedArticles == null) {
             downloadArticles(givenSources, numArticlesForEachSource);
         }
@@ -98,6 +107,7 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
             setArticlesList(cachedArticles);
         }
     }
+
     public void smartSaveInHistory(@NotNull Article givenArticle) {
         if(lastVisitedArticleId==null || lastVisitedArticleId.isEmpty()) {
             saveInHistory(givenArticle);
@@ -177,8 +187,10 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
 
 
     @Override
-    public void onArticlesFetchCompleted(List<ListItem> articles) {
+    public void onArticlesFetchCompleted(List<ListItem> articles, List<DocumentSnapshot> oldestArticles) {
         taskIsRunning = false;
+
+        oldestArticlesBySource = oldestArticles;
 
         // publish results
         cachedArticles = articles;
@@ -208,5 +220,16 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
     @Override
     public void onTechArticlesFetchFailed(String cause) {
 
+    }
+
+    @Override
+    public void onNextArticlesFetchCompleted(List<ListItem> newArticles, List<DocumentSnapshot> oldestArticles) {
+        taskIsRunning = false;
+
+        oldestArticlesBySource = new ArrayList<>(oldestArticles);
+
+        // publish results
+        cachedArticles.addAll(newArticles);
+        setArticlesList(cachedArticles);
     }
 }// end AllArticlesTabViewModel

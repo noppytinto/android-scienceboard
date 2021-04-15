@@ -318,8 +318,8 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
      */
     public void removeLoadingView(List<ListItem> articles) {
         articles.remove(articles.size() - 1);
-        int scrollPosition = articles.size();
-        notifyItemRemoved(scrollPosition);
+//        int scrollPosition = articles.size();
+//        notifyItemRemoved(scrollPosition);
     }
 
 

@@ -4,16 +4,17 @@ package com.nocorp.scienceboard.rss.repository;
 import android.content.Context;
 import android.os.ConditionVariable;
 import android.util.Log;
+
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.rss.room.ArticleDao;
 import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
-import com.nocorp.scienceboard.rss.room.SourceDao;
+
 import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ public class ArticleRepository {
     private final String TITLE = "title";
     private final String THUMBNAIL_URL = "thumbnail_url";
     private final String WEBPAGE_URL = "webpage_url";
-    private List<ListItem> cachedArticles;
+    private List<ListItem> fetchedArticles;
     private FirebaseFirestore db;
     private ArticlesRepositoryListener listener;
     private int sourcesFetched;
@@ -36,7 +37,7 @@ public class ArticleRepository {
     private final ConditionVariable releaseThread = new ConditionVariable();
     private final ConditionVariable releaseResource = new ConditionVariable();
     private boolean articlesFetched;
-    private Thread currentThread;
+    private List<DocumentSnapshot> oldestArticlesSnapshots;
 
 
     //----------------------------------------------------------- CONSTRUCTORS
@@ -53,11 +54,18 @@ public class ArticleRepository {
 
     // DOM strategy
     public void getArticles(List<Source> givenSources, int numArticlesForEachSource, Context context) {
-        if(givenSources==null || givenSources.size()<=0) return;
+        if(givenSources==null || givenSources.isEmpty()) return;
+
         downloadArticlesFromRemoteDb(givenSources, numArticlesForEachSource, context);
     }// end getArticles()
 
 
+    // DOM strategy
+    public void getNextArticles(List<DocumentSnapshot> oldestDocuments, int numArticlesForEachSource, Context context) {
+        if(oldestDocuments==null || oldestDocuments.isEmpty()) return;
+
+        downloadNextArticlesFromRemoteDb(oldestDocuments, numArticlesForEachSource, context);
+    }// end getArticles()
 
 
 
@@ -72,8 +80,8 @@ public class ArticleRepository {
      */
     private void downloadArticlesFromRemoteDb(List<Source> givenSources, int numArticlesForEachSource, Context context) {
         // download source data
-        currentThread = Thread.currentThread();
-        cachedArticles = new ArrayList<>();
+        fetchedArticles = new ArrayList<>();
+        oldestArticlesSnapshots = new ArrayList<>();
         sourcesToFetch = givenSources.size();
         sourcesFetched = 0;
         articlesFetched = false;
@@ -84,7 +92,25 @@ public class ArticleRepository {
         if(sourcesFetched >= sourcesToFetch) {
 //            releaseThread.close();
             Log.d(TAG, "SCIENCE_BOARD - all articles fetched");
-            listener.onArticlesFetchCompleted(cachedArticles);
+            listener.onArticlesFetchCompleted(fetchedArticles, oldestArticlesSnapshots);
+        }
+    }
+
+    private void downloadNextArticlesFromRemoteDb(List<DocumentSnapshot> oldestDocuments, int numArticlesForEachSource, Context context) {
+        // download source data
+        fetchedArticles = new ArrayList<>();
+        oldestArticlesSnapshots = new ArrayList<>();
+        sourcesToFetch = oldestDocuments.size();
+        sourcesFetched = 0;
+        articlesFetched = false;
+        Log.d(TAG, "SCIENCE_BOARD - sources to fetch: " + sourcesToFetch);
+        for(DocumentSnapshot currentDocument: oldestDocuments) {
+            downloadNextArticlesFromRemoteDb_companion(currentDocument, numArticlesForEachSource, context);
+        }
+        if(sourcesFetched >= sourcesToFetch) {
+//            releaseThread.close();
+            Log.d(TAG, "SCIENCE_BOARD - all articles fetched");
+            listener.onNextArticlesFetchCompleted(fetchedArticles, oldestArticlesSnapshots);
         }
     }
 
@@ -95,11 +121,20 @@ public class ArticleRepository {
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            Article article = buildArticle(document);
-                            if(article!=null)  {
-                                result.add(article);
+
+                        List<DocumentSnapshot> documentSnapshots = task.getResult().getDocuments();
+
+                        if(documentSnapshots!=null && !documentSnapshots.isEmpty()) {
+                            int i=0;
+                            for ( /*ignore*/ ; i<documentSnapshots.size(); i++) {
+                                DocumentSnapshot document = documentSnapshots.get(i);
+                                Article article = buildArticle(document);
+                                if(article!=null)  {
+                                    result.add(article);
+                                }
                             }
+                            // getting oldest document
+                            extractOldestSnapshots(documentSnapshots, i);
                         }
 
                         //
@@ -113,9 +148,9 @@ public class ArticleRepository {
                 });
         Log.d(TAG, "SCIENCE_BOARD - blocking on this thread until articles are fetched");
 
-        synchronized (cachedArticles) {
+        synchronized (fetchedArticles) {
             try {
-                cachedArticles.wait();
+                fetchedArticles.wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -123,16 +158,69 @@ public class ArticleRepository {
         Log.d(TAG, "SCIENCE_BOARD - thread resumed");
     }
 
+    private void downloadNextArticlesFromRemoteDb_companion(DocumentSnapshot startingDocument, int givenLimit, Context context) {
+        List<Article> result = new ArrayList<>();
+
+        Query query = db.collection(ARTICLES_COLLECTION_NAME)
+                .orderBy(PUB_DATE, Query.Direction.DESCENDING)
+                .startAfter(startingDocument)
+                .limit(givenLimit);
+
+        query.get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+
+                        List<DocumentSnapshot> documentSnapshots = task.getResult().getDocuments();
+
+                        if(documentSnapshots!=null && !documentSnapshots.isEmpty()) {
+                            int i=0;
+                            for ( /*ignore*/ ; i<documentSnapshots.size(); i++) {
+                                DocumentSnapshot document = documentSnapshots.get(i);
+                                Article article = buildArticle(document);
+                                if(article!=null)  {
+                                    result.add(article);
+                                }
+                            }
+                            // getting oldest document
+                            extractOldestSnapshots(documentSnapshots, i);
+                        }
+
+                        //
+                        onArticlesFetchCompleted(result, context);
+
+                    } else {
+                        Log.e(TAG, "SCIENCE_BOARD - Error getting articles.", task.getException());
+//                        listener.onArticlesFetchFailed("Error getting articles." + task.getException().getMessage());
+                        sourcesFetched++;
+                    }
+                });
+        Log.d(TAG, "SCIENCE_BOARD - blocking on this thread until articles are fetched");
+
+        synchronized (fetchedArticles) {
+            try {
+                fetchedArticles.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        Log.d(TAG, "SCIENCE_BOARD - thread resumed");
+    }
+
+    private void extractOldestSnapshots(List<DocumentSnapshot> documentSnapshots, int i) {
+        oldestArticlesSnapshots.add(documentSnapshots.get(i-1));
+    }
+
     private void onArticlesFetchCompleted(List<Article> articles, Context context) {
         if(articles==null || articles.size()<=0) return;
-        cachedArticles.addAll(articles);
+        fetchedArticles.addAll(articles);
         saveArticlesInRoom(articles, context);
         sourcesFetched++;
         Log.d(TAG, "SCIENCE_BOARD - article fetched, resuming thread");
-        synchronized(cachedArticles){
-            cachedArticles.notify();
+        synchronized(fetchedArticles){
+            fetchedArticles.notify();
         }
     }
+
 
     // DOM strategy
     private List<Article> combineArticles(List<Source> sources) {
@@ -150,7 +238,7 @@ public class ArticleRepository {
         return result;
     }
 
-    private Article buildArticle(QueryDocumentSnapshot document) {
+    private Article buildArticle(DocumentSnapshot document) {
         Article article = null;
         if(document==null) return article;
 

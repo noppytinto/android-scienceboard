@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -23,7 +24,6 @@ import com.nocorp.scienceboard.MobileNavigationDirections;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentAllTabBinding;
 import com.nocorp.scienceboard.model.Article;
-import com.nocorp.scienceboard.model.LoadingViewItem;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
@@ -46,10 +46,11 @@ public class AllTabFragment extends Fragment implements
     private FragmentAllTabBinding binding;
     private Toast toast;
     private SourceViewModel sourceViewModel;
-    private List<Source> sources;
+    private List<Source> sourcesFetched;
     private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 3;
     private boolean isLoading = false;
     private List<ListItem> articlesToDisplay;
+    private final int AD_DISTANCE = 5; // distance between teh ads (in terms of items)
 
 
 
@@ -85,26 +86,26 @@ public class AllTabFragment extends Fragment implements
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         sourceViewModel.getObservableAllSources().observe(getViewLifecycleOwner(), sources -> {
-            if(sources!=null && sources.size()>0) {
+            if(sources!=null && !sources.isEmpty()) {
                 // TODO
-                this.sources = sources;
+                this.sourcesFetched = sources;
                 allTabViewModel.fetchArticles(sources, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, false);
             }
         });
 
         allTabViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), resultArticles -> {
-            if(resultArticles==null || resultArticles.size()==0) {
-                swipeRefreshLayout.setRefreshing(false);
-                progressIndicator.setVisibility(View.GONE);
+            swipeRefreshLayout.setRefreshing(false);
+            progressIndicator.setVisibility(View.GONE);
+
+            if(resultArticles==null || resultArticles.isEmpty()) {
 //                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
             }
             else {
-                swipeRefreshLayout.setRefreshing(false);
-                progressIndicator.setVisibility(View.GONE);
-                resultArticles = adProvider.populateListWithAds(resultArticles, 5);
+                resultArticles = adProvider.populateListWithAds(resultArticles, AD_DISTANCE);
                 articlesToDisplay = new ArrayList<>(resultArticles);
                 recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
                 showCenteredToast("articles fetched");
+                isLoading = false;
             }
         });
     }
@@ -170,32 +171,15 @@ public class AllTabFragment extends Fragment implements
         // adding loading view
         recyclerAdapterArticlesList.addLoadingView(articlesToDisplay);
 
-        // TODO: load new items (asynchronously)
-        // recyclerAdapterArticlesList.notifyDataSetChanged();
+        // TODO: move into viewmodel ?
+        // load new items
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            // removing loading view
+            recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
 
-        // TODO: removing loading view
-//        recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
-
-
-//        final Handler handler = new Handler();
-//        handler.postDelayed(() -> {
-//            // Do something after 5s
-//
-//        }, 5000);
-
-
-//        int currentSize = scrollPosition;
-//        int nextLimit = currentSize + 10;
-//
-//        //
-//        while (currentSize - 1 < nextLimit) {
-////            articlesToDisplay.add("Item " + currentSize); //TODO
-//            currentSize++;
-//        }
-
-        isLoading = false;
-
-        //TODO
+            // load new items (asynchronously)
+            allTabViewModel.fetchNextArticles(NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE);
+        }, 1000 * 2); // delay for 2 seconds
     }
 
     private void setupSwipeDownToRefresh() {
@@ -206,7 +190,7 @@ public class AllTabFragment extends Fragment implements
     }
 
     private void refreshAction() {
-        allTabViewModel.fetchArticles(sources, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, true);
+        allTabViewModel.fetchArticles(sourcesFetched, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, true);
     }
 
     @Override

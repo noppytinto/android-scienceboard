@@ -7,6 +7,8 @@ import android.util.Log;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.model.VisitedArticle;
@@ -28,13 +30,14 @@ public class TechTabViewModel extends AndroidViewModel implements ArticlesReposi
     private ArticleRepository articleRepository;
     private final List<String> mainCategories = Arrays.asList("tech");
     private final String TECH_CATEGORY = "tech";
-    private static List<Source> targetSources;
+    private static List<Source> pickedSources;
     private static boolean taskIsRunning;
     private static boolean saveInHistoryTaskIsRunning;
     private static String lastVisitedArticleId;
     private static long oldVisitedDate;
     private SourceRepository sourceRepository;
     private static List<ListItem> cachedArticles;
+    private static List<DocumentSnapshot> oldestArticlesBySource;
 
 
     //------------------------------------------------------------ CONSTRUCTORS
@@ -66,7 +69,7 @@ public class TechTabViewModel extends AndroidViewModel implements ArticlesReposi
             downloadArticles(givenSources, numArticlesForEachSource);
         }
         else {
-            smartArticlesDownload(givenSources, numArticlesForEachSource);
+            tryCachedArticles(givenSources, numArticlesForEachSource);
         }
     }
 
@@ -76,10 +79,10 @@ public class TechTabViewModel extends AndroidViewModel implements ArticlesReposi
                 cachedArticles = new ArrayList<>();
                 taskIsRunning = true;
                 // pick sources for ALL tab, only once
-                if(targetSources==null || targetSources.size()<=0) {
-                    targetSources = sourceRepository.getAllSourcesOfThisCategory(givenSources, TECH_CATEGORY);
+                if(pickedSources ==null || pickedSources.size()<=0) {
+                    pickedSources = sourceRepository.getAllSourcesOfThisCategory(givenSources, TECH_CATEGORY);
                 }
-                articleRepository.getArticles(targetSources, numArticlesForEachSource, getApplication());
+                articleRepository.getArticles(pickedSources, numArticlesForEachSource, getApplication());
             };
 
             ThreadManager threadManager = ThreadManager.getInstance();
@@ -87,7 +90,16 @@ public class TechTabViewModel extends AndroidViewModel implements ArticlesReposi
         }
     }
 
-    private void smartArticlesDownload(List<Source> givenSources, int numArticlesForEachSource) {
+    public void fetchNextArticles(int numArticlesForEachSource) {
+        Runnable task = () -> {
+            articleRepository.getNextArticles(oldestArticlesBySource, numArticlesForEachSource, getApplication());
+        };
+
+        ThreadManager threadManager = ThreadManager.getInstance();
+        threadManager.runTask(task);
+    }
+
+    private void tryCachedArticles(List<Source> givenSources, int numArticlesForEachSource) {
         if(cachedArticles == null) {
             downloadArticles(givenSources, numArticlesForEachSource);
         }
@@ -176,8 +188,10 @@ public class TechTabViewModel extends AndroidViewModel implements ArticlesReposi
 
 
     @Override
-    public void onArticlesFetchCompleted(List<ListItem> articles) {
+    public void onArticlesFetchCompleted(List<ListItem> articles, List<DocumentSnapshot> oldestArticles) {
         taskIsRunning = false;
+
+        oldestArticlesBySource = oldestArticles;
 
         // publish results
         cachedArticles = articles;
@@ -207,5 +221,16 @@ public class TechTabViewModel extends AndroidViewModel implements ArticlesReposi
     @Override
     public void onTechArticlesFetchFailed(String cause) {
 
+    }
+
+    @Override
+    public void onNextArticlesFetchCompleted(List<ListItem> newArticles, List<DocumentSnapshot> oldestArticles) {
+        taskIsRunning = false;
+
+        oldestArticlesBySource = new ArrayList<>(oldestArticles);
+
+        // publish results
+        cachedArticles.addAll(newArticles);
+        setArticlesList(cachedArticles);
     }
 }// end TechTabViewModel
