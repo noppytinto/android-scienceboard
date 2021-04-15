@@ -108,11 +108,10 @@ public class ArticleRepository {
                     } else {
                         Log.e(TAG, "SCIENCE_BOARD - Error getting articles.", task.getException());
 //                        listener.onArticlesFetchFailed("Error getting articles." + task.getException().getMessage());
+                        sourcesFetched++;
                     }
                 });
         Log.d(TAG, "SCIENCE_BOARD - blocking on this thread until articles are fetched");
-//        releaseThread.block();
-
 
         synchronized (cachedArticles) {
             try {
