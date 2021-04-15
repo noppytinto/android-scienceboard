@@ -175,14 +175,8 @@ public class TechTabFragment extends Fragment implements
         recyclerAdapterArticlesList.addLoadingView(articlesToDisplay);
 
         // TODO: move into viewmodel ?
-        // load new items
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            // removing loading view
-            recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
-
-            // load new items (asynchronously)
-            techTabViewModel.fetchNextArticles(NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE);
-        }, 1000 * 2); // delay for 2 seconds
+        // load new items (asynchronously)
+        techTabViewModel.fetchNextArticles(NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE);
     }
 
 
