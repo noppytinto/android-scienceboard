@@ -79,5 +79,10 @@ public class HistoryViewModel extends AndroidViewModel implements HistoryReposit
         Log.d(TAG, "SCIENCE_BOARD - onHistoryFetchFailed: articles fetching failed" + cause);
     }
 
+    @Override
+    public void onHistoryNuked(boolean nuked) {
+        setArticlesList(null);
+    }
+
 
 }// end HistoryViewModel

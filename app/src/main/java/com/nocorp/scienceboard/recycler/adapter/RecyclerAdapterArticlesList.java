@@ -38,6 +38,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
     private final String TAG = this.getClass().getSimpleName();
     private List<ListItem> recyclerList;
     private OnArticleClickedListener listener;
+    private final float THUMBNAIL_SIZE_MULTIPLIER = 0.50f;
 
     private static final int PROGRESS_INDICATOR_TYPE = 0;
     private static final int ARTICLE_TYPE = 1;
@@ -201,7 +202,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
                 Glide.with(holder.itemView.getContext())
                         .load(thumbnailUrl)
                         .apply(gildeOptions)
-                        .thumbnail(/*sizeMultiplier = 0.25% less than original*/ 0.25f)
+                        .thumbnail(/*sizeMultiplier = 0.25% less than original*/ THUMBNAIL_SIZE_MULTIPLIER)
                         .transition(withCrossFade())
                         .into(holder.thumbnail);
 
@@ -244,7 +245,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
                 Glide.with(holder.itemView.getContext())
                         .load(thumbnailUrl)
                         .apply(gildeOptions)
-                        .thumbnail(/*sizeMultiplier = 0.25% less than original*/ 0.25f)
+                        .thumbnail(/*sizeMultiplier = 0.25% less than original*/ THUMBNAIL_SIZE_MULTIPLIER)
                         .transition(withCrossFade())
                         .into(holder.thumbnail);
 

@@ -25,4 +25,7 @@ public interface HistoryDao {
             "WHERE id = :targetIdentifier AND visited_date = :oldVisitedDate")
     int update(long newVisitedDate, String targetIdentifier, long oldVisitedDate);
 
+    @Query("DELETE FROM VisitedArticle")
+    public void nukeTable();
+
 }

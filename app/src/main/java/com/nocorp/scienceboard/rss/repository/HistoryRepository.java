@@ -23,10 +23,6 @@ public class HistoryRepository{
 
     //------------------------------------------------------------ CONSTRUCTORS
 
-    public HistoryRepository(Context context) {
-
-    }
-
     public HistoryRepository(HistoryRepositoryListener listener) {
         this.listener = listener;
     }
@@ -51,10 +47,7 @@ public class HistoryRepository{
             List<ListItem> result = null;
 
             if(temp!=null && temp.size()>0) {
-                result = new ArrayList<>();
-                for(Article article : temp) {
-                    result.add((VisitedArticle) article);
-                }
+                result = new ArrayList<>(temp);
             }
 
             listener.onHistoryFetchCompleted(result);
@@ -65,7 +58,24 @@ public class HistoryRepository{
             t.runTask(task);
         } catch (Exception e) {
             e.printStackTrace();
-            Log.d(TAG, "SCIENCE_BOARD - getHistoryFromRoom: cannot start thread " + e.getMessage());
+            Log.d(TAG, "SCIENCE_BOARD - getFromRoom: cannot start thread " + e.getMessage());
+        }
+    }
+
+    private void nukeHistory(Context context) {
+        HistoryDao dao = getHistoryDao(context);
+
+        Runnable task = () -> {
+            dao.nukeTable();
+            listener.onHistoryNuked(true);
+        };
+
+        ThreadManager t = ThreadManager.getInstance();
+        try {
+            t.runTask(task);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(TAG, "SCIENCE_BOARD - nukeHistory: cannot start thread " + e.getMessage());
         }
     }
 
