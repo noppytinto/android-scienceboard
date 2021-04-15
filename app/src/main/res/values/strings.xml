@@ -24,6 +24,6 @@
     <string name="bookmarks">Bookmarks</string>
     <string name="history">History</string>
     <string name="string_history_fetched">history fetched</string>
-    <string name="string_clear_history">Clear history</string>
+    <string name="string_clear_history">Clear History</string>
     <string name="string_clear">clear</string>
 </resources>

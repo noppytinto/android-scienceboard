@@ -54,6 +54,6 @@
 
     <item
         android:id="@+id/option_webviewMenu_delete"
-        android:title="Clear all browsing data"
+        android:title="Clear cache/cookies"
         app:showAsAction="never" />
 </menu>

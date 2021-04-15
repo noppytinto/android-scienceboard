@@ -27,6 +27,7 @@ import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
@@ -232,15 +233,29 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
             return true;
         }
         else if(item.getItemId() == R.id.option_webviewMenu_delete) {
-            deleteBrowsingDataAction();
+            clearCacheCookiesAction();
             return true;
         }
         return false;
     }
 
-    private void deleteBrowsingDataAction() {
-        WebStorage.getInstance().deleteAllData();
-        showBottomToast(getString(R.string.string_browsing_data_deleted));
+    private void clearCacheCookiesAction() {
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Do you want clear cache/cookies?")
+                .setPositiveButton("yes", (dialog, listener) -> {
+                    //
+                    WebStorage.getInstance().deleteAllData();
+                    showBottomToast("cache/cookies deleted");
+                    dialog.dismiss();
+                })
+                .setNegativeButton("no", (dialog, listener)-> {
+                    //
+                    dialog.dismiss();
+//                    showCenteredToast("operation aborted");
+
+                })
+                .show();
+
     }
 
     private void stopPageLoadingAction() {
