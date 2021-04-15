@@ -34,7 +34,9 @@ public class ArticleRepository {
     private int sourcesFetched;
     private int sourcesToFetch;
     private final ConditionVariable releaseThread = new ConditionVariable();
-
+    private final ConditionVariable releaseResource = new ConditionVariable();
+    private boolean articlesFetched;
+    private Thread currentThread;
 
 
     //----------------------------------------------------------- CONSTRUCTORS
@@ -70,17 +72,20 @@ public class ArticleRepository {
      */
     private void downloadArticlesFromRemoteDb(List<Source> givenSources, int numArticlesForEachSource, Context context) {
         // download source data
+        currentThread = Thread.currentThread();
         cachedArticles = new ArrayList<>();
         sourcesToFetch = givenSources.size();
         sourcesFetched = 0;
+        articlesFetched = false;
         Log.d(TAG, "SCIENCE_BOARD - sources to fetch: " + sourcesToFetch);
         for(Source currentSource: givenSources) {
             downloadArticlesFromRemoteDb_companion(currentSource.getId(), numArticlesForEachSource, context);
         }
-        Log.d(TAG, "SCIENCE_BOARD - blocking on this thread until sources are all fetched");
-        releaseThread.block();
-        Log.d(TAG, "SCIENCE_BOARD - thread released");
-        listener.onArticlesFetchCompleted(cachedArticles);
+        if(sourcesFetched >= sourcesToFetch) {
+//            releaseThread.close();
+            Log.d(TAG, "SCIENCE_BOARD - all articles fetched");
+            listener.onArticlesFetchCompleted(cachedArticles);
+        }
     }
 
     // get the latest <limit> articles
@@ -105,6 +110,18 @@ public class ArticleRepository {
 //                        listener.onArticlesFetchFailed("Error getting articles." + task.getException().getMessage());
                     }
                 });
+        Log.d(TAG, "SCIENCE_BOARD - blocking on this thread until articles are fetched");
+//        releaseThread.block();
+
+
+        synchronized (cachedArticles) {
+            try {
+                cachedArticles.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        Log.d(TAG, "SCIENCE_BOARD - thread resumed");
     }
 
     private void onArticlesFetchCompleted(List<Article> articles, Context context) {
@@ -112,10 +129,9 @@ public class ArticleRepository {
         cachedArticles.addAll(articles);
         saveArticlesInRoom(articles, context);
         sourcesFetched++;
-        Log.d(TAG, "SCIENCE_BOARD - sources fetched: " + sourcesFetched);
-        if(sourcesFetched >= sourcesToFetch) {
-            releaseThread.open();
-            Log.d(TAG, "SCIENCE_BOARD - condition verified, releasing thread");
+        Log.d(TAG, "SCIENCE_BOARD - article fetched, resuming thread");
+        synchronized(cachedArticles){
+            cachedArticles.notify();
         }
     }
 

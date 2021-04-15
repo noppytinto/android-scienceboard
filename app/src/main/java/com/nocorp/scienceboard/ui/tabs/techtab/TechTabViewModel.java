@@ -180,6 +180,7 @@ public class TechTabViewModel extends AndroidViewModel implements ArticlesReposi
         taskIsRunning = false;
 
         // publish results
+        cachedArticles = articles;
         setArticlesList(articles);
     }
 

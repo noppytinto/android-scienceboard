@@ -66,6 +66,7 @@ public class TechTabFragment extends Fragment implements
                              @Nullable Bundle savedInstanceState) {
         binding = FragmentTechTabBinding.inflate(getLayoutInflater());
         view = binding.getRoot();
+        Log.d(TAG, "SCIENCE_BOARD - onCreateView: called");
         return view;
     }
 

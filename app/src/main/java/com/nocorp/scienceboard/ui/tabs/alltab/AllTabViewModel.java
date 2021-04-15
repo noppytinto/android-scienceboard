@@ -178,6 +178,7 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
         taskIsRunning = false;
 
         // publish results
+        cachedArticles = articles;
         setArticlesList(articles);
     }
 
