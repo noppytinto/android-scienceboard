@@ -93,7 +93,7 @@ public class TechTabViewModel extends AndroidViewModel implements ArticlesReposi
                 cachedArticles = new ArrayList<>();
                 taskIsRunning = true;
                 // pick sources for ALL tab, only once
-                if(pickedSources ==null || pickedSources.size()<=0) {
+                if(pickedSources == null || pickedSources.isEmpty()) {
                     pickedSources = sourceRepository.getAllSourcesOfThisCategory(givenSources, TECH_CATEGORY);
                 }
                 articleRepository.getArticles(pickedSources, numArticlesForEachSource, getApplication());

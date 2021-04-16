@@ -2,7 +2,6 @@ package com.nocorp.scienceboard.rss.repository;
 
 
 import android.content.Context;
-import android.os.ConditionVariable;
 import android.util.Log;
 
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -32,10 +31,8 @@ public class ArticleRepository {
     private List<ListItem> fetchedArticles;
     private FirebaseFirestore db;
     private ArticlesRepositoryListener listener;
-    private int sourcesFetched;
-    private int sourcesToFetch;
-    private final ConditionVariable releaseThread = new ConditionVariable();
-    private final ConditionVariable releaseResource = new ConditionVariable();
+    private int sourcesConsumed;
+    private int sourcesToConsume;
     private boolean articlesFetched;
     private List<DocumentSnapshot> oldestArticlesSnapshots;
 
@@ -55,13 +52,15 @@ public class ArticleRepository {
     public void getArticles(List<Source> givenSources, int numArticlesForEachSource, Context context) {
         if(givenSources==null || givenSources.isEmpty()) return;
 
-        downloadArticlesFromRemoteDb(givenSources, numArticlesForEachSource, context);
+        // server strategy
+        downloadArticlesFromServer(givenSources, numArticlesForEachSource, context);
     }
 
-    public void getNextArticles(List<DocumentSnapshot> oldestDocuments, int numArticlesForEachSource, Context context) {
-        if(oldestDocuments==null || oldestDocuments.isEmpty()) return;
+    public void getNextArticles(List<DocumentSnapshot> oldestArticles, int numArticlesForEachSource, Context context) {
+        if(oldestArticles==null || oldestArticles.isEmpty()) return;
 
-        downloadNextArticlesFromRemoteDb(oldestDocuments, numArticlesForEachSource, context);
+        // server strategy
+        downloadNextArticlesFromServer(oldestArticles, numArticlesForEachSource, context);
     }
 
 
@@ -75,44 +74,29 @@ public class ArticleRepository {
      * TODO implemente real download limit
      * since this is a fake limit, because alla rticles are always downloaded regardless
      */
-    private void downloadArticlesFromRemoteDb(List<Source> givenSources, int numArticlesForEachSource, Context context) {
-        // download source data
+    private void downloadArticlesFromServer(List<Source> givenSources, int numArticlesForEachSource, Context context) {
+        // download source articles
         fetchedArticles = new ArrayList<>();
         oldestArticlesSnapshots = new ArrayList<>();
-        sourcesToFetch = givenSources.size();
-        sourcesFetched = 0;
+        sourcesToConsume = givenSources.size();
+        sourcesConsumed = 0;
         articlesFetched = false;
-        Log.d(TAG, "SCIENCE_BOARD - sources to fetch: " + sourcesToFetch);
+        Log.d(TAG, "SCIENCE_BOARD - sources to consume: " + sourcesToConsume);
+
+        //
         for(Source currentSource: givenSources) {
-            downloadArticlesFromRemoteDb_companion(currentSource.getId(), numArticlesForEachSource, context);
+            downloadArticlesFromServer_companion(currentSource.getId(), numArticlesForEachSource, context);
         }
-        if(sourcesFetched >= sourcesToFetch) {
-//            releaseThread.close();
+
+        //
+        if(sourcesConsumed >= sourcesToConsume) {
             Log.d(TAG, "SCIENCE_BOARD - all articles fetched");
             listener.onArticlesFetchCompleted(fetchedArticles, oldestArticlesSnapshots);
         }
     }
 
-    private void downloadNextArticlesFromRemoteDb(List<DocumentSnapshot> oldestDocuments, int numArticlesForEachSource, Context context) {
-        // download source data
-        fetchedArticles = new ArrayList<>();
-        oldestArticlesSnapshots = new ArrayList<>();
-        sourcesToFetch = oldestDocuments.size();
-        sourcesFetched = 0;
-        articlesFetched = false;
-        Log.d(TAG, "SCIENCE_BOARD - sources to fetch: " + sourcesToFetch);
-        for(DocumentSnapshot currentDocument: oldestDocuments) {
-            downloadNextArticlesFromRemoteDb_companion(currentDocument, numArticlesForEachSource, context);
-        }
-        if(sourcesFetched >= sourcesToFetch) {
-//            releaseThread.close();
-            Log.d(TAG, "SCIENCE_BOARD - all articles fetched");
-            listener.onNextArticlesFetchCompleted(fetchedArticles, oldestArticlesSnapshots);
-        }
-    }
-
     // get the latest <limit> articles
-    private void downloadArticlesFromRemoteDb_companion(String sourceName, int limit, Context context) {
+    private void downloadArticlesFromServer_companion(String sourceName, int limit, Context context) {
         List<Article> result = new ArrayList<>();
         db.collection(ARTICLES_COLLECTION_NAME).whereEqualTo(SOURCE_ID, (String)sourceName).orderBy(PUB_DATE, Query.Direction.DESCENDING).limit(limit)
                 .get()
@@ -140,7 +124,7 @@ public class ArticleRepository {
                     } else {
                         Log.e(TAG, "SCIENCE_BOARD - Error getting articles.", task.getException());
 //                        listener.onArticlesFetchFailed("Error getting articles." + task.getException().getMessage());
-                        sourcesFetched++;
+                        sourcesConsumed++;
                     }
                 });
         Log.d(TAG, "SCIENCE_BOARD - blocking on this thread until articles are fetched");
@@ -155,7 +139,28 @@ public class ArticleRepository {
         Log.d(TAG, "SCIENCE_BOARD - thread resumed");
     }
 
-    private void downloadNextArticlesFromRemoteDb_companion(DocumentSnapshot startingDocument, int givenLimit, Context context) {
+
+
+
+    private void downloadNextArticlesFromServer(List<DocumentSnapshot> givenOldestArticles, int numArticlesForEachSource, Context context) {
+        // download source data
+        fetchedArticles = new ArrayList<>();
+        oldestArticlesSnapshots = new ArrayList<>();
+        sourcesToConsume = givenOldestArticles.size();
+        sourcesConsumed = 0;
+        articlesFetched = false;
+        Log.d(TAG, "SCIENCE_BOARD - sources to fetch: " + sourcesToConsume);
+        for(DocumentSnapshot currentDocument: givenOldestArticles) {
+            downloadNextArticlesFromServer_companion(currentDocument, numArticlesForEachSource, context);
+        }
+        if(sourcesConsumed >= sourcesToConsume) {
+//            releaseThread.close();
+            Log.d(TAG, "SCIENCE_BOARD - all articles fetched");
+            listener.onNextArticlesFetchCompleted(fetchedArticles, oldestArticlesSnapshots);
+        }
+    }
+
+    private void downloadNextArticlesFromServer_companion(DocumentSnapshot startingDocument, int givenLimit, Context context) {
         List<Article> result = new ArrayList<>();
 
         Query query = db.collection(ARTICLES_COLLECTION_NAME)
@@ -189,7 +194,7 @@ public class ArticleRepository {
                     } else {
                         Log.e(TAG, "SCIENCE_BOARD - Error getting articles.", task.getException());
 //                        listener.onArticlesFetchFailed("Error getting articles." + task.getException().getMessage());
-                        sourcesFetched++;
+                        sourcesConsumed++;
                     }
                 });
         Log.d(TAG, "SCIENCE_BOARD - blocking on this thread until articles are fetched");
@@ -212,7 +217,7 @@ public class ArticleRepository {
         if(articles==null || articles.size()<=0) return;
         fetchedArticles.addAll(articles);
         saveArticlesInRoom(articles, context);
-        sourcesFetched++;
+        sourcesConsumed++;
         Log.d(TAG, "SCIENCE_BOARD - article fetched, resuming thread");
         synchronized(fetchedArticles){
             fetchedArticles.notify();

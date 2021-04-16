@@ -27,6 +27,7 @@ import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
+import com.nocorp.scienceboard.ui.tabs.techtab.TechTabFragment;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
@@ -58,6 +59,7 @@ public class AllTabFragment extends Fragment implements
     //--------------------------------------------------------------------- CONSTRUCTORS
 
     public static AllTabFragment newInstance() {
+        Log.d(AllTabFragment.class.getSimpleName(), "SCIENCE_BOARD - newInstance: called");
         return new AllTabFragment();
     }
 
@@ -66,6 +68,11 @@ public class AllTabFragment extends Fragment implements
 
 
     //--------------------------------------------------------------------- ANDROID METHODS
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.d(TAG, "SCIENCE_BOARD - onCreate: called1");
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,

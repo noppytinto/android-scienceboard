@@ -46,7 +46,7 @@ public class TechTabFragment extends Fragment implements
     private SourceViewModel sourceViewModel;
     private List<Source> sourcesFetched;
     private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 1;
-    private final int AD_DISTANCE = 5; // distance between teh ads (in terms of items)
+    private final int AD_DISTANCE = 5; // distance between ads (in terms of items)
     private List<ListItem> articlesToDisplay;
     private boolean isLoading = false;
 
@@ -56,12 +56,20 @@ public class TechTabFragment extends Fragment implements
     //--------------------------------------------------------------------- CONSTRUCTORS
 
     public static TechTabFragment newInstance() {
+        Log.d(TechTabFragment.class.getSimpleName(), "SCIENCE_BOARD - newInstance: called");
         return new TechTabFragment();
     }
 
 
 
     //--------------------------------------------------------------------- ANDROID METHODS
+
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.d(TAG, "SCIENCE_BOARD - onCreate: called1");
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,

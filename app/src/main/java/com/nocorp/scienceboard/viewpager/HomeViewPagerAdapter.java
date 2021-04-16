@@ -20,14 +20,15 @@ public class HomeViewPagerAdapter extends FragmentStateAdapter {
     public Fragment createFragment(int position) {
         switch (position) {
             case 0: {
-                Fragment allArticlesTabFragment = AllTabFragment.newInstance();
 //                Bundle args = new Bundle();
 //                // Our object is just an integer :-P
 //                args.putInt(allArticlesTabFragment.ARG_OBJECT, position + 1);
-                return allArticlesTabFragment;
+                return AllTabFragment.newInstance();
             }
-            default:
+            case 1:
                 return TechTabFragment.newInstance();
+            default:
+                return new Fragment();
         }
     }
 
