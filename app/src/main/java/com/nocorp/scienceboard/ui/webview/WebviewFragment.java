@@ -439,6 +439,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         webView.setScrollbarFadingEnabled(false);
         webView.setFocusable(true);
         webView.setFocusableInTouchMode(true);
+//        webView.setLayerType(WebView.LAYER_TYPE_SOFTWARE, null); // TODO: this might fix blank screen porblem
         defineWebclientBehaviorMain(webView);
     }
 
