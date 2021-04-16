@@ -1,23 +1,25 @@
 package com.nocorp.scienceboard.viewpager;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.lifecycle.Lifecycle;
+import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
-
 import com.nocorp.scienceboard.ui.tabs.alltab.AllTabFragment;
 import com.nocorp.scienceboard.ui.tabs.techtab.TechTabFragment;
 
 public class HomeViewPagerAdapter extends FragmentStateAdapter {
+    private final String TAG = this.getClass().getSimpleName();
 
-    public HomeViewPagerAdapter(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle) {
-        super(fragmentManager, lifecycle);
+    public HomeViewPagerAdapter(@NonNull FragmentActivity fragment) {
+        super(fragment);
     }
 
     @NonNull
     @Override
     public Fragment createFragment(int position) {
+        Log.d(TAG, "SCIENCE_BOARD - createFragment: position clicked: " + position);
         switch (position) {
             case 0: {
 //                Bundle args = new Bundle();
@@ -27,9 +29,18 @@ public class HomeViewPagerAdapter extends FragmentStateAdapter {
             }
             case 1:
                 return TechTabFragment.newInstance();
-            default:
+            case 2:
+                return new Fragment();
+            case 3:
+                return new Fragment();
+            case 4:
+                return new Fragment();
+            case 5:
                 return new Fragment();
         }
+
+        // TODO: fix
+        return null;
     }
 
     @Override
