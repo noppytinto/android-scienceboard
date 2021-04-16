@@ -52,20 +52,17 @@ public class ArticleRepository {
 
     //----------------------------------------------------------- PUBLIC METHODS
 
-    // DOM strategy
     public void getArticles(List<Source> givenSources, int numArticlesForEachSource, Context context) {
         if(givenSources==null || givenSources.isEmpty()) return;
 
         downloadArticlesFromRemoteDb(givenSources, numArticlesForEachSource, context);
-    }// end getArticles()
+    }
 
-
-    // DOM strategy
     public void getNextArticles(List<DocumentSnapshot> oldestDocuments, int numArticlesForEachSource, Context context) {
         if(oldestDocuments==null || oldestDocuments.isEmpty()) return;
 
         downloadNextArticlesFromRemoteDb(oldestDocuments, numArticlesForEachSource, context);
-    }// end getArticles()
+    }
 
 
 
@@ -164,6 +161,7 @@ public class ArticleRepository {
         Query query = db.collection(ARTICLES_COLLECTION_NAME)
                 .orderBy(PUB_DATE, Query.Direction.DESCENDING)
                 .startAfter(startingDocument)
+                .whereEqualTo("source_id", startingDocument.get("source_id"))
                 .limit(givenLimit);
 
         query.get()

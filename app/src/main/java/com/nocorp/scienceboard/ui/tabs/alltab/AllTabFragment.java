@@ -88,7 +88,7 @@ public class AllTabFragment extends Fragment implements
         sourceViewModel.getObservableAllSources().observe(getViewLifecycleOwner(), sources -> {
             if(sources!=null && !sources.isEmpty()) {
                 // TODO
-                this.sourcesFetched = sources;
+                this.sourcesFetched = new ArrayList<>(sources);
                 allTabViewModel.fetchArticles(sources, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, false);
             }
         });

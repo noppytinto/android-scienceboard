@@ -199,27 +199,7 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
 
     @Override
     public void onArticlesFetchFailed(String cause) {
-
-    }
-
-    @Override
-    public void onAllArticlesFetchCompleted(List<Article> articles) {
-
-    }
-
-    @Override
-    public void onAllArticlesFetchFailed(String cause) {
-
-    }
-
-    @Override
-    public void onTechArticlesFetchCompleted(List<Article> articles) {
-
-    }
-
-    @Override
-    public void onTechArticlesFetchFailed(String cause) {
-
+        // TODO
     }
 
     @Override
@@ -231,5 +211,10 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
         // publish results
         cachedArticles.addAll(newArticles);
         setArticlesList(cachedArticles);
+    }
+
+    @Override
+    public void onNextArticlesFetchFailed(String cause) {
+        // TODO
     }
 }// end AllArticlesTabViewModel

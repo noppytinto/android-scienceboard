@@ -27,8 +27,8 @@ import java.util.List;
 public class TechTabViewModel extends AndroidViewModel implements ArticlesRepositoryListener {
     private final String TAG = this.getClass().getSimpleName();
     private MutableLiveData<List<ListItem>> articlesList;
+    private MutableLiveData<List<ListItem>> nextArticlesList;
     private ArticleRepository articleRepository;
-    private final List<String> mainCategories = Arrays.asList("tech");
     private final String TECH_CATEGORY = "tech";
     private static List<Source> pickedSources;
     private static boolean taskIsRunning;
@@ -40,17 +40,21 @@ public class TechTabViewModel extends AndroidViewModel implements ArticlesReposi
     private static List<DocumentSnapshot> oldestArticlesBySource;
 
 
-    //------------------------------------------------------------ CONSTRUCTORS
+
+    //-------------------------------------------------------------------------------------------- CONSTRUCTORS
 
     public TechTabViewModel(Application application) {
         super(application);
         articlesList = new MutableLiveData<>();
         articleRepository = new ArticleRepository(this);
         sourceRepository = new SourceRepository();
+        nextArticlesList = new MutableLiveData<>();
     }
 
 
-    //------------------------------------------------------------ GETTERS/SETTERS
+
+
+    //-------------------------------------------------------------------------------------------- GETTERS/SETTERS
 
     public LiveData<List<ListItem>> getObservableArticlesList() {
         return articlesList;
@@ -60,9 +64,19 @@ public class TechTabViewModel extends AndroidViewModel implements ArticlesReposi
         this.articlesList.postValue(articlesList);
     }
 
+    public LiveData<List<ListItem>> getObservableNextArticlesList() {
+        return nextArticlesList;
+    }
+
+    public void setNextArticlesList(List<ListItem> articlesList) {
+        this.nextArticlesList.postValue(articlesList);
+    }
 
 
-    //------------------------------------------------------------ METHODS
+
+    //-------------------------------------------------------------------------------------------- METHODS
+
+    //-------------------------------------------------------------- FETCH ARTICLES
 
     public void fetchArticles(List<Source> givenSources, int numArticlesForEachSource, boolean forced) {
         if(forced) {
@@ -90,15 +104,6 @@ public class TechTabViewModel extends AndroidViewModel implements ArticlesReposi
         }
     }
 
-    public void fetchNextArticles(int numArticlesForEachSource) {
-        Runnable task = () -> {
-            articleRepository.getNextArticles(oldestArticlesBySource, numArticlesForEachSource, getApplication());
-        };
-
-        ThreadManager threadManager = ThreadManager.getInstance();
-        threadManager.runTask(task);
-    }
-
     private void tryCachedArticles(List<Source> givenSources, int numArticlesForEachSource) {
         if(cachedArticles == null) {
             downloadArticles(givenSources, numArticlesForEachSource);
@@ -107,6 +112,64 @@ public class TechTabViewModel extends AndroidViewModel implements ArticlesReposi
             setArticlesList(cachedArticles);
         }
     }
+
+    @Override
+    public void onArticlesFetchCompleted(List<ListItem> articles, List<DocumentSnapshot> oldestArticles) {
+        taskIsRunning = false;
+
+        oldestArticlesBySource = oldestArticles;
+
+        // publish results
+        cachedArticles = articles;
+        setArticlesList(articles);
+    }
+
+    @Override
+    public void onArticlesFetchFailed(String cause) {
+        taskIsRunning = false;
+
+        // TODO
+    }
+
+
+
+    //-------------------------------------------------------------- FETCH NEXT ARTICLES
+
+    public void fetchNextArticles(int numArticlesForEachSource) {
+        if(!taskIsRunning) {
+            Runnable task = () -> {
+                sleepforNseconds(2);
+                Log.d(TAG, "SCIENCE_BOARD - fetchNextArticles: fetching new articles");
+                articleRepository.getNextArticles(oldestArticlesBySource, numArticlesForEachSource, getApplication());
+            };
+
+            ThreadManager threadManager = ThreadManager.getInstance();
+            threadManager.runTask(task);
+        }
+    }
+
+
+    @Override
+    public void onNextArticlesFetchCompleted(List<ListItem> newArticles, List<DocumentSnapshot> oldestArticles) {
+        taskIsRunning = false;
+        oldestArticlesBySource = new ArrayList<>(oldestArticles);
+
+        // publish results
+        cachedArticles.addAll(newArticles);
+        setNextArticlesList(cachedArticles);
+    }
+
+    @Override
+    public void onNextArticlesFetchFailed(String cause) {
+        taskIsRunning = false;
+
+        // TODO
+    }
+
+
+
+
+    //-------------------------------------------------------------- HISTORY
 
     public void smartSaveInHistory(@NotNull Article givenArticle) {
         if(lastVisitedArticleId==null || lastVisitedArticleId.isEmpty()) {
@@ -186,51 +249,14 @@ public class TechTabViewModel extends AndroidViewModel implements ArticlesReposi
         return roomDatabase.getHistoryDao();
     }
 
-
-    @Override
-    public void onArticlesFetchCompleted(List<ListItem> articles, List<DocumentSnapshot> oldestArticles) {
-        taskIsRunning = false;
-
-        oldestArticlesBySource = oldestArticles;
-
-        // publish results
-        cachedArticles = articles;
-        setArticlesList(articles);
+    private void sleepforNseconds(long seconds) {
+        try {
+            Thread.sleep(1000 * seconds);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
-    @Override
-    public void onArticlesFetchFailed(String cause) {
 
-    }
 
-    @Override
-    public void onAllArticlesFetchCompleted(List<Article> articles) {
-
-    }
-
-    @Override
-    public void onAllArticlesFetchFailed(String cause) {
-
-    }
-
-    @Override
-    public void onTechArticlesFetchCompleted(List<Article> articles) {
-
-    }
-
-    @Override
-    public void onTechArticlesFetchFailed(String cause) {
-
-    }
-
-    @Override
-    public void onNextArticlesFetchCompleted(List<ListItem> newArticles, List<DocumentSnapshot> oldestArticles) {
-        taskIsRunning = false;
-
-        oldestArticlesBySource = new ArrayList<>(oldestArticles);
-
-        // publish results
-        cachedArticles.addAll(newArticles);
-        setArticlesList(cachedArticles);
-    }
 }// end TechTabViewModel

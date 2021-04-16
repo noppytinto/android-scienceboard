@@ -11,16 +11,12 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.nocorp.scienceboard.MobileNavigationDirections;
 import com.nocorp.scienceboard.R;
@@ -49,7 +45,7 @@ public class TechTabFragment extends Fragment implements
     private Toast toast;
     private SourceViewModel sourceViewModel;
     private List<Source> sourcesFetched;
-    private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 2;
+    private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 1;
     private final int AD_DISTANCE = 5; // distance between teh ads (in terms of items)
     private List<ListItem> articlesToDisplay;
     private boolean isLoading = false;
@@ -91,7 +87,7 @@ public class TechTabFragment extends Fragment implements
             Log.d(TAG, "SCIENCE_BOARD - observe: called");
             if(sources!=null && !sources.isEmpty()) {
                 // TODO
-                this.sourcesFetched = sources;
+                this.sourcesFetched = new ArrayList<>(sources);
                 techTabViewModel.fetchArticles(sources, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, false);
             }
         });
@@ -105,7 +101,7 @@ public class TechTabFragment extends Fragment implements
             }
             else {
                 resultArticles = adProvider.populateListWithAds(resultArticles, AD_DISTANCE);
-                articlesToDisplay = new ArrayList<>(resultArticles);
+                articlesToDisplay = resultArticles;
                 recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
                 showCenteredToast("articles fetched");
                 isLoading = false;
@@ -159,11 +155,11 @@ public class TechTabFragment extends Fragment implements
                 LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
 
                 if (!isLoading) {
-                    if (linearLayoutManager != null && linearLayoutManager.findLastCompletelyVisibleItemPosition() == articlesToDisplay.size() - 1) {
+                    if (linearLayoutManager != null &&
+                            linearLayoutManager.findLastCompletelyVisibleItemPosition() == articlesToDisplay.size() - 1) {
                         //bottom of list!
                         Log.d(TAG, "SCIENCE_BOARD - loadMore: reached the end of the recycler");
                         loadMore();
-                        isLoading = true;
                     }
                 }
             }
@@ -171,12 +167,30 @@ public class TechTabFragment extends Fragment implements
     }
 
     private void loadMore() {
+        isLoading = true;
+
         // adding loading view
+        observerNextArticlesFetch();
         recyclerAdapterArticlesList.addLoadingView(articlesToDisplay);
 
         // TODO: move into viewmodel ?
         // load new items (asynchronously)
         techTabViewModel.fetchNextArticles(NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE);
+    }
+
+    private void observerNextArticlesFetch() {
+        techTabViewModel.getObservableNextArticlesList().observe(getViewLifecycleOwner(), fetchedArticles -> {
+            if(fetchedArticles==null || fetchedArticles.isEmpty()) {
+//                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
+            }
+            else {
+                recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
+                fetchedArticles = adProvider.populateListWithAds(fetchedArticles, AD_DISTANCE);
+                articlesToDisplay = fetchedArticles;
+                recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
+                isLoading = false;
+            }
+        });
     }
 
 
