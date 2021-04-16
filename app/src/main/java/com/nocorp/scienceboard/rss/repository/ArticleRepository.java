@@ -33,7 +33,6 @@ public class ArticleRepository {
     private ArticlesRepositoryListener listener;
     private int sourcesConsumed;
     private int sourcesToConsume;
-    private boolean articlesFetched;
     private List<DocumentSnapshot> oldestArticlesSnapshots;
 
 
@@ -80,7 +79,6 @@ public class ArticleRepository {
         oldestArticlesSnapshots = new ArrayList<>();
         sourcesToConsume = givenSources.size();
         sourcesConsumed = 0;
-        articlesFetched = false;
         Log.d(TAG, "SCIENCE_BOARD - sources to consume: " + sourcesToConsume);
 
         //
@@ -148,7 +146,6 @@ public class ArticleRepository {
         oldestArticlesSnapshots = new ArrayList<>();
         sourcesToConsume = givenOldestArticles.size();
         sourcesConsumed = 0;
-        articlesFetched = false;
         Log.d(TAG, "SCIENCE_BOARD - sources to fetch: " + sourcesToConsume);
         for(DocumentSnapshot currentDocument: givenOldestArticles) {
             downloadNextArticlesFromServer_companion(currentDocument, numArticlesForEachSource, context);
@@ -197,8 +194,8 @@ public class ArticleRepository {
                         sourcesConsumed++;
                     }
                 });
-        Log.d(TAG, "SCIENCE_BOARD - blocking on this thread until articles are fetched");
 
+        Log.d(TAG, "SCIENCE_BOARD - blocking on this thread until articles are fetched");
         synchronized (fetchedArticles) {
             try {
                 fetchedArticles.wait();
@@ -214,10 +211,16 @@ public class ArticleRepository {
     }
 
     private void onArticlesFetchCompleted(List<Article> articles, Context context) {
-        if(articles==null || articles.size()<=0) return;
-        fetchedArticles.addAll(articles);
-        saveArticlesInRoom(articles, context);
-        sourcesConsumed++;
+        if(articles==null || articles.isEmpty()) {
+            // in case of no more articles to fetch
+            sourcesConsumed = sourcesToConsume;
+        }
+        else {
+            fetchedArticles.addAll(articles);
+            saveArticlesInRoom(articles, context);
+            sourcesConsumed++;
+        }
+
         Log.d(TAG, "SCIENCE_BOARD - article fetched, resuming thread");
         synchronized(fetchedArticles){
             fetchedArticles.notify();

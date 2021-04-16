@@ -46,9 +46,9 @@ public class TechTabViewModel extends AndroidViewModel implements ArticlesReposi
     public TechTabViewModel(Application application) {
         super(application);
         articlesList = new MutableLiveData<>();
+        nextArticlesList = new MutableLiveData<>();
         articleRepository = new ArticleRepository(this);
         sourceRepository = new SourceRepository();
-        nextArticlesList = new MutableLiveData<>();
     }
 
 
@@ -152,6 +152,7 @@ public class TechTabViewModel extends AndroidViewModel implements ArticlesReposi
     @Override
     public void onNextArticlesFetchCompleted(List<ListItem> newArticles, List<DocumentSnapshot> oldestArticles) {
         taskIsRunning = false;
+
         oldestArticlesBySource = new ArrayList<>(oldestArticles);
 
         // publish results

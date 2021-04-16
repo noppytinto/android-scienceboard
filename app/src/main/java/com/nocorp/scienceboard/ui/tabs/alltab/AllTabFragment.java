@@ -49,9 +49,9 @@ public class AllTabFragment extends Fragment implements
     private SourceViewModel sourceViewModel;
     private List<Source> sourcesFetched;
     private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 3;
-    private boolean isLoading = false;
-    private List<ListItem> articlesToDisplay;
     private final int AD_DISTANCE = 5; // distance between teh ads (in terms of items)
+    private List<ListItem> articlesToDisplay;
+    private boolean isLoading = false;
 
 
 
@@ -68,17 +68,13 @@ public class AllTabFragment extends Fragment implements
 
 
     //--------------------------------------------------------------------- ANDROID METHODS
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Log.d(TAG, "SCIENCE_BOARD - onCreate: called1");
-    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         binding = FragmentAllTabBinding.inflate(getLayoutInflater());
         view = binding.getRoot();
+        Log.d(TAG, "SCIENCE_BOARD - onCreateView: called");
         return view;
     }
 
@@ -167,7 +163,6 @@ public class AllTabFragment extends Fragment implements
                         //bottom of list!
                         Log.d(TAG, "SCIENCE_BOARD - loadMore: reached the end of the recycler");
                         loadMore();
-                        isLoading = true;
                     }
                 }
             }
@@ -175,12 +170,31 @@ public class AllTabFragment extends Fragment implements
     }
 
     private void loadMore() {
+        isLoading = true;
+
         // adding loading view
+        observerNextArticlesFetch();
         recyclerAdapterArticlesList.addLoadingView(articlesToDisplay);
 
         // TODO: move into viewmodel ?
         // load new items (asynchronously)
         allTabViewModel.fetchNextArticles(NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE);
+    }
+
+    private void observerNextArticlesFetch() {
+        allTabViewModel.getObservableNextArticlesList().observe(getViewLifecycleOwner(), fetchedArticles -> {
+            if(fetchedArticles==null || fetchedArticles.isEmpty()) {
+//                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
+                recyclerAdapterArticlesList.addLoadingView(articlesToDisplay);
+            }
+            else {
+                recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
+                fetchedArticles = adProvider.populateListWithAds(fetchedArticles, AD_DISTANCE);
+                articlesToDisplay = fetchedArticles;
+                recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
+                isLoading = false;
+            }
+        });
     }
 
     private void setupSwipeDownToRefresh() {

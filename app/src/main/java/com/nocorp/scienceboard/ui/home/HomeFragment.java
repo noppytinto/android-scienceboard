@@ -62,7 +62,7 @@ public class HomeFragment extends Fragment{
         viewPagerAdapter = new HomeViewPagerAdapter(requireActivity());
         viewPager.setAdapter(viewPagerAdapter);
         viewPager.setUserInputEnabled(false); // disables horiz. swipe to scroll tabs gestures
-        viewPager.setOffscreenPageLimit(1);
+        viewPager.setOffscreenPageLimit(1);// TODO: this might solve the "blank tab" problem, but needs more investigation, since the default strategy makes more sense
 
         TabLayoutMediator tabLayoutMediator = new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             switch (position) {

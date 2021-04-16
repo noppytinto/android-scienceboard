@@ -1,9 +1,7 @@
 package com.nocorp.scienceboard.ui.tabs.techtab;
 
 import androidx.lifecycle.ViewModelProvider;
-
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -27,7 +25,6 @@ import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,13 +61,6 @@ public class TechTabFragment extends Fragment implements
 
     //--------------------------------------------------------------------- ANDROID METHODS
 
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Log.d(TAG, "SCIENCE_BOARD - onCreate: called1");
-    }
-
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
@@ -90,9 +80,7 @@ public class TechTabFragment extends Fragment implements
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Log.d(TAG, "SCIENCE_BOARD - onActivityCreated: called");
         sourceViewModel.getObservableAllSources().observe(getViewLifecycleOwner(), sources -> {
-            Log.d(TAG, "SCIENCE_BOARD - observe: called");
             if(sources!=null && !sources.isEmpty()) {
                 // TODO
                 this.sourcesFetched = new ArrayList<>(sources);
@@ -109,7 +97,7 @@ public class TechTabFragment extends Fragment implements
             }
             else {
                 resultArticles = adProvider.populateListWithAds(resultArticles, AD_DISTANCE);
-                articlesToDisplay = resultArticles;
+                articlesToDisplay = new ArrayList<>(resultArticles);
                 recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
                 showCenteredToast("articles fetched");
                 isLoading = false;
@@ -190,6 +178,7 @@ public class TechTabFragment extends Fragment implements
         techTabViewModel.getObservableNextArticlesList().observe(getViewLifecycleOwner(), fetchedArticles -> {
             if(fetchedArticles==null || fetchedArticles.isEmpty()) {
 //                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
+                recyclerAdapterArticlesList.addLoadingView(articlesToDisplay);
             }
             else {
                 recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
