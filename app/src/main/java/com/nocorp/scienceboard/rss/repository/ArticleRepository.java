@@ -28,6 +28,7 @@ public class ArticleRepository {
     private final String TITLE = "title";
     private final String THUMBNAIL_URL = "thumbnail_url";
     private final String WEBPAGE_URL = "webpage_url";
+    private final String KEYWORDS = "keywords";
     private List<ListItem> fetchedArticles;
     private FirebaseFirestore db;
     private ArticlesRepositoryListener listener;
@@ -157,7 +158,9 @@ public class ArticleRepository {
         }
     }
 
-    private void downloadNextArticlesFromServer_companion(DocumentSnapshot startingDocument, int givenLimit, Context context) {
+    private void downloadNextArticlesFromServer_companion(DocumentSnapshot startingDocument,
+                                                          int givenLimit,
+                                                          Context context) {
         List<Article> result = new ArrayList<>();
 
         Query query = db.collection(ARTICLES_COLLECTION_NAME)
@@ -206,6 +209,14 @@ public class ArticleRepository {
         Log.d(TAG, "SCIENCE_BOARD - thread resumed");
     }
 
+//    private Query contains(Query query, String... keywords) {
+//        for(String keyword: )
+//        query.whereEqualTo("source_id", document.get("source_id"));
+//        return query;
+//    }
+
+
+
     private void extractOldestSnapshots(List<DocumentSnapshot> documentSnapshots, int i) {
         oldestArticlesSnapshots.add(documentSnapshots.get(i-1));
     }
@@ -251,12 +262,14 @@ public class ArticleRepository {
         article = new Article();
         article.setTitle((String) document.get(TITLE));
         article.setWebpageUrl((String) document.get(WEBPAGE_URL));
-        article.setPubDate((long) document.get(PUB_DATE));
+        article.setPubDate((Long) document.get(PUB_DATE));
         article.setThumbnailUrl((String) document.get(THUMBNAIL_URL));
         article.setId((String) document.getId());
         article.setSourceId((String) document.get(SOURCE_ID));
         article.setSourceRealName((String) document.get(SOURCE_REAL_NAME));
         article.setSourceWebsiteUrl((String) document.get(SOURCE_WEBSITE_URL));
+        List<String> keywords = (List<String>) document.get(KEYWORDS);
+        article.setKeywords(keywords);
 
         return article;
     }

@@ -7,20 +7,50 @@
     android:layout_height="match_parent">
 
 
+    <HorizontalScrollView
+        android:id="@+id/container_bottomSheetWebview"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/shape_keywords_bar"
+        android:padding="0dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/view_bottomSheetWebview_shadow"
+        app:layout_constraintEnd_toStartOf="@+id/button_bottomSheetWebview"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroup_bottomSheetWebview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:singleLine="true">
+
+
+        </com.google.android.material.chip.ChipGroup>
+
+
+    </HorizontalScrollView>
+
+
     <View
+        android:id="@+id/view_bottomSheetWebview_shadow"
         android:layout_width="match_parent"
         android:layout_height="15dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="8dp"
         android:background="@drawable/gradient_vertical_dark"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button_webviewFragment_bottomSheet" />
+        app:layout_constraintTop_toBottomOf="@+id/button_bottomSheetWebview" />
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/button_webviewFragment_bottomSheet"
+        android:id="@+id/button_bottomSheetWebview"
         android:layout_width="80dp"
-        android:layout_height="30dp"
+        android:layout_height="32dp"
+        android:layout_marginTop="4dp"
         android:layout_marginEnd="8dp"
         android:padding="0dp"
         android:paddingStart="0dp"
@@ -36,17 +66,17 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/cardView3"
+        android:id="@+id/cardView_bottomSheetWebview"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="14dp"
         android:backgroundTint="@color/darkSemiTransparent"
         app:cardCornerRadius="@dimen/bottom_sheet_corner_radius"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button_webviewFragment_bottomSheet">
+        app:layout_constraintTop_toBottomOf="@+id/button_bottomSheetWebview">
 
 
         <WebView

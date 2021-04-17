@@ -10,6 +10,7 @@ import com.nocorp.scienceboard.utility.MyValues;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 public class Article extends ListItem implements Comparable<Article>, Serializable {
@@ -29,6 +30,7 @@ public class Article extends ListItem implements Comparable<Article>, Serializab
     private String sourceWebsiteUrl;
     @ColumnInfo(name = "source_real_name")
     private String sourceRealName;
+    private List<String> keywords;
 
 
     public Article() {
@@ -129,4 +131,11 @@ public class Article extends ListItem implements Comparable<Article>, Serializab
         this.sourceId = sourceId;
     }
 
+    public List<String> getKeywords() {
+        return keywords;
+    }
+
+    public void setKeywords(List<String> keywords) {
+        this.keywords = keywords;
+    }
 }// end Article

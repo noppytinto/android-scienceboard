@@ -1,6 +1,7 @@
 package com.nocorp.scienceboard.ui.webview;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -24,9 +26,13 @@ import android.webkit.WebSettings;
 import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.HorizontalScrollView;
 import android.widget.Toast;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipDrawable;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
@@ -34,6 +40,8 @@ import com.google.android.material.snackbar.Snackbar;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentWebviewBinding;
 import com.nocorp.scienceboard.model.Article;
+
+import java.util.List;
 
 import static android.view.View.SCROLLBARS_INSIDE_OVERLAY;
 
@@ -66,6 +74,9 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private WebView webViewBottomSheet;
     private ExtendedFloatingActionButton showButton;
     private View bottomSheet;
+    private ChipGroup chipGroup;
+    private HorizontalScrollView horizontalScrollView;
+    private List<String> keywords;
 
 
     //------------------------------------------------------------------------------------ ANDROID METHODS
@@ -92,28 +103,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        toolbar = viewBinding.toolbarWebviewFragment;
-        toolbar.setOnMenuItemClickListener(this);
-        toolbar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
-        webViewMain = viewBinding.webViewWebviewFragment;
-        progressIndicator = viewBinding.progressIndicatorWebviewFragment;
-        currentTextSize = DEFAULT_TEXT_SIZE;
-        stopMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_stop);
-        bookmarkMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_bookmark);
-        webviewViewModel = new ViewModelProvider(this).get(WebviewViewModel.class);
-
-        // webview botomsheet
-        webViewBottomSheet = viewBinding.includeWebviewFragment.webviewBottomSheetWebview;
-        showButton = viewBinding.includeWebviewFragment.buttonWebviewFragmentBottomSheet;
-        bottomSheet = view.findViewById(R.id.include_webviewFragment);
-//        bottomSheet.setOnFocusChangeListener((v, hasFocus) -> {
-//            if(hasFocus) {
-//                setupBackButtonBehaviorForWebviewMain(webViewBottomSheet);
-//            }
-//            else {
-//                ignoreBackButton(webViewBottomSheet);
-//            }
-//        });
+        initiView(view);
 
 
         //
@@ -122,6 +112,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
             this.currentArticle = WebviewFragmentArgs.fromBundle(getArguments()).getArticleArgument();
             this.webpageUrl = currentArticle.getWebpageUrl();
             this.sourceName = currentArticle.getSourceRealName();
+            this.keywords = currentArticle.getKeywords();
 
             if(sourceName!=null && !sourceName.isEmpty()) {
                 //TODO
@@ -129,10 +120,20 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
                 toolbar.setTitle(sourceName);
             }
 
+            buildKeywordsChips(keywords, chipGroup);
+
             checkIfAlreadyInBookmarks();
 
         }
     }
+
+    private void buildKeywordsChips(List<String> keywords, ChipGroup chipGroup) {
+        if(keywords==null || keywords.isEmpty()) return;
+        for(String currentKeyword: keywords) {
+            addChip(currentKeyword, chipGroup);
+        }
+    }
+
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -151,6 +152,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
                 if (newState == BottomSheetBehavior.STATE_HALF_EXPANDED) {
                     setupBackButtonBehaviorForWebviewMain(webViewBottomSheet);
+                    horizontalScrollView.setVisibility(View.VISIBLE);
                     showButton.setText(R.string.string_close);
                     showButton.setOnClickListener(v -> {
                         if (behavior.getState() == BottomSheetBehavior.STATE_HALF_EXPANDED) {
@@ -160,10 +162,12 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
                 }
                 else if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
                     ignoreBackButton(webViewBottomSheet);
+                    horizontalScrollView.setVisibility(View.GONE);
                     showButton.setText(R.string.string_search);
                     showButton.setOnClickListener(v -> {
                         if (behavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
                             behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+
                         }
                     });
                 }
@@ -239,6 +243,58 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         return false;
     }
 
+
+
+
+
+
+
+    //---------------------------------------------------------------------- METHODS
+
+
+    private void initiView(@NonNull View view) {
+        toolbar = viewBinding.toolbarWebviewFragment;
+        toolbar.setOnMenuItemClickListener(this);
+        toolbar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
+        webViewMain = viewBinding.webViewWebviewFragment;
+        progressIndicator = viewBinding.progressIndicatorWebviewFragment;
+        currentTextSize = DEFAULT_TEXT_SIZE;
+        stopMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_stop);
+        bookmarkMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_bookmark);
+        webviewViewModel = new ViewModelProvider(this).get(WebviewViewModel.class);
+        chipGroup = viewBinding.includeWebviewFragment.chipGroupBottomSheetWebview;
+        horizontalScrollView = viewBinding.includeWebviewFragment.containerBottomSheetWebview;
+        // webview botomsheet
+        webViewBottomSheet = viewBinding.includeWebviewFragment.webviewBottomSheetWebview;
+        showButton = viewBinding.includeWebviewFragment.buttonBottomSheetWebview;
+        bottomSheet = view.findViewById(R.id.include_webviewFragment);
+//        bottomSheet.setOnFocusChangeListener((v, hasFocus) -> {
+//            if(hasFocus) {
+//                setupBackButtonBehaviorForWebviewMain(webViewBottomSheet);
+//            }
+//            else {
+//                ignoreBackButton(webViewBottomSheet);
+//            }
+//        });
+    }
+
+    private void addChip(String name, ChipGroup chipGroup) {
+        if(name==null || name.isEmpty()) return;
+//        Chip newChip = new Chip(requireContext(), null, R.style.ScienceBoard_Button_Chip_Choice);
+//        Chip newChip = (Chip) getLayoutInflater().inflate(R.layout.layout_chip_choice, chipGroup, false);
+        Chip newChip = new Chip(requireContext());
+        ChipDrawable chipDrawable = ChipDrawable.createFromAttributes(requireContext(),
+                null,
+                0,
+                R.style.ScienceBoard_Button_Chip_Choice);
+        newChip.setChipDrawable(chipDrawable);
+        newChip.setCheckable(true);
+        newChip.setCheckedIconVisible(false);
+        newChip.setText(name);
+
+        chipGroup.addView(newChip);
+    }
+
     private void clearCacheCookiesAction() {
         new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Do you want clear cache/cookies?")
@@ -297,6 +353,9 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         });
         webviewViewModel.removeFromBookmarks(articleId);
     }
+
+
+
 
 
     //------------------------------------------------------------------------------------ METHODS

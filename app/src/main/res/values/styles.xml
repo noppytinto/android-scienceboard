@@ -45,8 +45,23 @@
 
 
 
+    <!-- CINEMATES BUTTON CHIP CHOICE -->
+    <style name="ScienceBoard.Button.Chip.Choice" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="android:textColor">@color/chip_choice_text_states</item>
+        <item name="chipBackgroundColor">@color/chip_choice_bg_states</item>
+        <item name="chipStrokeColor">@color/chip_choice_text_states</item>
+        <item name="chipStrokeWidth">1dp</item>
+<!--        <item name="android:textAppearance">@style/Cinemates.Button.Chip.Choice.TextAppearance</item>-->
+    </style>
+<!--    <style name="Cinemates.Button.Chip.Choice.TextAppearance" parent="TextAppearance.MdcTypographyStyles.Button">-->
+<!--        <item name="fontFamily">@font/poppins_semibold</item>-->
+<!--        <item name="android:textSize">10sp</item>-->
+<!--        <item name="android:textAllCaps">false</item>-->
+<!--    </style>-->
 
-<!--    <style name="TextAppearance.MdcTypographyStyles.Button" parent="TextAppearance.MaterialComponents.Button">-->
+
+
+    <!--    <style name="TextAppearance.MdcTypographyStyles.Button" parent="TextAppearance.MaterialComponents.Button">-->
 <!--        <item name="fontFamily">@font/poppins</item>-->
 <!--        <item name="android:fontFamily">@font/poppins</item>-->
 <!--        <item name="android:textSize">14sp</item>-->
