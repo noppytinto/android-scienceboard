@@ -346,7 +346,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 
         StringBuilder builder = new StringBuilder();
         for (String value : selectedKeywords) {
-            builder.append(value);
+            builder.append(value).append(" ");
         }
 
         String query = builder.toString();
