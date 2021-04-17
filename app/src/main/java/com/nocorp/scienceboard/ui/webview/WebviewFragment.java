@@ -342,7 +342,11 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     }
 
     private void triggerGoogleSearch(List<String> selectedKeywords) {
-        if(selectedKeywords==null || selectedKeywords.isEmpty()) return;
+        if(selectedKeywords==null) return;
+        if(selectedKeywords.isEmpty()) {
+            webViewBottomSheet.loadUrl(getString(R.string.string_google_search_website));
+            return;
+        }
 
         StringBuilder builder = new StringBuilder();
         for (String value : selectedKeywords) {
