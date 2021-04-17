@@ -26,7 +26,8 @@
             android:id="@+id/chipGroup_bottomSheetWebview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:singleLine="true">
+            app:singleLine="true"
+            >
 
 
         </com.google.android.material.chip.ChipGroup>

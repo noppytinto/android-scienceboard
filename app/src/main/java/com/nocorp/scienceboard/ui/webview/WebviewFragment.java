@@ -26,6 +26,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.CompoundButton;
 import android.widget.HorizontalScrollView;
 import android.widget.Toast;
 
@@ -41,6 +42,10 @@ import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentWebviewBinding;
 import com.nocorp.scienceboard.model.Article;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 import static android.view.View.SCROLLBARS_INSIDE_OVERLAY;
@@ -77,6 +82,11 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private ChipGroup chipGroup;
     private HorizontalScrollView horizontalScrollView;
     private List<String> keywords;
+    private List<Chip> chips;
+    private List<String> selectedKeywords;
+    private int chipId = 0;
+    private String lastKeywordSelected;
+
 
 
     //------------------------------------------------------------------------------------ ANDROID METHODS
@@ -187,6 +197,21 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
                 behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
             }
         });
+
+//        chipGroup.setOnCheckedChangeListener((group, checkedId) -> {
+//            Chip chip = chipGroup.findViewById(checkedId);
+//            if(chip != null && chip.isChecked()) {
+//                selectedKeywords.add(chip.getText().toString());
+//                lastKeywordSelected = chip.getText().toString();
+//            }
+//            else {
+//                selectedKeywords.remove(lastKeywordSelected);
+//            }
+//
+//            Log.d(TAG, "onCheckedChanged: " + selectedKeywords);
+//        });
+
+
     }
 
     @Override
@@ -264,6 +289,10 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         webviewViewModel = new ViewModelProvider(this).get(WebviewViewModel.class);
         chipGroup = viewBinding.includeWebviewFragment.chipGroupBottomSheetWebview;
         horizontalScrollView = viewBinding.includeWebviewFragment.containerBottomSheetWebview;
+        chips = new ArrayList<>();
+        selectedKeywords = new ArrayList<>();
+
+
         // webview botomsheet
         webViewBottomSheet = viewBinding.includeWebviewFragment.webviewBottomSheetWebview;
         showButton = viewBinding.includeWebviewFragment.buttonBottomSheetWebview;
@@ -291,8 +320,45 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         newChip.setCheckable(true);
         newChip.setCheckedIconVisible(false);
         newChip.setText(name);
+        int i = chipId++;
+        newChip.setId(i);
+        newChip.setTag(i);
 
+        newChip.setOnCheckedChangeListener((compoundButton, checked) -> {
+            if(checked) {
+                selectedKeywords.add(name);
+            }
+            else {
+                selectedKeywords.remove(name);
+            }
+            triggerGoogleSearch(selectedKeywords);
+
+            Log.d(TAG, "addChip: " + selectedKeywords);
+        });
+
+        chips.add(newChip);
         chipGroup.addView(newChip);
+//        chipGroup.invalidate();
+    }
+
+    private void triggerGoogleSearch(List<String> selectedKeywords) {
+        if(selectedKeywords==null || selectedKeywords.isEmpty()) return;
+
+        StringBuilder builder = new StringBuilder();
+        for (String value : selectedKeywords) {
+            builder.append(value);
+        }
+
+        String query = builder.toString();
+        String url = null;
+        try {
+            url = "https://www.google.com/search?q=" + URLEncoder.encode(query, String.valueOf(StandardCharsets.UTF_8));
+            webViewBottomSheet.loadUrl(url);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void clearCacheCookiesAction() {
