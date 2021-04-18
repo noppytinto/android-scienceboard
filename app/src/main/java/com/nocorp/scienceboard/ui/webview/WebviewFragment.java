@@ -50,7 +50,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-import io.alterac.blurkit.BlurLayout;
 
 import static android.view.View.SCROLLBARS_INSIDE_OVERLAY;
 
@@ -90,7 +89,6 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private List<String> selectedKeywords;
     private int chipId = 0;
     private String lastKeywordSelected;
-    private BlurLayout blurLayout;
 
 
 

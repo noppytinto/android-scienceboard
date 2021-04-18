@@ -322,8 +322,8 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
         ListItem lastItem = articles.get(articles.size()-1);
         if(lastItem instanceof LoadingView) {
             articles.remove(articles.size() - 1);
-//        int scrollPosition = articles.size();
-//        notifyItemRemoved(scrollPosition);
+            int scrollPosition = articles.size();
+            notifyItemRemoved(scrollPosition);
             Log.d(TAG, "SCIENCE_BOARD - loading view removed");
         }
     }

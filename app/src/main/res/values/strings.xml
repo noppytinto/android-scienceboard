@@ -26,4 +26,5 @@
     <string name="string_history_fetched">history fetched</string>
     <string name="string_clear_history">Clear History</string>
     <string name="string_clear">clear</string>
+    <string name="search">search</string>
 </resources>

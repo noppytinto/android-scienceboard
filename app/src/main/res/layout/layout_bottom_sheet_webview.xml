@@ -22,7 +22,6 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible">
 
-
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/chipGroup_bottomSheetWebview"
             android:layout_width="wrap_content"
@@ -30,10 +29,7 @@
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
             app:singleLine="true">
-
-
         </com.google.android.material.chip.ChipGroup>
-
 
     </HorizontalScrollView>
 
@@ -62,7 +58,7 @@
         android:paddingEnd="0dp"
         android:paddingRight="0dp"
         android:paddingBottom="0dp"
-        android:text="search"
+        android:text="@string/search"
         android:textAlignment="center"
         android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"

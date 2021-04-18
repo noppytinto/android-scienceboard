@@ -80,30 +80,12 @@ public class TechTabFragment extends Fragment implements
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        sourceViewModel.getObservableAllSources().observe(getViewLifecycleOwner(), sources -> {
-            if(sources!=null && !sources.isEmpty()) {
-                // TODO
-                this.sourcesFetched = new ArrayList<>(sources);
-                techTabViewModel.fetchArticles(sources, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, false);
-            }
-        });
-
-        techTabViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), resultArticles -> {
-            swipeRefreshLayout.setRefreshing(false);
-            progressIndicator.setVisibility(View.GONE);
-
-            if(resultArticles==null || resultArticles.isEmpty()) {
-//                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
-            }
-            else {
-                resultArticles = adProvider.populateListWithAds(resultArticles, AD_DISTANCE);
-                articlesToDisplay = new ArrayList<>(resultArticles);
-                recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
-                showCenteredToast("articles fetched");
-                isLoading = false;
-            }
-        });
+        observeSourcesFetched();
+        observeArticlesFetched();
+        observerNextArticlesFetch();
     }
+
+
 
     @Override
     public void onDestroyView() {
@@ -154,9 +136,17 @@ public class TechTabFragment extends Fragment implements
                     if (linearLayoutManager != null &&
                         (articlesToDisplay != null && !articlesToDisplay.isEmpty()) &&
                         linearLayoutManager.findLastCompletelyVisibleItemPosition() == articlesToDisplay.size() - 1) {
-                        //bottom of list!
-                        Log.d(TAG, "SCIENCE_BOARD - initScrollListener: reached the end of the recycler");
-                        loadMoreArticles();
+
+                        // NOTE:
+                        // this resolve the "cannot call this method in a scroll callback" problem
+                        // it happens when we are adding elements while scrolling
+                        recyclerView.post(new Runnable() {
+                            public void run() {
+                                //bottom of list!
+                                Log.d(TAG, "SCIENCE_BOARD - initScrollListener: reached the end of the recycler");
+                                loadMoreArticles();
+                            }
+                        });
                     }
                 }
             }
@@ -169,8 +159,7 @@ public class TechTabFragment extends Fragment implements
         // adding loading view
         recyclerAdapterArticlesList.addLoadingView(articlesToDisplay);
 
-        // load new items (asynchronously)
-        observerNextArticlesFetch();
+        // load new items
         techTabViewModel.fetchNextArticles(NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE);
     }
 
@@ -183,9 +172,37 @@ public class TechTabFragment extends Fragment implements
             else {
                 recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
                 fetchedArticles = adProvider.populateListWithAds(fetchedArticles, AD_DISTANCE);
-                articlesToDisplay = fetchedArticles;
+                articlesToDisplay = new ArrayList<>(fetchedArticles);
                 recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
                 isLoading = false;
+            }
+        });
+    }
+
+    private void observeArticlesFetched() {
+        techTabViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), resultArticles -> {
+            swipeRefreshLayout.setRefreshing(false);
+            progressIndicator.setVisibility(View.GONE);
+
+            if(resultArticles==null || resultArticles.isEmpty()) {
+//                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
+            }
+            else {
+                resultArticles = adProvider.populateListWithAds(resultArticles, AD_DISTANCE);
+                articlesToDisplay = new ArrayList<>(resultArticles);
+                recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
+                showCenteredToast("articles fetched");
+                isLoading = false;
+            }
+        });
+    }
+
+    private void observeSourcesFetched() {
+        sourceViewModel.getObservableAllSources().observe(getViewLifecycleOwner(), sources -> {
+            if(sources!=null && !sources.isEmpty()) {
+                // TODO
+                this.sourcesFetched = new ArrayList<>(sources);
+                techTabViewModel.fetchArticles(sources, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, false);
             }
         });
     }
