@@ -5,21 +5,21 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
-import com.nocorp.scienceboard.model.BookmarkedArticle;
+import com.nocorp.scienceboard.model.BookmarkArticle;
 
 import java.util.List;
 
 @Dao
 public interface BookmarkDao {
-    @Query("SELECT * FROM bookmarkedarticle ORDER BY saved_date DESC")
-    List<BookmarkedArticle> selectAll();
+    @Query("SELECT * FROM BookmarkArticle ORDER BY saved_date DESC")
+    List<BookmarkArticle> selectAll();
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    void insert(BookmarkedArticle article);
+    void insert(BookmarkArticle article);
 
-    @Query("DELETE FROM bookmarkedarticle WHERE id = :givenIdentifier")
+    @Query("DELETE FROM BookmarkArticle WHERE id = :givenIdentifier")
     void delete(String givenIdentifier);
 
-    @Query("SELECT 1 FROM bookmarkedarticle WHERE id = :givenIdentifier")
+    @Query("SELECT 1 FROM BookmarkArticle WHERE id = :givenIdentifier")
     boolean checkDuplication(String givenIdentifier);
 }

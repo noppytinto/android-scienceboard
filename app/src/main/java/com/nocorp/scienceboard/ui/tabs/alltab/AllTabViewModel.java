@@ -9,8 +9,8 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.nocorp.scienceboard.model.Article;
+import com.nocorp.scienceboard.model.HistoryArticle;
 import com.nocorp.scienceboard.model.Source;
-import com.nocorp.scienceboard.model.VisitedArticle;
 import com.nocorp.scienceboard.rss.repository.ArticleRepository;
 import com.nocorp.scienceboard.rss.repository.ArticlesRepositoryListener;
 import com.nocorp.scienceboard.rss.repository.SourceRepository;
@@ -137,7 +137,7 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
     public void fetchNextArticles(int numArticlesForEachSource) {
         if(!taskIsRunning) {
             Runnable task = () -> {
-                sleepforNseconds(2);
+                sleepforNseconds(1);
                 Log.d(TAG, "SCIENCE_BOARD - fetchNextArticles: fetching new articles");
                 articleRepository.getNextArticles(oldestArticlesBySource, numArticlesForEachSource, getApplication());
             };
@@ -188,8 +188,8 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
         Runnable task = () -> {
             // TODO null checks
             long millis=System.currentTimeMillis();
-            VisitedArticle visitedArticle = new VisitedArticle(givenArticle);
-            visitedArticle.setVisitedDate(millis);
+            HistoryArticle historyArticle = new HistoryArticle(givenArticle);
+            historyArticle.setVisitedDate(millis);
             int result = dao.update(millis, lastVisitedArticleId, oldVisitedDate);
 
             if(result>0) {
@@ -218,9 +218,9 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
                 // TODO null checks
                 saveInHistoryTaskIsRunning = true;
                 long millis=System.currentTimeMillis();
-                VisitedArticle visitedArticle = new VisitedArticle(givenArticle);
-                visitedArticle.setVisitedDate(millis);
-                dao.insert(visitedArticle);
+                HistoryArticle historyArticle = new HistoryArticle(givenArticle);
+                historyArticle.setVisitedDate(millis);
+                dao.insert(historyArticle);
                 lastVisitedArticleId = givenArticle.getId();
                 oldVisitedDate = millis;
                 saveInHistoryTaskIsRunning = false;

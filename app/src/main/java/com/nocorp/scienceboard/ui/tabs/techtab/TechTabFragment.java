@@ -152,25 +152,25 @@ public class TechTabFragment extends Fragment implements
 
                 if (!isLoading) {
                     if (linearLayoutManager != null &&
-                            linearLayoutManager.findLastCompletelyVisibleItemPosition() == articlesToDisplay.size() - 1) {
+                        (articlesToDisplay != null && !articlesToDisplay.isEmpty()) &&
+                        linearLayoutManager.findLastCompletelyVisibleItemPosition() == articlesToDisplay.size() - 1) {
                         //bottom of list!
-                        Log.d(TAG, "SCIENCE_BOARD - loadMore: reached the end of the recycler");
-                        loadMore();
+                        Log.d(TAG, "SCIENCE_BOARD - initScrollListener: reached the end of the recycler");
+                        loadMoreArticles();
                     }
                 }
             }
         });
     }
 
-    private void loadMore() {
+    private void loadMoreArticles() {
         isLoading = true;
 
         // adding loading view
-        observerNextArticlesFetch();
         recyclerAdapterArticlesList.addLoadingView(articlesToDisplay);
 
-        // TODO: move into viewmodel ?
         // load new items (asynchronously)
+        observerNextArticlesFetch();
         techTabViewModel.fetchNextArticles(NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE);
     }
 
@@ -178,7 +178,7 @@ public class TechTabFragment extends Fragment implements
         techTabViewModel.getObservableNextArticlesList().observe(getViewLifecycleOwner(), fetchedArticles -> {
             if(fetchedArticles==null || fetchedArticles.isEmpty()) {
 //                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
-                recyclerAdapterArticlesList.addLoadingView(articlesToDisplay);
+                recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
             }
             else {
                 recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);

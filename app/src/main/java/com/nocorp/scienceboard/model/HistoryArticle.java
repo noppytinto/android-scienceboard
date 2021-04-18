@@ -8,18 +8,18 @@ import com.nocorp.scienceboard.utility.MyValues;
 
 @Entity(primaryKeys = {"id", "visited_date"})
 public
-class VisitedArticle extends Article {
+class HistoryArticle extends Article {
     @ColumnInfo(name = "visited_date")
     @NonNull
     private long visitedDate;
 
 
-    public VisitedArticle() {
-        setItemType(MyValues.ItemType.VISITED_ARTICLE);
+    public HistoryArticle() {
+        setItemType(MyValues.ItemType.HISTORY_ARTICLE);
     }
 
-    public VisitedArticle(Article article) {
-        setItemType(MyValues.ItemType.VISITED_ARTICLE);
+    public HistoryArticle(Article article) {
+        setItemType(MyValues.ItemType.HISTORY_ARTICLE);
         setId(article.getId());
         setTitle(article.getTitle());
         setThumbnailUrl(article.getThumbnailUrl());
@@ -28,6 +28,7 @@ class VisitedArticle extends Article {
         setSourceRealName(article.getSourceRealName());
         setSourceWebsiteUrl(article.getSourceWebsiteUrl());
         setSourceId(article.getSourceId());
+        setKeywords(article.getKeywords());
     }
 
 

@@ -15,14 +15,14 @@ import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.model.Article;
-import com.nocorp.scienceboard.model.BookmarkedArticle;
-import com.nocorp.scienceboard.model.LoadingViewItem;
-import com.nocorp.scienceboard.model.VisitedArticle;
+import com.nocorp.scienceboard.model.BookmarkArticle;
+import com.nocorp.scienceboard.model.LoadingView;
+import com.nocorp.scienceboard.model.HistoryArticle;
 import com.nocorp.scienceboard.recycler.viewholder.LoadingViewHolder;
 import com.nocorp.scienceboard.ui.viewholder.HistoryViewHolder;
 import com.nocorp.scienceboard.utility.ad.admob.model.ListAd;
 import com.nocorp.scienceboard.ui.viewholder.ArticleViewHolder;
-import com.nocorp.scienceboard.ui.viewholder.ListAdViewHolder;
+import com.nocorp.scienceboard.ui.viewholder.SmallAdViewHolder;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.utility.MyUtilities;
 import com.nocorp.scienceboard.utility.MyValues;
@@ -42,10 +42,9 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
 
     private static final int LOADING_VIEW_TYPE = 0;
     private static final int ARTICLE_TYPE = 1;
-    private static final int LIST_AD_TYPE = 2;
-    private static final int VISITED_ARTICLE_TYPE = 3;
-    private static final int BOOKMARKED_ARTICLE_TYPE = 4;
-
+    private static final int SMALL_AD_TYPE = 2;
+    private static final int HISTORY_ARTICLE_TYPE = 3;
+    private static final int BOOKMARK_ARTICLE_TYPE = 4;
 
     public interface OnArticleClickedListener {
         public void onArticleClicked(int position);
@@ -73,12 +72,12 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
                 return LOADING_VIEW_TYPE;
             case ARTICLE:
                 return ARTICLE_TYPE;
-            case LIST_AD:
-                return LIST_AD_TYPE;
-            case VISITED_ARTICLE:
-                return VISITED_ARTICLE_TYPE;
-            case BOOKMARKED_ARTICLE:
-                return BOOKMARKED_ARTICLE_TYPE;
+            case SMALL_AD:
+                return SMALL_AD_TYPE;
+            case HISTORY_ARTICLE:
+                return HISTORY_ARTICLE_TYPE;
+            case BOOKMARK_ARTICLE:
+                return BOOKMARK_ARTICLE_TYPE;
             default:
                 return 0;
         }
@@ -90,22 +89,22 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
         View view = null;
 
         if(viewType == LOADING_VIEW_TYPE) {
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layour_loading_viewholder, parent, false);
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_loading_viewholder, parent, false);
             return new LoadingViewHolder(view);
         }
         if(viewType == ARTICLE_TYPE) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_article_viewholder, parent, false);
             return new ArticleViewHolder(view, listener);
         }
-        else if(viewType == LIST_AD_TYPE) {
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_native_ad_articles_list_level, parent, false);
-            return new ListAdViewHolder(view);
+        else if(viewType == SMALL_AD_TYPE) {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_small_ad_articles_list_level, parent, false);
+            return new SmallAdViewHolder(view);
         }
-        else if(viewType == VISITED_ARTICLE_TYPE) {
+        else if(viewType == HISTORY_ARTICLE_TYPE) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_history_viewholder, parent, false);
             return new HistoryViewHolder(view, listener);
         }
-        else if(viewType == BOOKMARKED_ARTICLE_TYPE) {
+        else if(viewType == BOOKMARK_ARTICLE_TYPE) {
             //TODO create visited article view holder
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_article_viewholder, parent, false);
             return new ArticleViewHolder(view, listener);
@@ -118,7 +117,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if(getItemViewType(position) == LOADING_VIEW_TYPE) {
-            showLoadingView((LoadingViewHolder) holder, position);
+            buildLoadingViewItem((LoadingViewHolder) holder, position);
         }
         if(getItemViewType(position) == ARTICLE_TYPE) {
             Article article = (Article) recyclerList.get(position);
@@ -126,21 +125,21 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
             //
             buildArticleItem((ArticleViewHolder) holder, article);
         }
-        else if(getItemViewType(position) == LIST_AD_TYPE) {
+        else if(getItemViewType(position) == SMALL_AD_TYPE) {
             ListAd listAd = (ListAd) recyclerList.get(position);
 
             //
-            buildListAdItem((ListAdViewHolder) holder, listAd);
+            buildSmallAdItem((SmallAdViewHolder) holder, listAd);
         }
-        else if(getItemViewType(position) == VISITED_ARTICLE_TYPE) {
-            VisitedArticle article = (VisitedArticle) recyclerList.get(position);
+        else if(getItemViewType(position) == HISTORY_ARTICLE_TYPE) {
+            HistoryArticle article = (HistoryArticle) recyclerList.get(position);
 
             //
             buildHistoryItem((HistoryViewHolder) holder, article);
         }
-        else if(getItemViewType(position) == BOOKMARKED_ARTICLE_TYPE) {
+        else if(getItemViewType(position) == BOOKMARK_ARTICLE_TYPE) {
             //TODO create BookmarkedArticle view holder
-            BookmarkedArticle article = (BookmarkedArticle) recyclerList.get(position);
+            BookmarkArticle article = (BookmarkArticle) recyclerList.get(position);
 
             //
             buildArticleItem((ArticleViewHolder) holder, article);
@@ -148,7 +147,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
 
     }
 
-    private void showLoadingView(LoadingViewHolder holder, int position) {
+    private void buildLoadingViewItem(LoadingViewHolder holder, int position) {
         // TODO: progressbar would be displayed
     }
 
@@ -270,7 +269,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
         holder.pubDate.setText(readablePubDate);
     }
 
-    private void buildListAdItem(ListAdViewHolder holder, ListAd item) {
+    private void buildSmallAdItem(SmallAdViewHolder holder, ListAd item) {
         NativeAd nativeAd = item.getAd();
         holder.displayNativeAd(nativeAd);
     }
@@ -307,9 +306,10 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
      * cannot be the recyclerList !
      */
     public void addLoadingView(List<ListItem> articles) {
-        articles.add(new LoadingViewItem());
+        if(articles==null || articles.isEmpty()) return;
+        articles.add(new LoadingView());
         notifyItemInserted(articles.size() - 1);
-        Log.d(TAG, "SCIENCE_BOARD - loding view added");
+        Log.d(TAG, "SCIENCE_BOARD - loading view added");
     }
 
     /**
@@ -317,9 +317,15 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
      * cannot be the recyclerList !
      */
     public void removeLoadingView(List<ListItem> articles) {
-        articles.remove(articles.size() - 1);
+        if(articles==null || articles.isEmpty()) return;
+
+        ListItem lastItem = articles.get(articles.size()-1);
+        if(lastItem instanceof LoadingView) {
+            articles.remove(articles.size() - 1);
 //        int scrollPosition = articles.size();
 //        notifyItemRemoved(scrollPosition);
+            Log.d(TAG, "SCIENCE_BOARD - loading view removed");
+        }
     }
 
 

@@ -6,21 +6,19 @@ import androidx.room.Entity;
 
 import com.nocorp.scienceboard.utility.MyValues;
 
-import java.util.Date;
-
 @Entity
-public class BookmarkedArticle extends Article {
+public class BookmarkArticle extends Article {
     @ColumnInfo(name = "saved_date")
     @NonNull
     private long savedDate;
 
 
-    public BookmarkedArticle() {
-        setItemType(MyValues.ItemType.BOOKMARKED_ARTICLE);
+    public BookmarkArticle() {
+        setItemType(MyValues.ItemType.BOOKMARK_ARTICLE);
     }
 
-    public BookmarkedArticle(Article article) {
-        setItemType(MyValues.ItemType.BOOKMARKED_ARTICLE);
+    public BookmarkArticle(Article article) {
+        setItemType(MyValues.ItemType.BOOKMARK_ARTICLE);
         setId(article.getId());
         setTitle(article.getTitle());
         setThumbnailUrl(article.getThumbnailUrl());
@@ -29,6 +27,7 @@ public class BookmarkedArticle extends Article {
         setSourceRealName(article.getSourceRealName());
         setSourceWebsiteUrl(article.getSourceWebsiteUrl());
         setSourceId(article.getSourceId());
+        setKeywords(article.getKeywords());
 
     }
 

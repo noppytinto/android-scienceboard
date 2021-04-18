@@ -4,9 +4,9 @@ public class MyValues {
 
     public enum ItemType {
         ARTICLE,
-        LIST_AD,
-        VISITED_ARTICLE,
-        BOOKMARKED_ARTICLE,
+        SMALL_AD,
+        HISTORY_ARTICLE,
+        BOOKMARK_ARTICLE,
         LOADING_VIEW
     }
 

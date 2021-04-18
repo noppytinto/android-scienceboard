@@ -18,10 +18,10 @@ import com.nocorp.scienceboard.R;
 import java.util.Collections;
 import java.util.List;
 
-public class ListAdViewHolder extends RecyclerView.ViewHolder {
+public class SmallAdViewHolder extends RecyclerView.ViewHolder {
     public ConstraintLayout parent;
 
-    public ListAdViewHolder(@NonNull View itemView) {
+    public SmallAdViewHolder(@NonNull View itemView) {
         super(itemView);
         parent = itemView.findViewById(R.id.constraintLayout_layoutNativeAdArticlesListLevel_parent);
     }
@@ -32,7 +32,7 @@ public class ListAdViewHolder extends RecyclerView.ViewHolder {
             LayoutInflater inflater = (LayoutInflater) parent.getContext()
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             NativeAdView adView = (NativeAdView) inflater
-                    .inflate(R.layout.layout_native_ad_articles_list_level, null);
+                    .inflate(R.layout.layout_small_ad_articles_list_level, null);
 
             TextView headline = adView.findViewById(R.id.textView_layoutNativeAdArticlesListLevel_headline);
             headline.setText(nativeAd.getHeadline());

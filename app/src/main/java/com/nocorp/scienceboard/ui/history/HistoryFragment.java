@@ -62,7 +62,8 @@ public class HistoryFragment extends Fragment implements
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         binding = FragmentHistoryBinding.inflate(getLayoutInflater());
         view = binding.getRoot();
@@ -74,7 +75,6 @@ public class HistoryFragment extends Fragment implements
         super.onViewCreated(view, savedInstanceState);
         initView();
     }
-
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -103,7 +103,6 @@ public class HistoryFragment extends Fragment implements
         inflater.inflate(R.menu.menu_history_fragment, menu);
     }
 
-
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if(item.getItemId() == R.id.option_webviewMenu_stop) {
@@ -112,8 +111,6 @@ public class HistoryFragment extends Fragment implements
         }
         return false;
     }
-
-
 
     @Override
     public void onDestroyView() {
@@ -149,7 +146,6 @@ public class HistoryFragment extends Fragment implements
         historyViewModel.clearHistory();
     }
 
-
     private void initView() {
         progressIndicator = binding.progressIndicatorHistoryFragment;
         swipeRefreshLayout = binding.swipeRefreshHistoryFragment;
@@ -158,7 +154,6 @@ public class HistoryFragment extends Fragment implements
         initRecycleView();
         setupSwipeDownToRefresh();
     }
-
 
     private void initRecycleView() {
         // defining Recycler view

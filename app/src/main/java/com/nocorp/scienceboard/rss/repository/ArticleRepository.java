@@ -37,7 +37,7 @@ public class ArticleRepository {
     private List<DocumentSnapshot> oldestArticlesSnapshots;
 
 
-    //----------------------------------------------------------- CONSTRUCTORS
+    //--------------------------------------------------------------------------- CONSTRUCTORS
 
     public ArticleRepository(ArticlesRepositoryListener listener) {
         this.listener = listener;
@@ -47,16 +47,20 @@ public class ArticleRepository {
 
 
 
-    //----------------------------------------------------------- PUBLIC METHODS
+    //--------------------------------------------------------------------------- PUBLIC METHODS
 
-    public void getArticles(List<Source> givenSources, int numArticlesForEachSource, Context context) {
+    public void getArticles(List<Source> givenSources,
+                            int numArticlesForEachSource,
+                            Context context) {
         if(givenSources==null || givenSources.isEmpty()) return;
 
         // server strategy
         downloadArticlesFromServer(givenSources, numArticlesForEachSource, context);
     }
 
-    public void getNextArticles(List<DocumentSnapshot> oldestArticles, int numArticlesForEachSource, Context context) {
+    public void getNextArticles(List<DocumentSnapshot> oldestArticles,
+                                int numArticlesForEachSource,
+                                Context context) {
         if(oldestArticles==null || oldestArticles.isEmpty()) return;
 
         // server strategy
@@ -67,14 +71,15 @@ public class ArticleRepository {
 
 
 
-    //----------------------------------------------------------- PRIVATE METHODS
-
+    //--------------------------------------------------------------------------- PRIVATE METHODS
 
     /**
      * TODO implemente real download limit
      * since this is a fake limit, because alla rticles are always downloaded regardless
      */
-    private void downloadArticlesFromServer(List<Source> givenSources, int numArticlesForEachSource, Context context) {
+    private void downloadArticlesFromServer(List<Source> givenSources,
+                                            int numArticlesForEachSource,
+                                            Context context) {
         // download source articles
         fetchedArticles = new ArrayList<>();
         oldestArticlesSnapshots = new ArrayList<>();
@@ -95,7 +100,9 @@ public class ArticleRepository {
     }
 
     // get the latest <limit> articles
-    private void downloadArticlesFromServer_companion(String sourceName, int limit, Context context) {
+    private void downloadArticlesFromServer_companion(String sourceName,
+                                                      int limit,
+                                                      Context context) {
         List<Article> result = new ArrayList<>();
         db.collection(ARTICLES_COLLECTION_NAME).whereEqualTo(SOURCE_ID, (String)sourceName).orderBy(PUB_DATE, Query.Direction.DESCENDING).limit(limit)
                 .get()
@@ -114,7 +121,7 @@ public class ArticleRepository {
                                 }
                             }
                             // getting oldest document
-                            extractOldestSnapshots(documentSnapshots, i);
+                            extractOldestArticles(documentSnapshots, i);
                         }
 
                         //
@@ -138,17 +145,16 @@ public class ArticleRepository {
         Log.d(TAG, "SCIENCE_BOARD - thread resumed");
     }
 
-
-
-
-    private void downloadNextArticlesFromServer(List<DocumentSnapshot> givenOldestArticles, int numArticlesForEachSource, Context context) {
+    private void downloadNextArticlesFromServer(List<DocumentSnapshot> startingArticles,
+                                                int numArticlesForEachSource,
+                                                Context context) {
         // download source data
         fetchedArticles = new ArrayList<>();
         oldestArticlesSnapshots = new ArrayList<>();
-        sourcesToConsume = givenOldestArticles.size();
+        sourcesToConsume = startingArticles.size();
         sourcesConsumed = 0;
         Log.d(TAG, "SCIENCE_BOARD - sources to fetch: " + sourcesToConsume);
-        for(DocumentSnapshot currentDocument: givenOldestArticles) {
+        for(DocumentSnapshot currentDocument: startingArticles) {
             downloadNextArticlesFromServer_companion(currentDocument, numArticlesForEachSource, context);
         }
         if(sourcesConsumed >= sourcesToConsume) {
@@ -158,15 +164,15 @@ public class ArticleRepository {
         }
     }
 
-    private void downloadNextArticlesFromServer_companion(DocumentSnapshot startingDocument,
+    private void downloadNextArticlesFromServer_companion(DocumentSnapshot startingArticle,
                                                           int givenLimit,
                                                           Context context) {
         List<Article> result = new ArrayList<>();
 
         Query query = db.collection(ARTICLES_COLLECTION_NAME)
                 .orderBy(PUB_DATE, Query.Direction.DESCENDING)
-                .startAfter(startingDocument)
-                .whereEqualTo("source_id", startingDocument.get("source_id"))
+                .startAfter(startingArticle)
+                .whereEqualTo("source_id", startingArticle.get("source_id"))
                 .limit(givenLimit);
 
         query.get()
@@ -185,7 +191,7 @@ public class ArticleRepository {
                                 }
                             }
                             // getting oldest document
-                            extractOldestSnapshots(documentSnapshots, i);
+                            extractOldestArticles(documentSnapshots, i);
                         }
 
                         //
@@ -207,52 +213,6 @@ public class ArticleRepository {
             }
         }
         Log.d(TAG, "SCIENCE_BOARD - thread resumed");
-    }
-
-//    private Query contains(Query query, String... keywords) {
-//        for(String keyword: )
-//        query.whereEqualTo("source_id", document.get("source_id"));
-//        return query;
-//    }
-
-
-
-    private void extractOldestSnapshots(List<DocumentSnapshot> documentSnapshots, int i) {
-        oldestArticlesSnapshots.add(documentSnapshots.get(i-1));
-    }
-
-    private void onArticlesFetchCompleted(List<Article> articles, Context context) {
-        if(articles==null || articles.isEmpty()) {
-            // in case of no more articles to fetch
-            sourcesConsumed = sourcesToConsume;
-        }
-        else {
-            fetchedArticles.addAll(articles);
-            saveArticlesInRoom(articles, context);
-            sourcesConsumed++;
-        }
-
-        Log.d(TAG, "SCIENCE_BOARD - article fetched, resuming thread");
-        synchronized(fetchedArticles){
-            fetchedArticles.notify();
-        }
-    }
-
-
-    // DOM strategy
-    private List<Article> combineArticles(List<Source> sources) {
-        List<Article> result = null;
-        if(sources==null || sources.size()<=0) return result;
-
-        result = new ArrayList<>();
-        for(Source currentSource: sources) {
-            List<Article> temp = currentSource.getArticles();
-            if(temp!=null && temp.size()>0) {
-                result.addAll(temp);
-            }
-        }
-
-        return result;
     }
 
     private Article buildArticle(DocumentSnapshot document) {
@@ -274,8 +234,26 @@ public class ArticleRepository {
         return article;
     }
 
+    private void onArticlesFetchCompleted(List<Article> articles, Context context) {
+        if(articles==null || articles.isEmpty()) {
+            // in case of no more articles to fetch
+            sourcesConsumed = sourcesToConsume;
+        }
+        else {
+            fetchedArticles.addAll(articles);
+            saveArticlesInRoom(articles, context);
+            sourcesConsumed++;
+        }
 
+        Log.d(TAG, "SCIENCE_BOARD - article fetched, resuming thread");
+        synchronized(fetchedArticles){
+            fetchedArticles.notify();
+        }
+    }
 
+    private void extractOldestArticles(List<DocumentSnapshot> documentSnapshots, int i) {
+        oldestArticlesSnapshots.add(documentSnapshots.get(i-1));
+    }
 
     private void saveArticlesInRoom(@NotNull List<Article> articles, Context context) {
         ArticleDao articleDao = getArticleDao(context);
@@ -301,6 +279,27 @@ public class ArticleRepository {
     private ArticleDao getArticleDao(Context context) {
         ScienceBoardRoomDatabase roomDatabase = ScienceBoardRoomDatabase.getInstance(context);
         return roomDatabase.getArticleDao();
+    }
+
+    //    private Query contains(Query query, String... keywords) {
+//        for(String keyword: )
+//        query.whereEqualTo("source_id", document.get("source_id"));
+//        return query;
+//    }
+
+    private List<Article> combineArticles(List<Source> sources) {
+        List<Article> result = null;
+        if(sources==null || sources.size()<=0) return result;
+
+        result = new ArrayList<>();
+        for(Source currentSource: sources) {
+            List<Article> temp = currentSource.getArticles();
+            if(temp!=null && temp.size()>0) {
+                result.addAll(temp);
+            }
+        }
+
+        return result;
     }
 
 }// end ArticleRepository

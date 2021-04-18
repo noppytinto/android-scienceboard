@@ -107,6 +107,12 @@ public class HomeFragment extends Fragment{
 //        adProvider.destroyAds();
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
+
 
 
     //--------------------------------------------------------------------- methods

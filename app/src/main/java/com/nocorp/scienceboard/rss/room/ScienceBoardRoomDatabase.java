@@ -9,12 +9,12 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
 import com.nocorp.scienceboard.model.Article;
-import com.nocorp.scienceboard.model.BookmarkedArticle;
+import com.nocorp.scienceboard.model.BookmarkArticle;
 import com.nocorp.scienceboard.model.Source;
-import com.nocorp.scienceboard.model.VisitedArticle;
+import com.nocorp.scienceboard.model.HistoryArticle;
 
 @Database(
-        entities = {Source.class, Article.class, VisitedArticle.class, BookmarkedArticle.class},
+        entities = {Source.class, Article.class, HistoryArticle.class, BookmarkArticle.class},
         version = 1,
         exportSchema = false)
 @TypeConverters({StringListConverter.class})

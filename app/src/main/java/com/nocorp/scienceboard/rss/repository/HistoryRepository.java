@@ -3,8 +3,7 @@ package com.nocorp.scienceboard.rss.repository;
 import android.content.Context;
 import android.util.Log;
 
-import com.nocorp.scienceboard.model.Article;
-import com.nocorp.scienceboard.model.VisitedArticle;
+import com.nocorp.scienceboard.model.HistoryArticle;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.rss.room.HistoryDao;
@@ -43,7 +42,7 @@ public class HistoryRepository{
         HistoryDao dao = getHistoryDao(context);
 
         Runnable task = () -> {
-            List<VisitedArticle> temp = dao.selectAll();
+            List<HistoryArticle> temp = dao.selectAll();
             List<ListItem> result = null;
 
             if(temp!=null && temp.size()>0) {

@@ -5,27 +5,25 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
-import androidx.room.Update;
 
-import com.nocorp.scienceboard.model.VisitedArticle;
+import com.nocorp.scienceboard.model.HistoryArticle;
 
-import java.util.Date;
 import java.util.List;
 
 @Dao
 public interface HistoryDao {
-    @Query("SELECT * FROM visitedarticle ORDER BY visited_date DESC")
-    List<VisitedArticle> selectAll();
+    @Query("SELECT * FROM HistoryArticle ORDER BY visited_date DESC")
+    List<HistoryArticle> selectAll();
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    void insert(VisitedArticle article);
+    void insert(HistoryArticle article);
 
-    @Query("UPDATE VisitedArticle " +
+    @Query("UPDATE HistoryArticle " +
             "SET visited_date = :newVisitedDate " +
             "WHERE id = :targetIdentifier AND visited_date = :oldVisitedDate")
     int update(long newVisitedDate, String targetIdentifier, long oldVisitedDate);
 
-    @Query("DELETE FROM VisitedArticle")
+    @Query("DELETE FROM HistoryArticle")
     public void nukeTable();
 
 }

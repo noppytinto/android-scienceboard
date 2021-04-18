@@ -11,8 +11,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -27,7 +25,6 @@ import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
-import com.nocorp.scienceboard.ui.tabs.techtab.TechTabFragment;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
@@ -156,36 +153,39 @@ public class AllTabFragment extends Fragment implements
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
-                LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                LinearLayoutManager linearLayoutManager =
+                        (LinearLayoutManager) recyclerView.getLayoutManager();
 
                 if (!isLoading) {
-                    if (linearLayoutManager != null && linearLayoutManager.findLastCompletelyVisibleItemPosition() == articlesToDisplay.size() - 1) {
+                    if (linearLayoutManager != null &&
+                        (articlesToDisplay != null && !articlesToDisplay.isEmpty()) &&
+                        linearLayoutManager.findLastCompletelyVisibleItemPosition() == articlesToDisplay.size() - 1) {
                         //bottom of list!
-                        Log.d(TAG, "SCIENCE_BOARD - loadMore: reached the end of the recycler");
-                        loadMore();
+                        Log.d(TAG, "SCIENCE_BOARD - initScrollListener: reached the end of the recycler");
+                        loadMoreArticles();
                     }
                 }
             }
         });
     }
 
-    private void loadMore() {
+    private void loadMoreArticles() {
         isLoading = true;
 
         // adding loading view
-        observerNextArticlesFetch();
         recyclerAdapterArticlesList.addLoadingView(articlesToDisplay);
 
-        // TODO: move into viewmodel ?
-        // load new items (asynchronously)
+        // load new items
+        observerNextArticlesFetched();
         allTabViewModel.fetchNextArticles(NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE);
     }
 
-    private void observerNextArticlesFetch() {
+    private void observerNextArticlesFetched() {
         allTabViewModel.getObservableNextArticlesList().observe(getViewLifecycleOwner(), fetchedArticles -> {
             if(fetchedArticles==null || fetchedArticles.isEmpty()) {
 //                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
-                recyclerAdapterArticlesList.addLoadingView(articlesToDisplay);
+//                recyclerAdapterArticlesList.addLoadingView(articlesToDisplay);
+                recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
             }
             else {
                 recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
@@ -218,6 +218,9 @@ public class AllTabFragment extends Fragment implements
             Navigation.findNavController(view).navigate(action);
         }
     }
+
+
+
 
     private void runToastOnUiThread(String message) {
         requireActivity().runOnUiThread(() -> {

@@ -42,23 +42,24 @@ public class HistoryViewModel extends AndroidViewModel implements HistoryReposit
     }
 
 
+
+
     //------------------------------------------------------------ METHODS
 
     public void fetchHistory(int limit) {
         // TODO: implement limit?
-        Runnable task = () -> {
-            taskIsRunning = true;
-            // pick sources for ALL tab, only once
-            historyRepository.fetchArticles(limit, getApplication());
-        };
 
         if( ! taskIsRunning) {
+            Runnable task = () -> {
+                taskIsRunning = true;
+                // pick sources for ALL tab, only once
+                historyRepository.fetchArticles(limit, getApplication());
+            };
+
             ThreadManager threadManager = ThreadManager.getInstance();
             threadManager.runTask(task);
         }
-
     }
-
 
     @Override
     public void onHistoryFetchCompleted(List<ListItem> articles) {
@@ -84,8 +85,8 @@ public class HistoryViewModel extends AndroidViewModel implements HistoryReposit
         setArticlesList(null);
     }
 
-
     public void clearHistory() {
         historyRepository.nukeHistory(getApplication());
     }
+
 }// end HistoryViewModel

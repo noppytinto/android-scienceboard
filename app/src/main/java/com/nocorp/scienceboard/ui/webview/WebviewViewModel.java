@@ -10,7 +10,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.nocorp.scienceboard.model.Article;
-import com.nocorp.scienceboard.model.BookmarkedArticle;
+import com.nocorp.scienceboard.model.BookmarkArticle;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.rss.room.BookmarkDao;
 import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
@@ -116,9 +116,9 @@ public class WebviewViewModel extends AndroidViewModel {
             try {
                 addingToBookmarksTaskIsRunning = true;
                 long millis=System.currentTimeMillis();
-                BookmarkedArticle bookmarkedArticle = new BookmarkedArticle(givenArticle);
-                bookmarkedArticle.setSavedDate(millis);
-                dao.insert(bookmarkedArticle);
+                BookmarkArticle bookmarkArticle = new BookmarkArticle(givenArticle);
+                bookmarkArticle.setSavedDate(millis);
+                dao.insert(bookmarkArticle);
                 setAddToBookmarksResponse(true);
             } catch (Exception e) {
                 e.printStackTrace();

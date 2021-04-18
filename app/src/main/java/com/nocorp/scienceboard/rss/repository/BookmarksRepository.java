@@ -4,7 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.nocorp.scienceboard.model.Article;
-import com.nocorp.scienceboard.model.BookmarkedArticle;
+import com.nocorp.scienceboard.model.BookmarkArticle;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.rss.room.BookmarkDao;
@@ -45,13 +45,13 @@ public class BookmarksRepository {
         BookmarkDao dao = getBookmarkDao(context);
 
         Runnable task = () -> {
-            List<BookmarkedArticle> temp = dao.selectAll();
+            List<BookmarkArticle> temp = dao.selectAll();
             List<ListItem> result = null;
 
             if(temp!=null && temp.size()>0) {
                 result = new ArrayList<>();
                 for(Article article : temp) {
-                    result.add((BookmarkedArticle) article);
+                    result.add((BookmarkArticle) article);
                 }
             }
 
