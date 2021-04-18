@@ -280,7 +280,8 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 //        webViewMain.loadDataWithBaseURL(null, extractedContentHtmlWithUtf8Encoding, "text/html", "UTF-8", null);
         if(extractedContentHtmlWithUtf8Encoding==null || extractedContentHtmlWithUtf8Encoding.isEmpty()) return;
 
-        extractedContentHtmlWithUtf8Encoding = extractedContentHtmlWithUtf8Encoding.replace("<head>", "<head><style>img{max-width: 100%; width:auto; height: auto;}</style>");
+        extractedContentHtmlWithUtf8Encoding =
+                extractedContentHtmlWithUtf8Encoding.replace("<head>", "<head><style>body{background-color: Ivory;} img{max-width: 100%; width:auto; height: auto;}</style>");
         // Parse your HTML file or String with Jsoup
         org.jsoup.nodes.Document doc = Jsoup.parse(extractedContentHtmlWithUtf8Encoding);
         // doc.select selects all tags in the the HTML document
