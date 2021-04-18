@@ -175,6 +175,7 @@ dependencies {
 //    implementation group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '4.2.0'
 //    implementation 'edu.stanford.nlp:stanford-corenlp:4.2.0:models'
 
+    implementation 'net.dankito.readability4j:readability4j:1.0.3'
 
 
 }

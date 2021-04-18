@@ -1,9 +1,7 @@
 package com.nocorp.scienceboard.ui.webview;
 
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -15,7 +13,6 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -27,7 +24,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.CompoundButton;
 import android.widget.HorizontalScrollView;
 import android.widget.Toast;
 
@@ -42,7 +38,15 @@ import com.google.android.material.snackbar.Snackbar;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentWebviewBinding;
 import com.nocorp.scienceboard.model.Article;
+import com.nocorp.scienceboard.system.MyOkHttpClient;
 
+import net.dankito.readability4j.Readability4J;
+import net.dankito.readability4j.extended.Readability4JExtended;
+
+import org.jetbrains.annotations.NotNull;
+import org.jsoup.Jsoup;
+
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -50,9 +54,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
 
 import static android.view.View.SCROLLBARS_INSIDE_OVERLAY;
 
+import okhttp3.ResponseBody;
 
 public class WebviewFragment extends Fragment implements androidx.appcompat.widget.Toolbar.OnMenuItemClickListener {
     private final String TAG = this.getClass().getSimpleName();
@@ -87,9 +95,12 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private List<String> keywords;
     private List<Chip> chips;
     private List<String> selectedKeywords;
-    private int chipId = 0;
-    private String lastKeywordSelected;
+    private int chipId;
 
+    private MenuItem readModeMenuItem;
+    private boolean readModeEnabled = false;
+    private String extractedContentHtmlWithUtf8Encoding;
+    private WebView webViewReadmode;
 
 
 
@@ -108,7 +119,6 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         viewBinding = FragmentWebviewBinding.inflate(inflater, container, false);
         view = viewBinding.getRoot();
         return view;
@@ -137,14 +147,6 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
             buildKeywordsChips(keywords, chipGroup);
 
             checkIfAlreadyInBookmarks();
-
-        }
-    }
-
-    private void buildKeywordsChips(List<String> keywords, ChipGroup chipGroup) {
-        if(keywords==null || keywords.isEmpty()) return;
-        for(String currentKeyword: keywords) {
-            addChip(currentKeyword, chipGroup);
         }
     }
 
@@ -159,66 +161,11 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         // bottom sheet webview
         applyBrowsingRecommendedSettingsBottomSheet(webViewBottomSheet);
         webViewBottomSheet.loadUrl(getString(R.string.string_google_search_website));
-        final BottomSheetBehavior behavior = BottomSheetBehavior.from(bottomSheet);
-        behavior.setDraggable(false);
-        behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-            @Override
-            public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                if (newState == BottomSheetBehavior.STATE_HALF_EXPANDED) {
-                    setupBackButtonBehaviorForWebviewMain(webViewBottomSheet);
-                    horizontalScrollView.setVisibility(View.VISIBLE);
-                    showButton.setText(R.string.string_close);
-                    showButton.setOnClickListener(v -> {
-                        if (behavior.getState() == BottomSheetBehavior.STATE_HALF_EXPANDED) {
-                            behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                        }
-                    });
-                }
-                else if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                    ignoreBackButton(webViewBottomSheet);
-                    horizontalScrollView.setVisibility(View.GONE);
-                    showButton.setText(R.string.string_search);
-                    showButton.setOnClickListener(v -> {
-                        if (behavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
-                            behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+        defineBottomSheetBehavior();
 
-                        }
-                    });
-                }
-//                else if (newState == BottomSheetBehavior.STATE_DRAGGING) {
-//                    behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
-//                }
-            }
-
-            @Override
-            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                // ignore
-            }
-        });
-
-        showButton.setOnClickListener(v -> {
-            if (behavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
-                behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
-            }
-        });
-
-//        chipGroup.setOnCheckedChangeListener((group, checkedId) -> {
-//            Chip chip = chipGroup.findViewById(checkedId);
-//            if(chip != null && chip.isChecked()) {
-//                selectedKeywords.add(chip.getText().toString());
-//                lastKeywordSelected = chip.getText().toString();
-//            }
-//            else {
-//                selectedKeywords.remove(lastKeywordSelected);
-//            }
-//
-//            Log.d(TAG, "onCheckedChanged: " + selectedKeywords);
-//        });
-
-
+        //
+        preparePageForReadMode(webpageUrl);
     }
-
-
 
 
     @Override
@@ -272,6 +219,15 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
             clearCacheCookiesAction();
             return true;
         }
+        else if(item.getItemId() == R.id.option_webviewMenu_readmode) {
+            if(readModeEnabled) {
+                stopReadMode();
+            }
+            else {
+                startReadMode();
+            }
+            return true;
+        }
         return false;
     }
 
@@ -280,8 +236,179 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 
 
 
-
     //---------------------------------------------------------------------- METHODS
+
+    public void preparePageForReadMode(String url) {
+        OkHttpClient client = MyOkHttpClient.getClient();
+
+        okhttp3.Request request = new okhttp3.Request.Builder()
+                .url(url)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull okhttp3.Response response) {
+                try (ResponseBody responseBody = response.body()) {
+                    if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+                    if(responseBody!=null) {
+                        parseWebpage(responseBody, url);
+                        enableReadModeButton();
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            @Override public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private void parseWebpage(ResponseBody responseBody, String url) throws IOException {
+        Readability4J readability4J = new Readability4JExtended(url, responseBody.string());
+        net.dankito.readability4j.Article article = readability4J.parse();
+        // returns extracted content in a <div> element
+        extractedContentHtmlWithUtf8Encoding = article.getContentWithUtf8Encoding();
+
+        if(extractedContentHtmlWithUtf8Encoding==null || extractedContentHtmlWithUtf8Encoding.isEmpty()) return;
+        extractedContentHtmlWithUtf8Encoding = extractedContentHtmlWithUtf8Encoding.replace("<head>", "<head><style>img{max-width: 100%; width:auto; height: auto;}</style>");
+        // Parse your HTML file or String with Jsoup
+        org.jsoup.nodes.Document doc = Jsoup.parse(extractedContentHtmlWithUtf8Encoding);
+        // doc.select selects all tags in the the HTML document
+//        doc.select("img").attr("width", "100%").attr();// find all images and set with to 100%
+        doc.select("figure").attr("style", "max-width: 100%; width: auto; height: auto");// find all figures and set with to 80%
+        doc.select("iframe").attr("style", "max-width: 100%; width: auto; height: auto"); // find all iframes and set with to 100%
+        // add more attributes or CSS to other HTML tags
+        extractedContentHtmlWithUtf8Encoding = doc.html();
+
+        Log.d(TAG, "onViewCreated: " + extractedContentHtmlWithUtf8Encoding);
+    }
+
+    private void startReadMode() {
+//        webViewMain.loadDataWithBaseURL(null, extractedContentHtmlWithUtf8Encoding, "text/html", "UTF-8", null);
+        if(extractedContentHtmlWithUtf8Encoding==null || extractedContentHtmlWithUtf8Encoding.isEmpty()) return;
+        readModeEnabled = true;
+        readModeMenuItem.setTitle("Exit Read mode");
+        webViewReadmode = viewBinding.webViewWebviewFragmentReadMode;
+        webViewReadmode.setVisibility(View.VISIBLE);
+        webViewMain.setVisibility(View.GONE);
+        applyBestSettingsForWebviewReadMode(webViewReadmode);
+        webViewReadmode.loadData(extractedContentHtmlWithUtf8Encoding, "text/html", "UTF-8");
+        showRedSnackbar("Read mode is an experimental feature");
+    }
+
+//    @SuppressLint("NewApi")
+//    private void openWebView(WebView webView) {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+//            webView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING);
+//        } else {
+//            webView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
+//        }
+//        String data = "<div> your HTML content </div>";
+//        webView.loadDataWithBaseURL("file:///android_asset/", getHtmlData(data), "text/html", "utf-8", null);
+//    }
+//
+//    private String getHtmlData(String bodyHTML) {
+//        String head = "<head><style>img{max-width: 100%; width:auto; height: auto;}</style></head>";
+//        return "<html>" + head + "<body>" + bodyHTML + "</body></html>";
+//    }
+
+    private void applyBestSettingsForWebviewReadMode(WebView webView) {
+        WebSettings webSettingsReadMode = webView.getSettings();
+        webSettingsReadMode.setJavaScriptEnabled(true);
+        webSettingsReadMode.setLoadWithOverviewMode(true);
+        webSettingsReadMode.setUseWideViewPort(false);
+        webSettingsReadMode.setSupportZoom(true);
+        webSettingsReadMode.setBuiltInZoomControls(true);
+        webSettingsReadMode.setDisplayZoomControls(false);
+        webSettingsReadMode.setDomStorageEnabled(true);
+        webSettingsReadMode.setDatabaseEnabled(true);
+//        webSettingsReadMode.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            webSettingsReadMode.setSafeBrowsingEnabled(true);
+        }
+        webView.setScrollBarStyle(SCROLLBARS_INSIDE_OVERLAY);
+        webView.setScrollbarFadingEnabled(false);
+        webView.setFocusable(true);
+        webView.setFocusableInTouchMode(true);
+//        defineWebclientBehaviorBottomSheet(webView);
+//        webView.setWebChromeClient(new WebChromeClient());
+        webView.setWebViewClient(new WebViewClient());
+    }
+
+    private void enableReadModeButton() {
+        requireActivity().runOnUiThread(() -> {
+                    try {
+                        readModeMenuItem.setEnabled(true);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+        );
+    }
+
+    private void stopReadMode() {
+        readModeEnabled = false;
+        webViewMain.setVisibility(View.VISIBLE);
+        webViewReadmode.setVisibility(View.GONE);
+        readModeMenuItem.setTitle("Read mode");
+    }
+
+    private void buildKeywordsChips(List<String> keywords, ChipGroup chipGroup) {
+        if(keywords==null || keywords.isEmpty()) return;
+        for(String currentKeyword: keywords) {
+            addChip(currentKeyword, chipGroup);
+        }
+    }
+
+    private void defineBottomSheetBehavior() {
+        final BottomSheetBehavior behavior = BottomSheetBehavior.from(bottomSheet);
+        behavior.setDraggable(false);
+        behavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                if (newState == BottomSheetBehavior.STATE_HALF_EXPANDED) {
+                    setupBackButtonBehaviorForWebviewMain(webViewBottomSheet);
+                    horizontalScrollView.setVisibility(View.VISIBLE);
+                    showButton.setText(R.string.string_close);
+                    showButton.setOnClickListener(v -> {
+                        if (behavior.getState() == BottomSheetBehavior.STATE_HALF_EXPANDED) {
+                            behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                        }
+                    });
+                }
+                else if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    ignoreBackButton(webViewBottomSheet);
+                    horizontalScrollView.setVisibility(View.GONE);
+                    showButton.setText(R.string.string_search);
+                    showButton.setOnClickListener(v -> {
+                        if (behavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+                            behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+
+                        }
+                    });
+                }
+//                else if (newState == BottomSheetBehavior.STATE_DRAGGING) {
+//                    behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+//                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                // ignore
+            }
+        });
+
+        showButton.setOnClickListener(v -> {
+            if (behavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+                behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+            }
+        });
+    }
+
 
 
     private void initiView(@NonNull View view) {
@@ -298,6 +425,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         horizontalScrollView = viewBinding.includeWebviewFragment.containerBottomSheetWebview;
         chips = new ArrayList<>();
         selectedKeywords = new ArrayList<>();
+        readModeMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_readmode);
 
 
         // webview botomsheet
@@ -538,26 +666,24 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
      * Back button will go back in case of webviews
      */
     private void setupBackButtonBehaviorForWebviewMain(WebView webView) {
-        webView.setOnKeyListener(new View.OnKeyListener()
-        {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if(event.getAction() == KeyEvent.ACTION_DOWN) {
-                    WebView webView = (WebView) v;
+        webView.setOnKeyListener((v, keyCode, event) -> {
+            if(event.getAction() == KeyEvent.ACTION_DOWN) {
+                WebView webView1 = (WebView) v;
 
-                    switch(keyCode) {
-                        case KeyEvent.KEYCODE_BACK:
-                            if(webView.canGoBack()) {
-                                webView.goBack();
-                                return true;
-                            }
-                            break;
-                    }
+                switch(keyCode) {
+                    case KeyEvent.KEYCODE_BACK:
+                        if(webView1.canGoBack()) {
+                            webView1.goBack();
+                            return true;
+                        }
+                        break;
                 }
-                return false;
             }
+            return false;
         });
     }
+
+
 
     private void ignoreBackButton(WebView webView) {
         webView.setOnKeyListener(null);
@@ -633,12 +759,25 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         snackbar.show();
     }
 
+    private void showRedSnackbar(String message) {
+        snackbar = Snackbar.make(view, "",Snackbar.LENGTH_INDEFINITE);
+        snackbar.setText(message);
+        snackbar.setTextColor(getResources().getColor(R.color.white));
+        snackbar.setBackgroundTint(getResources().getColor(R.color.red));
+        snackbar.setAction("ok", v -> {
+            snackbar.dismiss();
+        });
+        snackbar.setActionTextColor(getResources().getColor(R.color.white));
+        snackbar.show();
+    }
+
+
     private void showErrorSnackbar(String message) {
         snackbar = Snackbar.make(view, "",Snackbar.LENGTH_INDEFINITE);
         snackbar.setText(message);
         snackbar.setTextColor(getResources().getColor(R.color.white));
         snackbar.setBackgroundTint(getResources().getColor(R.color.red));
-        snackbar.setAnchorView(R.id.nav_view);
+//        snackbar.setAnchorView(R.id.nav_view);
         snackbar.setAction("retry", v -> {
             snackbar.dismiss();
             webViewMain.loadUrl(webpageUrl);

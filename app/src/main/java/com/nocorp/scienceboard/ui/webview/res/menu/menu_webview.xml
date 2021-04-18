@@ -56,4 +56,11 @@
         android:id="@+id/option_webviewMenu_delete"
         android:title="Clear cache/cookies"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/option_webviewMenu_readmode"
+        android:enabled="false"
+        android:icon="@drawable/ic_library_books"
+        android:title="Read mode"
+        app:showAsAction="never" />
 </menu>
