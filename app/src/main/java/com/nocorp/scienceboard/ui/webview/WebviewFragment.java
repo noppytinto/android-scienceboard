@@ -151,7 +151,6 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         }
     }
 
-
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -167,7 +166,6 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         //
         preparePageForReadMode(webpageUrl);
     }
-
 
     @Override
     public void onDestroyView() {
@@ -400,6 +398,15 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
                         }
                     });
                 }
+//                else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+//                    ignoreBackButton(webViewBottomSheet);
+//                    showButton.setOnClickListener(v -> {
+//                        if (behavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+//                            behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+//
+//                        }
+//                    });
+//                }
 //                else if (newState == BottomSheetBehavior.STATE_DRAGGING) {
 //                    behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
 //                }
