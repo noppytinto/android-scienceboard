@@ -137,7 +137,7 @@ public class TechTabViewModel extends AndroidViewModel implements ArticlesReposi
     public void fetchNextArticles(int numArticlesForEachSource) {
         if(!taskIsRunning) {
             Runnable task = () -> {
-                sleepforNseconds(1);
+//                sleepforNseconds(1);
                 Log.d(TAG, "SCIENCE_BOARD - fetchNextArticles: fetching new articles");
                 articleRepository.getNextArticles(oldestArticlesBySource, numArticlesForEachSource, getApplication());
             };
