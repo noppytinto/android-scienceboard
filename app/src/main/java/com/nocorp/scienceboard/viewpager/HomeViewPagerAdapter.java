@@ -7,6 +7,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import com.nocorp.scienceboard.ui.tabs.alltab.AllTabFragment;
+import com.nocorp.scienceboard.ui.tabs.physicstab.PhysicsTabFragment;
+import com.nocorp.scienceboard.ui.tabs.spacetab.SpaceTabFragment;
 import com.nocorp.scienceboard.ui.tabs.techtab.TechTabFragment;
 
 public class HomeViewPagerAdapter extends FragmentStateAdapter {
@@ -30,16 +32,16 @@ public class HomeViewPagerAdapter extends FragmentStateAdapter {
             case 1:
                 return TechTabFragment.newInstance();
             case 2:
-                return new Fragment();
+                return PhysicsTabFragment.newInstance();
             case 3:
-                return new Fragment();
+                return SpaceTabFragment.newInstance();
             case 4:
                 return new Fragment();
             case 5:
                 return new Fragment();
         }
 
-        // TODO: fix
+        // TODO: fix, should use "default" as last chance
         return null;
     }
 

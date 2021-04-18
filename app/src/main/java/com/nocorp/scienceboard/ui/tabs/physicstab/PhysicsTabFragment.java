@@ -1,7 +1,9 @@
-package com.nocorp.scienceboard.ui.tabs.techtab;
+package com.nocorp.scienceboard.ui.tabs.physicstab;
 
 import androidx.lifecycle.ViewModelProvider;
+
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -9,30 +11,36 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.nocorp.scienceboard.MobileNavigationDirections;
 import com.nocorp.scienceboard.R;
-import com.nocorp.scienceboard.databinding.FragmentTechTabBinding;
+import com.nocorp.scienceboard.databinding.FragmentPhysicsTabBinding;
+import com.nocorp.scienceboard.databinding.FragmentSpaceTabBinding;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
+import com.nocorp.scienceboard.ui.tabs.spacetab.SpaceTabViewModel;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class TechTabFragment extends Fragment implements
-        RecyclerAdapterArticlesList.OnArticleClickedListener {
+public class PhysicsTabFragment extends Fragment implements
+        RecyclerAdapterArticlesList.OnArticleClickedListener  {
+
     private final String TAG = this.getClass().getSimpleName();
-    private TechTabViewModel techTabViewModel;
-    private FragmentTechTabBinding viewBinding;
+    private PhysicsTabViewModel physicsTabViewModel;
+    private FragmentPhysicsTabBinding viewBinding;
 
     private RecyclerAdapterArticlesList recyclerAdapterArticlesList;
     private RecyclerView recyclerView;
@@ -53,9 +61,9 @@ public class TechTabFragment extends Fragment implements
 
     //--------------------------------------------------------------------- CONSTRUCTORS
 
-    public static TechTabFragment newInstance() {
-        Log.d(TechTabFragment.class.getSimpleName(), "SCIENCE_BOARD - newInstance: called");
-        return new TechTabFragment();
+    public static PhysicsTabFragment newInstance() {
+        Log.d(PhysicsTabFragment.class.getSimpleName(), "SCIENCE_BOARD - newInstance: called");
+        return new PhysicsTabFragment();
     }
 
 
@@ -65,7 +73,7 @@ public class TechTabFragment extends Fragment implements
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        viewBinding = FragmentTechTabBinding.inflate(getLayoutInflater());
+        viewBinding = FragmentPhysicsTabBinding.inflate(getLayoutInflater());
         view = viewBinding.getRoot();
         Log.d(TAG, "SCIENCE_BOARD - onCreateView: called");
         return view;
@@ -101,19 +109,19 @@ public class TechTabFragment extends Fragment implements
     //--------------------------------------------------------------------- METHODS
 
     private void initiView() {
-        progressIndicator = viewBinding.progressIndicatorTechTabFragment;
-        swipeRefreshLayout = viewBinding.swipeRefreshTechTabFragment;
+        progressIndicator = viewBinding.progressIndicatorPhysicsTabFragment;
+        swipeRefreshLayout = viewBinding.swipeRefreshPhysicsTabFragment;
         swipeRefreshLayout.setColorSchemeResources(R.color.orange_light);
         adProvider = AdProvider.getInstance(); // is not guaranteed that
         sourceViewModel = new ViewModelProvider(requireActivity()).get(SourceViewModel.class);
-        techTabViewModel = new ViewModelProvider(this).get(TechTabViewModel.class);
+        physicsTabViewModel = new ViewModelProvider(this).get(PhysicsTabViewModel.class);
         initRecycleView();
         setupSwipeDownToRefresh();
     }
 
     private void initRecycleView() {
         // defining Recycler view
-        recyclerView = viewBinding.recyclerViewTechTabFragment;
+        recyclerView = viewBinding.recyclerViewPhysicsTabFragment;
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this);
         recyclerView.setAdapter(recyclerAdapterArticlesList);
@@ -135,8 +143,8 @@ public class TechTabFragment extends Fragment implements
 
                 if (!isLoading) {
                     if (linearLayoutManager != null &&
-                        (articlesToDisplay != null && !articlesToDisplay.isEmpty()) &&
-                        linearLayoutManager.findLastCompletelyVisibleItemPosition() == articlesToDisplay.size() - 1) {
+                            (articlesToDisplay != null && !articlesToDisplay.isEmpty()) &&
+                            linearLayoutManager.findLastCompletelyVisibleItemPosition() == articlesToDisplay.size() - 1) {
 
                         // NOTE:
                         // this resolve the "cannot call this method in a scroll callback" problem
@@ -161,11 +169,11 @@ public class TechTabFragment extends Fragment implements
         recyclerAdapterArticlesList.addLoadingView(articlesToDisplay);
 
         // load new items
-        techTabViewModel.fetchNextArticles(NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE);
+        physicsTabViewModel.fetchNextArticles(NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE);
     }
 
     private void observerNextArticlesFetch() {
-        techTabViewModel.getObservableNextArticlesList().observe(getViewLifecycleOwner(), fetchedArticles -> {
+        physicsTabViewModel.getObservableNextArticlesList().observe(getViewLifecycleOwner(), fetchedArticles -> {
             if(fetchedArticles==null || fetchedArticles.isEmpty()) {
 //                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
                 recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
@@ -181,7 +189,7 @@ public class TechTabFragment extends Fragment implements
     }
 
     private void observeArticlesFetched() {
-        techTabViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), resultArticles -> {
+        physicsTabViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), resultArticles -> {
             swipeRefreshLayout.setRefreshing(false);
             progressIndicator.setVisibility(View.GONE);
 
@@ -203,7 +211,7 @@ public class TechTabFragment extends Fragment implements
             if(sources!=null && !sources.isEmpty()) {
                 // TODO
                 this.sourcesFetched = new ArrayList<>(sources);
-                techTabViewModel.fetchArticles(sources, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, false);
+                physicsTabViewModel.fetchArticles(sources, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, false);
             }
         });
     }
@@ -217,14 +225,14 @@ public class TechTabFragment extends Fragment implements
     }
 
     private void refreshAction() {
-        techTabViewModel.fetchArticles(sourcesFetched, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, true);
+        physicsTabViewModel.fetchArticles(sourcesFetched, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, true);
     }
 
     @Override
     public void onArticleClicked(int position) {
         Article article = (Article) recyclerAdapterArticlesList.getItem(position);
         if(article!=null) {
-            techTabViewModel.smartSaveInHistory(article);
+            physicsTabViewModel.smartSaveInHistory(article);
             MobileNavigationDirections.ActionGlobalWebviewFragment action =
                     MobileNavigationDirections.actionGlobalWebviewFragment(article);
             Navigation.findNavController(view).navigate(action);
@@ -262,6 +270,4 @@ public class TechTabFragment extends Fragment implements
         toast.show();
     }
 
-
-
-}// end TechTabFragment
+}// end PhysicsTabFragment
