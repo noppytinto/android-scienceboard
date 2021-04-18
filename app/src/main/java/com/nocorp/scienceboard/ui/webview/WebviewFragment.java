@@ -3,6 +3,7 @@ package com.nocorp.scienceboard.ui.webview;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -48,6 +49,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+
+import io.alterac.blurkit.BlurLayout;
+
 import static android.view.View.SCROLLBARS_INSIDE_OVERLAY;
 
 
@@ -86,6 +90,8 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private List<String> selectedKeywords;
     private int chipId = 0;
     private String lastKeywordSelected;
+    private BlurLayout blurLayout;
+
 
 
 
@@ -214,6 +220,9 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 
     }
 
+
+
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -305,6 +314,10 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 //                ignoreBackButton(webViewBottomSheet);
 //            }
 //        });
+
+
+
+
     }
 
     private void addChip(String name, ChipGroup chipGroup) {
@@ -312,14 +325,16 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 //        Chip newChip = new Chip(requireContext(), null, R.style.ScienceBoard_Button_Chip_Choice);
 //        Chip newChip = (Chip) getLayoutInflater().inflate(R.layout.layout_chip_choice, chipGroup, false);
         Chip newChip = new Chip(requireContext());
+//        newChip.setCheckable(true);
+//        newChip.setCheckedIconVisible(false);
         ChipDrawable chipDrawable = ChipDrawable.createFromAttributes(requireContext(),
                 null,
                 0,
                 R.style.ScienceBoard_Button_Chip_Choice);
         newChip.setChipDrawable(chipDrawable);
-        newChip.setCheckable(true);
-        newChip.setCheckedIconVisible(false);
         newChip.setText(name);
+        newChip.setTextAppearance(R.style.Cinemates_Button_Chip_Choice_TextAppearance);
+
         int i = chipId++;
         newChip.setId(i);
         newChip.setTag(i);

@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
         initView();
         initAdProvider();
         fetchSourcesFromRemoteDb();
+
     }
 
     @Override
