@@ -334,6 +334,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         webSettingsReadMode.setDisplayZoomControls(false);
         webSettingsReadMode.setDomStorageEnabled(true);
         webSettingsReadMode.setDatabaseEnabled(true);
+        webSettingsReadMode.setTextZoom(120);// where 90 is 90%; default value is ... 100
 //        webSettingsReadMode.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             webSettingsReadMode.setSafeBrowsingEnabled(true);
