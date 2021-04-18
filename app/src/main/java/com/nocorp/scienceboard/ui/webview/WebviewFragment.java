@@ -45,6 +45,7 @@ import net.dankito.readability4j.extended.Readability4JExtended;
 
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
+import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -273,48 +274,54 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         // returns extracted content in a <div> element
         extractedContentHtmlWithUtf8Encoding = article.getContentWithUtf8Encoding();
 
-        if(extractedContentHtmlWithUtf8Encoding==null || extractedContentHtmlWithUtf8Encoding.isEmpty()) return;
-        extractedContentHtmlWithUtf8Encoding = extractedContentHtmlWithUtf8Encoding.replace("<head>", "<head><style>img{max-width: 100%; width:auto; height: auto;}</style>");
-        // Parse your HTML file or String with Jsoup
-        org.jsoup.nodes.Document doc = Jsoup.parse(extractedContentHtmlWithUtf8Encoding);
-        // doc.select selects all tags in the the HTML document
-//        doc.select("img").attr("width", "100%").attr();// find all images and set with to 100%
-        doc.select("figure").attr("style", "max-width: 100%; width: auto; height: auto");// find all figures and set with to 80%
-        doc.select("iframe").attr("style", "max-width: 100%; width: auto; height: auto"); // find all iframes and set with to 100%
-        // add more attributes or CSS to other HTML tags
-        extractedContentHtmlWithUtf8Encoding = doc.html();
-
-        Log.d(TAG, "onViewCreated: " + extractedContentHtmlWithUtf8Encoding);
     }
 
     private void startReadMode() {
 //        webViewMain.loadDataWithBaseURL(null, extractedContentHtmlWithUtf8Encoding, "text/html", "UTF-8", null);
         if(extractedContentHtmlWithUtf8Encoding==null || extractedContentHtmlWithUtf8Encoding.isEmpty()) return;
-        readModeEnabled = true;
-        readModeMenuItem.setTitle("Exit Read mode");
-        webViewReadmode = viewBinding.webViewWebviewFragmentReadMode;
-        webViewReadmode.setVisibility(View.VISIBLE);
-        webViewMain.setVisibility(View.GONE);
-        applyBestSettingsForWebviewReadMode(webViewReadmode);
-        webViewReadmode.loadData(extractedContentHtmlWithUtf8Encoding, "text/html", "UTF-8");
-        showRedSnackbar("Read mode is an experimental feature");
+
+        extractedContentHtmlWithUtf8Encoding = extractedContentHtmlWithUtf8Encoding.replace("<head>", "<head><style>img{max-width: 100%; width:auto; height: auto;}</style>");
+        // Parse your HTML file or String with Jsoup
+        org.jsoup.nodes.Document doc = Jsoup.parse(extractedContentHtmlWithUtf8Encoding);
+        // doc.select selects all tags in the the HTML document
+//        doc.select("img").attr("width", "100%").attr();// find all images and set with to 100%
+
+        if(hasParagraphs(doc)) {
+            doc.select("figure").attr("style", "max-width: 100%; width: auto; height: auto");// find all figures and set with to 80%
+            doc.select("iframe").attr("style", "max-width: 100%; width: auto; height: auto"); // find all iframes and set with to 100%
+            // add more attributes or CSS to other HTML tags
+            extractedContentHtmlWithUtf8Encoding = doc.html();
+
+            Log.d(TAG, "onViewCreated: " + extractedContentHtmlWithUtf8Encoding);
+
+            readModeEnabled = true;
+            readModeMenuItem.setTitle("Exit Read mode");
+            webViewReadmode = viewBinding.webViewWebviewFragmentReadMode;
+            webViewReadmode.setVisibility(View.VISIBLE);
+            webViewMain.setVisibility(View.GONE);
+            applyBestSettingsForWebviewReadMode(webViewReadmode);
+            webViewReadmode.loadData(extractedContentHtmlWithUtf8Encoding, "text/html", "UTF-8");
+            showRedSnackbar("Read mode is an experimental feature.");
+        }
+        else {
+            showRedSnackbar("Content not found.");
+        }
+
     }
 
-//    @SuppressLint("NewApi")
-//    private void openWebView(WebView webView) {
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-//            webView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING);
-//        } else {
-//            webView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
-//        }
-//        String data = "<div> your HTML content </div>";
-//        webView.loadDataWithBaseURL("file:///android_asset/", getHtmlData(data), "text/html", "utf-8", null);
-//    }
-//
-//    private String getHtmlData(String bodyHTML) {
-//        String head = "<head><style>img{max-width: 100%; width:auto; height: auto;}</style></head>";
-//        return "<html>" + head + "<body>" + bodyHTML + "</body></html>";
-//    }
+    private boolean hasParagraphs(org.jsoup.nodes.Document doc) {
+        boolean result = false;
+        if(doc==null) return result;
+
+
+        Elements pTag = doc.select("p");
+
+        if(pTag!=null && pTag.size()>0)
+            result = true;
+
+
+        return result;
+    }
 
     private void applyBestSettingsForWebviewReadMode(WebView webView) {
         WebSettings webSettingsReadMode = webView.getSettings();
@@ -760,7 +767,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     }
 
     private void showRedSnackbar(String message) {
-        snackbar = Snackbar.make(view, "",Snackbar.LENGTH_INDEFINITE);
+        snackbar = Snackbar.make(view, "",Snackbar.LENGTH_LONG);
         snackbar.setText(message);
         snackbar.setTextColor(getResources().getColor(R.color.white));
         snackbar.setBackgroundTint(getResources().getColor(R.color.red));
