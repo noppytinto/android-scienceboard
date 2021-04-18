@@ -322,29 +322,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         return result;
     }
 
-    private void applyBestSettingsForWebviewReadMode(WebView webView) {
-        WebSettings webSettingsReadMode = webView.getSettings();
-        webSettingsReadMode.setJavaScriptEnabled(true);
-        webSettingsReadMode.setLoadWithOverviewMode(true);
-        webSettingsReadMode.setUseWideViewPort(false);
-        webSettingsReadMode.setSupportZoom(true);
-        webSettingsReadMode.setBuiltInZoomControls(true);
-        webSettingsReadMode.setDisplayZoomControls(false);
-        webSettingsReadMode.setDomStorageEnabled(true);
-        webSettingsReadMode.setDatabaseEnabled(true);
-        webSettingsReadMode.setTextZoom(120);// where 90 is 90%; default value is ... 100
-//        webSettingsReadMode.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            webSettingsReadMode.setSafeBrowsingEnabled(true);
-        }
-        webView.setScrollBarStyle(SCROLLBARS_INSIDE_OVERLAY);
-        webView.setScrollbarFadingEnabled(false);
-        webView.setFocusable(true);
-        webView.setFocusableInTouchMode(true);
-//        defineWebclientBehaviorBottomSheet(webView);
-//        webView.setWebChromeClient(new WebChromeClient());
-        webView.setWebViewClient(new WebViewClient());
-    }
+
 
     private void enableReadModeButton() {
         requireActivity().runOnUiThread(() -> {
@@ -587,6 +565,52 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 
     //------------------------------------------------------------------------------------ METHODS
 
+    private void applyBrowsingRecommendedSettingsMain(WebView webView) {
+        webSettingsMain = webView.getSettings();
+        webSettingsMain.setJavaScriptEnabled(true);
+        webSettingsMain.setJavaScriptCanOpenWindowsAutomatically(true);// TODO: allow youtube to set a video fullscreen
+        webSettingsMain.setLoadWithOverviewMode(true);
+        webSettingsMain.setUseWideViewPort(true);
+        webSettingsMain.setSupportZoom(true);
+        webSettingsMain.setBuiltInZoomControls(true);
+        webSettingsMain.setDisplayZoomControls(false);
+        webSettingsMain.setDomStorageEnabled(true);
+        webSettingsMain.setDatabaseEnabled(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            webSettingsMain.setSafeBrowsingEnabled(true);
+        }
+        webView.setScrollBarStyle(SCROLLBARS_INSIDE_OVERLAY);
+        webView.setScrollbarFadingEnabled(false);
+//        webView.setFocusable(true);
+//        webView.setFocusableInTouchMode(true);
+//        webView.setLayerType(WebView.LAYER_TYPE_SOFTWARE, null); // TODO: this might fix blank screen porblem
+        defineWebclientBehaviorMain(webView);
+    }
+
+    private void applyBestSettingsForWebviewReadMode(WebView webView) {
+        WebSettings webSettingsReadMode = webView.getSettings();
+        webSettingsReadMode.setJavaScriptEnabled(true);
+        webSettingsReadMode.setLoadWithOverviewMode(true);
+        webSettingsReadMode.setUseWideViewPort(false);
+        webSettingsReadMode.setSupportZoom(true);
+        webSettingsReadMode.setBuiltInZoomControls(true);
+        webSettingsReadMode.setDisplayZoomControls(false);
+        webSettingsReadMode.setDomStorageEnabled(true);
+        webSettingsReadMode.setDatabaseEnabled(true);
+        webSettingsReadMode.setTextZoom(120);// where 90 is 90%; default value is ... 100
+//        webSettingsReadMode.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            webSettingsReadMode.setSafeBrowsingEnabled(true);
+        }
+        webView.setScrollBarStyle(SCROLLBARS_INSIDE_OVERLAY);
+        webView.setScrollbarFadingEnabled(false);
+//        webView.setFocusable(true);
+//        webView.setFocusableInTouchMode(true);
+//        defineWebclientBehaviorBottomSheet(webView);
+//        webView.setWebChromeClient(new WebChromeClient());
+        webView.setWebViewClient(new WebViewClient());
+    }
+
     private void applyBrowsingRecommendedSettingsBottomSheet(WebView webView) {
         webSettingsBottomSheet = webView.getSettings();
         webSettingsBottomSheet.setJavaScriptEnabled(true);
@@ -602,8 +626,8 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         }
         webView.setScrollBarStyle(SCROLLBARS_INSIDE_OVERLAY);
         webView.setScrollbarFadingEnabled(false);
-        webView.setFocusable(true);
-        webView.setFocusableInTouchMode(true);
+//        webView.setFocusable(true);
+//        webView.setFocusableInTouchMode(true);
         defineWebclientBehaviorBottomSheet(webView);
     }
 
@@ -705,27 +729,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         webView.setOnKeyListener(null);
     }
 
-    private void applyBrowsingRecommendedSettingsMain(WebView webView) {
-        webSettingsMain = webView.getSettings();
-        webSettingsMain.setJavaScriptEnabled(true);
-//        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);// TODO: allow youtube to set a video fullscreen
-        webSettingsMain.setLoadWithOverviewMode(true);
-        webSettingsMain.setUseWideViewPort(true);
-        webSettingsMain.setSupportZoom(true);
-        webSettingsMain.setBuiltInZoomControls(true);
-        webSettingsMain.setDisplayZoomControls(false);
-        webSettingsMain.setDomStorageEnabled(true);
-        webSettingsMain.setDatabaseEnabled(true);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            webSettingsMain.setSafeBrowsingEnabled(true);
-        }
-        webView.setScrollBarStyle(SCROLLBARS_INSIDE_OVERLAY);
-        webView.setScrollbarFadingEnabled(false);
-        webView.setFocusable(true);
-        webView.setFocusableInTouchMode(true);
-//        webView.setLayerType(WebView.LAYER_TYPE_SOFTWARE, null); // TODO: this might fix blank screen porblem
-        defineWebclientBehaviorMain(webView);
-    }
+
 
     private void defineWebclientBehaviorMain(WebView webView) {
         setupBackButtonBehaviorForWebviewMain(webView);
