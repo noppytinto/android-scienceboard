@@ -1,7 +1,9 @@
-package com.nocorp.scienceboard.ui.tabs.tech;
+package com.nocorp.scienceboard.ui.tabs.base;
 
 import androidx.lifecycle.ViewModelProvider;
+
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -9,31 +11,34 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.nocorp.scienceboard.MobileNavigationDirections;
 import com.nocorp.scienceboard.R;
-import com.nocorp.scienceboard.databinding.FragmentTechTabBinding;
+import com.nocorp.scienceboard.databinding.FragmentSpaceTabBinding;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
+import com.nocorp.scienceboard.ui.tabs.space.SpaceTabFragment;
+import com.nocorp.scienceboard.ui.tabs.space.SpaceTabViewModel;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class TechTabFragment extends Fragment implements
+public class BaseTabFragment extends Fragment implements
         RecyclerAdapterArticlesList.OnArticleClickedListener {
     private final String TAG = this.getClass().getSimpleName();
-    private TechTabViewModel techTabViewModel;
-    private FragmentTechTabBinding viewBinding;
-
+    private BaseTabViewModel baseTabViewModel;
     private RecyclerAdapterArticlesList recyclerAdapterArticlesList;
     private RecyclerView recyclerView;
     private CircularProgressIndicator progressIndicator;
@@ -49,13 +54,14 @@ public class TechTabFragment extends Fragment implements
     private boolean isLoading = false;
 
 
+    private FragmentSpaceTabBinding viewBinding;
 
 
     //--------------------------------------------------------------------- CONSTRUCTORS
 
-    public static TechTabFragment newInstance() {
-        Log.d(TechTabFragment.class.getSimpleName(), "SCIENCE_BOARD - newInstance: called");
-        return new TechTabFragment();
+    public static SpaceTabFragment newInstance() {
+        Log.d(SpaceTabFragment.class.getSimpleName(), "SCIENCE_BOARD - newInstance: called");
+        return new SpaceTabFragment();
     }
 
 
@@ -65,7 +71,7 @@ public class TechTabFragment extends Fragment implements
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        viewBinding = FragmentTechTabBinding.inflate(getLayoutInflater());
+        viewBinding = FragmentSpaceTabBinding.inflate(getLayoutInflater());
         view = viewBinding.getRoot();
         Log.d(TAG, "SCIENCE_BOARD - onCreateView: called");
         return view;
@@ -100,20 +106,22 @@ public class TechTabFragment extends Fragment implements
 
     //--------------------------------------------------------------------- METHODS
 
+
     private void initiView() {
-        progressIndicator = viewBinding.progressIndicatorTechTabFragment;
-        swipeRefreshLayout = viewBinding.swipeRefreshTechTabFragment;
+        progressIndicator = viewBinding.progressIndicatorSpaceTabFragment;
+        swipeRefreshLayout = viewBinding.swipeRefreshSpaceTabFragment;
+        recyclerView = viewBinding.recyclerViewSpaceTabFragment;
+
         swipeRefreshLayout.setColorSchemeResources(R.color.orange_light);
         adProvider = AdProvider.getInstance(); // is not guaranteed that
         sourceViewModel = new ViewModelProvider(requireActivity()).get(SourceViewModel.class);
-        techTabViewModel = new ViewModelProvider(this).get(TechTabViewModel.class);
+        baseTabViewModel = new ViewModelProvider(this).get(BaseTabViewModel.class);
         initRecycleView();
         setupSwipeDownToRefresh();
     }
 
     private void initRecycleView() {
         // defining Recycler view
-        recyclerView = viewBinding.recyclerViewTechTabFragment;
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this);
         recyclerView.setAdapter(recyclerAdapterArticlesList);
@@ -135,18 +143,16 @@ public class TechTabFragment extends Fragment implements
 
                 if (!isLoading) {
                     if (linearLayoutManager != null &&
-                        (articlesToDisplay != null && !articlesToDisplay.isEmpty()) &&
-                        linearLayoutManager.findLastCompletelyVisibleItemPosition() == articlesToDisplay.size() - 1) {
+                            (articlesToDisplay != null && !articlesToDisplay.isEmpty()) &&
+                            linearLayoutManager.findLastCompletelyVisibleItemPosition() == articlesToDisplay.size() - 1) {
 
                         // NOTE:
                         // this resolve the "cannot call this method in a scroll callback" problem
                         // it happens when we are adding elements while scrolling
-                        recyclerView.post(new Runnable() {
-                            public void run() {
-                                //bottom of list!
-                                Log.d(TAG, "SCIENCE_BOARD - initScrollListener: reached the end of the recycler");
-                                loadMoreArticles();
-                            }
+                        recyclerView.post(() -> {
+                            //bottom of list!
+                            Log.d(TAG, "SCIENCE_BOARD - initScrollListener: reached the end of the recycler");
+                            loadMoreArticles();
                         });
                     }
                 }
@@ -161,11 +167,11 @@ public class TechTabFragment extends Fragment implements
         recyclerAdapterArticlesList.addLoadingView(articlesToDisplay);
 
         // load new items
-        techTabViewModel.fetchNextArticles(NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE);
+        baseTabViewModel.fetchNextArticles(NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE);
     }
 
     private void observerNextArticlesFetch() {
-        techTabViewModel.getObservableNextArticlesList().observe(getViewLifecycleOwner(), fetchedArticles -> {
+        baseTabViewModel.getObservableNextArticlesList().observe(getViewLifecycleOwner(), fetchedArticles -> {
             isLoading = false;
             recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
 
@@ -181,12 +187,11 @@ public class TechTabFragment extends Fragment implements
     }
 
     private void observeArticlesFetched() {
-        techTabViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), resultArticles -> {
+        baseTabViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), resultArticles -> {
             swipeRefreshLayout.setRefreshing(false);
             progressIndicator.setVisibility(View.GONE);
 
             if(resultArticles==null || resultArticles.isEmpty()) {
-                isLoading = false;
 //                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
             }
             else {
@@ -204,7 +209,7 @@ public class TechTabFragment extends Fragment implements
             if(sources!=null && !sources.isEmpty()) {
                 // TODO
                 this.sourcesFetched = new ArrayList<>(sources);
-                techTabViewModel.fetchArticles(sources, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, false);
+                baseTabViewModel.fetchArticles(sources, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, false);
             }
         });
     }
@@ -218,14 +223,14 @@ public class TechTabFragment extends Fragment implements
     }
 
     private void refreshAction() {
-        techTabViewModel.fetchArticles(sourcesFetched, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, true);
+        baseTabViewModel.fetchArticles(sourcesFetched, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, true);
     }
 
     @Override
     public void onArticleClicked(int position) {
         Article article = (Article) recyclerAdapterArticlesList.getItem(position);
         if(article!=null) {
-            techTabViewModel.smartSaveInHistory(article);
+            baseTabViewModel.smartSaveInHistory(article);
             MobileNavigationDirections.ActionGlobalWebviewFragment action =
                     MobileNavigationDirections.actionGlobalWebviewFragment(article);
             Navigation.findNavController(view).navigate(action);
@@ -265,4 +270,4 @@ public class TechTabFragment extends Fragment implements
 
 
 
-}// end TechTabFragment
+}// end BaseTabFragment

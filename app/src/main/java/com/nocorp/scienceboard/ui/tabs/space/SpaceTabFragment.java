@@ -147,12 +147,10 @@ public class SpaceTabFragment extends Fragment implements
                         // NOTE:
                         // this resolve the "cannot call this method in a scroll callback" problem
                         // it happens when we are adding elements while scrolling
-                        recyclerView.post(new Runnable() {
-                            public void run() {
-                                //bottom of list!
-                                Log.d(TAG, "SCIENCE_BOARD - initScrollListener: reached the end of the recycler");
-                                loadMoreArticles();
-                            }
+                        recyclerView.post(() -> {
+                            //bottom of list!
+                            Log.d(TAG, "SCIENCE_BOARD - initScrollListener: reached the end of the recycler");
+                            loadMoreArticles();
                         });
                     }
                 }
@@ -172,16 +170,16 @@ public class SpaceTabFragment extends Fragment implements
 
     private void observerNextArticlesFetch() {
         spaceTabViewModel.getObservableNextArticlesList().observe(getViewLifecycleOwner(), fetchedArticles -> {
-            if(fetchedArticles==null || fetchedArticles.isEmpty()) {
-//                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
-                recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
-            }
-            else {
-                recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
+            isLoading = false;
+            recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
+
+            if(fetchedArticles!=null && !fetchedArticles.isEmpty()) {
                 fetchedArticles = adProvider.populateListWithAds(fetchedArticles, AD_DISTANCE);
                 articlesToDisplay = new ArrayList<>(fetchedArticles);
                 recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
-                isLoading = false;
+            }
+            else {
+                // todo
             }
         });
     }
@@ -192,6 +190,7 @@ public class SpaceTabFragment extends Fragment implements
             progressIndicator.setVisibility(View.GONE);
 
             if(resultArticles==null || resultArticles.isEmpty()) {
+                isLoading = false;
 //                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
             }
             else {

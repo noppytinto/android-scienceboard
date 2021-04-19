@@ -49,7 +49,7 @@ public class PhysicsTabFragment extends Fragment implements
     private Toast toast;
     private SourceViewModel sourceViewModel;
     private List<Source> sourcesFetched;
-    private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 1;
+    private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 10; // TODO
     private final int AD_DISTANCE = 5; // distance between ads (in terms of items)
     private List<ListItem> articlesToDisplay;
     private boolean isLoading = false;
@@ -131,6 +131,10 @@ public class PhysicsTabFragment extends Fragment implements
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
+
+//                if (!recyclerView.canScrollVertically(1) && newState==RecyclerView.SCROLL_STATE_IDLE) {
+//
+//                }
             }
 
             @Override
@@ -139,23 +143,23 @@ public class PhysicsTabFragment extends Fragment implements
 
                 LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
 
-                if (!isLoading) {
-                    if (linearLayoutManager != null &&
-                            (articlesToDisplay != null && !articlesToDisplay.isEmpty()) &&
-                            linearLayoutManager.findLastCompletelyVisibleItemPosition() == articlesToDisplay.size() - 1) {
+                if (!isLoading && linearLayoutManager != null ) {
+                    int lastVisibleItem = linearLayoutManager.findLastCompletelyVisibleItemPosition();
+                    boolean reachedTheLastItem = lastVisibleItem == articlesToDisplay.size() - 1;
+                    boolean articleListIsValid = articlesToDisplay != null && !articlesToDisplay.isEmpty();
 
+                    if (articleListIsValid && reachedTheLastItem ) {
                         // NOTE:
                         // this resolve the "cannot call this method in a scroll callback" problem
                         // it happens when we are adding elements while scrolling
-                        recyclerView.post(new Runnable() {
-                            public void run() {
-                                //bottom of list!
-                                Log.d(TAG, "SCIENCE_BOARD - initScrollListener: reached the end of the recycler");
-                                loadMoreArticles();
-                            }
+                        recyclerView.post(() -> {
+                            //bottom of list!
+                            Log.d(TAG, "SCIENCE_BOARD - initScrollListener: reached the end of the recycler");
+                            loadMoreArticles();
                         });
                     }
                 }
+
             }
         });
     }
@@ -172,16 +176,16 @@ public class PhysicsTabFragment extends Fragment implements
 
     private void observerNextArticlesFetch() {
         physicsTabViewModel.getObservableNextArticlesList().observe(getViewLifecycleOwner(), fetchedArticles -> {
-            if(fetchedArticles==null || fetchedArticles.isEmpty()) {
-//                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
-                recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
-            }
-            else {
-                recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
+            isLoading = false;
+            recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
+
+            if(fetchedArticles!=null && !fetchedArticles.isEmpty()) {
                 fetchedArticles = adProvider.populateListWithAds(fetchedArticles, AD_DISTANCE);
                 articlesToDisplay = new ArrayList<>(fetchedArticles);
                 recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
-                isLoading = false;
+            }
+            else {
+                // todo
             }
         });
     }
@@ -192,6 +196,7 @@ public class PhysicsTabFragment extends Fragment implements
             progressIndicator.setVisibility(View.GONE);
 
             if(resultArticles==null || resultArticles.isEmpty()) {
+                isLoading = false;
 //                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
             }
             else {

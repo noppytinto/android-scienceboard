@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.ui.tabs.space;
+package com.nocorp.scienceboard.ui.tabs.base;
 
 import android.app.Application;
 import android.content.Context;
@@ -7,6 +7,7 @@ import android.util.Log;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.nocorp.scienceboard.model.Article;
@@ -25,7 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SpaceTabViewModel extends AndroidViewModel implements ArticlesRepositoryListener {
+public abstract class BaseTabViewModel extends AndroidViewModel implements ArticlesRepositoryListener {
     private final String TAG = this.getClass().getSimpleName();
     private MutableLiveData<List<ListItem>> articlesList;
     private MutableLiveData<List<ListItem>> nextArticlesList;
@@ -44,7 +45,7 @@ public class SpaceTabViewModel extends AndroidViewModel implements ArticlesRepos
 
     //-------------------------------------------------------------------------------------------- CONSTRUCTORS
 
-    public SpaceTabViewModel(Application application) {
+    public BaseTabViewModel(Application application) {
         super(application);
         articlesList = new MutableLiveData<>();
         nextArticlesList = new MutableLiveData<>();
@@ -261,5 +262,4 @@ public class SpaceTabViewModel extends AndroidViewModel implements ArticlesRepos
 
 
 
-
-}// end SpaceTabViewModel
+}// end BaseTabViewModel

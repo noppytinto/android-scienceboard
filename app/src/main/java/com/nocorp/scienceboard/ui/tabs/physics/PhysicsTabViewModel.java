@@ -38,7 +38,7 @@ public class PhysicsTabViewModel extends AndroidViewModel implements ArticlesRep
     private static long oldVisitedDate;
     private SourceRepository sourceRepository;
     private static List<ListItem> cachedArticles;
-    private static List<DocumentSnapshot> oldestArticlesBySource;
+    private static List<DocumentSnapshot> oldestArticlesSnapshots;
 
 
 
@@ -118,7 +118,7 @@ public class PhysicsTabViewModel extends AndroidViewModel implements ArticlesRep
     public void onArticlesFetchCompleted(List<ListItem> articles, List<DocumentSnapshot> oldestArticles) {
         taskIsRunning = false;
 
-        oldestArticlesBySource = oldestArticles;
+        oldestArticlesSnapshots = oldestArticles;
 
         // publish results
         cachedArticles = articles;
@@ -141,7 +141,8 @@ public class PhysicsTabViewModel extends AndroidViewModel implements ArticlesRep
             Runnable task = () -> {
 //                sleepforNseconds(1);
                 Log.d(TAG, "SCIENCE_BOARD - fetchNextArticles: fetching new articles");
-                articleRepository.getNextArticles(oldestArticlesBySource, numArticlesForEachSource, getApplication());
+
+                articleRepository.getNextArticles(oldestArticlesSnapshots, numArticlesForEachSource, getApplication());
             };
 
             ThreadManager threadManager = ThreadManager.getInstance();
@@ -153,7 +154,7 @@ public class PhysicsTabViewModel extends AndroidViewModel implements ArticlesRep
     public void onNextArticlesFetchCompleted(List<ListItem> newArticles, List<DocumentSnapshot> oldestArticles) {
         taskIsRunning = false;
 
-        oldestArticlesBySource = new ArrayList<>(oldestArticles);
+        oldestArticlesSnapshots = new ArrayList<>(oldestArticles);
 
         // publish results
         cachedArticles.addAll(newArticles);
@@ -163,8 +164,8 @@ public class PhysicsTabViewModel extends AndroidViewModel implements ArticlesRep
     @Override
     public void onNextArticlesFetchFailed(String cause) {
         taskIsRunning = false;
-
-        // TODO
+        setNextArticlesList(null);
+        Log.d(TAG, "SCIENCE_BOARD - onNextArticlesFetchFailed: " + cause);
     }
 
 

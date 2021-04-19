@@ -61,7 +61,11 @@ public class ArticleRepository {
     public void getNextArticles(List<DocumentSnapshot> oldestArticles,
                                 int numArticlesForEachSource,
                                 Context context) {
-        if(oldestArticles==null || oldestArticles.isEmpty()) return;
+
+        if(oldestArticles==null || oldestArticles.isEmpty()) {
+            listener.onNextArticlesFetchFailed("no more articles");
+            return;
+        }
 
         // server strategy
         downloadNextArticlesFromServer(oldestArticles, numArticlesForEachSource, context);

@@ -59,7 +59,8 @@ android {
                 'src/main/java/com/nocorp/scienceboard/ui/bookmarks/res',
                 'src/main/java/com/nocorp/scienceboard/ui/ad/res',
 
-                
+                'src/main/java/com/nocorp/scienceboard/ui/tabs/base/res',
+
                 'src/main/java/com/nocorp/scienceboard/ui/tabs/all/res',
                 'src/main/java/com/nocorp/scienceboard/ui/tabs/tech/res',
 
@@ -130,6 +131,14 @@ dependencies {
     implementation "androidx.room:room-rxjava2:$room_version"
     // optional - Test helpers
     testImplementation "androidx.room:room-testing:$room_version"
+
+
+    // PAGING LIBRARY INTEGRATION
+    def paging_version = "2.1.2"
+    implementation "androidx.paging:paging-runtime:$paging_version" // For Kotlin use paging-runtime-ktx
+    // optional - RxJava support
+    implementation "androidx.paging:paging-rxjava2:$paging_version" // For Kotlin use paging-rxjava2-ktx
+
 
 
 
