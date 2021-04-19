@@ -59,9 +59,28 @@ android {
                 'src/main/java/com/nocorp/scienceboard/ui/bookmarks/res',
                 'src/main/java/com/nocorp/scienceboard/ui/ad/res',
                 'src/main/java/com/nocorp/scienceboard/ui/tabs/alltab/res',
-                'src/main/java/com/nocorp/scienceboard/ui/tabs/techtab/res',
-                'src/main/java/com/nocorp/scienceboard/ui/tabs/physicstab/res',
-                'src/main/java/com/nocorp/scienceboard/ui/tabs/spacetab/res'
+                'src/main/java/com/nocorp/scienceboard/ui/tabs/tech/res',
+
+                'src/main/java/com/nocorp/scienceboard/ui/tabs/physics/res',
+
+                'src/main/java/com/nocorp/scienceboard/ui/tabs/space/res',
+                'src/main/java/com/nocorp/scienceboard/ui/tabs/space/res',
+
+
+                'src/main/java/com/nocorp/scienceboard/ui/tabs/medicine/res',
+                'src/main/java/com/nocorp/scienceboard/ui/tabs/biology/res',
+                'src/main/java/com/nocorp/scienceboard/ui/tabs/geology/res',
+                'src/main/java/com/nocorp/scienceboard/ui/tabs/chemistry/res',
+                'src/main/java/com/nocorp/scienceboard/ui/tabs/psicology/res',
+
+                'src/main/java/com/nocorp/scienceboard/ui/tabs/tech/gpu/res',
+                'src/main/java/com/nocorp/scienceboard/ui/tabs/tech/android/res',
+                'src/main/java/com/nocorp/scienceboard/ui/tabs/tech/apple/res',
+                'src/main/java/com/nocorp/scienceboard/ui/tabs/tech/pc/res',
+                'src/main/java/com/nocorp/scienceboard/ui/tabs/tech/linux/res',
+                'src/main/java/com/nocorp/scienceboard/ui/tabs/tech/gaming/res',
+                'src/main/java/com/nocorp/scienceboard/ui/tabs/tech/security/res',
+
 
         ]
     }

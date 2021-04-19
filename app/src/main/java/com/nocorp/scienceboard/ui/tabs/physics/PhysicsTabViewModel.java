@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.ui.tabs.spacetab;
+package com.nocorp.scienceboard.ui.tabs.physics;
 
 import android.app.Application;
 import android.content.Context;
@@ -25,12 +25,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SpaceTabViewModel extends AndroidViewModel implements ArticlesRepositoryListener {
+public class PhysicsTabViewModel extends AndroidViewModel implements ArticlesRepositoryListener {
     private final String TAG = this.getClass().getSimpleName();
     private MutableLiveData<List<ListItem>> articlesList;
     private MutableLiveData<List<ListItem>> nextArticlesList;
     private ArticleRepository articleRepository;
-    private final String SPACE_CATEGORY = "space";
+    private final String PHYSICS_CATEGORY = "physics";
     private static List<Source> pickedSources;
     private static boolean taskIsRunning;
     private static boolean saveInHistoryTaskIsRunning;
@@ -44,7 +44,7 @@ public class SpaceTabViewModel extends AndroidViewModel implements ArticlesRepos
 
     //-------------------------------------------------------------------------------------------- CONSTRUCTORS
 
-    public SpaceTabViewModel(Application application) {
+    public PhysicsTabViewModel(Application application) {
         super(application);
         articlesList = new MutableLiveData<>();
         nextArticlesList = new MutableLiveData<>();
@@ -95,7 +95,7 @@ public class SpaceTabViewModel extends AndroidViewModel implements ArticlesRepos
                 taskIsRunning = true;
                 // pick sources for ALL tab, only once
                 if(pickedSources == null || pickedSources.isEmpty()) {
-                    pickedSources = sourceRepository.getAllSourcesOfThisCategory(givenSources, SPACE_CATEGORY);
+                    pickedSources = sourceRepository.getAllSourcesOfThisCategory(givenSources, PHYSICS_CATEGORY);
                 }
                 articleRepository.getArticles(pickedSources, numArticlesForEachSource, getApplication());
             };
@@ -262,4 +262,5 @@ public class SpaceTabViewModel extends AndroidViewModel implements ArticlesRepos
 
 
 
-}// end SpaceTabViewModel
+
+}// end PhysicsTabViewModel

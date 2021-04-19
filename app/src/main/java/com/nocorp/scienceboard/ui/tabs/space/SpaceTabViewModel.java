@@ -1,8 +1,9 @@
-package com.nocorp.scienceboard.ui.tabs.alltab;
+package com.nocorp.scienceboard.ui.tabs.space;
 
 import android.app.Application;
 import android.content.Context;
 import android.util.Log;
+
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -14,21 +15,22 @@ import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.rss.repository.ArticleRepository;
 import com.nocorp.scienceboard.rss.repository.ArticlesRepositoryListener;
 import com.nocorp.scienceboard.rss.repository.SourceRepository;
-import com.nocorp.scienceboard.system.ThreadManager;
-import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.rss.room.HistoryDao;
 import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
+import com.nocorp.scienceboard.system.ThreadManager;
+import com.nocorp.scienceboard.ui.viewholder.ListItem;
+
 import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-public class AllTabViewModel extends AndroidViewModel implements ArticlesRepositoryListener {
+public class SpaceTabViewModel extends AndroidViewModel implements ArticlesRepositoryListener {
     private final String TAG = this.getClass().getSimpleName();
     private MutableLiveData<List<ListItem>> articlesList;
     private MutableLiveData<List<ListItem>> nextArticlesList;
     private ArticleRepository articleRepository;
-    private final List<String> mainCategories = Arrays.asList("space", "physics", "tech", "medicine", "biology");
+    private final String SPACE_CATEGORY = "space";
     private static List<Source> pickedSources;
     private static boolean taskIsRunning;
     private static boolean saveInHistoryTaskIsRunning;
@@ -42,13 +44,14 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
 
     //-------------------------------------------------------------------------------------------- CONSTRUCTORS
 
-    public AllTabViewModel(Application application) {
+    public SpaceTabViewModel(Application application) {
         super(application);
         articlesList = new MutableLiveData<>();
         nextArticlesList = new MutableLiveData<>();
         articleRepository = new ArticleRepository(this);
         sourceRepository = new SourceRepository();
     }
+
 
 
 
@@ -91,8 +94,8 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
                 cachedArticles = new ArrayList<>();
                 taskIsRunning = true;
                 // pick sources for ALL tab, only once
-                if(pickedSources ==null || pickedSources.isEmpty()) {
-                    pickedSources = sourceRepository.getAsourceForEachMainCategory_randomly(givenSources, mainCategories);
+                if(pickedSources == null || pickedSources.isEmpty()) {
+                    pickedSources = sourceRepository.getAllSourcesOfThisCategory(givenSources, SPACE_CATEGORY);
                 }
                 articleRepository.getArticles(pickedSources, numArticlesForEachSource, getApplication());
             };
@@ -101,7 +104,6 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
             threadManager.runTask(task);
         }
     }
-
 
     private void tryCachedArticles(List<Source> givenSources, int numArticlesForEachSource) {
         if(cachedArticles == null) {
@@ -137,7 +139,7 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
     public void fetchNextArticles(int numArticlesForEachSource) {
         if(!taskIsRunning) {
             Runnable task = () -> {
-                sleepforNseconds(1);
+//                sleepforNseconds(1);
                 Log.d(TAG, "SCIENCE_BOARD - fetchNextArticles: fetching new articles");
                 articleRepository.getNextArticles(oldestArticlesBySource, numArticlesForEachSource, getApplication());
             };
@@ -164,6 +166,8 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
 
         // TODO
     }
+
+
 
 
     //-------------------------------------------------------------- HISTORY
@@ -225,6 +229,7 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
                 oldVisitedDate = millis;
                 saveInHistoryTaskIsRunning = false;
             } catch (Exception e) {
+                e.printStackTrace();
                 Log.e(TAG, "SCIENCE_BOARD - saveInHistory: cannot save in history, " + e.getMessage());
             }
         };
@@ -235,7 +240,7 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
                 t.runTask(task);
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.e(TAG, "SCIENCE_BOARD - saveInHistory: cannot start thread " + e.getMessage());
+                Log.d(TAG, "SCIENCE_BOARD - saveInHistory: cannot start thread " + e.getMessage());
             }
         }
     }
@@ -255,4 +260,6 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
 
 
 
-}// end AllArticlesTabViewModel
+
+
+}// end SpaceTabViewModel

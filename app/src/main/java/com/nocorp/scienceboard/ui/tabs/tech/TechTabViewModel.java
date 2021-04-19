@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.ui.tabs.physicstab;
+package com.nocorp.scienceboard.ui.tabs.tech;
 
 import android.app.Application;
 import android.content.Context;
@@ -10,27 +10,25 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.nocorp.scienceboard.model.Article;
-import com.nocorp.scienceboard.model.HistoryArticle;
 import com.nocorp.scienceboard.model.Source;
+import com.nocorp.scienceboard.model.HistoryArticle;
 import com.nocorp.scienceboard.rss.repository.ArticleRepository;
 import com.nocorp.scienceboard.rss.repository.ArticlesRepositoryListener;
 import com.nocorp.scienceboard.rss.repository.SourceRepository;
-import com.nocorp.scienceboard.rss.room.HistoryDao;
-import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
-
+import com.nocorp.scienceboard.rss.room.HistoryDao;
+import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
 import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.List;
 
-public class PhysicsTabViewModel extends AndroidViewModel implements ArticlesRepositoryListener {
+public class TechTabViewModel extends AndroidViewModel implements ArticlesRepositoryListener {
     private final String TAG = this.getClass().getSimpleName();
     private MutableLiveData<List<ListItem>> articlesList;
     private MutableLiveData<List<ListItem>> nextArticlesList;
     private ArticleRepository articleRepository;
-    private final String PHYSICS_CATEGORY = "physics";
+    private final String TECH_CATEGORY = "tech";
     private static List<Source> pickedSources;
     private static boolean taskIsRunning;
     private static boolean saveInHistoryTaskIsRunning;
@@ -44,7 +42,7 @@ public class PhysicsTabViewModel extends AndroidViewModel implements ArticlesRep
 
     //-------------------------------------------------------------------------------------------- CONSTRUCTORS
 
-    public PhysicsTabViewModel(Application application) {
+    public TechTabViewModel(Application application) {
         super(application);
         articlesList = new MutableLiveData<>();
         nextArticlesList = new MutableLiveData<>();
@@ -95,7 +93,7 @@ public class PhysicsTabViewModel extends AndroidViewModel implements ArticlesRep
                 taskIsRunning = true;
                 // pick sources for ALL tab, only once
                 if(pickedSources == null || pickedSources.isEmpty()) {
-                    pickedSources = sourceRepository.getAllSourcesOfThisCategory(givenSources, PHYSICS_CATEGORY);
+                    pickedSources = sourceRepository.getAllSourcesOfThisCategory(givenSources, TECH_CATEGORY);
                 }
                 articleRepository.getArticles(pickedSources, numArticlesForEachSource, getApplication());
             };
@@ -260,7 +258,4 @@ public class PhysicsTabViewModel extends AndroidViewModel implements ArticlesRep
 
 
 
-
-
-
-}// end PhysicsTabViewModel
+}// end TechTabViewModel

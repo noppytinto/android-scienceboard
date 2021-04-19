@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.ui.tabs.spacetab;
+package com.nocorp.scienceboard.ui.tabs.space;
 
 import androidx.lifecycle.ViewModelProvider;
 

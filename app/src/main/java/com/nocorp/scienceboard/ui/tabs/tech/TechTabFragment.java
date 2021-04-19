@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.ui.tabs.techtab;
+package com.nocorp.scienceboard.ui.tabs.tech;
 
 import androidx.lifecycle.ViewModelProvider;
 import android.os.Bundle;

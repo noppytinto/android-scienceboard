@@ -4,10 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".ui.tabs.techtab.TechTabFragment">
+    tools:context=".ui.tabs.space.SpaceTabFragment">
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
-        android:id="@+id/progressIndicator_techTabFragment"
+        android:id="@+id/progressIndicator_spaceTabFragment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:indeterminate="true"
@@ -20,7 +20,7 @@
 
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipeRefresh_techTabFragment"
+        android:id="@+id/swipeRefresh_spaceTabFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -30,7 +30,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView_techTabFragment"
+            android:id="@+id/recyclerView_spaceTabFragment"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:scrollbars="vertical"

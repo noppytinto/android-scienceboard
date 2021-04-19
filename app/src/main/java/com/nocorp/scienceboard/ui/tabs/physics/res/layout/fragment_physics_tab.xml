@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".ui.tabs.spacetab.SpaceTabFragment">
+    tools:context=".ui.tabs.physics.PhysicsTabFragment">
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
-        android:id="@+id/progressIndicator_spaceTabFragment"
+        android:id="@+id/progressIndicator_physicsTabFragment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:indeterminate="true"
@@ -20,7 +20,7 @@
 
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipeRefresh_spaceTabFragment"
+        android:id="@+id/swipeRefresh_physicsTabFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -30,7 +30,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView_spaceTabFragment"
+            android:id="@+id/recyclerView_physicsTabFragment"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:scrollbars="vertical"
@@ -42,4 +42,4 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

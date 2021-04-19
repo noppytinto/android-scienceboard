@@ -6,10 +6,10 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
-import com.nocorp.scienceboard.ui.tabs.alltab.AllTabFragment;
-import com.nocorp.scienceboard.ui.tabs.physicstab.PhysicsTabFragment;
-import com.nocorp.scienceboard.ui.tabs.spacetab.SpaceTabFragment;
-import com.nocorp.scienceboard.ui.tabs.techtab.TechTabFragment;
+import com.nocorp.scienceboard.ui.tabs.all.AllTabFragment;
+import com.nocorp.scienceboard.ui.tabs.physics.PhysicsTabFragment;
+import com.nocorp.scienceboard.ui.tabs.space.SpaceTabFragment;
+import com.nocorp.scienceboard.ui.tabs.tech.TechTabFragment;
 
 public class HomeViewPagerAdapter extends FragmentStateAdapter {
     private final String TAG = this.getClass().getSimpleName();

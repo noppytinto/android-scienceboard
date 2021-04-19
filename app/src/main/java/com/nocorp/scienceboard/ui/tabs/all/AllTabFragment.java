@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.ui.tabs.alltab;
+package com.nocorp.scienceboard.ui.tabs.all;
 
 import androidx.lifecycle.ViewModelProvider;
 

@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.ui.tabs.physicstab;
+package com.nocorp.scienceboard.ui.tabs.physics;
 
 import androidx.lifecycle.ViewModelProvider;
 
@@ -23,12 +23,10 @@ import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.nocorp.scienceboard.MobileNavigationDirections;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentPhysicsTabBinding;
-import com.nocorp.scienceboard.databinding.FragmentSpaceTabBinding;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
-import com.nocorp.scienceboard.ui.tabs.spacetab.SpaceTabViewModel;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
