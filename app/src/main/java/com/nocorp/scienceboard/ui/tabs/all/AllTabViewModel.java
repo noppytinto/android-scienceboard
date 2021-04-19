@@ -177,9 +177,9 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
         else if(lastVisitedArticleId.equals(givenArticle.getId())){
             updateHistory(givenArticle);
         }
-        else {
-            saveInHistory(givenArticle);
-        }
+//        else {
+//            saveInHistory(givenArticle);
+//        }
         // TODO: improve this branching
     }
 

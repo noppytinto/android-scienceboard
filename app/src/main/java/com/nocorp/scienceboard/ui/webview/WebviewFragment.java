@@ -2,9 +2,11 @@ package com.nocorp.scienceboard.ui.webview;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -22,7 +24,10 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebStorage;
 import android.webkit.WebView;
@@ -203,7 +208,6 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         }
         else {
             webViewMain.loadUrl(webpageUrl);
-            webViewBottomSheet.loadUrl(getString(R.string.string_google_search_website));
         }
     }
 
@@ -355,16 +359,15 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             webSettings.setSafeBrowsingEnabled(true);
         }
-        webView.setScrollBarStyle(SCROLLBARS_INSIDE_OVERLAY);
+        webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_INSET);
         webView.setScrollbarFadingEnabled(false);
-
-
-        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);// TODO: allow youtube to set a video fullscreen
         webSettings.setLoadWithOverviewMode(true);
-//        webSettings.setUseWideViewPort(true);
+        webSettings.setDatabaseEnabled(true);
+//        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);// TODO: allow youtube to set a video fullscreen
+
+
 //        webSettings.setBuiltInZoomControls(true);
 //        webSettings.setDisplayZoomControls(false);
-//        webSettings.setDatabaseEnabled(true);
 //        webView.setFocusable(true);
 //        webView.setFocusableInTouchMode(true);
 //        webView.setLayerType(WebView.LAYER_TYPE_SOFTWARE, null); // TODO: this might fix blank screen porblem
@@ -372,6 +375,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 
     private void applyCustomWebviewSettings_mainWebview(WebView webView) {
         applyBasicWebviewSettings(webView);
+        webView.getSettings().setUseWideViewPort(true);
         defineWebclientBehavior_mainWebview(webView);
     }
 
@@ -382,17 +386,22 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 
     private void applyBrowsingRecommendedSettings_bottomSheetWebview(WebView webView) {
         applyBasicWebviewSettings(webView);
+        webView.getSettings().setUseWideViewPort(true);
         defineWebclientBehavior_bottomSheetWebview(webView);
     }
 
     private void defineWebclientBehavior_mainWebview(WebView webView) {
         defineWebviewBackButtonBehavior(webView);
-        webView.setWebChromeClient(new WebChromeClient());
+//        webView.setWebChromeClient(new WebChromeClient());
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                view.loadUrl(url);
-                return true;
+                // TODO: doing this might cause blank pages!!!
+//                view.loadUrl(url);
+//                return true;
+
+                // TODO: doing this will prevent blank pages!!!
+                return super.shouldOverrideUrlLoading(view, url);
             }
 
             @Override
@@ -414,9 +423,16 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
                 super.onReceivedError(view, errorCode, description, failingUrl);
                 String message = "An error occurred when displaying page." + "\ndescription: " + description + "\nerror: " + errorCode;
-                showErrorSnackbar(message);
+                showErrorSnackbar(message, requireContext());
             }
 
+            @Override
+            public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
+                super.onReceivedHttpError(view, request, errorResponse);
+                Log.d(TAG, "SCIENCE_BOARD - onReceivedHttpError: reason: " + errorResponse.getReasonPhrase());
+                Log.d(TAG, "SCIENCE_BOARD - onReceivedHttpError: statuscode: " + errorResponse.getStatusCode());
+//                showErrorSnackbar("HTTP error.", requireContext());
+            }
         });
     }
 
@@ -532,10 +548,10 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
             webViewMain.setVisibility(View.GONE);
             applyCustomWebviewSettings_readModeWebview(webViewReadmode);
             webViewReadmode.loadData(extractedContentHtmlWithUtf8Encoding, "text/html", "UTF-8");
-            showRedSnackbar("Read mode is an experimental feature.", Snackbar.LENGTH_SHORT, "ok", (v)->snackbar.dismiss());
+            showRedSnackbar("Read mode is an experimental feature.", Snackbar.LENGTH_SHORT, "ok", (v)->snackbar.dismiss(), requireContext());
         }
         else {
-            showRedSnackbar("Content not found.", Snackbar.LENGTH_SHORT, "ok", (v)->snackbar.dismiss());
+            showRedSnackbar("Content not found.", Snackbar.LENGTH_SHORT, "ok", (v)->snackbar.dismiss(), requireContext());
         }
 
     }
@@ -620,6 +636,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
                     showButton.setOnClickListener(v -> {
                         if (behavior.getState() == BottomSheetBehavior.STATE_HALF_EXPANDED) {
                             behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                            webViewBottomSheet.loadUrl(getString(R.string.string_google_search_website));
                         }
                     });
                 }
@@ -837,40 +854,40 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         webviewViewModel.checkIsInBookmarks(currentArticle);
     }
 
-    private void showLoadCompletedSnackbar() {
+    private void showLoadCompletedSnackbar(Context context) {
         String message = getString(R.string.string_page_load_completed);
         snackbar = Snackbar.make(view, "",Snackbar.LENGTH_SHORT);
         snackbar.setText(message);
         snackbar.setText(message);
-        snackbar.setTextColor(getResources().getColor(R.color.white));
-        snackbar.setBackgroundTint(getResources().getColor(R.color.green));
+        snackbar.setTextColor(context.getResources().getColor(R.color.white));
+        snackbar.setBackgroundTint(context.getResources().getColor(R.color.green));
         snackbar.setAnchorView(R.id.nav_view);
         snackbar.setAction("ok", v -> snackbar.dismiss());
-        snackbar.setActionTextColor(getResources().getColor(R.color.white));
+        snackbar.setActionTextColor(context.getResources().getColor(R.color.white));
         snackbar.show();
     }
 
-    private void showRedSnackbar(String message, int duration, String actionLabel, View.OnClickListener action) {
+    private void showRedSnackbar(String message, int duration, String actionLabel, View.OnClickListener action, Context context) {
         snackbar = Snackbar.make(view, "", duration);
         snackbar.setText(message);
-        snackbar.setTextColor(getResources().getColor(R.color.white));
-        snackbar.setBackgroundTint(getResources().getColor(R.color.red));
+        snackbar.setTextColor(context.getResources().getColor(R.color.white));
+        snackbar.setBackgroundTint(context.getResources().getColor(R.color.red));
         snackbar.setAction(actionLabel, action);
-        snackbar.setActionTextColor(getResources().getColor(R.color.white));
+        snackbar.setActionTextColor(context.getResources().getColor(R.color.white));
         snackbar.show();
     }
 
-    private void showErrorSnackbar(String message) {
+    private void showErrorSnackbar(String message, Context context) {
         snackbar = Snackbar.make(view, "", Snackbar.LENGTH_INDEFINITE);
         snackbar.setText(message);
-        snackbar.setTextColor(getResources().getColor(R.color.white));
-        snackbar.setBackgroundTint(getResources().getColor(R.color.red));
+        snackbar.setTextColor(context.getResources().getColor(R.color.white));
+        snackbar.setBackgroundTint(context.getResources().getColor(R.color.red));
 //        snackbar.setAnchorView(R.id.nav_view);
         snackbar.setAction("retry", v -> {
             snackbar.dismiss();
             webViewMain.loadUrl(webpageUrl);
         });
-        snackbar.setActionTextColor(getResources().getColor(R.color.white));
+        snackbar.setActionTextColor(context.getResources().getColor(R.color.white));
         snackbar.show();
     }
 

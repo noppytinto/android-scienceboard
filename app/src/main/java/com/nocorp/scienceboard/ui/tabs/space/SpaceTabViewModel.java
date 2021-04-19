@@ -179,9 +179,9 @@ public class SpaceTabViewModel extends AndroidViewModel implements ArticlesRepos
         else if(lastVisitedArticleId.equals(givenArticle.getId())){
             updateHistory(givenArticle);
         }
-        else {
-            saveInHistory(givenArticle);
-        }
+//        else {
+//            saveInHistory(givenArticle);
+//        }
         // TODO: improve this branching
     }
 

@@ -180,9 +180,9 @@ public class PhysicsTabViewModel extends AndroidViewModel implements ArticlesRep
         else if(lastVisitedArticleId.equals(givenArticle.getId())){
             updateHistory(givenArticle);
         }
-        else {
-            saveInHistory(givenArticle);
-        }
+//        else {
+//            saveInHistory(givenArticle);
+//        }
         // TODO: improve this branching
     }
 

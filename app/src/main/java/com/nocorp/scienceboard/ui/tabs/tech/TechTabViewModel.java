@@ -177,9 +177,9 @@ public class TechTabViewModel extends AndroidViewModel implements ArticlesReposi
         else if(lastVisitedArticleId.equals(givenArticle.getId())){
             updateHistory(givenArticle);
         }
-        else {
-            saveInHistory(givenArticle);
-        }
+//        else {
+//            saveInHistory(givenArticle);
+//        }
         // TODO: improve this branching
     }
 
