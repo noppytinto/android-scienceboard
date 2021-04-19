@@ -28,11 +28,11 @@ public class ArticleViewHolder extends RecyclerView.ViewHolder  {
         this.cardViewTitle = itemView.findViewById(R.id.cardView_articleViewholder_title);
 
         cardViewThumbnail.setOnClickListener(v -> {
-            this.listener.onArticleClicked(getAdapterPosition());
+            this.listener.onArticleClicked(getAdapterPosition(), itemView);
         });
 
         cardViewTitle.setOnClickListener(v -> {
-            this.listener.onArticleClicked(getAdapterPosition());
+            this.listener.onArticleClicked(getAdapterPosition(), itemView);
         });
 
     }

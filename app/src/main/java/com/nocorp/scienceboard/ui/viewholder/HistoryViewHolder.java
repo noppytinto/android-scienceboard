@@ -30,11 +30,11 @@ public class HistoryViewHolder extends RecyclerView.ViewHolder  {
         this.cardViewTitle = itemView.findViewById(R.id.cardView_historyViewHolder_title);
 
         cardViewThumbnail.setOnClickListener(v -> {
-            this.listener.onArticleClicked(getAdapterPosition());
+            this.listener.onArticleClicked(getAdapterPosition(), itemView);
         });
 
         cardViewTitle.setOnClickListener(v -> {
-            this.listener.onArticleClicked(getAdapterPosition());
+            this.listener.onArticleClicked(getAdapterPosition(), itemView);
         });
 
     }

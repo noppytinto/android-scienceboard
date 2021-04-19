@@ -222,7 +222,7 @@ public class TechTabFragment extends Fragment implements
     }
 
     @Override
-    public void onArticleClicked(int position) {
+    public void onArticleClicked(int position, View itemView) {
         Article article = (Article) recyclerAdapterArticlesList.getItem(position);
         if(article!=null) {
             techTabViewModel.smartSaveInHistory(article);

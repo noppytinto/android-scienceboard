@@ -1,12 +1,15 @@
 package com.nocorp.scienceboard.ui.tabs.all;
 
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.FragmentNavigator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -18,6 +21,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.google.android.material.transition.Hold;
+import com.google.android.material.transition.MaterialContainerTransform;
 import com.nocorp.scienceboard.MobileNavigationDirections;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentAllTabBinding;
@@ -65,6 +70,12 @@ public class AllTabFragment extends Fragment implements
 
 
     //--------------------------------------------------------------------- ANDROID METHODS
+
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -227,10 +238,24 @@ public class AllTabFragment extends Fragment implements
     }
 
     @Override
-    public void onArticleClicked(int position) {
+    public void onArticleClicked(int position, View itemView) {
         Article article = (Article) recyclerAdapterArticlesList.getItem(position);
         if(article!=null) {
             allTabViewModel.smartSaveInHistory(article);
+
+//            FragmentNavigator.Extras extras = new FragmentNavigator
+//                    .Extras
+//                    .Builder()
+//                    .addSharedElement(view, view.getTransitionName())
+//                    .build();
+//
+//            MobileNavigationDirections.ActionGlobalWebviewFragment action =
+//                    MobileNavigationDirections.actionGlobalWebviewFragment(article);
+//            Navigation.findNavController(view).navigate(action, extras);
+
+
+
+
             MobileNavigationDirections.ActionGlobalWebviewFragment action =
                     MobileNavigationDirections.actionGlobalWebviewFragment(article);
             Navigation.findNavController(view).navigate(action);

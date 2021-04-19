@@ -1,7 +1,10 @@
 package com.nocorp.scienceboard.ui.webview;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -35,6 +38,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.transition.MaterialContainerTransform;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentWebviewBinding;
 import com.nocorp.scienceboard.model.Article;
@@ -68,43 +72,53 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private FragmentWebviewBinding viewBinding;
     private WebviewViewModel webviewViewModel;
     private View view;
-
-    private String webpageUrl;
-    private String sourceName;
-
-    private WebView webViewMain;
-
     private LinearProgressIndicator progressIndicator;
     private Snackbar snackbar;
     private Toolbar toolbar;
     private Toast toast;
 
+
+    // main webview
+    private String webpageUrl;
+    private String sourceName;
+    private WebView webViewMain;
     private MenuItem stopMenuItem;
-    private Article currentArticle;
     private MenuItem bookmarkMenuItem;
+    private Article currentArticle;
     private boolean articleAlreadyInBookmarks;
-
-    private WebView webViewBottomSheet;
-    private ExtendedFloatingActionButton showButton;
-    private View bottomSheet;
-    private ChipGroup chipGroup;
-    private HorizontalScrollView horizontalScrollView;
-    private List<String> keywords;
-    private List<Chip> chips;
-    private List<String> selectedKeywords;
-    private int chipId;
-
-    private MenuItem readModeMenuItem;
-    private boolean readModeEnabled = false;
-    private String extractedContentHtmlWithUtf8Encoding;
-    private WebView webViewReadmode;
-
 
     private final int TEXT_SIZE_STEP = 20;
     private final int DEFAULT_TEXT_SIZE = 90;
     private int currentTextSize;
     private final int UPPER_TEXT_SIZE_LIMIT = 200;
     private final int LOWER_TEXT_SIZE_LIMIT = 0;
+
+
+    // bottom sheet
+    private WebView webViewBottomSheet;
+    private ExtendedFloatingActionButton showButton;
+    private View bottomSheet;
+    private View backgroundShadow;
+    // keywords
+    private ChipGroup chipGroup;
+    private HorizontalScrollView chipsContainer;
+    private List<String> keywords;
+    private List<Chip> chips;
+    private List<String> selectedKeywords;
+    private int chipId;
+
+
+    // read mode
+    private WebView webViewReadmode;
+    private boolean readModeEnabled = false;
+    private String extractedContentHtmlWithUtf8Encoding;
+    private MenuItem readModeMenuItem;
+
+    // animations
+    private int shortAnimationDuration;
+
+
+
 
 
 
@@ -121,23 +135,53 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+//        setEnterTransition();
+    }
+
+    private void setEnterTransition() {
+        // TRANSITION
+        MaterialContainerTransform transform = new MaterialContainerTransform();
+//        transform.setInterpolator(new FastOutSlowInInterpolator());
+        transform.setDrawingViewId(R.id.nav_host_fragment);
+//        transform.setContainerColor(Color.WHITE);
+//        transform.setFadeMode(MaterialContainerTransform.FADE_MODE_THROUGH);
+//        transform.setDuration(700);
+//        transform.setAllContainerColors(getResources().getColor(R.color.orange_light));
+
+        setSharedElementEnterTransition(transform);
+//        setSharedElementReturnTransition(transform);
+    }
+
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         viewBinding = FragmentWebviewBinding.inflate(inflater, container, false);
         view = viewBinding.getRoot();
+        Log.d(TAG, "onCreateView: called");
         return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+//        this.view.draw
+
         initiView(view);
+        Bundle arguments = null;
 
+        if (savedInstanceState != null) {
+            arguments = savedInstanceState.getBundle("currentArguments");
+        }
+        else {
+            arguments = getArguments();
+        }
 
-        //
-        if (getArguments() != null) {
+        if(arguments!=null) {
             // the article is always non-null
-            this.currentArticle = WebviewFragmentArgs.fromBundle(getArguments()).getArticleArgument();
+            this.currentArticle = WebviewFragmentArgs.fromBundle(arguments).getArticleArgument();
             this.webpageUrl = currentArticle.getWebpageUrl();
             this.sourceName = currentArticle.getSourceRealName();
             this.keywords = currentArticle.getKeywords();
@@ -149,7 +193,6 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
             }
 
             buildKeywordsChips(keywords, chipGroup);
-
             checkIfAlreadyInBookmarks();
         }
     }
@@ -157,23 +200,27 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        // main webview
         applyCustomWebviewSettings_mainWebview(webViewMain);
-        webViewMain.loadUrl(webpageUrl);
-
-        // bottom sheet webview
         applyBrowsingRecommendedSettings_bottomSheetWebview(webViewBottomSheet);
-        webViewBottomSheet.loadUrl(getString(R.string.string_google_search_website));
         defineBottomSheetBehavior();
-
-        //
         preparePageForReadMode(webpageUrl);
+
+        if(savedInstanceState!=null) {
+            webViewMain.restoreState(savedInstanceState.getBundle("webviewMainBundle"));
+            webViewBottomSheet.restoreState(savedInstanceState.getBundle("webviewBottomSheetBundle"));
+            webViewReadmode.restoreState(savedInstanceState.getBundle("webviewReadModeBundle"));
+        }
+        else {
+            webViewMain.loadUrl(webpageUrl);
+            webViewBottomSheet.loadUrl(getString(R.string.string_google_search_website));
+        }
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         viewBinding = null;
+        Log.d(TAG, "onDestroyView: called");
     }
 
     @Override
@@ -233,7 +280,28 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         return false;
     }
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        Log.d(TAG, "onSaveInstanceState: called");
+        saveState(outState);
+        super.onSaveInstanceState(outState);
+    }
 
+    private void saveState(@NonNull Bundle outState) {
+        Bundle webviewMainBundle = new Bundle();
+        webViewMain.saveState(webviewMainBundle);
+        outState.putBundle("webviewMainBundle", webviewMainBundle);
+
+        Bundle webviewBottomSheetBundle = new Bundle();
+        webViewBottomSheet.saveState(webviewBottomSheetBundle);
+        outState.putBundle("webviewBottomSheetBundle", webviewBottomSheetBundle);
+
+        Bundle webviewReadModeBundle = new Bundle();
+        webViewReadmode.saveState(webviewReadModeBundle);
+        outState.putBundle("webviewReadModeBundle", webviewBottomSheetBundle);
+
+        outState.putBundle("currentArguments", getArguments());
+    }
 
 
 
@@ -261,27 +329,26 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         bookmarkMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_bookmark);
         webviewViewModel = new ViewModelProvider(this).get(WebviewViewModel.class);
         chipGroup = viewBinding.includeWebviewFragment.chipGroupBottomSheetWebview;
-        horizontalScrollView = viewBinding.includeWebviewFragment.containerBottomSheetWebview;
+        chipsContainer = viewBinding.includeWebviewFragment.containerBottomSheetWebview;
         chips = new ArrayList<>();
         selectedKeywords = new ArrayList<>();
         readModeMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_readmode);
+
+        // read mode
+        webViewReadmode = viewBinding.webViewWebviewFragmentReadMode;
 
 
         // webview botomsheet
         webViewBottomSheet = viewBinding.includeWebviewFragment.webviewBottomSheetWebview;
         showButton = viewBinding.includeWebviewFragment.buttonBottomSheetWebview;
         bottomSheet = view.findViewById(R.id.include_webviewFragment);
-//        bottomSheet.setOnFocusChangeListener((v, hasFocus) -> {
-//            if(hasFocus) {
-//                setupBackButtonBehaviorForWebviewMain(webViewBottomSheet);
-//            }
-//            else {
-//                ignoreBackButton(webViewBottomSheet);
-//            }
-//        });
+        backgroundShadow = viewBinding.includeWebviewFragment.viewBottomSheetWebviewShadow2;
 
 
 
+        // Retrieve and cache the system's default "short" animation time.
+        shortAnimationDuration = getResources().getInteger(
+                android.R.integer.config_shortAnimTime);
 
     }
 
@@ -472,7 +539,6 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 
             readModeEnabled = true;
             readModeMenuItem.setTitle("Exit Read mode");
-            webViewReadmode = viewBinding.webViewWebviewFragmentReadMode;
             webViewReadmode.setVisibility(View.VISIBLE);
             webViewMain.setVisibility(View.GONE);
             applyCustomWebviewSettings_readModeWebview(webViewReadmode);
@@ -559,7 +625,8 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
                 if (newState == BottomSheetBehavior.STATE_HALF_EXPANDED) {
                     defineWebviewBackButtonBehavior(webViewBottomSheet);
-                    horizontalScrollView.setVisibility(View.VISIBLE);
+                    crossfadeEnter(chipsContainer);
+                    backgroundShadow.setVisibility(View.VISIBLE);
                     showButton.setText(R.string.string_close);
                     showButton.setOnClickListener(v -> {
                         if (behavior.getState() == BottomSheetBehavior.STATE_HALF_EXPANDED) {
@@ -569,7 +636,8 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
                 }
                 else if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
                     ignoreBackButton(webViewBottomSheet);
-                    horizontalScrollView.setVisibility(View.GONE);
+                   crossfadeExit(chipsContainer);
+                    backgroundShadow.setVisibility(View.GONE);
                     showButton.setText(R.string.string_search);
                     showButton.setOnClickListener(v -> {
                         if (behavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
@@ -603,6 +671,38 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
                 behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
             }
         });
+    }
+
+    private void crossfadeEnter(View view) {
+        // Set the content view to 0% opacity but visible, so that it is visible
+        // (but fully transparent) during the animation.
+        view.setAlpha(0f);
+        view.setVisibility(View.VISIBLE);
+
+        // Animate the content view to 100% opacity, and clear any animation
+        // listener set on the view.
+        view.animate()
+                .alpha(1f)
+                .setDuration(shortAnimationDuration)
+                .setListener(null);
+
+    }
+
+    private void crossfadeExit(View view) {
+        // Animate the loading view to 0% opacity. After the animation ends,
+        // set its visibility to GONE as an optimization step (it won't
+        // participate in layout passes, etc.)
+        view.animate()
+                .alpha(0f)
+                .setDuration(shortAnimationDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        view.setVisibility(View.GONE);
+                    }
+                });
+
+
     }
 
     public void preparePageForReadMode(String url) {

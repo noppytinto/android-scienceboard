@@ -47,7 +47,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
     private static final int BOOKMARK_ARTICLE_TYPE = 4;
 
     public interface OnArticleClickedListener {
-        public void onArticleClicked(int position);
+        public void onArticleClicked(int position, View itemView);
     }
 
 

@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:viewBindingIgnore="true"
-    android:background="@color/light_gray">
+    android:background="@color/light_gray"
+    >
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView_articleViewholder_thumbnail"
@@ -43,7 +43,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_min="100dp"
         app:layout_constraintStart_toEndOf="@+id/cardView_articleViewholder_thumbnail"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+
+        >
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"

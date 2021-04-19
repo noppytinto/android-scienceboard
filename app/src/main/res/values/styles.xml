@@ -49,16 +49,17 @@
     <style name="ScienceBoard.Button.Chip.Choice" parent="Widget.MaterialComponents.Chip.Choice">
         <item name="chipBackgroundColor">@color/chip_choice_bg_states</item>
         <item name="chipStrokeColor">@color/color_states_chip_choice_stroke</item>
-        <item name="chipStrokeWidth">1dp</item>
+        <item name="chipStrokeWidth">@dimen/chip_stroke_width</item>
         <item name="android:textAppearance">@style/Cinemates.Button.Chip.Choice.TextAppearance</item>
         <item name="android:checkable">true</item>
         <item name="checkedIconVisible">false</item>
+        <item name="chipMinHeight">@dimen/chip_min_height</item>
     </style>
     <style name="Cinemates.Button.Chip.Choice.TextAppearance" parent="TextAppearance.MdcTypographyStyles.Button">
         <item name="fontFamily">@font/roboto_medium</item>
-        <item name="android:textSize">12sp</item>
+        <item name="android:textSize">@dimen/chip_text_size</item>
         <item name="android:textAllCaps">false</item>
-        <item name="android:letterSpacing">0.01</item>
+        <item name="android:letterSpacing">@dimen/chip_letter_spacing</item>
         <item name="android:textColor">@color/color_states_chip_choice_text</item>
     </style>
 
@@ -67,7 +68,7 @@
     <style name="TextAppearance.MdcTypographyStyles.Button" parent="TextAppearance.MaterialComponents.Button">
         <item name="fontFamily">@font/roboto</item>
         <item name="android:fontFamily">@font/roboto</item>
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">@dimen/button_default_text_size</item>
     </style>
 
 

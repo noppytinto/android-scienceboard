@@ -23,7 +23,6 @@ import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentBookmarksBinding;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
-import com.nocorp.scienceboard.ui.history.HistoryViewModel;
 
 import java.util.ArrayList;
 
@@ -120,7 +119,7 @@ public class BookmarksFragment extends Fragment implements
     }
 
     @Override
-    public void onArticleClicked(int position) {
+    public void onArticleClicked(int position, View itemView) {
         Article article = (Article) recyclerAdapterArticlesList.getItem(position);
         if(article!=null) {
             MobileNavigationDirections.ActionGlobalWebviewFragment action =

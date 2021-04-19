@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
     private void fetchSourcesFromRemoteDb() {
         sourceViewModel = new ViewModelProvider(this).get(SourceViewModel.class);
         sourceViewModel.getObservableAllSources().observe(this, sources -> {
-            if(sources!=null && sources.size()>0) {
+            if(sources!=null && !sources.isEmpty()) {
                 showCenteredToast("sources fetched from remote DB");
             }
             else {

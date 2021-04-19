@@ -28,7 +28,6 @@ import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
 import com.nocorp.scienceboard.ui.tabs.space.SpaceTabFragment;
-import com.nocorp.scienceboard.ui.tabs.space.SpaceTabViewModel;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
@@ -227,7 +226,7 @@ public class BaseTabFragment extends Fragment implements
     }
 
     @Override
-    public void onArticleClicked(int position) {
+    public void onArticleClicked(int position, View itemView) {
         Article article = (Article) recyclerAdapterArticlesList.getItem(position);
         if(article!=null) {
             baseTabViewModel.smartSaveInHistory(article);
