@@ -167,17 +167,8 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-//        this.view.draw
-
         initiView(view);
-        Bundle arguments = null;
-
-        if (savedInstanceState != null) {
-            arguments = savedInstanceState.getBundle("currentArguments");
-        }
-        else {
-            arguments = getArguments();
-        }
+        Bundle arguments = getArguments();
 
         if(arguments!=null) {
             // the article is always non-null
@@ -283,8 +274,8 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         Log.d(TAG, "onSaveInstanceState: called");
-        saveState(outState);
         super.onSaveInstanceState(outState);
+        saveState(outState);
     }
 
     private void saveState(@NonNull Bundle outState) {
@@ -298,9 +289,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 
         Bundle webviewReadModeBundle = new Bundle();
         webViewReadmode.saveState(webviewReadModeBundle);
-        outState.putBundle("webviewReadModeBundle", webviewBottomSheetBundle);
-
-        outState.putBundle("currentArguments", getArguments());
+        outState.putBundle("webviewReadModeBundle", webviewReadModeBundle);
     }
 
 

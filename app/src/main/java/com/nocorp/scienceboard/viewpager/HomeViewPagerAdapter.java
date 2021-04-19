@@ -1,10 +1,13 @@
 package com.nocorp.scienceboard.viewpager;
 
+import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Lifecycle;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import com.nocorp.scienceboard.ui.tabs.all.AllTabFragment;
 import com.nocorp.scienceboard.ui.tabs.physics.PhysicsTabFragment;
@@ -14,8 +17,9 @@ import com.nocorp.scienceboard.ui.tabs.tech.TechTabFragment;
 public class HomeViewPagerAdapter extends FragmentStateAdapter {
     private final String TAG = this.getClass().getSimpleName();
 
-    public HomeViewPagerAdapter(@NonNull FragmentActivity fragment) {
-        super(fragment);
+    public HomeViewPagerAdapter(@NonNull FragmentManager fm,
+                                @NonNull Lifecycle lifecycle) {
+        super(fm, lifecycle);
     }
 
     @NonNull
