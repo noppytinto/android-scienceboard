@@ -58,7 +58,9 @@ android {
                 'src/main/java/com/nocorp/scienceboard/ui/home/res',
                 'src/main/java/com/nocorp/scienceboard/ui/bookmarks/res',
                 'src/main/java/com/nocorp/scienceboard/ui/ad/res',
-                'src/main/java/com/nocorp/scienceboard/ui/tabs/alltab/res',
+
+                
+                'src/main/java/com/nocorp/scienceboard/ui/tabs/all/res',
                 'src/main/java/com/nocorp/scienceboard/ui/tabs/tech/res',
 
                 'src/main/java/com/nocorp/scienceboard/ui/tabs/physics/res',
