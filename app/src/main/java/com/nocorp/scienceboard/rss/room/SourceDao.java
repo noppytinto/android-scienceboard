@@ -28,4 +28,9 @@ public interface SourceDao {
 
     @Delete
     void delete(Source source);
+
+    @Query("UPDATE Source " +
+            "SET followed = :value " +
+            "WHERE id = :sourceId")
+    int updateFollowStatus(boolean value, String sourceId);
 }

@@ -1,6 +1,5 @@
 package com.nocorp.scienceboard.ui.topics;
 
-import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.os.Bundle;
@@ -8,17 +7,34 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.transition.MaterialContainerTransform;
 import com.nocorp.scienceboard.R;
+import com.nocorp.scienceboard.databinding.FragmentTopicsBinding;
+import com.nocorp.scienceboard.model.Topic;
+import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterTopics;
 
-public class TopicsFragment extends Fragment {
+import java.util.ArrayList;
+import java.util.List;
+
+public class TopicsFragment extends Fragment implements RecyclerAdapterTopics.FollowChipListener {
     private final String TAG = this.getClass().getSimpleName();
     private TopicsViewModel topicsViewModel;
+    private View view;
+    private RecyclerView recyclerView;
+    private RecyclerAdapterTopics recyclerAdapterTopics;
+    private FragmentTopicsBinding viewBinding;
+    private List<Topic> topicsFetched;
+    private ExtendedFloatingActionButton floatingActionButton;
 
 
 
@@ -41,31 +57,35 @@ public class TopicsFragment extends Fragment {
         setEnterTransition();
     }
 
-    private void setEnterTransition() {
-        // TRANSITION
-        MaterialContainerTransform transform = new MaterialContainerTransform();
-//        transform.setInterpolator(new FastOutSlowInInterpolator());
-        transform.setDrawingViewId(R.id.nav_host_fragment);
-//        transform.setContainerColor(Color.WHITE);
-//        transform.setFadeMode(MaterialContainerTransform.FADE_MODE_THROUGH);
-        transform.setDuration(1000);
-        transform.setAllContainerColors(getResources().getColor(R.color.white));
-
-        setSharedElementEnterTransition(transform);
-//        setSharedElementReturnTransition(transform);
-    }
-
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_topics, container, false);
+        viewBinding = FragmentTopicsBinding.inflate(getLayoutInflater());
+        view = viewBinding.getRoot();
+        return view;
     }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        initView();
+    }
+
+
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        topicsViewModel = new ViewModelProvider(this).get(TopicsViewModel.class);
-        // TODO: Use the ViewModel
+
+        floatingActionButton.show();
+        floatingActionButton.setOnClickListener(v -> {
+            //todo
+            floatingActionButton.hide();
+            Navigation.findNavController(view).popBackStack();
+        });
+
+        observeTopicsFetched();
+
     }
 
 
@@ -74,9 +94,59 @@ public class TopicsFragment extends Fragment {
 
     //-------------------------------------------------------------------------------------------- METHODS
 
+    private void observeTopicsFetched() {
+        topicsViewModel.getObservableTopicsList().observe(getViewLifecycleOwner(), topics -> {
+            if(topics!=null && !topics.isEmpty()) {
+                // TODO
+                this.topicsFetched = new ArrayList<>(topics);
+                recyclerAdapterTopics.loadNewData(topics);
+            }
+        });
+    }
+
+    private void initView() {
+        topicsViewModel = new ViewModelProvider(requireActivity()).get(TopicsViewModel.class);
+        floatingActionButton = viewBinding.floatingActionButtonTopicsFragment;
+        recyclerView = viewBinding.recyclerViewTopicsFragment;
+
+        initRecycleView(recyclerView);
+    }
+
+    private void initRecycleView(RecyclerView recyclerView) {
+        // defining Recycler view
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recyclerAdapterTopics = new RecyclerAdapterTopics(new ArrayList<>(), this);
+        recyclerView.setAdapter(recyclerAdapterTopics);
+        recyclerView.addItemDecoration(new DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL));
+//        SnapHelper snapHelper = new LinearSnapHelper();
+//        snapHelper.attachToRecyclerView(recyclerView);
+    }
+
+    private void setEnterTransition() {
+        // TRANSITION
+        MaterialContainerTransform transform = new MaterialContainerTransform();
+//        transform.setInterpolator(new FastOutSlowInInterpolator());
+        transform.setDrawingViewId(R.id.nav_host_fragment);
+//        transform.setContainerColor(Color.WHITE);
+//        transform.setFadeMode(MaterialContainerTransform.FADE_MODE_THROUGH);
+        transform.setDuration(800);
+        transform.setAllContainerColors(getResources().getColor(R.color.white));
+
+        setSharedElementEnterTransition(transform);
+//        setSharedElementReturnTransition(transform);
+    }
 
 
 
+    @Override
+    public void onFollowChipChecked(int position, View view) {
+
+    }
+
+    @Override
+    public void onFollowChipUnchecked(int position, View view) {
+
+    }
 
 
 }// end TopicsFragment

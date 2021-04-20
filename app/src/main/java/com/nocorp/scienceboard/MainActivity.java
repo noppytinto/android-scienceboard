@@ -1,6 +1,8 @@
 package com.nocorp.scienceboard;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Toast;
@@ -8,8 +10,15 @@ import android.widget.Toast;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.nocorp.scienceboard.databinding.ActivityMainBinding;
+import com.nocorp.scienceboard.model.Source;
+import com.nocorp.scienceboard.model.Topic;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
+import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
+import com.nocorp.scienceboard.rss.room.SourceDao;
+import com.nocorp.scienceboard.rss.room.TopicDao;
 import com.nocorp.scienceboard.system.ConnectionManager;
+import com.nocorp.scienceboard.system.ThreadManager;
+import com.nocorp.scienceboard.ui.topics.TopicsViewModel;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
 import androidx.annotation.NonNull;
@@ -23,6 +32,11 @@ import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements NavController.OnDestinationChangedListener {
@@ -39,6 +53,8 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
     private Toast toast;
 
 
+    private TopicsViewModel topicsViewModel;
+
 
 
 
@@ -50,14 +66,18 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
         initView();
         initAdProvider();
         fetchSourcesFromRemoteDb();
-
+        topicsViewModel.fetchTopics();
     }
+
+
+
 
     @Override
     protected void onResume() {
         super.onResume();
         boolean internetAvailable = ConnectionManager.getInternetStatus(this);
         if(internetAvailable) {
+
         }
         else {
             showErrorSnackbar(getString(R.string.string_no_internet_connection));
@@ -131,6 +151,9 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
         appBar = getSupportActionBar();
         // Enable the Up button
         if(appBar!=null) appBar.setDisplayHomeAsUpEnabled(true);
+
+        topicsViewModel = new ViewModelProvider(this).get(TopicsViewModel.class);
+
 
 
         bottomNavBar = binding.includeMainActivity.navView;

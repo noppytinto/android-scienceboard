@@ -28,6 +28,9 @@ public class Source implements Serializable{
     @ColumnInfo(name = "real_name")
     private String realName;
 
+    @ColumnInfo(defaultValue = "true")
+    private boolean followed;
+
 
 
     public String getId() {
@@ -94,4 +97,11 @@ public class Source implements Serializable{
         this.realName = realName;
     }
 
+    public boolean isFollowed() {
+        return followed;
+    }
+
+    public void setFollowed(boolean followed) {
+        this.followed = followed;
+    }
 }// end Source
