@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
@@ -231,7 +232,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     @Override
     public void onDetach() {
         super.onDetach();
-        if(snackbar!=null) snackbar.dismiss();
+        if(snackbar!=null && snackbar.isShown()) snackbar.dismiss();
     }
 
     @Override
@@ -295,19 +296,21 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private void saveState(@NonNull Bundle outState) {
         Bundle webviewMainBundle = new Bundle();
         webViewMain.saveState(webviewMainBundle);
-        outState.putBundle("webviewMainBundle", webviewMainBundle);
+        if(webviewMainBundle!=null)
+            outState.putBundle("webviewMainBundle", webviewMainBundle);
 
         Bundle webviewBottomSheetBundle = new Bundle();
         webViewBottomSheet.saveState(webviewBottomSheetBundle);
-        outState.putBundle("webviewBottomSheetBundle", webviewBottomSheetBundle);
+        if(webviewBottomSheetBundle!=null)
+            outState.putBundle("webviewBottomSheetBundle", webviewBottomSheetBundle);
 
         Bundle webviewReadModeBundle = new Bundle();
         webViewReadmode.saveState(webviewReadModeBundle);
-        outState.putBundle("webviewReadModeBundle", webviewReadModeBundle);
+        if(webviewReadModeBundle!=null)
+            outState.putBundle("webviewReadModeBundle", webviewReadModeBundle);
 
         outState.putBoolean("readModeState", readModeEnabled);
         outState.putString("readModeContent", readModeContent);
-
     }
 
 
@@ -442,13 +445,13 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
                 showErrorSnackbar(message, requireContext());
             }
 
-            @Override
-            public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
-                super.onReceivedHttpError(view, request, errorResponse);
-                Log.d(TAG, "SCIENCE_BOARD - onReceivedHttpError: reason: " + errorResponse.getReasonPhrase());
-                Log.d(TAG, "SCIENCE_BOARD - onReceivedHttpError: statuscode: " + errorResponse.getStatusCode());
-//                showErrorSnackbar("HTTP error.", requireContext());
-            }
+//            @Override
+//            public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
+//                super.onReceivedHttpError(view, request, errorResponse);
+//                Log.d(TAG, "SCIENCE_BOARD - onReceivedHttpError: reason: " + errorResponse.getReasonPhrase());
+//                Log.d(TAG, "SCIENCE_BOARD - onReceivedHttpError: statuscode: " + errorResponse.getStatusCode());
+////                showErrorSnackbar("HTTP error.", requireContext());
+//            }
         });
 
 
@@ -973,27 +976,35 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     }
 
     private void showRedSnackbar(String message, int duration, String actionLabel, View.OnClickListener action, Context context) {
-        snackbar = Snackbar.make(view, "", duration);
-        snackbar.setText(message);
-        snackbar.setTextColor(context.getResources().getColor(R.color.white));
-        snackbar.setBackgroundTint(context.getResources().getColor(R.color.red));
-        snackbar.setAction(actionLabel, action);
-        snackbar.setActionTextColor(context.getResources().getColor(R.color.white));
-        snackbar.show();
+        try {
+            snackbar = Snackbar.make(view, "", duration);
+            snackbar.setText(message);
+            snackbar.setTextColor(context.getResources().getColor(R.color.white));
+            snackbar.setBackgroundTint(context.getResources().getColor(R.color.red));
+            snackbar.setAction(actionLabel, action);
+            snackbar.setActionTextColor(context.getResources().getColor(R.color.white));
+            snackbar.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void showErrorSnackbar(String message, Context context) {
-        snackbar = Snackbar.make(view, "", Snackbar.LENGTH_INDEFINITE);
-        snackbar.setText(message);
-        snackbar.setTextColor(context.getResources().getColor(R.color.white));
-        snackbar.setBackgroundTint(context.getResources().getColor(R.color.red));
+        try {
+            snackbar = Snackbar.make(view, "", Snackbar.LENGTH_INDEFINITE);
+            snackbar.setText(message);
+            snackbar.setTextColor(context.getResources().getColor(R.color.white));
+            snackbar.setBackgroundTint(context.getResources().getColor(R.color.red));
 //        snackbar.setAnchorView(R.id.nav_view);
-        snackbar.setAction("retry", v -> {
-            snackbar.dismiss();
-            webViewMain.loadUrl(webpageUrl);
-        });
-        snackbar.setActionTextColor(context.getResources().getColor(R.color.white));
-        snackbar.show();
+            snackbar.setAction("retry", v -> {
+                snackbar.dismiss();
+                webViewMain.loadUrl(webpageUrl);
+            });
+            snackbar.setActionTextColor(context.getResources().getColor(R.color.white));
+            snackbar.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void showBottomToast(String message) {
