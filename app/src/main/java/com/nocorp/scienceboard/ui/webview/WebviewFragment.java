@@ -5,8 +5,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -24,8 +22,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.SslErrorHandler;
-import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
@@ -68,8 +64,6 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 
-import static android.view.View.SCROLLBARS_INSIDE_OVERLAY;
-
 import okhttp3.ResponseBody;
 
 public class WebviewFragment extends Fragment implements androidx.appcompat.widget.Toolbar.OnMenuItemClickListener {
@@ -89,6 +83,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private WebView webViewMain;
     private MenuItem stopMenuItem;
     private MenuItem bookmarkMenuItem;
+    private MenuItem reloadPageMenuItem;
     private Article currentArticle;
     private boolean articleAlreadyInBookmarks;
 
@@ -101,7 +96,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 
     // bottom sheet
     private WebView webViewBottomSheet;
-    private ExtendedFloatingActionButton showButton;
+    private ExtendedFloatingActionButton searchButton;
     private View bottomSheet;
     private View backgroundShadow;
     // keywords
@@ -123,7 +118,10 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     private int shortAnimationDuration;
 
 
-
+    // google search
+    private final String googleSearchQueryUrl = "https://www.google.com/search?q=";
+//    private final String javascript_getTheSelectedWord = "(function(){return window.getSelection().toString()})()";
+//    private String selectedWord;
 
 
 
@@ -208,6 +206,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         }
         else {
             webViewMain.loadUrl(webpageUrl);
+            webViewBottomSheet.loadUrl(getString(R.string.string_google_search_website));
         }
     }
 
@@ -325,15 +324,16 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         chipsContainer = viewBinding.includeWebviewFragment.containerBottomSheetWebview;
         chips = new ArrayList<>();
         selectedKeywords = new ArrayList<>();
-        readModeMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_readmode);
 
         // read mode
         webViewReadmode = viewBinding.webViewWebviewFragmentReadMode;
+        readModeMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_readmode);
+        reloadPageMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_refresh);
 
 
         // webview botomsheet
         webViewBottomSheet = viewBinding.includeWebviewFragment.webviewBottomSheetWebview;
-        showButton = viewBinding.includeWebviewFragment.buttonBottomSheetWebview;
+        searchButton = viewBinding.includeWebviewFragment.buttonBottomSheetWebview;
         bottomSheet = view.findViewById(R.id.include_webviewFragment);
         backgroundShadow = viewBinding.includeWebviewFragment.viewBottomSheetWebviewShadow2;
 
@@ -434,6 +434,28 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 //                showErrorSnackbar("HTTP error.", requireContext());
             }
         });
+
+
+
+//        webView.evaluateJavascript(javascript_getTheSelectedWord,
+//                selectedText -> {
+//                    try {
+//                        if(selectedText==null || selectedText.isEmpty()) return;
+//                        if(selectedText.contains(" ")){
+//                            selectedText= selectedText.substring(0, selectedText.indexOf(" "));
+//                            selectedWord = selectedText;
+//                        }
+//
+//                        if (selectedWord==null || selectedWord.isEmpty()) return;
+//                        Log.v(TAG, "SCIENCE_BOARD - WEBVIEW SELECTION:" + selectedWord);
+//                        searchButton.setText("search: " + selectedWord);
+//                        searchButton.setOnClickListener(v -> searchSelecteWordOnGoogle(selectedWord));
+//
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                        Log.d(TAG, "defineWebclientBehavior_mainWebview: " + e.getMessage());
+//                    }
+//                });
     }
 
     private void defineWebclientBehavior_bottomSheetWebview(WebView webView) {
@@ -627,28 +649,32 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         behavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                if (newState == BottomSheetBehavior.STATE_HALF_EXPANDED) {
-                    defineWebviewBackButtonBehavior(webViewBottomSheet);
-                    crossfadeEnter(chipsContainer);
-                    showButton.setOnClickListener(v -> {
-                        if (behavior.getState() == BottomSheetBehavior.STATE_HALF_EXPANDED) {
-                            behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                            showButton.setText(R.string.string_close);
-                            backgroundShadow.setVisibility(View.VISIBLE);
+                if (newState == BottomSheetBehavior.STATE_HALF_EXPANDED ||
+                    newState == BottomSheetBehavior.STATE_EXPANDED) {
 
+                    defineWebviewBackButtonBehavior(webViewBottomSheet);
+                    applyCrossfadeEnter(chipsContainer);
+                    searchButton.setText(R.string.similar_news);
+                    backgroundShadow.setVisibility(View.VISIBLE);
+                    searchButton.setOnClickListener(v -> {
+                        // ignore v
+
+                        if (behavior.getState() == BottomSheetBehavior.STATE_HALF_EXPANDED ||
+                                newState == BottomSheetBehavior.STATE_EXPANDED) {
+                            searchSimilarArticlesOnGoogle(keywords);
                         }
                     });
                 }
                 else if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
                     ignoreBackButton(webViewBottomSheet);
-                   crossfadeExit(chipsContainer);
+                    applyCrossfadeExit(chipsContainer);
+                    backgroundShadow.setVisibility(View.GONE);
+                    searchButton.setText(R.string.string_search);
+                    searchButton.setOnClickListener(v -> {
+                        // ignore v
 
-                    showButton.setOnClickListener(v -> {
                         if (behavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
                             behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
-                            backgroundShadow.setVisibility(View.GONE);
-                            showButton.setText(R.string.string_search);
-
                         }
                     });
                 }
@@ -664,7 +690,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 //                else if (newState == BottomSheetBehavior.STATE_DRAGGING) {
 //                    behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
 //                }
-            }
+            }// end onStateChanged()
 
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
@@ -672,15 +698,16 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
             }
         });
 
-        showButton.setOnClickListener(v -> {
+        searchButton.setOnClickListener(v -> {
+            // ignore v
+
             if (behavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
                 behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
-                webViewBottomSheet.loadUrl(getString(R.string.string_google_search_website));
             }
         });
     }
 
-    private void crossfadeEnter(View view) {
+    private void applyCrossfadeEnter(View view) {
         // Set the content view to 0% opacity but visible, so that it is visible
         // (but fully transparent) during the animation.
         view.setAlpha(0f);
@@ -695,7 +722,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 
     }
 
-    private void crossfadeExit(View view) {
+    private void applyCrossfadeExit(View view) {
         // Animate the loading view to 0% opacity. After the animation ends,
         // set its visibility to GONE as an optimization step (it won't
         // participate in layout passes, etc.)
@@ -776,7 +803,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
             else {
                 selectedKeywords.remove(name);
             }
-            triggerGoogleSearch(selectedKeywords);
+            triggerKeywordsGoogleSearch(selectedKeywords);
 
             Log.d(TAG, "addChip: " + selectedKeywords);
         });
@@ -787,7 +814,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     }
 
 
-    private void triggerGoogleSearch(List<String> selectedKeywords) {
+    private void triggerKeywordsGoogleSearch(List<String> selectedKeywords) {
         if(selectedKeywords==null) return;
         if(selectedKeywords.isEmpty()) {
             webViewBottomSheet.loadUrl(getString(R.string.string_google_search_website));
@@ -802,7 +829,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         String query = builder.toString();
         String url = null;
         try {
-            url = "https://www.google.com/search?q=" + URLEncoder.encode(query, String.valueOf(StandardCharsets.UTF_8));
+            url = googleSearchQueryUrl + URLEncoder.encode(query, String.valueOf(StandardCharsets.UTF_8));
             webViewBottomSheet.loadUrl(url);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -810,6 +837,50 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
             e.printStackTrace();
         }
     }
+
+    private void searchSimilarArticlesOnGoogle(List<String> selectedKeywords) {
+        String query = null;
+
+        if(selectedKeywords!=null && ! selectedKeywords.isEmpty()) {
+            StringBuilder stringBuilder = new StringBuilder();
+            for(String currentKeyword : keywords) {
+                stringBuilder.append(currentKeyword).append(" ");
+            }
+            query = stringBuilder.toString();
+        }
+        else {
+            query = currentArticle.getTitle();
+        }
+
+
+        String url = null;
+        try {
+            url = googleSearchQueryUrl + URLEncoder.encode(query, String.valueOf(StandardCharsets.UTF_8));
+            webViewBottomSheet.loadUrl(url);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void searchSelecteWordOnGoogle(String selectedWord) {
+        String query = null;
+
+        if(selectedWord!=null && ! selectedWord.isEmpty()) {
+            query = selectedWord;
+            String url = null;
+            try {
+                url = googleSearchQueryUrl + URLEncoder.encode(query, String.valueOf(StandardCharsets.UTF_8));
+                webViewBottomSheet.loadUrl(url);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
     private void invalidateWebviewBackButtonBehavior(WebView webView) {
         webView.setOnKeyListener(null);
