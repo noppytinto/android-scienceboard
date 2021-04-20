@@ -1,9 +1,7 @@
 package com.nocorp.scienceboard.ui.tabs.all;
 
-import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,9 +18,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.transition.Hold;
-import com.google.android.material.transition.MaterialContainerTransform;
 import com.nocorp.scienceboard.MobileNavigationDirections;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentAllTabBinding;
@@ -30,6 +29,7 @@ import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
+import com.nocorp.scienceboard.ui.home.HomeFragment;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
@@ -46,15 +46,18 @@ public class AllTabFragment extends Fragment implements
     private View view;
     private AdProvider adProvider;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private FragmentAllTabBinding binding;
+    private FragmentAllTabBinding viewBinding;
     private Toast toast;
     private SourceViewModel sourceViewModel;
     private List<Source> sourcesFetched;
-    private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 3;
+    private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 10;
     private final int AD_DISTANCE = 5; // distance between teh ads (in terms of items)
     private List<ListItem> articlesToDisplay;
     private boolean isLoading = false;
 
+
+    //
+    private FloatingActionButton topicsButton;
 
 
 
@@ -71,17 +74,11 @@ public class AllTabFragment extends Fragment implements
 
     //--------------------------------------------------------------------- ANDROID METHODS
 
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        binding = FragmentAllTabBinding.inflate(getLayoutInflater());
-        view = binding.getRoot();
+        viewBinding = FragmentAllTabBinding.inflate(getLayoutInflater());
+        view = viewBinding.getRoot();
         Log.d(TAG, "SCIENCE_BOARD - onCreateView: called");
         return view;
     }
@@ -106,7 +103,7 @@ public class AllTabFragment extends Fragment implements
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null;
+        viewBinding = null;
     }
 
 
@@ -116,22 +113,38 @@ public class AllTabFragment extends Fragment implements
     //--------------------------------------------------------------------- METHODS
 
     private void initView() {
-        progressIndicator = binding.progressIndicatorAllArticlesTabFragment;
-        swipeRefreshLayout = binding.swipeRefreshAllArticlesTabFragment;
+        progressIndicator = viewBinding.progressIndicatorAllArticlesTabFragment;
+        swipeRefreshLayout = viewBinding.swipeRefreshAllArticlesTabFragment;
         swipeRefreshLayout.setColorSchemeResources(R.color.orange_light);
         adProvider = AdProvider.getInstance(); // is not guaranteed that
         sourceViewModel = new ViewModelProvider(requireActivity()).get(SourceViewModel.class);
         allTabViewModel = new ViewModelProvider(this).get(AllTabViewModel.class);
+
+        //
+        topicsButton = viewBinding.floatingActionButtonAllArticlesTabFragmentEdit;
+        topicsButton.setOnClickListener(v -> {
+            FragmentNavigator.Extras extras = new FragmentNavigator
+                .Extras
+                .Builder()
+                .addSharedElement(topicsButton, topicsButton.getTransitionName())
+                .build();
+
+            Navigation.findNavController(view).navigate(R.id.action_navigation_home_to_topicsFragment,null,null, extras);
+
+        });
+
         initRecycleView();
         setupSwipeDownToRefresh();
     }
 
     private void initRecycleView() {
         // defining Recycler view
-        recyclerView = binding.recyclerViewAllArticlesTabFragment;
+        recyclerView = viewBinding.recyclerViewAllArticlesTabFragment;
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this);
         recyclerView.setAdapter(recyclerAdapterArticlesList);
+//        SnapHelper snapHelper = new LinearSnapHelper();
+//        snapHelper.attachToRecyclerView(recyclerView);
         initScrollListener();
     }
 

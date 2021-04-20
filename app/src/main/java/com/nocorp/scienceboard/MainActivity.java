@@ -87,6 +87,9 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
             hideToolbar();
             hideBottomBar();
         }
+        else if(destination.getId() == R.id.topicsFragment) {
+            hideToolbar();
+        }
         else {
             showToolbar();
             showBottomBar();
@@ -172,17 +175,21 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
     }
 
     private void showErrorSnackbar(String message) {
-        if(snackbar!=null) snackbar.dismiss(); // dismiss any previous snackbar
-        snackbar = Snackbar.make(view, message, Snackbar.LENGTH_INDEFINITE);
-        snackbar.setTextColor(getMyColor(R.color.white));
-        snackbar.setBackgroundTint(getMyColor(R.color.red));
-        snackbar.setAnchorView(binding.includeMainActivity.navView);
-        snackbar.setAction(R.string.string_retry, v -> {
-            snackbar.dismiss();
-            retryAction();
-        });
-        snackbar.setActionTextColor(getMyColor(R.color.white));
-        snackbar.show();
+        try {
+            if(snackbar!=null && snackbar.isShown()) snackbar.dismiss(); // dismiss any previous snackbar
+            snackbar = Snackbar.make(view, message, Snackbar.LENGTH_INDEFINITE);
+            snackbar.setTextColor(getMyColor(R.color.white));
+            snackbar.setBackgroundTint(getMyColor(R.color.red));
+            snackbar.setAnchorView(binding.includeMainActivity.navView);
+            snackbar.setAction(R.string.string_retry, v -> {
+                snackbar.dismiss();
+                retryAction();
+            });
+            snackbar.setActionTextColor(getMyColor(R.color.white));
+            snackbar.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private int getMyColor(int resourceId) {
@@ -201,14 +208,18 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
 
 
     private void showGreenSnackbar(String message) {
-        if(snackbar!=null) snackbar.dismiss(); // dismiss any previous snackbar
-        snackbar = Snackbar.make(view, message,Snackbar.LENGTH_SHORT);
-        snackbar.setTextColor(getMyColor(R.color.white));
-        snackbar.setBackgroundTint(getMyColor(R.color.green));
-        snackbar.setAnchorView(binding.includeMainActivity.navView);
-        snackbar.setAction(R.string.string_ok, v -> snackbar.dismiss());
-        snackbar.setActionTextColor(getMyColor(R.color.white));
-        snackbar.show();
+        try {
+            if(snackbar!=null && snackbar.isShown()) snackbar.dismiss(); // dismiss any previous snackbar
+            snackbar = Snackbar.make(view, message,Snackbar.LENGTH_SHORT);
+            snackbar.setTextColor(getMyColor(R.color.white));
+            snackbar.setBackgroundTint(getMyColor(R.color.green));
+            snackbar.setAnchorView(binding.includeMainActivity.navView);
+            snackbar.setAction(R.string.string_ok, v -> snackbar.dismiss());
+            snackbar.setActionTextColor(getMyColor(R.color.white));
+            snackbar.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void showCenteredToast(String message) {

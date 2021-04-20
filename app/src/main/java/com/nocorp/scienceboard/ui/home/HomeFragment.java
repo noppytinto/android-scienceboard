@@ -19,6 +19,8 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.android.material.transition.Hold;
+import com.google.android.material.transition.MaterialElevationScale;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentHomeBinding;
 import com.nocorp.scienceboard.databinding.FragmentTechTabBinding;
@@ -35,6 +37,14 @@ public class HomeFragment extends Fragment{
     private TabLayout tabLayout;
     private FragmentHomeBinding binding;
 
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+//        setExitTransition(new Hold().setDuration(1000));
+        setExitTransition(new MaterialElevationScale(/* growing= */ false));
+        setReenterTransition(new MaterialElevationScale(/* growing= */ true));
+    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -67,7 +77,7 @@ public class HomeFragment extends Fragment{
         TabLayoutMediator tabLayoutMediator = new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             switch (position) {
                 case 0:
-                    tab.setText("ALL");
+                    tab.setText("Home");
                     break;
                 case 1:
                     tab.setText("Tech");
