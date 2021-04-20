@@ -624,30 +624,30 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 
     private void defineBottomSheetBehavior() {
         final BottomSheetBehavior behavior = BottomSheetBehavior.from(bottomSheet);
-        behavior.setDraggable(false);
         behavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
                 if (newState == BottomSheetBehavior.STATE_HALF_EXPANDED) {
                     defineWebviewBackButtonBehavior(webViewBottomSheet);
                     crossfadeEnter(chipsContainer);
-                    backgroundShadow.setVisibility(View.VISIBLE);
-                    showButton.setText(R.string.string_close);
                     showButton.setOnClickListener(v -> {
                         if (behavior.getState() == BottomSheetBehavior.STATE_HALF_EXPANDED) {
                             behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                            webViewBottomSheet.loadUrl(getString(R.string.string_google_search_website));
+                            showButton.setText(R.string.string_close);
+                            backgroundShadow.setVisibility(View.VISIBLE);
+
                         }
                     });
                 }
                 else if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
                     ignoreBackButton(webViewBottomSheet);
                    crossfadeExit(chipsContainer);
-                    backgroundShadow.setVisibility(View.GONE);
-                    showButton.setText(R.string.string_search);
+
                     showButton.setOnClickListener(v -> {
                         if (behavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
                             behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+                            backgroundShadow.setVisibility(View.GONE);
+                            showButton.setText(R.string.string_search);
 
                         }
                     });
@@ -675,6 +675,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         showButton.setOnClickListener(v -> {
             if (behavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
                 behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+                webViewBottomSheet.loadUrl(getString(R.string.string_google_search_website));
             }
         });
     }

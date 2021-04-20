@@ -172,14 +172,17 @@ public class TechTabViewModel extends AndroidViewModel implements ArticlesReposi
 
     public void smartSaveInHistory(@NotNull Article givenArticle) {
         if(lastVisitedArticleId==null || lastVisitedArticleId.isEmpty()) {
+            // no matches, save
             saveInHistory(givenArticle);
         }
         else if(lastVisitedArticleId.equals(givenArticle.getId())){
+            // match, skip save
             updateHistory(givenArticle);
         }
-//        else {
-//            saveInHistory(givenArticle);
-//        }
+        else {
+            // initial save
+            saveInHistory(givenArticle);
+        }
         // TODO: improve this branching
     }
 
