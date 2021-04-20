@@ -111,7 +111,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     // read mode
     private WebView webViewReadmode;
     private boolean readModeEnabled = false;
-    private String extractedContentHtmlWithUtf8Encoding;
+    private String readModeContent;
     private MenuItem readModeMenuItem;
 
     // animations
@@ -194,19 +194,30 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        // TODO: improve code
+        // readModeEnabled must be set before applyCustomWebviewSettings_mainWebview
+        if(savedInstanceState!=null) {
+            readModeEnabled = savedInstanceState.getBoolean("readModeState");
+            readModeContent = savedInstanceState.getString("readModeContent");
+        }
+
         applyCustomWebviewSettings_mainWebview(webViewMain);
         applyBrowsingRecommendedSettings_bottomSheetWebview(webViewBottomSheet);
         defineBottomSheetBehavior();
-        preparePageForReadMode(webpageUrl);
 
         if(savedInstanceState!=null) {
             webViewMain.restoreState(savedInstanceState.getBundle("webviewMainBundle"));
             webViewBottomSheet.restoreState(savedInstanceState.getBundle("webviewBottomSheetBundle"));
             webViewReadmode.restoreState(savedInstanceState.getBundle("webviewReadModeBundle"));
+            enableReadModeButton();
+            if(readModeEnabled) {
+                startReadModeActionWithoutReaload(readModeContent);
+            }
         }
         else {
             webViewMain.loadUrl(webpageUrl);
             webViewBottomSheet.loadUrl(getString(R.string.string_google_search_website));
+            preparePageForReadMode(webpageUrl);
         }
     }
 
@@ -267,7 +278,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
                 stopReadMode();
             }
             else {
-                startReadModeAction();
+                startReadModeAction(readModeContent);
             }
             return true;
         }
@@ -293,6 +304,10 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         Bundle webviewReadModeBundle = new Bundle();
         webViewReadmode.saveState(webviewReadModeBundle);
         outState.putBundle("webviewReadModeBundle", webviewReadModeBundle);
+
+        outState.putBoolean("readModeState", readModeEnabled);
+        outState.putString("readModeContent", readModeContent);
+
     }
 
 
@@ -416,7 +431,8 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
                 progressIndicator.setVisibility(View.VISIBLE);
-                showMenuIitemIcon(stopMenuItem);
+                if(!readModeEnabled)
+                    showMenuIitemIcon(stopMenuItem);
             }
 
             @Override
@@ -545,14 +561,14 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         webiew.getSettings().setTextZoom(currentTextSize);
     }
 
-    private void startReadModeAction() {
+    private void startReadModeAction(String readModeContent) {
 //        webViewMain.loadDataWithBaseURL(null, extractedContentHtmlWithUtf8Encoding, "text/html", "UTF-8", null);
-        if(extractedContentHtmlWithUtf8Encoding==null || extractedContentHtmlWithUtf8Encoding.isEmpty()) return;
+        if(readModeContent ==null || readModeContent.isEmpty()) return;
 
-        extractedContentHtmlWithUtf8Encoding =
-                extractedContentHtmlWithUtf8Encoding.replace("<head>", "<head><style>body{background-color: Ivory;} img{max-width: 100%; width:auto; height: auto;}</style>");
+        readModeContent =
+                readModeContent.replace("<head>", "<head><style>body{background-color: Ivory;} img{max-width: 100%; width:auto; height: auto;}</style>");
         // Parse your HTML file or String with Jsoup
-        org.jsoup.nodes.Document doc = Jsoup.parse(extractedContentHtmlWithUtf8Encoding);
+        org.jsoup.nodes.Document doc = Jsoup.parse(readModeContent);
         // doc.select selects all tags in the the HTML document
 //        doc.select("img").attr("width", "100%").attr();// find all images and set with to 100%
 
@@ -560,22 +576,38 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
             doc.select("figure").attr("style", "max-width: 100%; width: auto; height: auto");// find all figures and set with to 80%
             doc.select("iframe").attr("style", "max-width: 100%; width: auto; height: auto"); // find all iframes and set with to 100%
             // add more attributes or CSS to other HTML tags
-            extractedContentHtmlWithUtf8Encoding = doc.html();
+            readModeContent = doc.html();
 
-            Log.d(TAG, "onViewCreated: " + extractedContentHtmlWithUtf8Encoding);
+            Log.d(TAG, "onViewCreated: " + readModeContent);
 
             readModeEnabled = true;
             readModeMenuItem.setTitle("Exit Read mode");
             webViewReadmode.setVisibility(View.VISIBLE);
             webViewMain.setVisibility(View.GONE);
             applyCustomWebviewSettings_readModeWebview(webViewReadmode);
-            webViewReadmode.loadData(extractedContentHtmlWithUtf8Encoding, "text/html", "UTF-8");
+            webViewReadmode.loadData(readModeContent, "text/html", "UTF-8");
             showRedSnackbar("Read mode is an experimental feature.", Snackbar.LENGTH_SHORT, "ok", (v)->snackbar.dismiss(), requireContext());
+            hideMenuItemIcon(reloadPageMenuItem);
+            hideMenuItemIcon(stopMenuItem);
         }
         else {
             showRedSnackbar("Content not found.", Snackbar.LENGTH_SHORT, "ok", (v)->snackbar.dismiss(), requireContext());
         }
 
+    }
+
+    private void startReadModeActionWithoutReaload(String readModeContent) {
+//        webViewMain.loadDataWithBaseURL(null, extractedContentHtmlWithUtf8Encoding, "text/html", "UTF-8", null);
+        if(readModeContent ==null || readModeContent.isEmpty()) return;
+
+        readModeMenuItem.setTitle("Exit Read mode");
+        webViewReadmode.setVisibility(View.VISIBLE);
+        webViewMain.setVisibility(View.GONE);
+        applyCustomWebviewSettings_readModeWebview(webViewReadmode);
+//        webViewReadmode.loadData(readModeContent, "text/html", "UTF-8");
+//        showRedSnackbar("Read mode is an experimental feature.", Snackbar.LENGTH_SHORT, "ok", (v)->snackbar.dismiss(), requireContext());
+        hideMenuItemIcon(reloadPageMenuItem);
+        hideMenuItemIcon(stopMenuItem);
     }
 
     private void clearCacheCookiesAction() {
@@ -752,7 +784,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
                 try (ResponseBody responseBody = response.body()) {
                     if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
                     if(responseBody!=null) {
-                        parseWebpage(responseBody, url);
+                        readModeContent = parseWebpage(responseBody, url);
                         enableReadModeButton();
                     }
 
@@ -769,12 +801,12 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     }
 
 
-    private void parseWebpage(ResponseBody responseBody, String url) throws IOException {
+    private String parseWebpage(ResponseBody responseBody, String url) throws IOException {
         Readability4J readability4J = new Readability4JExtended(url, responseBody.string());
         net.dankito.readability4j.Article article = readability4J.parse();
         // returns extracted content in a <div> element
-        extractedContentHtmlWithUtf8Encoding = article.getContentWithUtf8Encoding();
-
+        article.getContentWithUtf8Encoding();
+        return article.getContentWithUtf8Encoding();
     }
 
     private void addChip(String name, ChipGroup chipGroup) {
@@ -906,6 +938,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         webViewMain.setVisibility(View.VISIBLE);
         webViewReadmode.setVisibility(View.GONE);
         readModeMenuItem.setTitle("Read mode");
+        showMenuIitemIcon(reloadPageMenuItem);
     }
 
     private void buildKeywordsChips(List<String> keywords, ChipGroup chipGroup) {
