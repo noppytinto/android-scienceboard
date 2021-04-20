@@ -65,9 +65,19 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
         super.onCreate(savedInstanceState);
         initView();
         initAdProvider();
-        fetchSourcesFromRemoteDb();
+
+        observeTopicsFetched();
         topicsViewModel.fetchTopics();
     }
+
+    private void observeTopicsFetched() {
+        topicsViewModel.getObservableTopicsList().observe(this, topics -> {
+            if(topics!=null && !topics.isEmpty()) {
+                fetchSourcesFromRemoteDb();
+            }
+        });
+    }
+
 
 
 

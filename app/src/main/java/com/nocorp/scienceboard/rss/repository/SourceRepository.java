@@ -6,6 +6,7 @@ import android.util.Log;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.nocorp.scienceboard.model.Source;
+import com.nocorp.scienceboard.model.Topic;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
 import com.nocorp.scienceboard.rss.room.SourceDao;
@@ -67,20 +68,21 @@ public class SourceRepository {
         }
     }
 
-    public List<Source> getAsourceForEachMainCategory_randomly(List<Source> givenSources, List<String> givenCategories) {
+    public List<Source> getAsourceForEachFollowedCategory_randomly(List<Source> givenSources, List<Topic> topics) {
         List<Source> result = null;
-        if(givenSources==null || givenSources.size()<=0) return result;
-        if(givenCategories==null || givenCategories.size()<=0) return result;
+        if(givenSources==null || givenSources.isEmpty()) return result;
+        if(topics==null || topics.isEmpty()) return result;
 
         List<Source> allSources = new ArrayList<>(givenSources);
-        List<String> mainCategories = new ArrayList<>(givenCategories);
-
+        Collections.shuffle(allSources);
         result = new ArrayList<>();
-        for(int i=0; i < mainCategories.size(); i++) {
-            Source source = getTheFirstSourceFallingInThisCategory(allSources, mainCategories.get(i));
-            if(source!=null) {
-                result.add(source);
-                allSources.remove(source);
+        for(int i=0; i < topics.size(); i++) {
+            if(topics.get(i).getFollowed()) {
+                Source source = getTheFirstSourceFallingInThisCategory(allSources, topics.get(i).getName().toLowerCase());
+                if(source!=null) {
+                    result.add(source);
+                    allSources.remove(source);
+                }
             }
         }
 

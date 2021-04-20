@@ -46,6 +46,7 @@ public class RecyclerAdapterTopics extends
         Topic topic = recyclerList.get(position);
 
         holder.sourceNameLabel.setText(topic.getName());
+        holder.followChip.setChecked(topic.getFollowed());
 
         // todo
     }

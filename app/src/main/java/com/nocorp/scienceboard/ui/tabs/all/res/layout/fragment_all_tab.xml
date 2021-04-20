@@ -58,7 +58,7 @@
         android:layout_marginBottom="8dp"
         android:clickable="true"
         android:src="@drawable/ic_edit_white"
-        app:backgroundTint="#F8B880"
+        app:backgroundTint="@color/orange_light"
         app:fabSize="mini"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

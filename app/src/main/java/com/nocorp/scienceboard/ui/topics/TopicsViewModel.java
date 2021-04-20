@@ -66,4 +66,17 @@ public class TopicsViewModel extends AndroidViewModel implements TopicRepository
     }
 
 
+    public void follow(String topicName) {
+        topicRepository.follow(topicName, getApplication());
+    }
+
+    public void unfollow(String topicName) {
+        topicRepository.unfollow(topicName, getApplication());
+    }
+
+    public void updateTopicsFollowStatus(List<Topic> topicsToUpdate) {
+        if(topicsToUpdate!=null && !topicsToUpdate.isEmpty()) {
+            topicRepository.updateAll(topicsToUpdate, getApplication());
+        }
+    }
 }// end TopicsViewModel

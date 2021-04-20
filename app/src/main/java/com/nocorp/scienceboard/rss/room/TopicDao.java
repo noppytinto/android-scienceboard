@@ -22,6 +22,9 @@ public interface TopicDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertAll(List<Topic> topics);
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void updateAll(List<Topic> topics);
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insert(Topic topic);
 

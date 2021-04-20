@@ -52,7 +52,11 @@ public class ArticleRepository {
     public void getArticles(List<Source> givenSources,
                             int numArticlesForEachSource,
                             Context context) {
-        if(givenSources==null || givenSources.isEmpty()) return;
+        //TODO: givenSources==null should be returned only in case of errors
+        if(givenSources==null || givenSources.isEmpty()) {
+            listener.onArticlesFetchCompleted(new ArrayList<>(), new ArrayList<>());
+            return;
+        }
 
         // server strategy
         downloadArticlesFromServer(givenSources, numArticlesForEachSource, context);

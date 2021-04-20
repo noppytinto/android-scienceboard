@@ -28,15 +28,15 @@
         android:layout_marginStart="16dp"
         android:fontFamily="@font/roboto_bold"
         android:text="Customize Home feed"
-        android:textSize="18sp"
+        android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/imageView_topicsFragment" />
 
     <ImageView
         android:id="@+id/imageView_topicsFragment"
-        android:layout_width="125dp"
-        android:layout_height="72dp"
-        android:layout_marginTop="16dp"
+        android:layout_width="149dp"
+        android:layout_height="93dp"
+        android:layout_marginTop="32dp"
         android:src="@drawable/ic_undraw_check_boxes"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.70"
@@ -50,7 +50,7 @@
         android:layout_marginTop="4dp"
         android:text="pick your favourite Topics"
         android:textColor="@color/gray"
-        android:textSize="14sp"
+        android:textSize="16sp"
         app:layout_constraintStart_toStartOf="@+id/textView_topicsFragment_header"
         app:layout_constraintTop_toBottomOf="@+id/textView_topicsFragment_header" />
 
@@ -70,9 +70,13 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
+        android:paddingStart="0dp"
+        android:paddingLeft="0dp"
+        android:paddingEnd="0dp"
+        android:paddingRight="0dp"
         android:text="done"
+        android:textAlignment="center"
         android:visibility="gone"
-        app:icon="@drawable/ic_done"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         tools:visibility="visible" />

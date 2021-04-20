@@ -36,6 +36,7 @@ import java.util.List;
 
 public class AllTabFragment extends Fragment implements
         RecyclerAdapterArticlesList.OnArticleClickedListener {
+
     private final String TAG = this.getClass().getSimpleName();
     private RecyclerAdapterArticlesList recyclerAdapterArticlesList;
     private RecyclerView recyclerView;
@@ -215,6 +216,9 @@ public class AllTabFragment extends Fragment implements
                 this.sourcesFetched = new ArrayList<>(sources);
                 allTabViewModel.fetchArticles(sources, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, false);
             }
+            else {
+                // TODO
+            }
         });
     }
 
@@ -223,9 +227,19 @@ public class AllTabFragment extends Fragment implements
             swipeRefreshLayout.setRefreshing(false);
             progressIndicator.setVisibility(View.GONE);
 
-            if(resultArticles==null || resultArticles.isEmpty()) {
+            if(resultArticles==null) {
                 isLoading = false;
+
+
 //                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
+            }
+            else if(resultArticles.isEmpty()) {
+                isLoading = false;
+                // TODO this should only be called when the list is empty,
+                // when errors occurs should be the case above
+
+                articlesToDisplay = new ArrayList<>();
+                recyclerAdapterArticlesList.clearList();
             }
             else {
                 resultArticles = adProvider.populateListWithAds(resultArticles, AD_DISTANCE);

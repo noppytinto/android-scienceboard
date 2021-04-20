@@ -14,6 +14,7 @@ import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.rss.repository.ArticleRepository;
 import com.nocorp.scienceboard.rss.repository.ArticlesRepositoryListener;
 import com.nocorp.scienceboard.rss.repository.SourceRepository;
+import com.nocorp.scienceboard.rss.repository.TopicRepository;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.rss.room.HistoryDao;
@@ -78,22 +79,20 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
 
     public void fetchArticles(List<Source> givenSources, int numArticlesForEachSource, boolean forced) {
         if(forced) {
-            downloadArticles(givenSources, numArticlesForEachSource);
+            downloadArticlesFromFollowedTopics(givenSources, numArticlesForEachSource);
         }
         else {
             tryCachedArticles(givenSources, numArticlesForEachSource);
         }
     }
 
-    private void downloadArticles(List<Source> givenSources, int numArticlesForEachSource) {
+    private void downloadArticlesFromFollowedTopics(List<Source> givenSources, int numArticlesForEachSource) {
         if( ! taskIsRunning) {
             Runnable task = () -> {
                 cachedArticles = new ArrayList<>();
                 taskIsRunning = true;
                 // pick sources for ALL tab, only once
-                if(pickedSources ==null || pickedSources.isEmpty()) {
-                    pickedSources = sourceRepository.getAsourceForEachMainCategory_randomly(givenSources, mainCategories);
-                }
+                pickedSources = sourceRepository.getAsourceForEachFollowedCategory_randomly(givenSources, TopicRepository.getCachedTopcis());
                 articleRepository.getArticles(pickedSources, numArticlesForEachSource, getApplication());
             };
 
@@ -105,7 +104,7 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
 
     private void tryCachedArticles(List<Source> givenSources, int numArticlesForEachSource) {
         if(cachedArticles == null) {
-            downloadArticles(givenSources, numArticlesForEachSource);
+            downloadArticlesFromFollowedTopics(givenSources, numArticlesForEachSource);
         }
         else {
             setArticlesList(cachedArticles);
@@ -116,11 +115,17 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
     public void onArticlesFetchCompleted(List<ListItem> articles, List<DocumentSnapshot> oldestArticles) {
         taskIsRunning = false;
 
-        oldestArticlesSnapshots = oldestArticles;
+        if(articles==null) {
+            // TODO: null is returned only in case of errors
+        }
+        else {
+            oldestArticlesSnapshots = oldestArticles;
 
-        // publish results
-        cachedArticles = articles;
-        setArticlesList(articles);
+            // publish results
+            cachedArticles = articles;
+            setArticlesList(articles);
+        }
+
     }
 
     @Override

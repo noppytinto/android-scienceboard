@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,6 +38,8 @@ public class TopicsFragment extends Fragment implements RecyclerAdapterTopics.Fo
     private ExtendedFloatingActionButton floatingActionButton;
 
 
+    //
+    private List<Topic> topicsToUpdate;
 
 
 
@@ -80,8 +83,13 @@ public class TopicsFragment extends Fragment implements RecyclerAdapterTopics.Fo
         floatingActionButton.show();
         floatingActionButton.setOnClickListener(v -> {
             //todo
+
+            topicsViewModel.updateTopicsFollowStatus(topicsToUpdate);
+
+            //
             floatingActionButton.hide();
             Navigation.findNavController(view).popBackStack();
+
         });
 
         observeTopicsFetched();
@@ -108,7 +116,7 @@ public class TopicsFragment extends Fragment implements RecyclerAdapterTopics.Fo
         topicsViewModel = new ViewModelProvider(requireActivity()).get(TopicsViewModel.class);
         floatingActionButton = viewBinding.floatingActionButtonTopicsFragment;
         recyclerView = viewBinding.recyclerViewTopicsFragment;
-
+        topicsToUpdate = new ArrayList<>();
         initRecycleView(recyclerView);
     }
 
@@ -140,12 +148,28 @@ public class TopicsFragment extends Fragment implements RecyclerAdapterTopics.Fo
 
     @Override
     public void onFollowChipChecked(int position, View view) {
-
+        Topic topic = recyclerAdapterTopics.getItem(position);
+        if(topic!=null) {
+            topicsToUpdate.remove(topic);
+            topic.setFollowed(true);
+            topicsToUpdate.add(topic);
+        }
+        else {
+            Log.d(TAG, "onFollowChipChecked: cannot follow topic, cause: topic is null");
+        }
     }
 
     @Override
     public void onFollowChipUnchecked(int position, View view) {
-
+        Topic topic = recyclerAdapterTopics.getItem(position);
+        if(topic!=null) {
+            topicsToUpdate.remove(topic);
+            topic.setFollowed(false);
+            topicsToUpdate.add(topic);
+        }
+        else {
+            Log.d(TAG, "onFollowChipChecked: cannot unfollow topic, cause: topic is null");
+        }
     }
 
 
