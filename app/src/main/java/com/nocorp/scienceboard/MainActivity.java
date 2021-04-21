@@ -164,6 +164,8 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
     }
 
     private void loadTopics() {
+        observeFetchedTopics();
+
         //
         topicRepository.init(this, new OnTopicRepositoryInitilizedListener() {
             @Override
@@ -182,7 +184,6 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
     }
 
     private void fetchTopics() {
-        observeFetchedTopics();
         topicsViewModel.fetchTopics();
     }
 
