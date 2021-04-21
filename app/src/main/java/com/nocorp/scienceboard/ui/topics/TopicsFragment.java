@@ -23,6 +23,7 @@ import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentTopicsBinding;
 import com.nocorp.scienceboard.topics.model.Topic;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterTopics;
+import com.nocorp.scienceboard.topics.repository.OnTopicRepositoryUpdatedListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,29 +73,16 @@ public class TopicsFragment extends Fragment implements RecyclerAdapterTopics.Fo
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initView();
-    }
-
-
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
         floatingActionButton.show();
         floatingActionButton.setOnClickListener(v -> {
-            //todo
-
             topicsViewModel.updateTopicsFollowStatus(topicsToUpdate);
-
-            //
-            floatingActionButton.hide();
-            Navigation.findNavController(view).popBackStack();
-
+            Navigation.findNavController(view).navigateUp();
         });
-
         observeTopicsFetched();
-
     }
+
+
+
 
 
 
@@ -111,6 +99,8 @@ public class TopicsFragment extends Fragment implements RecyclerAdapterTopics.Fo
             }
         });
     }
+
+
 
     private void initView() {
         topicsViewModel = new ViewModelProvider(requireActivity()).get(TopicsViewModel.class);

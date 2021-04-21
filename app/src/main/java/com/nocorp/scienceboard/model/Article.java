@@ -23,7 +23,7 @@ public class Article extends ListItem implements Comparable<Article>, Serializab
     @ColumnInfo(name = "webpage_url")
     private String webpageUrl;
     @ColumnInfo(name = "pub_date")
-    private long pubDate;
+    private Long pubDate;
     @ColumnInfo(name = "source_id")
     private String sourceId;
     @ColumnInfo(name = "source_website_url")
@@ -78,7 +78,7 @@ public class Article extends ListItem implements Comparable<Article>, Serializab
 //        this.syndEntry = syndEntry;
 //    }
 
-    public long getPubDate() {
+    public Long getPubDate() {
         return pubDate;
     }
 
@@ -89,6 +89,8 @@ public class Article extends ListItem implements Comparable<Article>, Serializab
     @Override
     public int compareTo(Article another) {
         if(another==null) return 0;
+        if(another.pubDate==null) return 0;
+        if(this.pubDate==null) return 0;
 
         if(this.pubDate > another.pubDate)
             return -1;

@@ -3,6 +3,7 @@ package com.nocorp.scienceboard.topics.model;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 @Entity
@@ -21,6 +22,7 @@ public class Topic {
     public Topic() {
     }
 
+    @Ignore
     public Topic(@NonNull String id, String displayName) {
         this.id = id;
         this.displayName = displayName;

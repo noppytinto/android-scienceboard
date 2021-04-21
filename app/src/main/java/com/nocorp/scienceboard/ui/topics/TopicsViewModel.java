@@ -20,6 +20,9 @@ public class TopicsViewModel extends AndroidViewModel {
     private MutableLiveData<List<Topic>> topicsList;
     private TopicRepository topicRepository;
 
+    private MutableLiveData<Boolean> customizationStatus;
+
+
     //
     private static boolean taskIsRunning;
     private static List<Topic> cachedTopics;
@@ -31,6 +34,7 @@ public class TopicsViewModel extends AndroidViewModel {
     public TopicsViewModel(Application application) {
         super(application);
         topicsList = new MutableLiveData<>();
+        customizationStatus = new MutableLiveData<>();
         topicRepository = new TopicRepository();
     }
 
@@ -45,6 +49,16 @@ public class TopicsViewModel extends AndroidViewModel {
     public void setTopicsList(List<Topic> topicsList) {
         this.topicsList.postValue(topicsList);
     }
+
+
+    public LiveData<Boolean> getObservableCustomizationStatus() {
+        return customizationStatus;
+    }
+
+    public void setCustomizationStatus(Boolean customizationStatus) {
+        this.customizationStatus.postValue(customizationStatus);
+    }
+
 
 
 
@@ -73,12 +87,13 @@ public class TopicsViewModel extends AndroidViewModel {
             topicRepository.updateAll(topicsToUpdate, getApplication(), new OnTopicRepositoryUpdatedListener() {
                 @Override
                 public void onComplete(List<Topic> newTopicsList) {
-                    // ignore
+                    setCustomizationStatus(true);
                 }
 
                 @Override
                 public void onFailed(String cause) {
-                    // ignore
+                    setCustomizationStatus(false);
+
                 }
             });
         }

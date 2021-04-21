@@ -28,6 +28,7 @@ import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
+import com.nocorp.scienceboard.ui.topics.TopicsViewModel;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
@@ -50,6 +51,7 @@ public class AllTabFragment extends Fragment implements
     // viewmodels
     private AllTabViewModel allTabViewModel;
     private SourceViewModel sourceViewModel;
+    private TopicsViewModel topicsViewModel;
 
     //
     private AdProvider adProvider;
@@ -60,7 +62,6 @@ public class AllTabFragment extends Fragment implements
     //
     private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 10;
     private final int AD_DISTANCE = 5; // distance between teh ads (in terms of items)
-
 
 
 
@@ -77,6 +78,14 @@ public class AllTabFragment extends Fragment implements
 
     //----------------------------------------------------------------------------------------- ANDROID METHODS
 
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate: called");
+
+    }
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
@@ -89,15 +98,14 @@ public class AllTabFragment extends Fragment implements
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initView();
-    }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
         observeSourcesFetched();
         observeArticlesFetched();
         observerNextArticlesFetched();
+        observeCustomizationStatus();
+
     }
+
 
     @Override
     public void onDestroyView() {
@@ -121,13 +129,26 @@ public class AllTabFragment extends Fragment implements
         adProvider = AdProvider.getInstance(); // is not guaranteed that
         sourceViewModel = new ViewModelProvider(requireActivity()).get(SourceViewModel.class);
         allTabViewModel = new ViewModelProvider(this).get(AllTabViewModel.class);
+        topicsViewModel = new ViewModelProvider(requireActivity()).get(TopicsViewModel.class);
 
         //
         initRecycleView();
         setupSwipeDownToRefresh();
     }
 
+    private void observeCustomizationStatus() {
+        topicsViewModel.getObservableCustomizationStatus().observe(getViewLifecycleOwner(), customizationCompleted -> {
+            if(customizationCompleted) {
+                refreshArticles();
+            }
+            else {
+                // ignore
+            }
+        });
+    }
+
     private void pickPreferredTopicsInHomeFeed() {
+
         // add container transformation animation
         FragmentNavigator.Extras animations = new FragmentNavigator
                 .Extras
@@ -260,11 +281,11 @@ public class AllTabFragment extends Fragment implements
     private void setupSwipeDownToRefresh() {
         swipeRefreshLayout.setOnRefreshListener(() -> {
             Log.i(TAG, "onRefresh called from SwipeRefreshLayout");
-            refreshAction();
+            refreshArticles();
         });
     }
 
-    private void refreshAction() {
+    private void refreshArticles() {
         allTabViewModel.fetchArticles(sourcesFetched, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, true);
     }
 

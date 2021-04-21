@@ -13,8 +13,8 @@
         <action
             android:id="@+id/action_navigation_home_to_topicsFragment"
             app:destination="@id/topicsFragment"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popExitAnim="@anim/fragment_close_exit" />
+            app:exitAnim="@anim/nav_default_enter_anim"
+            app:popExitAnim="@anim/nav_default_exit_anim" />
     </fragment>
 
     <fragment
@@ -40,11 +40,10 @@
     <action
         android:id="@+id/action_global_webviewFragment"
         app:destination="@id/webviewFragment"
-        app:enterAnim="@anim/fragment_open_enter"
-        app:exitAnim="@anim/fragment_close_exit"
-        app:popEnterAnim="@anim/fragment_open_enter"
-        app:popExitAnim="@anim/fragment_close_exit"
- />
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
 
 
 
@@ -57,5 +56,9 @@
         android:id="@+id/topicsFragment"
         android:name="com.nocorp.scienceboard.ui.topics.TopicsFragment"
         android:label="fragment_topics"
-        tools:layout="@layout/fragment_topics" />
+        tools:layout="@layout/fragment_topics" >
+        <action
+            android:id="@+id/action_topicsFragment_to_navigation_home"
+            app:destination="@id/navigation_home" />
+    </fragment>
 </navigation>

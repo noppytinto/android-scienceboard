@@ -54,6 +54,8 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
 
     //-------------------------------------------------------------------------------------------- GETTERS/SETTERS
 
+
+
     public LiveData<List<ListItem>> getObservableArticlesList() {
         return articlesList;
     }
