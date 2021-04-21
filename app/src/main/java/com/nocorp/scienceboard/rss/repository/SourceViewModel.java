@@ -10,7 +10,7 @@ import com.nocorp.scienceboard.model.Source;
 
 import java.util.List;
 
-public class SourceViewModel extends AndroidViewModel implements SourceRepositoryListener {
+public class SourceViewModel extends AndroidViewModel {
     private final String TAG = this.getClass().getSimpleName();
     private MutableLiveData<List<String>> rssUrls;
     private MutableLiveData<List<Source>> allSources;
@@ -25,7 +25,7 @@ public class SourceViewModel extends AndroidViewModel implements SourceRepositor
         rssUrls = new MutableLiveData<>();
         allSources = new MutableLiveData<>();
         techSources = new MutableLiveData<>();
-        sourceRepository = new SourceRepository(this);
+        sourceRepository = new SourceRepository();
     }
 
 
@@ -64,52 +64,25 @@ public class SourceViewModel extends AndroidViewModel implements SourceRepositor
 
     //------------------------------------------------------------ METHODS
 
-    public void onAllSourcesFetchCompleted(List<Source> sources) {
-        if(sources != null && sources.size()>0) {
-            setAllSources(sources);
-            Log.d(TAG, "SCIENCE_BOARD - onAllSourcesFetchCompleted: sources fetched from remote db");
-        }
-        else {
-            setAllSources(null);
-            Log.d(TAG, "SCIENCE_BOARD - onAllSourcesFetchCompleted: sources list is empty");
-        }
-    }
-
-    @Override
-    public void onAllSourcesFetchFailed(String cause) {
-        setAllSources(null);
-        Log.d(TAG, "SCIENCE_BOARD - onAllSourcesFetchFailed: sources fetching failed" + cause);
-    }
-
-
-
-
     public void loadSourcesFromRemoteDb() {
-        sourceRepository.loadSources(getApplication());
+        sourceRepository.loadSources(getApplication(), new OnSourcesFetchedListener() {
+            @Override
+            public void onComplete(List<Source> fetchedSources) {
+                setAllSources(fetchedSources);
+                Log.d(TAG, "SCIENCE_BOARD - loadSourcesFromRemoteDb: sources fetched from remote db");
+            }
+
+            @Override
+            public void onFailded(String message) {
+                setAllSources(null);
+                Log.d(TAG, "SCIENCE_BOARD - loadSourcesFromRemoteDb: sources list is empty");
+            }
+        });
     }
 
 
 
 
-
-
-    @Override
-    public void onTechSourcesFetchCompleted(List<Source> sources) {
-        if(sources != null && sources.size()>0) {
-            setAllSources(sources);
-            Log.d(TAG, "SCIENCE_BOARD - onTechSourcesFetchCompleted: sources fetched from remote db");
-        }
-        else {
-            setAllSources(null);
-            Log.d(TAG, "SCIENCE_BOARD - onTechSourcesFetchCompleted: sources list is empty");
-        }
-    }
-
-    @Override
-    public void onTechSourcesFetchFailed(String cause) {
-        setAllSources(null);
-        Log.d(TAG, "SCIENCE_BOARD - onTechSourcesFetchFailed: sources fetching failed" + cause);
-    }
 
 
 }// end SourceViewModel

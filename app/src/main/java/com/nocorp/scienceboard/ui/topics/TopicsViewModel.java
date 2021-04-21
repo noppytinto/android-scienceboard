@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.nocorp.scienceboard.topics.model.Topic;
+import com.nocorp.scienceboard.topics.repository.OnTopicRepositoryUpdatedListener;
 import com.nocorp.scienceboard.topics.repository.OnTopicsFetchedListener;
 import com.nocorp.scienceboard.topics.repository.TopicRepository;
 import com.nocorp.scienceboard.topics.repository.TopicRepositoryListener;
@@ -59,6 +60,7 @@ public class TopicsViewModel extends AndroidViewModel {
 
             @Override
             public void onFailed(String message, List<Topic> cachedTopics) {
+                // fallback in cached topics if room in unavalaible
                 setTopicsList(cachedTopics);
                 Log.e(TAG, "SCIENCE_BOARD - fetchTopics: cannot fetch topics, cause:" + message);
 
@@ -66,5 +68,20 @@ public class TopicsViewModel extends AndroidViewModel {
         });
     }
 
+    public void updateTopicsFollowStatus(List<Topic> topicsToUpdate) {
+        if(topicsToUpdate!=null && !topicsToUpdate.isEmpty()) {
+            topicRepository.updateAll(topicsToUpdate, getApplication(), new OnTopicRepositoryUpdatedListener() {
+                @Override
+                public void onComplete(List<Topic> newTopicsList) {
+                    // ignore
+                }
+
+                @Override
+                public void onFailed(String cause) {
+                    // ignore
+                }
+            });
+        }
+    }
 
 }// end TopicsViewModel

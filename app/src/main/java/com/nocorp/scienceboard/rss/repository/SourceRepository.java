@@ -55,16 +55,79 @@ public class SourceRepository {
 
     //--------------------------------------------------------------------------- PUBLIC METHODS
 
-    public void loadSources(Context context) {
+    public void loadSources(Context context, OnSourcesFetchedListener listener) {
         if( ! taskIsRunning) {
             taskIsRunning = true;
             if(cachedSources==null) {
-                loadSourcesFromRemoteDb(context);
+                loadSourcesFromRemoteDb(context, listener);
             }
             else {
                 taskIsRunning = false;
-                listener.onAllSourcesFetchCompleted(cachedSources);
+                listener.onComplete(cachedSources);
             }
+        }
+    }
+
+    private void loadSourcesFromRemoteDb(Context context, OnSourcesFetchedListener listener) {
+        cachedSources = new ArrayList<>();
+        db.collection(SOURCES_COLLECTION_NAME)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            Boolean sourceEnabled = (Boolean) document.get(ENABLED);
+
+                            // testing code
+//                            String name = (String) document.get(NAME);
+//                            String testname = "lifehacker";
+//                            if(enabled!=null && enabled && name.equals(testname)) {
+//                                Source source = buildBasicSourceObject(document);
+//                                if(source!=null)  {
+//                                    cachedSources.add(source);
+//                                }
+//                            }
+
+                            if(sourceEnabled!=null && sourceEnabled) {
+                                Source source = buildSource(document);
+                                if(source!=null)  {
+                                    cachedSources.add(source);
+                                }
+                            }
+                        }
+
+                        //
+                        saveSourcesInRoom(cachedSources, context);
+
+                        //
+                        Collections.shuffle(cachedSources); // randomize collection
+                        taskIsRunning = false;
+                        listener.onComplete(cachedSources);
+                    } else {
+                        if(task.getException()!=null) {
+                            Log.w(TAG, "SCIENCE_BOARD - Error getting sources.", task.getException());
+                            listener.onFailded("Error getting sources." + task.getException().getMessage());
+                        }
+                    }
+                });
+    }
+
+    private void saveSourcesInRoom(@NotNull List<Source> sources, Context context) {
+        Runnable task = () -> {
+            try {
+                SourceDao sourceDao = getSourceDao(context);
+                sourceDao.insertAll(sources);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.e(TAG, "SCIENCE_BOARD - saveSourcesInRoom: cannot save sources in Room, cause:" + e.getMessage());
+            }
+        };
+
+        ThreadManager t = ThreadManager.getInstance();
+        try {
+            t.runTask(task);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e(TAG, "SCIENCE_BOARD - saveSourcesInRoom: cannot start thread " + e.getMessage());
         }
     }
 
@@ -115,53 +178,7 @@ public class SourceRepository {
 
     //--------------------------------------------------------------------------- PRIVATE METHODS
 
-    private void loadSourcesFromRemoteDb(Context context) {
-        cachedSources = new ArrayList<>();
-        db.collection(SOURCES_COLLECTION_NAME)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-//                            Log.d(TAG, document.getId() + " => " + document.get(NAME));
-//                            Log.d(TAG, document.getId() + " => " + document.get(WEBSITE_URL));
-//                            Log.d(TAG, document.getId() + " => " + document.get(LANGUAGE));
-//                            Log.d(TAG, document.getId() + " => " + document.get(RSS_URL));
-//                            Log.d(TAG, document.getId() + " => " + document.get(CATEGORY));
-//                            Log.d(TAG, document.getId() + " => " + document.get(ENABLED));
 
-                            Boolean sourceEnabled = (Boolean) document.get(ENABLED);
-
-                            // testing code
-//                            String name = (String) document.get(NAME);
-//                            String testname = "lifehacker";
-//                            if(enabled!=null && enabled && name.equals(testname)) {
-//                                Source source = buildBasicSourceObject(document);
-//                                if(source!=null)  {
-//                                    cachedSources.add(source);
-//                                }
-//                            }
-
-                            if(sourceEnabled!=null && sourceEnabled) {
-                                Source source = buildSource(document);
-                                if(source!=null)  {
-                                    cachedSources.add(source);
-                                }
-                            }
-                        }
-
-                        //
-                        saveSourcesInRoom(cachedSources, context);
-
-                        //
-                        Collections.shuffle(cachedSources); // randomize collection
-                        taskIsRunning = false;
-                        listener.onAllSourcesFetchCompleted(cachedSources);
-                    } else {
-                        Log.w(TAG, "SCIENCE_BOARD - Error getting sources.", task.getException());
-                        listener.onAllSourcesFetchFailed("Error getting sources." + task.getException().getMessage());
-                    }
-                });
-    }
 
     private Source buildSource(QueryDocumentSnapshot document) {
         Source source = null;
@@ -205,26 +222,7 @@ public class SourceRepository {
         return result;
     }
 
-    private void saveSourcesInRoom(@NotNull List<Source> sources, Context context) {
-        SourceDao sourceDao = getSourceDao(context);
 
-        Runnable task = () -> {
-            try {
-                sourceDao.insertAll(sources);
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.e(TAG, "SCIENCE_BOARD - saveSourcesInRoom: cannot save sources in Room, cause:" + e.getMessage());
-            }
-        };
-
-        ThreadManager t = ThreadManager.getInstance();
-        try {
-            t.runTask(task);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.e(TAG, "SCIENCE_BOARD - saveSourcesInRoom: cannot start thread " + e.getMessage());
-        }
-    }
 
     private SourceDao getSourceDao(Context context) {
         ScienceBoardRoomDatabase roomDatabase = ScienceBoardRoomDatabase.getInstance(context);

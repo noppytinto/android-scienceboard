@@ -42,7 +42,6 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
 
 
     //-------------------------------------------------------------------------------------------- CONSTRUCTORS
-m
     public AllTabViewModel(Application application) {
         super(application);
         articlesList = new MutableLiveData<>();

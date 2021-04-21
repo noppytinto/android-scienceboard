@@ -138,33 +138,33 @@ public class TopicRepository {
         return cachedTopics;
     }
 
-//    public void updateAll(List<Topic> topicsToUpdate, Context context, OnTopicRepositoryUpdatedListener listener) {
-//        TopicDao dao = getTopicDao(context);
-//
-//        Runnable task = () -> {
-//            try {
-//                dao.updateAll(topicsToUpdate);
-//
-//                // update cached topics
-//                cachedTopics = dao.selectAll();
-//
-//                //
-//                listener.onTopicsUpdateCompleted(cachedTopics);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                Log.e(TAG, "SCIENCE_BOARD - follow: cannot update topics in Room, cause:" + e.getMessage());
-//                listener.onTopicsUpdateFailed(e.getMessage());
-//            }
-//        };
-//
-//        ThreadManager t = ThreadManager.getInstance();
-//        try {
-//            t.runTask(task);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            Log.e(TAG, "SCIENCE_BOARD - follow: cannot start thread " + e.getMessage());
-//            listener.onTopicsUpdateFailed(e.getMessage());
-//        }
-//    }
+    public void updateAll(List<Topic> topicsToUpdate, Context context, OnTopicRepositoryUpdatedListener listener) {
+        TopicDao dao = getTopicDao(context);
+
+        Runnable task = () -> {
+            try {
+                dao.updateAll(topicsToUpdate);
+
+                // update cached topics
+                cachedTopics = dao.selectAll();
+
+                //
+                listener.onComplete(cachedTopics);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.e(TAG, "SCIENCE_BOARD - follow: cannot update topics in Room, cause:" + e.getMessage());
+                listener.onFailed(e.getMessage());
+            }
+        };
+
+        ThreadManager t = ThreadManager.getInstance();
+        try {
+            t.runTask(task);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e(TAG, "SCIENCE_BOARD - follow: cannot start thread " + e.getMessage());
+            listener.onFailed(e.getMessage());
+        }
+    }
 
 }// end TopicRepository

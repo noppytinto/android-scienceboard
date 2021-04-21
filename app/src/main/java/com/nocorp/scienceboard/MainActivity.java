@@ -179,8 +179,6 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
                 Log.e(TAG, "SCIENCE_BOARD - loadTopics: " + message);
             }
         });
-
-
     }
 
     private void fetchTopics() {
@@ -190,11 +188,7 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
 
     private void observeFetchedTopics() {
         topicsViewModel.getObservableTopicsList().observe(this, topics -> {
-            if(topics == null) {
-                //TODO: error message
-                Log.e(TAG, "SCIENCE_BOARD - loadTopics: an error occurrend when fetching topics");
-            }
-            else if(topics.isEmpty()) {
+            if(topics == null || topics.isEmpty()) {
                 //TODO: warning message, no topics in memory
                 Log.w(TAG, "SCIENCE_BOARD - loadTopics: no topics in Room");
             }
@@ -206,15 +200,10 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
 
     private void loadSources() {
         sourceViewModel.getObservableAllSources().observe(this, sources -> {
-            if(sources == null) {
-                //TODO: error message
-                Log.e(TAG, "SCIENCE_BOARD - loadSources: an error occurrend when fetching sources");
-                showCenteredToast("an error occurred when fetching sources from remote DB");
-            }
-            else if(sources.isEmpty()) {
+            if(sources == null || sources.isEmpty()) {
                 //TODO: warning message, no sources in remote DB
                 Log.w(TAG, "SCIENCE_BOARD - loadSources: no sources in remote DB");
-
+                showCenteredToast("an error occurred when fetching sources from remote DB");
             }
             else {
                 showCenteredToast("sources fetched from remote DB");
