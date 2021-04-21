@@ -12,9 +12,10 @@ import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.BookmarkArticle;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.model.HistoryArticle;
-import com.nocorp.scienceboard.model.Topic;
-import com.nocorp.scienceboard.model.TopicWithSources;
-import com.nocorp.scienceboard.model.TopicWithSubtopics;
+import com.nocorp.scienceboard.topics.model.Topic;
+import com.nocorp.scienceboard.topics.room.TopicDao;
+import com.nocorp.scienceboard.topics.room.TopicWithSourcesDao;
+import com.nocorp.scienceboard.topics.room.TopicWithSubtopicsDao;
 
 @Database(
         entities = {

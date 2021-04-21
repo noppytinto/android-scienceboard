@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.rss.room;
+package com.nocorp.scienceboard.topics.room;
 
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -6,8 +6,7 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
-import com.nocorp.scienceboard.model.Article;
-import com.nocorp.scienceboard.model.Topic;
+import com.nocorp.scienceboard.topics.model.Topic;
 
 import java.util.List;
 
@@ -16,7 +15,7 @@ public interface TopicDao {
     @Query("SELECT * FROM topic")
     List<Topic> selectAll();
 
-    @Query("SELECT * FROM topic WHERE name = :givenValue")
+    @Query("SELECT * FROM topic WHERE id = :givenValue")
     List<Topic> selectById(String givenValue);
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
@@ -33,6 +32,6 @@ public interface TopicDao {
 
     @Query("UPDATE Topic " +
             "SET followed = :value " +
-            "WHERE name = :topicName")
+            "WHERE id = :topicName")
     int updateFollowStatus(boolean value, String topicName);
 }

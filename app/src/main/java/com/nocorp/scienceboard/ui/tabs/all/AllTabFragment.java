@@ -38,32 +38,36 @@ public class AllTabFragment extends Fragment implements
         RecyclerAdapterArticlesList.OnArticleClickedListener {
 
     private final String TAG = this.getClass().getSimpleName();
+    private FragmentAllTabBinding viewBinding;
+    private View view;
     private RecyclerAdapterArticlesList recyclerAdapterArticlesList;
     private RecyclerView recyclerView;
     private CircularProgressIndicator progressIndicator;
-    private AllTabViewModel allTabViewModel;
-    private View view;
-    private AdProvider adProvider;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private FragmentAllTabBinding viewBinding;
     private Toast toast;
+    private FloatingActionButton topicsButton;
+
+    // viewmodels
+    private AllTabViewModel allTabViewModel;
     private SourceViewModel sourceViewModel;
+
+    //
+    private AdProvider adProvider;
     private List<Source> sourcesFetched;
-    private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 10;
-    private final int AD_DISTANCE = 5; // distance between teh ads (in terms of items)
     private List<ListItem> articlesToDisplay;
     private boolean isLoading = false;
 
-
     //
-    private FloatingActionButton topicsButton;
+    private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 10;
+    private final int AD_DISTANCE = 5; // distance between teh ads (in terms of items)
 
 
 
-    //--------------------------------------------------------------------- CONSTRUCTORS
+
+
+    //----------------------------------------------------------------------------------------- CONSTRUCTORS
 
     public static AllTabFragment newInstance() {
-        Log.d(AllTabFragment.class.getSimpleName(), "SCIENCE_BOARD - newInstance: called");
         return new AllTabFragment();
     }
 
@@ -71,14 +75,13 @@ public class AllTabFragment extends Fragment implements
 
 
 
-    //--------------------------------------------------------------------- ANDROID METHODS
+    //----------------------------------------------------------------------------------------- ANDROID METHODS
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         viewBinding = FragmentAllTabBinding.inflate(getLayoutInflater());
         view = viewBinding.getRoot();
-        Log.d(TAG, "SCIENCE_BOARD - onCreateView: called");
         return view;
     }
 
@@ -88,7 +91,6 @@ public class AllTabFragment extends Fragment implements
         initView();
     }
 
-
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -96,8 +98,6 @@ public class AllTabFragment extends Fragment implements
         observeArticlesFetched();
         observerNextArticlesFetched();
     }
-
-
 
     @Override
     public void onDestroyView() {
@@ -115,25 +115,28 @@ public class AllTabFragment extends Fragment implements
         progressIndicator = viewBinding.progressIndicatorAllArticlesTabFragment;
         swipeRefreshLayout = viewBinding.swipeRefreshAllArticlesTabFragment;
         swipeRefreshLayout.setColorSchemeResources(R.color.orange_light);
+        topicsButton = viewBinding.floatingActionButtonAllArticlesTabFragmentEdit;
+        topicsButton.setOnClickListener(v -> pickPreferredTopicsInHomeFeed());
+        //
         adProvider = AdProvider.getInstance(); // is not guaranteed that
         sourceViewModel = new ViewModelProvider(requireActivity()).get(SourceViewModel.class);
         allTabViewModel = new ViewModelProvider(this).get(AllTabViewModel.class);
 
         //
-        topicsButton = viewBinding.floatingActionButtonAllArticlesTabFragmentEdit;
-        topicsButton.setOnClickListener(v -> {
-            FragmentNavigator.Extras extras = new FragmentNavigator
+        initRecycleView();
+        setupSwipeDownToRefresh();
+    }
+
+    private void pickPreferredTopicsInHomeFeed() {
+        // add container transformation animation
+        FragmentNavigator.Extras animations = new FragmentNavigator
                 .Extras
                 .Builder()
                 .addSharedElement(topicsButton, topicsButton.getTransitionName())
                 .build();
 
-            Navigation.findNavController(view).navigate(R.id.action_navigation_home_to_topicsFragment,null,null, extras);
-
-        });
-
-        initRecycleView();
-        setupSwipeDownToRefresh();
+        Navigation.findNavController(view)
+                .navigate(R.id.action_navigation_home_to_topicsFragment,null,null, animations);
     }
 
     private void initRecycleView() {
@@ -150,11 +153,6 @@ public class AllTabFragment extends Fragment implements
     private void initScrollListener() {
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-            }
-
-            @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
@@ -162,25 +160,25 @@ public class AllTabFragment extends Fragment implements
                         (LinearLayoutManager) recyclerView.getLayoutManager();
 
                 if (!isLoading) {
-                    if (linearLayoutManager != null &&
-                        (articlesToDisplay != null && !articlesToDisplay.isEmpty()) &&
-                        linearLayoutManager.findLastCompletelyVisibleItemPosition() == articlesToDisplay.size() - 1) {
-
+                    if (reachedTheBottomOfList(linearLayoutManager)) {
                         // NOTE:
-                        // this resolve the "cannot call this method in a scroll callback" problem
+                        // this resolve the "cannot call this method in a scroll callback" exception
                         // it happens when we are adding elements while scrolling
-                        recyclerView.post(new Runnable() {
-                            public void run() {
-                                //bottom of list!
-                                Log.d(TAG, "SCIENCE_BOARD - initScrollListener: reached the end of the recycler");
-                                loadMoreArticles();
-                            }
+                        recyclerView.post(() -> {
+                            Log.d(TAG, "SCIENCE_BOARD - initScrollListener: reached the end of the recycler");
+                            loadMoreArticles();
                         });
 
                     }
                 }
             }
         });
+    }
+
+    private boolean reachedTheBottomOfList(LinearLayoutManager linearLayoutManager) {
+        return linearLayoutManager != null &&
+            (articlesToDisplay != null && !articlesToDisplay.isEmpty()) &&
+            linearLayoutManager.findLastCompletelyVisibleItemPosition() == articlesToDisplay.size() - 1;
     }
 
     private void loadMoreArticles() {
@@ -193,31 +191,23 @@ public class AllTabFragment extends Fragment implements
         allTabViewModel.fetchNextArticles(NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE);
     }
 
-    private void observerNextArticlesFetched() {
-        allTabViewModel.getObservableNextArticlesList().observe(getViewLifecycleOwner(), fetchedArticles -> {
-            isLoading = false;
-            recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
 
-            if(fetchedArticles!=null && !fetchedArticles.isEmpty()) {
-                fetchedArticles = adProvider.populateListWithAds(fetchedArticles, AD_DISTANCE);
-                articlesToDisplay = new ArrayList<>(fetchedArticles);
-                recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
-            }
-            else {
-                // todo
-            }
-        });
-    }
 
     private void observeSourcesFetched() {
         sourceViewModel.getObservableAllSources().observe(getViewLifecycleOwner(), sources -> {
-            if(sources!=null && !sources.isEmpty()) {
-                // TODO
-                this.sourcesFetched = new ArrayList<>(sources);
-                allTabViewModel.fetchArticles(sources, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, false);
+            if(sources == null) {
+                //TODO: error message
+                Log.e(TAG, "SCIENCE_BOARD - loadSources: an error occurrend when fetching sources");
+                showCenteredToast("an error occurred when fetching sources from remote DB");
+            }
+            else if(sources.isEmpty()) {
+                //TODO: warning message, no topics in memory
+                Log.w(TAG, "SCIENCE_BOARD - loadSources: no sources in remote DB");
             }
             else {
                 // TODO
+                this.sourcesFetched = new ArrayList<>(sources);
+                allTabViewModel.fetchArticles(sources, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, false);
             }
         });
     }
@@ -247,6 +237,22 @@ public class AllTabFragment extends Fragment implements
                 recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
                 showCenteredToast("articles fetched");
                 isLoading = false;
+            }
+        });
+    }
+
+    private void observerNextArticlesFetched() {
+        allTabViewModel.getObservableNextArticlesList().observe(getViewLifecycleOwner(), fetchedArticles -> {
+            isLoading = false;
+            recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
+
+            if(fetchedArticles!=null && !fetchedArticles.isEmpty()) {
+                fetchedArticles = adProvider.populateListWithAds(fetchedArticles, AD_DISTANCE);
+                articlesToDisplay = new ArrayList<>(fetchedArticles);
+                recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
+            }
+            else {
+                // todo
             }
         });
     }

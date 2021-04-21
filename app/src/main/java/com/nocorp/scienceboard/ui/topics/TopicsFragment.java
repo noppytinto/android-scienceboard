@@ -21,7 +21,7 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.google.android.material.transition.MaterialContainerTransform;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentTopicsBinding;
-import com.nocorp.scienceboard.model.Topic;
+import com.nocorp.scienceboard.topics.model.Topic;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterTopics;
 
 import java.util.ArrayList;

@@ -1,31 +1,38 @@
-package com.nocorp.scienceboard.model;
+package com.nocorp.scienceboard.topics.model;
 
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
-import androidx.room.Embedded;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
-import androidx.room.Relation;
-
-import java.util.List;
 
 @Entity
 public class Topic {
     @PrimaryKey
     @NonNull
-    private String name;
+    private String id;
 
     @ColumnInfo(defaultValue = "true")
     private boolean followed;
 
+    @ColumnInfo(name = "display_name")
+    private String displayName;
 
 
-    public String getName() {
-        return name;
+    public Topic() {
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public Topic(@NonNull String id, String displayName) {
+        this.id = id;
+        this.displayName = displayName;
+        followed = true;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
 //    public List<Topic> getSubtopics() {
@@ -51,4 +58,14 @@ public class Topic {
 //    public void setSources(List<Source> sources) {
 //        this.sources = sources;
 //    }
-}
+
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+}// end Topic

@@ -10,14 +10,10 @@ import android.widget.Toast;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.nocorp.scienceboard.databinding.ActivityMainBinding;
-import com.nocorp.scienceboard.model.Source;
-import com.nocorp.scienceboard.model.Topic;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
-import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
-import com.nocorp.scienceboard.rss.room.SourceDao;
-import com.nocorp.scienceboard.rss.room.TopicDao;
 import com.nocorp.scienceboard.system.ConnectionManager;
-import com.nocorp.scienceboard.system.ThreadManager;
+import com.nocorp.scienceboard.topics.repository.OnTopicRepositoryInitilizedListener;
+import com.nocorp.scienceboard.topics.repository.TopicRepository;
 import com.nocorp.scienceboard.ui.topics.TopicsViewModel;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
@@ -33,15 +29,9 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
-import java.util.List;
-
 
 public class MainActivity extends AppCompatActivity implements NavController.OnDestinationChangedListener {
     private final String TAG = this.getClass().getSimpleName();
-    private AdProvider adProvider;
     private NavController navController;
     private BottomNavigationView bottomNavBar;
     private ActivityMainBinding binding;
@@ -49,12 +39,16 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
     private Snackbar snackbar;
     private Toolbar toolbar;
     private ActionBar appBar;
-    private SourceViewModel sourceViewModel;
     private Toast toast;
 
-
+    //
+    private AdProvider adProvider;
+    private SourceViewModel sourceViewModel;
     private TopicsViewModel topicsViewModel;
+    private TopicRepository topicRepository;
 
+    //
+    private final int NUM_ADS_TO_LOAD = 5;
 
 
 
@@ -64,20 +58,10 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initView();
-        initAdProvider();
+        initAdProvider(this, NUM_ADS_TO_LOAD);
 
-        observeTopicsFetched();
-        topicsViewModel.fetchTopics();
+        loadTopics();
     }
-
-    private void observeTopicsFetched() {
-        topicsViewModel.getObservableTopicsList().observe(this, topics -> {
-            if(topics!=null && !topics.isEmpty()) {
-                fetchSourcesFromRemoteDb();
-            }
-        });
-    }
-
 
 
 
@@ -87,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
         super.onResume();
         boolean internetAvailable = ConnectionManager.getInternetStatus(this);
         if(internetAvailable) {
-
+            // todo
         }
         else {
             showErrorSnackbar(getString(R.string.string_no_internet_connection));
@@ -138,34 +122,21 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
 
     //------------------------------------------------------------------------------ MY METHODS
 
-    private void fetchSourcesFromRemoteDb() {
-        sourceViewModel = new ViewModelProvider(this).get(SourceViewModel.class);
-        sourceViewModel.getObservableAllSources().observe(this, sources -> {
-            if(sources!=null && !sources.isEmpty()) {
-                showCenteredToast("sources fetched from remote DB");
-            }
-            else {
-                showCenteredToast("an error occurred when fetching sources from remote DB");
-            }
-        });
-        sourceViewModel.loadSourcesFromRemoteDb();
-    }
 
     private void initView() {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         view = binding.getRoot();
         setContentView(view);
+
+        // toolbar
         toolbar = binding.toolbarMainActivity;
         setSupportActionBar(toolbar);
-        // Get a support ActionBar corresponding to this toolbar
         appBar = getSupportActionBar();
         // Enable the Up button
         if(appBar!=null) appBar.setDisplayHomeAsUpEnabled(true);
 
-        topicsViewModel = new ViewModelProvider(this).get(TopicsViewModel.class);
 
-
-
+        // bottom navigation
         bottomNavBar = binding.includeMainActivity.navView;
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -177,13 +148,86 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
         NavigationUI.setupWithNavController(bottomNavBar, navController);
         navController.addOnDestinationChangedListener(this);
 
+
+
+        // viewmodels
+        topicRepository = new TopicRepository();
+        topicsViewModel = new ViewModelProvider(this).get(TopicsViewModel.class);
+        sourceViewModel = new ViewModelProvider(this).get(SourceViewModel.class);
+
+    }// end initView()
+
+    private void initAdProvider(Context context, int numAdsToLoad) {
+        AdProvider adProvider = AdProvider.getInstance();
+        adProvider.initAdMob(context);
+        adProvider.loadSomeAds(numAdsToLoad, context);
     }
 
-    private void initAdProvider() {
-        AdProvider adProvider = AdProvider.getInstance();
-        adProvider.initAdMob(this);
-        adProvider.loadSomeAds(5, this);
+    private void loadTopics() {
+        //
+        topicRepository.init(this, new OnTopicRepositoryInitilizedListener() {
+            @Override
+            public void onComplete() {
+                //
+                fetchTopics();
+            }
+
+            @Override
+            public void onFailded(String message) {
+                // use cached topics
+                fetchTopics();
+                Log.e(TAG, "SCIENCE_BOARD - loadTopics: " + message);
+            }
+        });
+
+
     }
+
+    private void fetchTopics() {
+        observeFetchedTopics();
+        topicsViewModel.fetchTopics();
+    }
+
+    private void observeFetchedTopics() {
+        topicsViewModel.getObservableTopicsList().observe(this, topics -> {
+            if(topics == null) {
+                //TODO: error message
+                Log.e(TAG, "SCIENCE_BOARD - loadTopics: an error occurrend when fetching topics");
+            }
+            else if(topics.isEmpty()) {
+                //TODO: warning message, no topics in memory
+                Log.w(TAG, "SCIENCE_BOARD - loadTopics: no topics in Room");
+            }
+            else {
+                loadSources();
+            }
+        });
+    }
+
+    private void loadSources() {
+        sourceViewModel.getObservableAllSources().observe(this, sources -> {
+            if(sources == null) {
+                //TODO: error message
+                Log.e(TAG, "SCIENCE_BOARD - loadSources: an error occurrend when fetching sources");
+                showCenteredToast("an error occurred when fetching sources from remote DB");
+            }
+            else if(sources.isEmpty()) {
+                //TODO: warning message, no sources in remote DB
+                Log.w(TAG, "SCIENCE_BOARD - loadSources: no sources in remote DB");
+
+            }
+            else {
+                showCenteredToast("sources fetched from remote DB");
+            }
+        });
+
+        //
+        sourceViewModel.loadSourcesFromRemoteDb();
+    }
+
+
+
+
 
     private void hideBottomBar() {
         if(bottomNavBar!=null)
@@ -238,7 +282,6 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
             showErrorSnackbar(getString(R.string.string_no_internet_connection));
         }
     }
-
 
     private void showGreenSnackbar(String message) {
         try {

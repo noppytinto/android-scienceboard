@@ -7,14 +7,14 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.nocorp.scienceboard.model.Topic;
-import com.nocorp.scienceboard.rss.repository.TopicRepository;
-import com.nocorp.scienceboard.rss.repository.TopicRepositoryListener;
-import com.nocorp.scienceboard.ui.viewholder.ListItem;
+import com.nocorp.scienceboard.topics.model.Topic;
+import com.nocorp.scienceboard.topics.repository.OnTopicsFetchedListener;
+import com.nocorp.scienceboard.topics.repository.TopicRepository;
+import com.nocorp.scienceboard.topics.repository.TopicRepositoryListener;
 
 import java.util.List;
 
-public class TopicsViewModel extends AndroidViewModel implements TopicRepositoryListener {
+public class TopicsViewModel extends AndroidViewModel {
     private final String TAG = this.getClass().getSimpleName();
     private MutableLiveData<List<Topic>> topicsList;
     private TopicRepository topicRepository;
@@ -30,7 +30,7 @@ public class TopicsViewModel extends AndroidViewModel implements TopicRepository
     public TopicsViewModel(Application application) {
         super(application);
         topicsList = new MutableLiveData<>();
-        topicRepository = new TopicRepository(this);
+        topicRepository = new TopicRepository();
     }
 
 
@@ -51,32 +51,20 @@ public class TopicsViewModel extends AndroidViewModel implements TopicRepository
     //-------------------------------------------------------------------------------------------- METHODS
 
     public void fetchTopics() {
-        topicRepository.fetchTopics(getApplication());
+        topicRepository.fetchTopics(getApplication(), new OnTopicsFetchedListener() {
+            @Override
+            public void onComplete(List<Topic> fetchedTopics) {
+                setTopicsList(fetchedTopics);
+            }
+
+            @Override
+            public void onFailed(String message, List<Topic> cachedTopics) {
+                setTopicsList(cachedTopics);
+                Log.e(TAG, "SCIENCE_BOARD - fetchTopics: cannot fetch topics, cause:" + message);
+
+            }
+        });
     }
 
-    @Override
-    public void onTopicsFetchCompleted(List<Topic> topics) {
-        setTopicsList(topics);
-    }
 
-    @Override
-    public void onTopicsFetchFailed(String cause) {
-        Log.e(TAG, "SCIENCE_BOARD - onTopicsFetchFailed: cannot fetch topics, cause:" + cause);
-        setTopicsList(null);
-    }
-
-
-    public void follow(String topicName) {
-        topicRepository.follow(topicName, getApplication());
-    }
-
-    public void unfollow(String topicName) {
-        topicRepository.unfollow(topicName, getApplication());
-    }
-
-    public void updateTopicsFollowStatus(List<Topic> topicsToUpdate) {
-        if(topicsToUpdate!=null && !topicsToUpdate.isEmpty()) {
-            topicRepository.updateAll(topicsToUpdate, getApplication());
-        }
-    }
 }// end TopicsViewModel

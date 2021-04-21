@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.chip.Chip;
 import com.nocorp.scienceboard.R;
-import com.nocorp.scienceboard.model.Topic;
+import com.nocorp.scienceboard.topics.model.Topic;
 
 import java.util.List;
 
@@ -45,7 +45,7 @@ public class RecyclerAdapterTopics extends
     public void onBindViewHolder(@NonNull TopicViewHolder holder, int position) {
         Topic topic = recyclerList.get(position);
 
-        holder.sourceNameLabel.setText(topic.getName());
+        holder.sourceNameLabel.setText(topic.getId());
         holder.followChip.setChecked(topic.getFollowed());
 
         // todo

@@ -6,7 +6,7 @@ import android.util.Log;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.nocorp.scienceboard.model.Source;
-import com.nocorp.scienceboard.model.Topic;
+import com.nocorp.scienceboard.topics.model.Topic;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
 import com.nocorp.scienceboard.rss.room.SourceDao;
@@ -78,7 +78,7 @@ public class SourceRepository {
         result = new ArrayList<>();
         for(int i=0; i < topics.size(); i++) {
             if(topics.get(i).getFollowed()) {
-                Source source = getTheFirstSourceFallingInThisCategory(allSources, topics.get(i).getName().toLowerCase());
+                Source source = getTheFirstSourceFallingInThisCategory(allSources, topics.get(i).getId().toLowerCase());
                 if(source!=null) {
                     result.add(source);
                     allSources.remove(source);

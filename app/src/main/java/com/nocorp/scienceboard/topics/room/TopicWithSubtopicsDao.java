@@ -1,10 +1,10 @@
-package com.nocorp.scienceboard.rss.room;
+package com.nocorp.scienceboard.topics.room;
 
 import androidx.room.Dao;
 import androidx.room.Query;
 import androidx.room.Transaction;
 
-import com.nocorp.scienceboard.model.TopicWithSubtopics;
+import com.nocorp.scienceboard.topics.model.TopicWithSubtopics;
 
 import java.util.List;
 

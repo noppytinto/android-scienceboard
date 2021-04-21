@@ -14,7 +14,7 @@ import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.rss.repository.ArticleRepository;
 import com.nocorp.scienceboard.rss.repository.ArticlesRepositoryListener;
 import com.nocorp.scienceboard.rss.repository.SourceRepository;
-import com.nocorp.scienceboard.rss.repository.TopicRepository;
+import com.nocorp.scienceboard.topics.repository.TopicRepository;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.rss.room.HistoryDao;
@@ -42,7 +42,7 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
 
 
     //-------------------------------------------------------------------------------------------- CONSTRUCTORS
-
+m
     public AllTabViewModel(Application application) {
         super(application);
         articlesList = new MutableLiveData<>();
@@ -92,7 +92,7 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
                 cachedArticles = new ArrayList<>();
                 taskIsRunning = true;
                 // pick sources for ALL tab, only once
-                pickedSources = sourceRepository.getAsourceForEachFollowedCategory_randomly(givenSources, TopicRepository.getCachedTopcis());
+                pickedSources = sourceRepository.getAsourceForEachFollowedCategory_randomly(givenSources, TopicRepository.getCachedTopics());
                 articleRepository.getArticles(pickedSources, numArticlesForEachSource, getApplication());
             };
 
