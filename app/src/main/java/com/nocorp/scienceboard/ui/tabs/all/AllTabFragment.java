@@ -101,6 +101,15 @@ public class AllTabFragment extends Fragment implements
 
     }
 
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        viewBinding = null;
+    }
+
+
+
     private void observeTimeMachineStatus() {
         timeMachineViewModel.getObservablePickedDate().observe(getViewLifecycleOwner(), pickedDate-> {
             Log.d(TAG, "observeTimeMachineStatus: called");
@@ -119,11 +128,16 @@ public class AllTabFragment extends Fragment implements
                 int month2 = cal.get(Calendar.MONTH);
                 int day2 = cal.get(Calendar.DAY_OF_MONTH);
 
+                Log.d(TAG, "observeTimeMachineStatus: " + day + "/" + month + "/" + year);
 
                 if((day==day2) && (month == month2) && (year == year2)) {
+                    timeMachineEnabled = false;
                 }
                 else {
                 }
+
+                refreshArticles();
+
             }
             else {
                 timeMachineEnabled = false;
@@ -131,16 +145,6 @@ public class AllTabFragment extends Fragment implements
         });
 
     }
-
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        viewBinding = null;
-    }
-
-
-
 
 
     //----------------------------------------------------------------------------------------- METHODS
@@ -224,6 +228,7 @@ public class AllTabFragment extends Fragment implements
         recyclerAdapterArticlesList.addLoadingView(articlesToDisplay);
 
         // load new items
+
         allTabViewModel.fetchNextArticles(NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE);
     }
 
@@ -244,7 +249,14 @@ public class AllTabFragment extends Fragment implements
             else {
                 // TODO
                 this.sourcesFetched = new ArrayList<>(sources);
-                allTabViewModel.fetchArticles(sources, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, false);
+
+                if(timeMachineEnabled) {
+                    allTabViewModel.fetchArticles_backInTime(sources, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, false, timeMachineViewModel.getObservablePickedDate().getValue());
+                }
+                else {
+                    allTabViewModel.fetchArticles(sources, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, false);
+
+                }
             }
         });
     }
@@ -304,7 +316,13 @@ public class AllTabFragment extends Fragment implements
     }
 
     private void refreshArticles() {
-        allTabViewModel.fetchArticles(sourcesFetched, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, true);
+        if(timeMachineEnabled) {
+            allTabViewModel.fetchArticles_backInTime(sourcesFetched, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, true, timeMachineViewModel.getObservablePickedDate().getValue());
+        }
+        else {
+            allTabViewModel.fetchArticles(sourcesFetched, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, true);
+
+        }
     }
 
     @Override

@@ -62,6 +62,19 @@ public class ArticleRepository {
         downloadArticlesFromServer(givenSources, numArticlesForEachSource, context);
     }
 
+    public void getArticles_backInTime(List<Source> givenSources,
+                            int numArticlesForEachSource,
+                            Context context, long startingDate) {
+        //TODO: givenSources==null should be returned only in case of errors
+        if(givenSources==null || givenSources.isEmpty()) {
+            listener.onArticlesFetchCompleted(new ArrayList<>(), new ArrayList<>());
+            return;
+        }
+
+        // server strategy
+        downloadArticlesFromServer_backInTime(givenSources, numArticlesForEachSource, context, startingDate);
+    }
+
     public void getNextArticles(List<DocumentSnapshot> oldestArticles,
                                 int numArticlesForEachSource,
                                 Context context) {
@@ -107,12 +120,88 @@ public class ArticleRepository {
         }
     }
 
+    private void downloadArticlesFromServer_backInTime(List<Source> givenSources,
+                                            int numArticlesForEachSource,
+                                            Context context, long startingDate) {
+        // download source articles
+        fetchedArticles = new ArrayList<>();
+        oldestArticlesSnapshots = new ArrayList<>();
+        sourcesToConsume = givenSources.size();
+        sourcesConsumed = 0;
+        Log.d(TAG, "SCIENCE_BOARD - sources to consume: " + sourcesToConsume);
+
+        //
+        for(Source currentSource: givenSources) {
+            downloadArticlesFromServer_companion_backInTime(currentSource.getId(), numArticlesForEachSource, context, startingDate);
+        }
+
+        //
+        if(sourcesConsumed >= sourcesToConsume) {
+            Log.d(TAG, "SCIENCE_BOARD - all articles fetched");
+            listener.onArticlesFetchCompleted(fetchedArticles, oldestArticlesSnapshots);
+        }
+    }
+
+
     // get the latest <limit> articles
     private void downloadArticlesFromServer_companion(String sourceName,
                                                       int limit,
                                                       Context context) {
         List<Article> result = new ArrayList<>();
-        db.collection(ARTICLES_COLLECTION_NAME).whereEqualTo(SOURCE_ID, (String)sourceName).orderBy(PUB_DATE, Query.Direction.DESCENDING).limit(limit)
+        db.collection(ARTICLES_COLLECTION_NAME)
+                .whereEqualTo(SOURCE_ID, (String)sourceName)
+                .orderBy(PUB_DATE, Query.Direction.DESCENDING)
+                .limit(limit)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+
+                        List<DocumentSnapshot> documentSnapshots = task.getResult().getDocuments();
+
+                        if(documentSnapshots!=null && !documentSnapshots.isEmpty()) {
+                            int i=0;
+                            for ( /*ignore*/ ; i<documentSnapshots.size(); i++) {
+                                DocumentSnapshot document = documentSnapshots.get(i);
+                                Article article = buildArticle(document);
+                                if(article!=null)  {
+                                    result.add(article);
+                                }
+                            }
+                            // getting oldest document
+                            extractOldestArticles(documentSnapshots, i);
+                        }
+
+                        //
+                        onArticlesFetchCompleted(result, context);
+
+                    } else {
+                        Log.e(TAG, "SCIENCE_BOARD - Error getting articles.", task.getException());
+//                        listener.onArticlesFetchFailed("Error getting articles." + task.getException().getMessage());
+                        sourcesConsumed++;
+                    }
+                });
+        Log.d(TAG, "SCIENCE_BOARD - blocking on this thread until articles are fetched");
+
+        synchronized (fetchedArticles) {
+            try {
+                fetchedArticles.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        Log.d(TAG, "SCIENCE_BOARD - thread resumed");
+    }
+
+    // get the latest <limit> articles
+    private void downloadArticlesFromServer_companion_backInTime(String sourceName,
+                                                      int limit,
+                                                      Context context, long startingDate) {
+        List<Article> result = new ArrayList<>();
+        db.collection(ARTICLES_COLLECTION_NAME)
+                .whereEqualTo(SOURCE_ID, (String)sourceName)
+                .whereLessThanOrEqualTo(PUB_DATE, startingDate)
+                .orderBy(PUB_DATE, Query.Direction.DESCENDING)
+                .limit(limit)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {

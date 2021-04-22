@@ -9,6 +9,7 @@ import java.time.Instant;
 public class TimeMachineViewModel extends ViewModel {
     private final String TAG = this.getClass().getSimpleName();
     private MutableLiveData<Long> pickedDate;
+    private static boolean timeMachineEnabled;
 
 
 
@@ -29,7 +30,13 @@ public class TimeMachineViewModel extends ViewModel {
         this.pickedDate.postValue(pickedDate);
     }
 
+    public static boolean isTimeMachineEnabled() {
+        return timeMachineEnabled;
+    }
 
+    public static void setTimeMachineEnabled(boolean timeMachineEnabled) {
+        TimeMachineViewModel.timeMachineEnabled = timeMachineEnabled;
+    }
 
     //-------------------------------------------------------------------------------------------- METHODS
 
