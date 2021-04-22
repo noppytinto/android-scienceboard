@@ -83,7 +83,12 @@ public class TopicsViewModel extends AndroidViewModel {
     }
 
     public void updateTopicsFollowStatus(List<Topic> topicsToUpdate) {
-        if(topicsToUpdate!=null && !topicsToUpdate.isEmpty()) {
+        if(topicsToUpdate==null) {
+        }
+        else if(topicsToUpdate.isEmpty()) {
+
+        }
+        else {
             topicRepository.updateAll(topicsToUpdate, getApplication(), new OnTopicRepositoryUpdatedListener() {
                 @Override
                 public void onComplete(List<Topic> newTopicsList) {

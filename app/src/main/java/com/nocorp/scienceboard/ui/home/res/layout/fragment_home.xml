@@ -106,4 +106,24 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floatingActionButton_homeFragment_customizeTopics"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:clickable="true"
+        android:src="@drawable/ic_edit_white"
+        android:transitionName="shared_element_container"
+        android:visibility="gone"
+        app:backgroundTint="@color/orange_light"
+        app:fabSize="mini"
+        app:layout_anchor="@id/viewPager_homeFragment"
+        app:layout_anchorGravity="bottom|right|end"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_behavior="com.nocorp.scienceboard.behavior.ScrollAwareFABBehavior"
+
+        tools:visibility="visible" />
+
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -45,8 +45,16 @@ public class RecyclerAdapterTopics extends
     public void onBindViewHolder(@NonNull TopicViewHolder holder, int position) {
         Topic topic = recyclerList.get(position);
 
-        holder.sourceNameLabel.setText(topic.getId());
-        holder.followChip.setChecked(topic.getFollowed());
+        holder.sourceNameLabel.setText(topic.getDisplayName());
+
+        if(topic.getFollowed()) {
+            holder.followChip.setChecked(true);
+            holder.followChip.setText("followed");
+        }
+        else {
+            holder.followChip.setChecked(false);
+            holder.followChip.setText("follow");
+        }
 
         // todo
     }
@@ -78,8 +86,8 @@ public class RecyclerAdapterTopics extends
             sourceNameLabel = itemView.findViewById(R.id.textView_layoutTopic_name);
             followChip = itemView.findViewById(R.id.chip_layoutTopic_follow);
 
-            followChip.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if(isChecked) {
+            followChip.setOnClickListener((buttonView) -> {
+                if(followChip.isChecked()) {
                     listener.onFollowChipChecked(getAdapterPosition(), itemView);
                     followChip.setText("followed");
                 }

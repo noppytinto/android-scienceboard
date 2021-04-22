@@ -11,20 +11,22 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.FragmentNavigator;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
-import com.google.android.material.transition.Hold;
 import com.google.android.material.transition.MaterialElevationScale;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentHomeBinding;
-import com.nocorp.scienceboard.databinding.FragmentTechTabBinding;
-import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
+import com.nocorp.scienceboard.ui.topics.TopicsViewModel;
 import com.nocorp.scienceboard.viewpager.HomeViewPagerAdapter;
 
 
@@ -35,7 +37,8 @@ public class HomeFragment extends Fragment{
     private HomeViewModel homeViewModel;
     private View view;
     private TabLayout tabLayout;
-    private FragmentHomeBinding binding;
+    private FragmentHomeBinding viewBinding;
+    private FloatingActionButton topicsButton;
 
 
     @Override
@@ -48,8 +51,8 @@ public class HomeFragment extends Fragment{
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        binding = FragmentHomeBinding.inflate(getLayoutInflater());
-        view = binding.getRoot();
+        viewBinding = FragmentHomeBinding.inflate(getLayoutInflater());
+        view = viewBinding.getRoot();
         Log.d(TAG, "SCIENCE_BOARD - onCreateView: called");
         return view;
     }
@@ -59,20 +62,24 @@ public class HomeFragment extends Fragment{
         super.onViewCreated(view, savedInstanceState);
         Log.d(TAG, "SCIENCE_BOARD - onViewCreated: called");
 
+        topicsButton = viewBinding.floatingActionButtonHomeFragmentCustomizeTopics;
+
         NavController navController = Navigation.findNavController(view);
         AppBarConfiguration appBarConfiguration =
                 new AppBarConfiguration.Builder(navController.getGraph()).build();
-        Toolbar toolbar = binding.toolbarHomeFragment;
+        Toolbar toolbar = viewBinding.toolbarHomeFragment;
         NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration);
 
-        tabLayout = binding.tablayoutHomeFragment;
-        viewPager = binding.viewPagerHomeFragment;
+        tabLayout = viewBinding.tablayoutHomeFragment;
+        viewPager = viewBinding.viewPagerHomeFragment;
         FragmentManager fm = getChildFragmentManager();
         Lifecycle lifecycle = getViewLifecycleOwner().getLifecycle();
         viewPagerAdapter = new HomeViewPagerAdapter(fm, lifecycle);
         viewPager.setAdapter(viewPagerAdapter);
         viewPager.setUserInputEnabled(false); // disables horiz. swipe to scroll tabs gestures
         viewPager.setOffscreenPageLimit(1);// TODO: this might solve the "blank tab" problem, but needs more investigation, since the default strategy makes more sense
+
+
 
         TabLayoutMediator tabLayoutMediator = new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             switch (position) {
@@ -99,11 +106,44 @@ public class HomeFragment extends Fragment{
         tabLayoutMediator.attach();
 
 
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+
+                switch (position) {
+                    case 0:
+                        Log.d(TAG, "onPageSelected: " + position);
+                        topicsButton.show();
+                        break;
+                    default:
+                        topicsButton.hide();
+
+                }
+            }
+        });
+
+
+
+
+        topicsButton.setOnClickListener(v -> pickPreferredTopicsInHomeFeed());
 
 
 
     }
 
+    private void pickPreferredTopicsInHomeFeed() {
+
+        // add container transformation animation
+        FragmentNavigator.Extras animations = new FragmentNavigator
+                .Extras
+                .Builder()
+                .addSharedElement(topicsButton, topicsButton.getTransitionName())
+                .build();
+
+        Navigation.findNavController(view)
+                .navigate(R.id.action_navigation_home_to_topicsFragment,null,null, animations);
+    }
 
 
 
@@ -120,8 +160,9 @@ public class HomeFragment extends Fragment{
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null;
+        viewBinding = null;
     }
+
 
 
 

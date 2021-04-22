@@ -141,7 +141,7 @@ public class SourceRepository {
         result = new ArrayList<>();
         for(int i=0; i < topics.size(); i++) {
             if(topics.get(i).getFollowed()) {
-                Source source = getTheFirstSourceFallingInThisCategory(allSources, topics.get(i).getId().toLowerCase());
+                Source source = getTheFirstSourceFallingInThisCategory(allSources, topics.get(i).getId());
                 if(source!=null) {
                     result.add(source);
                     allSources.remove(source);

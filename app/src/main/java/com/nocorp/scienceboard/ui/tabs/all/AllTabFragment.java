@@ -46,7 +46,6 @@ public class AllTabFragment extends Fragment implements
     private CircularProgressIndicator progressIndicator;
     private SwipeRefreshLayout swipeRefreshLayout;
     private Toast toast;
-    private FloatingActionButton topicsButton;
 
     // viewmodels
     private AllTabViewModel allTabViewModel;
@@ -123,8 +122,6 @@ public class AllTabFragment extends Fragment implements
         progressIndicator = viewBinding.progressIndicatorAllArticlesTabFragment;
         swipeRefreshLayout = viewBinding.swipeRefreshAllArticlesTabFragment;
         swipeRefreshLayout.setColorSchemeResources(R.color.orange_light);
-        topicsButton = viewBinding.floatingActionButtonAllArticlesTabFragmentEdit;
-        topicsButton.setOnClickListener(v -> pickPreferredTopicsInHomeFeed());
         //
         adProvider = AdProvider.getInstance(); // is not guaranteed that
         sourceViewModel = new ViewModelProvider(requireActivity()).get(SourceViewModel.class);
@@ -147,18 +144,6 @@ public class AllTabFragment extends Fragment implements
         });
     }
 
-    private void pickPreferredTopicsInHomeFeed() {
-
-        // add container transformation animation
-        FragmentNavigator.Extras animations = new FragmentNavigator
-                .Extras
-                .Builder()
-                .addSharedElement(topicsButton, topicsButton.getTransitionName())
-                .build();
-
-        Navigation.findNavController(view)
-                .navigate(R.id.action_navigation_home_to_topicsFragment,null,null, animations);
-    }
 
     private void initRecycleView() {
         // defining Recycler view
