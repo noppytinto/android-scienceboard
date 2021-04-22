@@ -3,11 +3,13 @@ package com.nocorp.scienceboard.ui.home;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
@@ -20,14 +22,23 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.android.material.transition.MaterialElevationScale;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentHomeBinding;
+import com.nocorp.scienceboard.ui.timemachine.DatePickerFragment;
+import com.nocorp.scienceboard.ui.timemachine.TimeMachineViewModel;
 import com.nocorp.scienceboard.ui.topics.TopicsViewModel;
 import com.nocorp.scienceboard.viewpager.HomeViewPagerAdapter;
+
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 
 public class HomeFragment extends Fragment{
@@ -39,6 +50,9 @@ public class HomeFragment extends Fragment{
     private TabLayout tabLayout;
     private FragmentHomeBinding viewBinding;
     private FloatingActionButton topicsButton;
+    private Toolbar toolbar;
+    private TimeMachineViewModel timeMachineViewModel;
+    private Chip chipTimeMachine;
 
 
     @Override
@@ -47,6 +61,7 @@ public class HomeFragment extends Fragment{
 //        setExitTransition(new Hold().setDuration(1000));
         setExitTransition(new MaterialElevationScale(/* growing= */ false));
         setReenterTransition(new MaterialElevationScale(/* growing= */ true));
+
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -67,7 +82,7 @@ public class HomeFragment extends Fragment{
         NavController navController = Navigation.findNavController(view);
         AppBarConfiguration appBarConfiguration =
                 new AppBarConfiguration.Builder(navController.getGraph()).build();
-        Toolbar toolbar = viewBinding.toolbarHomeFragment;
+        toolbar = viewBinding.toolbarHomeFragment;
         NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration);
 
         tabLayout = viewBinding.tablayoutHomeFragment;
@@ -124,7 +139,39 @@ public class HomeFragment extends Fragment{
         });
 
 
+        chipTimeMachine = viewBinding.chipHomeFragment;
+        chipTimeMachine.setOnClickListener(v -> {
+            DialogFragment newFragment = new DatePickerFragment();
+            newFragment.show(requireActivity().getSupportFragmentManager(), "datePicker");
+        });
 
+        timeMachineViewModel = new ViewModelProvider(requireActivity()).get(TimeMachineViewModel.class);
+        timeMachineViewModel.getObservablePickedDate().observe(getViewLifecycleOwner(), pickedDate-> {
+            if(pickedDate!=null && pickedDate>0) {
+
+                final Calendar c = Calendar.getInstance();
+                int year = c.get(Calendar.YEAR);
+                int month = c.get(Calendar.MONTH);
+                int day = c.get(Calendar.DAY_OF_MONTH);
+
+
+                Calendar cal = Calendar.getInstance();
+                cal.setTimeInMillis(pickedDate);
+                int year2 = cal.get(Calendar.YEAR);
+                int month2 = cal.get(Calendar.MONTH);
+                int day2 = cal.get(Calendar.DAY_OF_MONTH);
+
+
+                if((day==day2) && (month == month2) && (year == year2)) {
+                    chipTimeMachine.setText("Today");
+                }
+                else {
+                    chipTimeMachine.setText(cal.get(Calendar.DAY_OF_MONTH) + "/" + cal.get(Calendar.MONTH) + "/" + cal.get(Calendar.YEAR));
+                }
+
+
+            }
+        });
 
         topicsButton.setOnClickListener(v -> pickPreferredTopicsInHomeFeed());
 

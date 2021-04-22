@@ -14,6 +14,7 @@ import com.nocorp.scienceboard.rss.repository.SourceViewModel;
 import com.nocorp.scienceboard.system.ConnectionManager;
 import com.nocorp.scienceboard.topics.repository.OnTopicRepositoryInitilizedListener;
 import com.nocorp.scienceboard.topics.repository.TopicRepository;
+import com.nocorp.scienceboard.ui.timemachine.TimeMachineViewModel;
 import com.nocorp.scienceboard.ui.topics.TopicsViewModel;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
@@ -46,6 +47,8 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
     private SourceViewModel sourceViewModel;
     private TopicsViewModel topicsViewModel;
     private TopicRepository topicRepository;
+    private TimeMachineViewModel timeMachineViewModel;
+
 
     //
     private final int NUM_ADS_TO_LOAD = 5;
@@ -155,6 +158,8 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
         topicRepository = new TopicRepository();
         topicsViewModel = new ViewModelProvider(this).get(TopicsViewModel.class);
         sourceViewModel = new ViewModelProvider(this).get(SourceViewModel.class);
+        timeMachineViewModel = new ViewModelProvider(this).get(TimeMachineViewModel.class);
+
 
     }// end initView()
 

@@ -29,7 +29,6 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
     private MutableLiveData<List<ListItem>> articlesList;
     private MutableLiveData<List<ListItem>> nextArticlesList;
     private ArticleRepository articleRepository;
-    private final List<String> mainCategories = Arrays.asList("space", "physics", "tech", "medicine", "biology");
     private static List<Source> pickedSources;
     private static boolean taskIsRunning;
     private static boolean saveInHistoryTaskIsRunning;
@@ -38,6 +37,7 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
     private SourceRepository sourceRepository;
     private static List<ListItem> cachedArticles;
     private static List<DocumentSnapshot> oldestArticlesSnapshots;
+    private boolean timeMachineEnabled;
 
 
 

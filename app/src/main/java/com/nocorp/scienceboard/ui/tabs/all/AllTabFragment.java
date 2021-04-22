@@ -7,7 +7,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
-import androidx.navigation.fragment.FragmentNavigator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -19,7 +18,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.nocorp.scienceboard.MobileNavigationDirections;
 import com.nocorp.scienceboard.R;
@@ -28,11 +26,13 @@ import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
+import com.nocorp.scienceboard.ui.timemachine.TimeMachineViewModel;
 import com.nocorp.scienceboard.ui.topics.TopicsViewModel;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class AllTabFragment extends Fragment implements
@@ -51,12 +51,14 @@ public class AllTabFragment extends Fragment implements
     private AllTabViewModel allTabViewModel;
     private SourceViewModel sourceViewModel;
     private TopicsViewModel topicsViewModel;
+    private TimeMachineViewModel timeMachineViewModel;
 
     //
     private AdProvider adProvider;
     private List<Source> sourcesFetched;
     private List<ListItem> articlesToDisplay;
     private boolean isLoading = false;
+    private boolean timeMachineEnabled;
 
     //
     private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 10;
@@ -77,14 +79,6 @@ public class AllTabFragment extends Fragment implements
 
     //----------------------------------------------------------------------------------------- ANDROID METHODS
 
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Log.d(TAG, "onCreate: called");
-
-    }
-
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
@@ -98,10 +92,43 @@ public class AllTabFragment extends Fragment implements
         super.onViewCreated(view, savedInstanceState);
         initView();
 
+        observeTimeMachineStatus();
+
         observeSourcesFetched();
         observeArticlesFetched();
         observerNextArticlesFetched();
         observeCustomizationStatus();
+
+    }
+
+    private void observeTimeMachineStatus() {
+        timeMachineViewModel.getObservablePickedDate().observe(getViewLifecycleOwner(), pickedDate-> {
+            Log.d(TAG, "observeTimeMachineStatus: called");
+            if(pickedDate!=null && pickedDate>0) {
+                timeMachineEnabled = true;
+
+                final Calendar c = Calendar.getInstance();
+                int year = c.get(Calendar.YEAR);
+                int month = c.get(Calendar.MONTH);
+                int day = c.get(Calendar.DAY_OF_MONTH);
+
+
+                Calendar cal = Calendar.getInstance();
+                cal.setTimeInMillis(pickedDate);
+                int year2 = cal.get(Calendar.YEAR);
+                int month2 = cal.get(Calendar.MONTH);
+                int day2 = cal.get(Calendar.DAY_OF_MONTH);
+
+
+                if((day==day2) && (month == month2) && (year == year2)) {
+                }
+                else {
+                }
+            }
+            else {
+                timeMachineEnabled = false;
+            }
+        });
 
     }
 
@@ -116,7 +143,7 @@ public class AllTabFragment extends Fragment implements
 
 
 
-    //--------------------------------------------------------------------- METHODS
+    //----------------------------------------------------------------------------------------- METHODS
 
     private void initView() {
         progressIndicator = viewBinding.progressIndicatorAllArticlesTabFragment;
@@ -124,6 +151,7 @@ public class AllTabFragment extends Fragment implements
         swipeRefreshLayout.setColorSchemeResources(R.color.orange_light);
         //
         adProvider = AdProvider.getInstance(); // is not guaranteed that
+        timeMachineViewModel = new ViewModelProvider(requireActivity()).get(TimeMachineViewModel.class);
         sourceViewModel = new ViewModelProvider(requireActivity()).get(SourceViewModel.class);
         allTabViewModel = new ViewModelProvider(this).get(AllTabViewModel.class);
         topicsViewModel = new ViewModelProvider(requireActivity()).get(TopicsViewModel.class);
@@ -135,6 +163,8 @@ public class AllTabFragment extends Fragment implements
 
     private void observeCustomizationStatus() {
         topicsViewModel.getObservableCustomizationStatus().observe(getViewLifecycleOwner(), customizationCompleted -> {
+            Log.d(TAG, "observeCustomizationStatus: called");
+
             if(customizationCompleted) {
                 refreshArticles();
             }
@@ -201,6 +231,7 @@ public class AllTabFragment extends Fragment implements
 
     private void observeSourcesFetched() {
         sourceViewModel.getObservableAllSources().observe(getViewLifecycleOwner(), sources -> {
+            Log.d(TAG, "observeSourcesFetched: called");
             if(sources == null) {
                 //TODO: error message
                 Log.e(TAG, "SCIENCE_BOARD - loadSources: an error occurrend when fetching sources");
@@ -220,6 +251,7 @@ public class AllTabFragment extends Fragment implements
 
     private void observeArticlesFetched() {
         allTabViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), resultArticles -> {
+            Log.d(TAG, "getObservableArticlesList: called");
             swipeRefreshLayout.setRefreshing(false);
             progressIndicator.setVisibility(View.GONE);
 
@@ -249,6 +281,7 @@ public class AllTabFragment extends Fragment implements
 
     private void observerNextArticlesFetched() {
         allTabViewModel.getObservableNextArticlesList().observe(getViewLifecycleOwner(), fetchedArticles -> {
+            Log.d(TAG, "getObservableNextArticlesList: called");
             isLoading = false;
             recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
 
