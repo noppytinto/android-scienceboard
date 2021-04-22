@@ -76,7 +76,7 @@ public class HomeFragment extends Fragment{
         Lifecycle lifecycle = getViewLifecycleOwner().getLifecycle();
         viewPagerAdapter = new HomeViewPagerAdapter(fm, lifecycle);
         viewPager.setAdapter(viewPagerAdapter);
-        viewPager.setUserInputEnabled(false); // disables horiz. swipe to scroll tabs gestures
+        viewPager.setUserInputEnabled(true); // disables horiz. swipe to scroll tabs gestures
         viewPager.setOffscreenPageLimit(1);// TODO: this might solve the "blank tab" problem, but needs more investigation, since the default strategy makes more sense
 
 
