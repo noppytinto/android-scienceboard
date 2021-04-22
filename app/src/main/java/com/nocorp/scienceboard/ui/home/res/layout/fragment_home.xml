@@ -22,6 +22,7 @@
 
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/transition_container_home"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
@@ -38,6 +39,9 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
+
+
+
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_homeFragment"
@@ -56,6 +60,8 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.appcompat.widget.Toolbar>
+
+
 
 
         <com.google.android.material.tabs.TabLayout
@@ -115,9 +121,29 @@
 <!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
 
 
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/floatingActionButton_homeFragment_timeMachine"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="16dp"
+        android:clickable="false"
+        android:src="@drawable/ic_edit_white"
+        android:text="Time Machine mode"
+        android:textAllCaps="false"
+        android:textSize="12sp"
+        android:visibility="gone"
+        app:backgroundTint="@color/primary_blue"
+        app:fabSize="mini"
+        app:icon="@drawable/ic_baseline_fast_rewind_24"
+        app:layout_anchor="@id/viewPager_homeFragment"
+        app:layout_anchorGravity="bottom|left"
+        tools:visibility="visible" />
 
 
-<!--    </androidx.core.widget.NestedScrollView>-->
+
+
+    <!--    </androidx.core.widget.NestedScrollView>-->
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPager_homeFragment"

@@ -311,6 +311,7 @@ public class AllTabFragment extends Fragment implements
     private void setupSwipeDownToRefresh() {
         swipeRefreshLayout.setOnRefreshListener(() -> {
             Log.i(TAG, "onRefresh called from SwipeRefreshLayout");
+
             refreshArticles();
         });
     }

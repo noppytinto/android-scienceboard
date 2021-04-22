@@ -1,5 +1,8 @@
 package com.nocorp.scienceboard.ui.home;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,6 +26,7 @@ import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.chip.Chip;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -53,6 +57,9 @@ public class HomeFragment extends Fragment{
     private Toolbar toolbar;
     private TimeMachineViewModel timeMachineViewModel;
     private Chip chipTimeMachine;
+    private ExtendedFloatingActionButton fabTimeMachine;
+
+    private int shortAnimationDuration;
 
 
     @Override
@@ -144,6 +151,10 @@ public class HomeFragment extends Fragment{
             DialogFragment newFragment = new DatePickerFragment();
             newFragment.show(requireActivity().getSupportFragmentManager(), "datePicker");
         });
+        shortAnimationDuration = getResources().getInteger(
+                android.R.integer.config_shortAnimTime);
+
+        fabTimeMachine = viewBinding.floatingActionButtonHomeFragmentTimeMachine;
 
         timeMachineViewModel = new ViewModelProvider(requireActivity()).get(TimeMachineViewModel.class);
         timeMachineViewModel.getObservablePickedDate().observe(getViewLifecycleOwner(), pickedDate-> {
@@ -164,9 +175,15 @@ public class HomeFragment extends Fragment{
 
                 if((day==day2) && (month == month2) && (year == year2)) {
                     chipTimeMachine.setText("Today");
+                    chipTimeMachine.setChipStrokeWidth(0);
+                    applyCrossfadeExit(fabTimeMachine);
                 }
                 else {
+                    applyCrossfadeEnter(fabTimeMachine);
                     chipTimeMachine.setText(cal.get(Calendar.DAY_OF_MONTH) + "/" + cal.get(Calendar.MONTH) + "/" + cal.get(Calendar.YEAR));
+                    chipTimeMachine.setChipStrokeWidth(7);
+                    chipTimeMachine.setChipStrokeColor(ColorStateList.valueOf(getResources().getColor(R.color.primary_blue)));
+
                 }
 
 
@@ -190,6 +207,38 @@ public class HomeFragment extends Fragment{
 
         Navigation.findNavController(view)
                 .navigate(R.id.action_navigation_home_to_topicsFragment,null,null, animations);
+    }
+
+    private void applyCrossfadeEnter(View view) {
+        // Set the content view to 0% opacity but visible, so that it is visible
+        // (but fully transparent) during the animation.
+        view.setAlpha(0f);
+        view.setVisibility(View.VISIBLE);
+
+        // Animate the content view to 100% opacity, and clear any animation
+        // listener set on the view.
+        view.animate()
+                .alpha(1f)
+                .setDuration(shortAnimationDuration)
+                .setListener(null);
+
+    }
+
+    private void applyCrossfadeExit(View view) {
+        // Animate the loading view to 0% opacity. After the animation ends,
+        // set its visibility to GONE as an optimization step (it won't
+        // participate in layout passes, etc.)
+        view.animate()
+                .alpha(0f)
+                .setDuration(shortAnimationDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        view.setVisibility(View.GONE);
+                    }
+                });
+
+
     }
 
 
