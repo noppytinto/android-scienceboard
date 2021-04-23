@@ -57,6 +57,7 @@ public class ExploreFragment extends Fragment{
     private final int DATE_PICKER_SET_CHIP_STROKE_WIDTH = 7;
     private final int TABS_OFFSCREEN_PAGE_LIMIT = 1;
     private long datePickerCalendarDateInMillis;
+    private int MONTH_OFFSET_CORRECTION = 1;
 
 
 
@@ -229,7 +230,7 @@ public class ExploreFragment extends Fragment{
         applyCrossfadeEnter(fabTimeMachine, androidDefaultShortAnimationDuration);
         String ddmmyyyy_dateFormat = getString(R.string.slash_formatted_date,
                 cal.get(Calendar.DAY_OF_MONTH),
-                cal.get(Calendar.MONTH),
+                cal.get(Calendar.MONTH)+MONTH_OFFSET_CORRECTION,
                 cal.get(Calendar.YEAR));
         chipTimeMachine.setText(ddmmyyyy_dateFormat);
         chipTimeMachine.setChipStrokeWidth(DATE_PICKER_SET_CHIP_STROKE_WIDTH);

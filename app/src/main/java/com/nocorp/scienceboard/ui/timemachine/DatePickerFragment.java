@@ -36,7 +36,7 @@ public class DatePickerFragment extends DialogFragment
             final Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis((long)arguments.get("givenDialogCalendarDate"));
             int year = cal.get(Calendar.YEAR);
-            int month = cal.get(Calendar.MONTH)+1;
+            int month = cal.get(Calendar.MONTH);
             int day = cal.get(Calendar.DAY_OF_MONTH);
 
             Log.d(TAG, "onCreateDialog: " + day + "/" + month + "/" + year + "/" );
@@ -58,7 +58,7 @@ public class DatePickerFragment extends DialogFragment
 
 
         final Calendar c = Calendar.getInstance();
-        c.set(year, month+1, day);
+        c.set(year, month, day);
         long pickedDate = c.getTimeInMillis();
 
         Log.d(TAG, "onDateSet: " + pickedDate);
