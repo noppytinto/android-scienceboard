@@ -14,6 +14,7 @@ public class TimeMachineViewModel extends ViewModel {
     private final String TAG = this.getClass().getSimpleName();
     private MutableLiveData<Long> pickedDate;
     private static boolean timeMachineEnabled;
+    private static boolean dateChanged;
 
 
 
@@ -35,6 +36,7 @@ public class TimeMachineViewModel extends ViewModel {
     }
 
     public void setPickedDate(Long pickedDate) {
+        dateChanged = true;
         if(equalsTheCurrentDate(pickedDate))
             timeMachineEnabled = false;
         else
@@ -48,6 +50,14 @@ public class TimeMachineViewModel extends ViewModel {
 
     public void setTimeMachineEnabled(boolean timeMachineEnabled) {
         TimeMachineViewModel.timeMachineEnabled = timeMachineEnabled;
+    }
+
+    public boolean isDateChanged() {
+        return dateChanged;
+    }
+
+    public void setDateChanged(boolean dateChanged) {
+        TimeMachineViewModel.dateChanged = dateChanged;
     }
 
     //-------------------------------------------------------------------------------------------- METHODS

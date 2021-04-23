@@ -1,5 +1,6 @@
 package com.nocorp.scienceboard.ui.tabs.all;
 
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.os.Bundle;
@@ -26,19 +27,17 @@ import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
+import com.nocorp.scienceboard.ui.timemachine.OnDateChangedListener;
 import com.nocorp.scienceboard.ui.timemachine.TimeMachineViewModel;
 import com.nocorp.scienceboard.ui.topics.TopicsViewModel;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 public class AllTabFragment extends Fragment implements
-        RecyclerAdapterArticlesList.OnArticleClickedListener {
+        RecyclerAdapterArticlesList.OnArticleClickedListener, OnDateChangedListener {
 
     private final String TAG = this.getClass().getSimpleName();
     private FragmentAllTabBinding viewBinding;
@@ -68,7 +67,6 @@ public class AllTabFragment extends Fragment implements
 
 
 
-
     //----------------------------------------------------------------------------------------- CONSTRUCTORS
 
     public static AllTabFragment newInstance() {
@@ -92,15 +90,15 @@ public class AllTabFragment extends Fragment implements
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        Log.d(TAG, "onViewCreated: called");
+//        Log.d(TAG, "onViewCreated: called");
         super.onViewCreated(view, savedInstanceState);
         initView();
-
 
         observeSourcesFetched();
         observeArticlesFetched();
         observerNextArticlesFetched();
         observeCustomizationStatus();
+        observeTimeMachineStatus();
     }
 
     @Override
@@ -115,131 +113,37 @@ public class AllTabFragment extends Fragment implements
 
     //----------------------------------------------------------------------------------------- METHODS
 
-    private void initView() {
-        progressIndicator = viewBinding.progressIndicatorAllArticlesTabFragment;
-        swipeRefreshLayout = viewBinding.swipeRefreshAllArticlesTabFragment;
-        swipeRefreshLayout.setColorSchemeResources(R.color.orange_light);
-        //
-        adProvider = AdProvider.getInstance(); // is not guaranteed that
-        timeMachineViewModel = new ViewModelProvider(requireActivity()).get(TimeMachineViewModel.class);
-        sourceViewModel = new ViewModelProvider(requireActivity()).get(SourceViewModel.class);
-        allTabViewModel = new ViewModelProvider(this).get(AllTabViewModel.class);
-        topicsViewModel = new ViewModelProvider(requireActivity()).get(TopicsViewModel.class);
-        //
-        currentDateInMillis = System.currentTimeMillis();
-
-        //
-        initRecycleView();
-        setupSwipeDownToRefresh();
-    }
-
-    private void observeCustomizationStatus() {
-        topicsViewModel.getObservableCustomizationStatus().observe(getViewLifecycleOwner(), customizationCompleted -> {
-            Log.d(TAG, "observeCustomizationStatus: called");
-
-            if(customizationCompleted) {
-                refreshArticles(currentDateInMillis);
-            }
-            else {
-                // ignore
-            }
-        });
-    }
-
-    private void initRecycleView() {
-        // defining Recycler view
-        recyclerView = viewBinding.recyclerViewAllArticlesTabFragment;
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this);
-        recyclerView.setAdapter(recyclerAdapterArticlesList);
-//        SnapHelper snapHelper = new LinearSnapHelper();
-//        snapHelper.attachToRecyclerView(recyclerView);
-        initScrollListener();
-    }
-
-    private void initScrollListener() {
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-
-                LinearLayoutManager linearLayoutManager =
-                        (LinearLayoutManager) recyclerView.getLayoutManager();
-
-                if (!isLoading) {
-                    if (reachedTheBottomOfList(linearLayoutManager)) {
-                        // NOTE:
-                        // this resolve the "cannot call this method in a scroll callback" exception
-                        // it happens when we are adding elements while scrolling
-                        recyclerView.post(() -> {
-                            Log.d(TAG, "SCIENCE_BOARD - initScrollListener: reached the end of the recycler");
-                            loadMoreArticles();
-                        });
-
-                    }
-                }
-            }
-        });
-    }
-
-    private boolean reachedTheBottomOfList(LinearLayoutManager linearLayoutManager) {
-        return linearLayoutManager != null &&
-            (articlesToDisplay != null && !articlesToDisplay.isEmpty()) &&
-            linearLayoutManager.findLastCompletelyVisibleItemPosition() == articlesToDisplay.size() - 1;
-    }
-
-    private void loadMoreArticles() {
-        isLoading = true;
-
-        // adding loading view
-        recyclerAdapterArticlesList.addLoadingView(articlesToDisplay);
-
-        // load new items
-        allTabViewModel.fetchNextArticles(NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE);
-    }
-
-    private void observeTimeMachineStatus() {
-        timeMachineViewModel.getObservablePickedDate().observe(getViewLifecycleOwner(), pickedDate-> {
-            Log.d(TAG, "observeTimeMachineStatus: called");
-            if(timeMachineViewModel.timeMachineIsEnabled()) {
-                refreshArticles(pickedDate);
-            }
-            else {
-                refreshArticles(currentDateInMillis);
-            }
-        });
-
-    }
-
     private void observeSourcesFetched() {
-        sourceViewModel.getObservableAllSources().observe(getViewLifecycleOwner(), sources -> {
-            Log.d(TAG, "observeSourcesFetched: called");
-            if(sources == null) {
-                //TODO: error message
-                Log.e(TAG, "SCIENCE_BOARD - loadSources: an error occurrend when fetching sources");
-                showCenteredToast("an error occurred when fetching sources from remote DB");
-            }
-            else if(sources.isEmpty()) {
-                //TODO: warning message, no topics in memory
-                Log.w(TAG, "SCIENCE_BOARD - loadSources: no sources in remote DB");
-            }
-            else {
-                // TODO
-                this.sourcesFetched = new ArrayList<>(sources);
 
-                if(timeMachineViewModel.timeMachineIsEnabled()) {
-                    allTabViewModel.fetchArticles_backInTime(
-                            sources,
-                            NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
-                            false,
-                            timeMachineViewModel.getPickedDate());
+        sourceViewModel.getObservableAllSources().observe(getViewLifecycleOwner(), new Observer<List<Source>>() {
+            @Override
+            public void onChanged(List<Source> sources) {
+                Log.d(TAG, "observeSourcesFetched: called");
+                if(sources == null) {
+                    //TODO: error message
+                    Log.e(TAG, "SCIENCE_BOARD - loadSources: an error occurrend when fetching sources");
+                    showCenteredToast("an error occurred when fetching sources from remote DB");
+                }
+                else if(sources.isEmpty()) {
+                    //TODO: warning message, no topics in memory
+                    Log.w(TAG, "SCIENCE_BOARD - loadSources: no sources in remote DB");
                 }
                 else {
+                    // TODO
+                    sourcesFetched = new ArrayList<>(sources);
+                    long targetDate = currentDateInMillis;
+
+                    Log.d(TAG, "onChanged: using sources");
+                    if (timeMachineViewModel.timeMachineIsEnabled()) {
+                        targetDate = timeMachineViewModel.getPickedDate();
+                    }
+
                     allTabViewModel.fetchArticles_backInTime(
                             sources,
                             NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
                             false,
-                            currentDateInMillis);
+                            targetDate);
+
                 }
             }
         });
@@ -292,6 +196,117 @@ public class AllTabFragment extends Fragment implements
         });
     }
 
+    private void observeTimeMachineStatus() {
+        timeMachineViewModel.getObservablePickedDate().observe(getViewLifecycleOwner(), new Observer<Long>() {
+            @Override
+            public void onChanged(Long pickedDate) {
+                if(timeMachineViewModel.isDateChanged()) {
+                    Log.d(TAG, "observeTimeMachineStatus: using time machine");
+                    timeMachineViewModel.setDateChanged(false);
+                    if (timeMachineViewModel.timeMachineIsEnabled()) {
+                        refreshArticles(pickedDate);
+                    } else {
+                        refreshArticles(currentDateInMillis);
+                    }
+                }
+            }
+        });
+    }
+
+    private void refreshArticles(long startingDate) {
+        allTabViewModel.fetchArticles_backInTime(
+                sourcesFetched,
+                NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
+                true,
+                startingDate);
+    }
+
+    private void observeCustomizationStatus() {
+        topicsViewModel.getObservableCustomizationStatus().observe(getViewLifecycleOwner(), customizationCompleted -> {
+            Log.d(TAG, "observeCustomizationStatus: called");
+
+            if(customizationCompleted) {
+                refreshArticles(currentDateInMillis);
+            }
+            else {
+                // ignore
+            }
+        });
+    }
+
+
+
+
+    private void initView() {
+        progressIndicator = viewBinding.progressIndicatorAllArticlesTabFragment;
+        swipeRefreshLayout = viewBinding.swipeRefreshAllArticlesTabFragment;
+        swipeRefreshLayout.setColorSchemeResources(R.color.orange_light);
+        //
+        adProvider = AdProvider.getInstance(); // is not guaranteed that
+        timeMachineViewModel = new ViewModelProvider(requireActivity()).get(TimeMachineViewModel.class);
+        sourceViewModel = new ViewModelProvider(requireActivity()).get(SourceViewModel.class);
+        allTabViewModel = new ViewModelProvider(this).get(AllTabViewModel.class);
+        topicsViewModel = new ViewModelProvider(requireActivity()).get(TopicsViewModel.class);
+        //
+        currentDateInMillis = System.currentTimeMillis();
+
+        //
+        initRecycleView();
+        setupSwipeDownToRefresh();
+    }
+
+    private void initRecycleView() {
+        // defining Recycler view
+        recyclerView = viewBinding.recyclerViewAllArticlesTabFragment;
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this);
+        recyclerView.setAdapter(recyclerAdapterArticlesList);
+//        SnapHelper snapHelper = new LinearSnapHelper();
+//        snapHelper.attachToRecyclerView(recyclerView);
+        initScrollListener();
+    }
+
+    private void initScrollListener() {
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                LinearLayoutManager linearLayoutManager =
+                        (LinearLayoutManager) recyclerView.getLayoutManager();
+
+                if (!isLoading) {
+                    if (reachedTheBottomOfList(linearLayoutManager)) {
+                        // NOTE:
+                        // this resolve the "cannot call this method in a scroll callback" exception
+                        // it happens when we are adding elements while scrolling
+                        recyclerView.post(() -> {
+                            Log.d(TAG, "SCIENCE_BOARD - initScrollListener: reached the end of the recycler");
+                            loadMoreArticles();
+                        });
+
+                    }
+                }
+            }
+        });
+    }
+
+    private boolean reachedTheBottomOfList(LinearLayoutManager linearLayoutManager) {
+        return linearLayoutManager != null &&
+                (articlesToDisplay != null && !articlesToDisplay.isEmpty()) &&
+                linearLayoutManager.findLastCompletelyVisibleItemPosition() == articlesToDisplay.size() - 1;
+    }
+
+    private void loadMoreArticles() {
+        isLoading = true;
+
+        // adding loading view
+        recyclerAdapterArticlesList.addLoadingView(articlesToDisplay);
+
+        // load new items
+        allTabViewModel.fetchNextArticles(NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE);
+    }
+
     private void setupSwipeDownToRefresh() {
         swipeRefreshLayout.setOnRefreshListener(() -> {
             Log.d(TAG, "onRefresh called from SwipeRefreshLayout");
@@ -305,17 +320,6 @@ public class AllTabFragment extends Fragment implements
 
 
 
-
-
-
-
-    private void refreshArticles(long startingDate) {
-        allTabViewModel.fetchArticles_backInTime(
-                sourcesFetched,
-                NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
-                true,
-                startingDate);
-    }
 
     @Override
     public void onArticleClicked(int position, View itemView) {
@@ -341,9 +345,6 @@ public class AllTabFragment extends Fragment implements
             Navigation.findNavController(view).navigate(action);
         }
     }
-
-
-
 
     private void runToastOnUiThread(String message) {
         requireActivity().runOnUiThread(() -> {
@@ -371,4 +372,8 @@ public class AllTabFragment extends Fragment implements
         toast.show();
     }
 
+    @Override
+    public void onDateChanged(long date) {
+
+    }
 }// end AllArticlesTabFragment
