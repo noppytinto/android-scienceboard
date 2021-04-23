@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -14,6 +15,9 @@ import com.nocorp.scienceboard.rss.repository.SourceViewModel;
 import com.nocorp.scienceboard.system.ConnectionManager;
 import com.nocorp.scienceboard.topics.repository.OnTopicRepositoryInitilizedListener;
 import com.nocorp.scienceboard.topics.repository.TopicRepository;
+import com.nocorp.scienceboard.ui.bookmarks.BookmarksFragment;
+import com.nocorp.scienceboard.ui.explore.ExploreFragment;
+import com.nocorp.scienceboard.ui.history.HistoryFragment;
 import com.nocorp.scienceboard.ui.timemachine.TimeMachineViewModel;
 import com.nocorp.scienceboard.ui.topics.TopicsViewModel;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
@@ -23,6 +27,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
@@ -30,12 +36,14 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import static androidx.navigation.ui.NavigationUI.onNavDestinationSelected;
+
 
 public class MainActivity extends AppCompatActivity implements NavController.OnDestinationChangedListener {
     private final String TAG = this.getClass().getSimpleName();
     private NavController navController;
     private BottomNavigationView bottomNavBar;
-    private ActivityMainBinding binding;
+    private ActivityMainBinding viewBinding;
     private View view;
     private Snackbar snackbar;
     private Toolbar toolbar;
@@ -98,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
     public void onDestinationChanged(@NonNull NavController controller,
                                      @NonNull NavDestination destination,
                                      @Nullable Bundle arguments) {
-        if(destination.getId() == R.id.navigation_home) {
+        if(destination.getId() == R.id.navigation_explore) {
             hideToolbar();
             showBottomBar();
         }
@@ -118,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        binding = null;
+        viewBinding = null;
     }
 
 
@@ -129,29 +137,52 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
 
 
     private void initView() {
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        view = binding.getRoot();
+        viewBinding = ActivityMainBinding.inflate(getLayoutInflater());
+        view = viewBinding.getRoot();
         setContentView(view);
 
         // toolbar
-        toolbar = binding.toolbarMainActivity;
+        toolbar = viewBinding.toolbarMainActivity;
         setSupportActionBar(toolbar);
         appBar = getSupportActionBar();
         // Enable the Up button
         if(appBar!=null) appBar.setDisplayHomeAsUpEnabled(true);
 
 
-        // bottom navigation
-        bottomNavBar = binding.includeMainActivity.navView;
+
+
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
+        bottomNavBar = viewBinding.includeMainActivity.bottomNavView;
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_bookmarks, R.id.navigation_history)
+                R.id.navigation_explore, R.id.navigation_bookmarks, R.id.navigation_history)
                 .build();
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(bottomNavBar, navController);
         navController.addOnDestinationChangedListener(this);
+
+
+
+
+
+
+
+//        final FragmentManager fragmentManager = getSupportFragmentManager();
+//
+//        // define your fragments here
+//        final Fragment exploreFragment = new ExploreFragment();
+//        final Fragment bookmarksFragment = new BookmarksFragment();
+//        final Fragment historyFragment = new HistoryFragment();
+
+
+        // bottom navigation
+//        bottomNavBar = viewBinding.includeMainActivity.bottomNavView;
+//        navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+//        NavigationUI.setupWithNavController(bottomNavBar, navController);
+//        bottomNavBar.setOnNavigationItemSelectedListener(item ->
+//                onNavDestinationSelected(item, Navigation.findNavController(this, R.id.nav_host_fragment))
+//        );
 
 
 
@@ -254,7 +285,7 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
             snackbar = Snackbar.make(view, message, Snackbar.LENGTH_INDEFINITE);
             snackbar.setTextColor(getMyColor(R.color.white));
             snackbar.setBackgroundTint(getMyColor(R.color.red));
-            snackbar.setAnchorView(binding.includeMainActivity.navView);
+            snackbar.setAnchorView(viewBinding.includeMainActivity.bottomNavView);
             snackbar.setAction(R.string.string_retry, v -> {
                 snackbar.dismiss();
                 retryAction();
@@ -286,7 +317,7 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
             snackbar = Snackbar.make(view, message,Snackbar.LENGTH_SHORT);
             snackbar.setTextColor(getMyColor(R.color.white));
             snackbar.setBackgroundTint(getMyColor(R.color.green));
-            snackbar.setAnchorView(binding.includeMainActivity.navView);
+            snackbar.setAnchorView(viewBinding.includeMainActivity.bottomNavView);
             snackbar.setAction(R.string.string_ok, v -> snackbar.dismiss());
             snackbar.setActionTextColor(getMyColor(R.color.white));
             snackbar.show();

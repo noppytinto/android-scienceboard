@@ -152,6 +152,9 @@ dependencies {
     implementation "androidx.fragment:fragment:$fragment_version"
 
 
+    // https://mvnrepository.com/artifact/androidx.navigation/navigation-fragment
+    implementation group: 'androidx.navigation', name: 'navigation-fragment', version: '2.3.5'
+
 
 
     //-----------------------------------------------------------------  MY DEPENDENCIES

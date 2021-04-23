@@ -3,12 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_home">
+    app:startDestination="@+id/navigation_explore">
 
 
     <!-- bottom nav bar fragments -->
     <fragment
-        android:id="@+id/navigation_home"
+        android:id="@+id/navigation_explore"
         android:name="com.nocorp.scienceboard.ui.explore.ExploreFragment"
         android:label="@string/title_home"
         tools:layout="@layout/fragment_home" >
@@ -67,6 +67,6 @@
         tools:layout="@layout/fragment_topics" >
         <action
             android:id="@+id/action_topicsFragment_to_navigation_home"
-            app:destination="@id/navigation_home" />
+            app:destination="@id/navigation_explore" />
     </fragment>
 </navigation>
