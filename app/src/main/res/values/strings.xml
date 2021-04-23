@@ -10,7 +10,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="string_retry">retry</string>
     <string name="string_no_internet_connection">ERROR: no internet connection!</string>
-    <string name="string_ok">ok</string>
+    <string name="string_ok">OK</string>
     <string name="string_internet_available">Connection established! :)</string>
     <string name="string_articles_fetch_fail_message">An error occurred during fetch, contact the developer.</string>
     <string name="string_browsing_data_deleted">browsing data deleted</string>
@@ -20,6 +20,8 @@
     <string name="string_close">close</string>
     <string name="string_search">search</string>
     <string name="string_google_search_website">https://www.google.com</string>
+
+
     <string name="explore">Explore</string>
     <string name="bookmarks">Bookmarks</string>
     <string name="history">History</string>
@@ -29,4 +31,41 @@
     <string name="search">search</string>
     <string name="similar_news">similar</string>
     <string name="followed">followed</string>
+
+
+
+
+    <!-- TABS NAME -->
+    <string name="home_tab_name">Home</string>
+    <string name="tech_tab_name">Tech</string>
+    <string name="physics_tab_name">Physics</string>
+    <string name="space_tab_name">Space</string>
+    <string name="biology_tab_name">Biology</string>
+    <string name="medicine_tab_name">Medicine</string>
+    <string name="math_tab_name">Math</string>
+    <string name="psychology_tab_name">Psychology</string>
+    <string name="geology_tab_name">Geology</string>
+    <string name="chemistry_tab_name">Chemistry</string>
+    <!-- tech subtabs -->
+    <string name="gpu_tab_name">GPU</string>
+    <string name="apple_tab_name">Apple</string>
+    <string name="android_tab_name">Android</string>
+    <string name="mac_tab_name">Mac</string>
+    <string name="windows_tab_name">Windows</string>
+    <string name="pc_tab_name">PC</string>
+    <string name="gaming_tab_name">Gaming</string>
+    <string name="graphics_tab_name">Graphics</string>
+    <string name="security_tab_name">Security</string>
+    <string name="iphone_tab_name">iPhone</string>
+    <string name="developer_tab_name">Developer</string>
+
+
+    <!-- TIME MACHINE MODE CALENDAR STRINGS -->
+    <!-- the function takes dd/mm/yyyy as date format,
+         so just change the order here, if you want the mm/dd/yyyy date format for instance (2, 1, 3)
+    -->
+    <string name="formatted_date">%1$d / %2$d / %3$d</string>
+    <string name="today_label_date_picker">Today</string>
+
+
 </resources>
