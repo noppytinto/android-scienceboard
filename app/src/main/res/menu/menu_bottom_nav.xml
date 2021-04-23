@@ -15,5 +15,5 @@
         android:id="@+id/navigation_history"
         android:icon="@drawable/selector_history_icon_bottom_nav"
         android:title="@string/history_bottom_bar_label" />
-
+m
 </menu>

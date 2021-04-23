@@ -11,7 +11,7 @@
         android:id="@+id/navigation_explore"
         android:name="com.nocorp.scienceboard.ui.explore.ExploreFragment"
         android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" >
+        tools:layout="@layout/fragment_explore" >
         <action
             android:id="@+id/action_navigation_home_to_topicsFragment"
             app:destination="@id/topicsFragment"

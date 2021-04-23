@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -15,9 +14,6 @@ import com.nocorp.scienceboard.rss.repository.SourceViewModel;
 import com.nocorp.scienceboard.system.ConnectionManager;
 import com.nocorp.scienceboard.topics.repository.OnTopicRepositoryInitilizedListener;
 import com.nocorp.scienceboard.topics.repository.TopicRepository;
-import com.nocorp.scienceboard.ui.bookmarks.BookmarksFragment;
-import com.nocorp.scienceboard.ui.explore.ExploreFragment;
-import com.nocorp.scienceboard.ui.history.HistoryFragment;
 import com.nocorp.scienceboard.ui.timemachine.TimeMachineViewModel;
 import com.nocorp.scienceboard.ui.topics.TopicsViewModel;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
@@ -28,15 +24,14 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
+import androidx.navigation.NavigatorProvider;
+import androidx.navigation.fragment.FragmentNavigator;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-
-import static androidx.navigation.ui.NavigationUI.onNavDestinationSelected;
 
 
 public class MainActivity extends AppCompatActivity implements NavController.OnDestinationChangedListener {
@@ -147,24 +142,28 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
         appBar = getSupportActionBar();
         // Enable the Up button
         if(appBar!=null) appBar.setDisplayHomeAsUpEnabled(true);
+        bottomNavBar = viewBinding.includeMainActivity.bottomNavView;
+        navController = Navigation.findNavController(this, R.id.nav_host_fragment);
 
 
+        Fragment navHostFragment = getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
 
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-        bottomNavBar = viewBinding.includeMainActivity.bottomNavView;
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.navigation_explore, R.id.navigation_bookmarks, R.id.navigation_history)
                 .build();
-        navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(bottomNavBar, navController);
         navController.addOnDestinationChangedListener(this);
 
 
 
-
+//        FragmentNavigator navigator = new Keep(this, navHostFragment.getChildFragmentManager(), R.id.nav_host_fragment);
+//        navController.getNavigatorProvider().addNavigator(navigator);
+//        navController.setGraph(R.navigation.mobile_navigation);
+//        NavigationUI.setupWithNavController(bottomNavBar, navController);
 
 
 
