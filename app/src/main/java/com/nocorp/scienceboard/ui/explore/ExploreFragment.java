@@ -124,6 +124,8 @@ public class ExploreFragment extends Fragment{
         androidDefaultShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         datePickerCalendarDateInMillis = System.currentTimeMillis();
 
+        Log.d(TAG, "initView: datePickerCalendarDateInMillis: " + datePickerCalendarDateInMillis);
+
         // viewmodels
         timeMachineViewModel = new ViewModelProvider(requireActivity()).get(TimeMachineViewModel.class);
 

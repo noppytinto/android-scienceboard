@@ -31,11 +31,15 @@ public class DatePickerFragment extends DialogFragment
         Bundle arguments = getArguments();
 
         if(arguments!=null) {
+            Log.d(TAG, "initView: onCreateDialog: " + (long)arguments.get("givenDialogCalendarDate"));
+
             final Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis((long)arguments.get("givenDialogCalendarDate"));
             int year = cal.get(Calendar.YEAR);
-            int month = cal.get(Calendar.MONTH);
+            int month = cal.get(Calendar.MONTH)+1;
             int day = cal.get(Calendar.DAY_OF_MONTH);
+
+            Log.d(TAG, "onCreateDialog: " + day + "/" + month + "/" + year + "/" );
 
             // Create a new instance of DatePickerDialog and return it
             dialog = new DatePickerDialog(requireActivity(), this, year, month, day);
@@ -50,8 +54,11 @@ public class DatePickerFragment extends DialogFragment
         TimeMachineViewModel timeMachineViewModel =
                 new ViewModelProvider(requireActivity()).get(TimeMachineViewModel.class);
 
+        Log.d(TAG, "onDateSet: " + day + "/" + month + "/" + year + "/" );
+
+
         final Calendar c = Calendar.getInstance();
-        c.set(year, month, day);
+        c.set(year, month+1, day);
         long pickedDate = c.getTimeInMillis();
 
         Log.d(TAG, "onDateSet: " + pickedDate);
