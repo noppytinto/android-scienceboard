@@ -42,15 +42,14 @@ import java.util.Calendar;
 
 public class HomeFragment extends Fragment{
     private final String TAG = this.getClass().getSimpleName();
-    private ViewPager2 viewPager;
-    private View view;
-    private TabLayout tabLayout;
     private FragmentHomeBinding viewBinding;
+    private View view;
     private FloatingActionButton customizeHomeButton;
-    private Toolbar toolbar;
-    private TimeMachineViewModel timeMachineViewModel;
     private Chip chipTimeMachine;
     private ExtendedFloatingActionButton fabTimeMachine;
+
+    // viewmodels
+    private TimeMachineViewModel timeMachineViewModel;
 
     // animations
     private int androidDefaultShortAnimationDuration;
@@ -59,6 +58,8 @@ public class HomeFragment extends Fragment{
     private final int DATE_PICKER_DEFAULT_CHIP_STROKE_WIDTH = 0;
     private final int DATE_PICKER_SET_CHIP_STROKE_WIDTH = 7;
     private final int TABS_OFFSCREEN_PAGE_LIMIT = 1;
+
+
 
 
     //------------------------------------------------------------------------------------- ANDROID METHODS
@@ -104,12 +105,16 @@ public class HomeFragment extends Fragment{
 
 
 
+
+
+
+
     //------------------------------------------------------------------------------------- METHODS
 
     private void initView() {
-        toolbar = viewBinding.toolbarHomeFragment;
-        tabLayout = viewBinding.tablayoutHomeFragment;
-        viewPager = viewBinding.viewPagerHomeFragment;
+        Toolbar toolbar = viewBinding.toolbarHomeFragment;
+        TabLayout tabLayout = viewBinding.tablayoutHomeFragment;
+        ViewPager2 viewPager = viewBinding.viewPagerHomeFragment;
         customizeHomeButton = viewBinding.floatingActionButtonHomeFragmentCustomizeTopics;
         chipTimeMachine = viewBinding.chipHomeFragment;
         fabTimeMachine = viewBinding.floatingActionButtonHomeFragmentTimeMachine;
