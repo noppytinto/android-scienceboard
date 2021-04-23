@@ -31,6 +31,8 @@ import com.nocorp.scienceboard.ui.topics.TopicsViewModel;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -58,11 +60,11 @@ public class AllTabFragment extends Fragment implements
     private List<Source> sourcesFetched;
     private List<ListItem> articlesToDisplay;
     private boolean isLoading = false;
-    private boolean timeMachineEnabled;
 
     //
     private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 10;
     private final int AD_DISTANCE = 5; // distance between teh ads (in terms of items)
+    private long currentDateInMillis;
 
 
 
@@ -80,7 +82,8 @@ public class AllTabFragment extends Fragment implements
     //----------------------------------------------------------------------------------------- ANDROID METHODS
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         viewBinding = FragmentAllTabBinding.inflate(getLayoutInflater());
         view = viewBinding.getRoot();
@@ -89,10 +92,10 @@ public class AllTabFragment extends Fragment implements
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        Log.d(TAG, "onViewCreated: called");
         super.onViewCreated(view, savedInstanceState);
         initView();
 
-        observeTimeMachineStatus();
 
         observeSourcesFetched();
         observeArticlesFetched();
@@ -108,43 +111,9 @@ public class AllTabFragment extends Fragment implements
 
 
 
+
+
     //----------------------------------------------------------------------------------------- METHODS
-
-    private void observeTimeMachineStatus() {
-        timeMachineViewModel.getObservablePickedDate().observe(getViewLifecycleOwner(), pickedDate-> {
-            Log.d(TAG, "observeTimeMachineStatus: called");
-            if(pickedDate!=null && pickedDate>0) {
-                timeMachineEnabled = true;
-
-                final Calendar c = Calendar.getInstance();
-                int year = c.get(Calendar.YEAR);
-                int month = c.get(Calendar.MONTH);
-                int day = c.get(Calendar.DAY_OF_MONTH);
-
-
-                Calendar cal = Calendar.getInstance();
-                cal.setTimeInMillis(pickedDate);
-                int year2 = cal.get(Calendar.YEAR);
-                int month2 = cal.get(Calendar.MONTH);
-                int day2 = cal.get(Calendar.DAY_OF_MONTH);
-
-                Log.d(TAG, "observeTimeMachineStatus: " + day + "/" + month + "/" + year);
-
-                if((day==day2) && (month == month2) && (year == year2)) {
-                    timeMachineEnabled = false;
-                }
-                else {
-                }
-
-                refreshArticles();
-
-            }
-            else {
-                timeMachineEnabled = false;
-            }
-        });
-
-    }
 
     private void initView() {
         progressIndicator = viewBinding.progressIndicatorAllArticlesTabFragment;
@@ -156,6 +125,8 @@ public class AllTabFragment extends Fragment implements
         sourceViewModel = new ViewModelProvider(requireActivity()).get(SourceViewModel.class);
         allTabViewModel = new ViewModelProvider(this).get(AllTabViewModel.class);
         topicsViewModel = new ViewModelProvider(requireActivity()).get(TopicsViewModel.class);
+        //
+        currentDateInMillis = System.currentTimeMillis();
 
         //
         initRecycleView();
@@ -167,14 +138,13 @@ public class AllTabFragment extends Fragment implements
             Log.d(TAG, "observeCustomizationStatus: called");
 
             if(customizationCompleted) {
-                refreshArticles();
+                refreshArticles(currentDateInMillis);
             }
             else {
                 // ignore
             }
         });
     }
-
 
     private void initRecycleView() {
         // defining Recycler view
@@ -225,11 +195,21 @@ public class AllTabFragment extends Fragment implements
         recyclerAdapterArticlesList.addLoadingView(articlesToDisplay);
 
         // load new items
-
         allTabViewModel.fetchNextArticles(NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE);
     }
 
+    private void observeTimeMachineStatus() {
+        timeMachineViewModel.getObservablePickedDate().observe(getViewLifecycleOwner(), pickedDate-> {
+            Log.d(TAG, "observeTimeMachineStatus: called");
+            if(timeMachineViewModel.timeMachineIsEnabled()) {
+                refreshArticles(pickedDate);
+            }
+            else {
+                refreshArticles(currentDateInMillis);
+            }
+        });
 
+    }
 
     private void observeSourcesFetched() {
         sourceViewModel.getObservableAllSources().observe(getViewLifecycleOwner(), sources -> {
@@ -247,12 +227,19 @@ public class AllTabFragment extends Fragment implements
                 // TODO
                 this.sourcesFetched = new ArrayList<>(sources);
 
-                if(timeMachineEnabled) {
-                    allTabViewModel.fetchArticles_backInTime(sources, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, false, timeMachineViewModel.getObservablePickedDate().getValue());
+                if(timeMachineViewModel.timeMachineIsEnabled()) {
+                    allTabViewModel.fetchArticles_backInTime(
+                            sources,
+                            NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
+                            false,
+                            timeMachineViewModel.getPickedDate());
                 }
                 else {
-                    allTabViewModel.fetchArticles(sources, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, false);
-
+                    allTabViewModel.fetchArticles_backInTime(
+                            sources,
+                            NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
+                            false,
+                            currentDateInMillis);
                 }
             }
         });
@@ -307,20 +294,27 @@ public class AllTabFragment extends Fragment implements
 
     private void setupSwipeDownToRefresh() {
         swipeRefreshLayout.setOnRefreshListener(() -> {
-            Log.i(TAG, "onRefresh called from SwipeRefreshLayout");
+            Log.d(TAG, "onRefresh called from SwipeRefreshLayout");
 
-            refreshArticles();
+            if(timeMachineViewModel.timeMachineIsEnabled())
+                refreshArticles(timeMachineViewModel.getPickedDate());
+            else
+                refreshArticles(currentDateInMillis);
         });
     }
 
-    private void refreshArticles() {
-        if(timeMachineEnabled) {
-            allTabViewModel.fetchArticles_backInTime(sourcesFetched, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, true, timeMachineViewModel.getObservablePickedDate().getValue());
-        }
-        else {
-            allTabViewModel.fetchArticles(sourcesFetched, NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE, true);
 
-        }
+
+
+
+
+
+    private void refreshArticles(long startingDate) {
+        allTabViewModel.fetchArticles_backInTime(
+                sourcesFetched,
+                NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
+                true,
+                startingDate);
     }
 
     @Override

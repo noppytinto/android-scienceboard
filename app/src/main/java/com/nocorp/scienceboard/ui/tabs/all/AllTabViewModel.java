@@ -40,6 +40,7 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
 
 
     //-------------------------------------------------------------------------------------------- CONSTRUCTORS
+
     public AllTabViewModel(Application application) {
         super(application);
         articlesList = new MutableLiveData<>();
@@ -51,9 +52,8 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
 
 
 
+
     //-------------------------------------------------------------------------------------------- GETTERS/SETTERS
-
-
 
     public LiveData<List<ListItem>> getObservableArticlesList() {
         return articlesList;
@@ -76,73 +76,6 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
     //-------------------------------------------------------------------------------------------- METHODS
 
     //-------------------------------------------------------------- FETCH ARTICLES
-
-    public void fetchArticles(List<Source> givenSources, int numArticlesForEachSource, boolean forced) {
-        if(forced) {
-            downloadArticlesFromFollowedTopics(givenSources, numArticlesForEachSource);
-        }
-        else {
-            tryCachedArticles(givenSources, numArticlesForEachSource);
-        }
-    }
-
-    public void fetchArticles_backInTime(List<Source> givenSources, int numArticlesForEachSource, boolean forced, long startingDate) {
-        if(forced) {
-            downloadArticlesFromFollowedTopics_backInTime(givenSources, numArticlesForEachSource, startingDate);
-        }
-        else {
-            tryCachedArticles_backInTime(givenSources, numArticlesForEachSource, startingDate);
-        }
-    }
-
-    private void downloadArticlesFromFollowedTopics(List<Source> givenSources, int numArticlesForEachSource) {
-        if( ! taskIsRunning) {
-            Runnable task = () -> {
-                cachedArticles = new ArrayList<>();
-                taskIsRunning = true;
-                // pick sources for ALL tab, only once
-                pickedSources = sourceRepository.getAsourceForEachFollowedCategory_randomly(givenSources, TopicRepository.getCachedTopics());
-                articleRepository.getArticles(pickedSources, numArticlesForEachSource, getApplication());
-            };
-
-            ThreadManager threadManager = ThreadManager.getInstance();
-            threadManager.runTask(task);
-        }
-    }
-
-    private void downloadArticlesFromFollowedTopics_backInTime(List<Source> givenSources, int numArticlesForEachSource, long startingDate) {
-        if( ! taskIsRunning) {
-            Runnable task = () -> {
-                cachedArticles = new ArrayList<>();
-                taskIsRunning = true;
-                // pick sources for ALL tab, only once
-                pickedSources = sourceRepository.getAsourceForEachFollowedCategory_randomly(givenSources, TopicRepository.getCachedTopics());
-                articleRepository.getArticles_backInTime(pickedSources, numArticlesForEachSource, getApplication(), startingDate);
-            };
-
-            ThreadManager threadManager = ThreadManager.getInstance();
-            threadManager.runTask(task);
-        }
-    }
-
-
-    private void tryCachedArticles(List<Source> givenSources, int numArticlesForEachSource) {
-        if(cachedArticles == null) {
-            downloadArticlesFromFollowedTopics(givenSources, numArticlesForEachSource);
-        }
-        else {
-            setArticlesList(cachedArticles);
-        }
-    }
-
-    private void tryCachedArticles_backInTime(List<Source> givenSources, int numArticlesForEachSource, long startingDate) {
-        if(cachedArticles == null) {
-            downloadArticlesFromFollowedTopics_backInTime(givenSources, numArticlesForEachSource, startingDate);
-        }
-        else {
-            setArticlesList(cachedArticles);
-        }
-    }
 
     @Override
     public void onArticlesFetchCompleted(List<ListItem> articles, List<DocumentSnapshot> oldestArticles) {
@@ -167,6 +100,46 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
 
         // TODO
     }
+
+
+
+
+    //-------------------------------------------------------------- FETCH TIME MACHINE ARTICLES
+
+    public void fetchArticles_backInTime(List<Source> givenSources, int numArticlesForEachSource, boolean forced, long startingDateinMillis) {
+        if(forced) {
+            downloadArticlesFromFollowedTopics_backInTime(givenSources, numArticlesForEachSource, startingDateinMillis);
+        }
+        else {
+            tryCachedArticles_backInTime(givenSources, numArticlesForEachSource, startingDateinMillis);
+        }
+    }
+
+    private void downloadArticlesFromFollowedTopics_backInTime(List<Source> givenSources, int numArticlesForEachSource, long startingDateinMillis) {
+        if( ! taskIsRunning) {
+            Runnable task = () -> {
+                cachedArticles = new ArrayList<>();
+                taskIsRunning = true;
+                // pick sources for ALL tab, only once
+                pickedSources = sourceRepository.getAsourceForEachFollowedCategory_randomly(givenSources, TopicRepository.getCachedTopics());
+                articleRepository.getArticles_backInTime(pickedSources, numArticlesForEachSource, getApplication(), startingDateinMillis);
+            };
+
+            ThreadManager threadManager = ThreadManager.getInstance();
+            threadManager.runTask(task);
+        }
+    }
+
+    private void tryCachedArticles_backInTime(List<Source> givenSources, int numArticlesForEachSource, long startingDateinMillis) {
+        if(cachedArticles == null) {
+            downloadArticlesFromFollowedTopics_backInTime(givenSources, numArticlesForEachSource, startingDateinMillis);
+        }
+        else {
+            setArticlesList(cachedArticles);
+        }
+    }
+
+
 
 
 

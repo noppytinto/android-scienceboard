@@ -96,7 +96,8 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
      */
     @Override
     public void onDestinationChanged(@NonNull NavController controller,
-                                     @NonNull NavDestination destination, @Nullable Bundle arguments) {
+                                     @NonNull NavDestination destination,
+                                     @Nullable Bundle arguments) {
         if(destination.getId() == R.id.navigation_home) {
             hideToolbar();
             showBottomBar();

@@ -9,7 +9,7 @@
     <!-- bottom nav bar fragments -->
     <fragment
         android:id="@+id/navigation_home"
-        android:name="com.nocorp.scienceboard.ui.home.HomeFragment"
+        android:name="com.nocorp.scienceboard.ui.explore.ExploreFragment"
         android:label="@string/title_home"
         tools:layout="@layout/fragment_home" >
         <action

@@ -34,9 +34,6 @@ public class PhysicsTabViewModel extends AndroidViewModel implements ArticlesRep
     private final String PHYSICS_CATEGORY = "physics";
     private static List<Source> pickedSources;
     private static boolean taskIsRunning;
-    private static boolean saveInHistoryTaskIsRunning;
-    private static String lastVisitedArticleId;
-    private static long oldVisitedDate;
     private SourceRepository sourceRepository;
     private static List<ListItem> cachedArticles;
     private static List<DocumentSnapshot> oldestArticlesSnapshots;

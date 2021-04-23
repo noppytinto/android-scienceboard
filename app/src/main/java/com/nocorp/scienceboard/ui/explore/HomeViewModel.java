@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.ui.home;
+package com.nocorp.scienceboard.ui.explore;
 
 import androidx.lifecycle.ViewModel;
 

@@ -25,7 +25,11 @@ import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
+
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class TechTabFragment extends Fragment implements
@@ -202,6 +206,30 @@ public class TechTabFragment extends Fragment implements
         });
     }
 
+    /**
+     * PRECONDITIONS:
+     * the givenDate is guaranteed to be >0
+     */
+    private boolean equalsTheCurrentDate(Long givenDateInMillis) {
+        final Calendar currentDate = Calendar.getInstance();
+        int year = currentDate.get(Calendar.YEAR);
+        int month = currentDate.get(Calendar.MONTH);
+        int day = currentDate.get(Calendar.DAY_OF_MONTH);
+
+        Calendar cal = convertMillisInCalendar(givenDateInMillis);
+        int year2 = cal.get(Calendar.YEAR);
+        int month2 = cal.get(Calendar.MONTH);
+        int day2 = cal.get(Calendar.DAY_OF_MONTH);
+
+        return (day==day2) && (month == month2) && (year == year2);
+    }
+
+    @NotNull
+    private Calendar convertMillisInCalendar(Long pickedDate) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(pickedDate);
+        return cal;
+    }
 
     private void setupSwipeDownToRefresh() {
         swipeRefreshLayout.setOnRefreshListener(() -> {

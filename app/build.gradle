@@ -55,7 +55,7 @@ android {
                 'src/main/java/com/nocorp/scienceboard/ui/webview/res',
                 'src/main/java/com/nocorp/scienceboard/recycler/viewholder/res',
                 'src/main/java/com/nocorp/scienceboard/ui/history/res',
-                'src/main/java/com/nocorp/scienceboard/ui/home/res',
+                'src/main/java/com/nocorp/scienceboard/ui/explore/res',
                 'src/main/java/com/nocorp/scienceboard/ui/bookmarks/res',
                 'src/main/java/com/nocorp/scienceboard/ui/ad/res',
 

@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.ui.home;
+package com.nocorp.scienceboard.ui.explore;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -21,6 +21,7 @@ import androidx.navigation.Navigation;
 import androidx.navigation.fragment.FragmentNavigator;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import androidx.viewbinding.ViewBinding;
 import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -29,7 +30,7 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.android.material.transition.MaterialElevationScale;
 import com.nocorp.scienceboard.R;
-import com.nocorp.scienceboard.databinding.FragmentHomeBinding;
+import com.nocorp.scienceboard.databinding.FragmentExploreBinding;
 import com.nocorp.scienceboard.ui.timemachine.DatePickerFragment;
 import com.nocorp.scienceboard.ui.timemachine.TimeMachineViewModel;
 import com.nocorp.scienceboard.viewpager.HomeViewPagerAdapter;
@@ -37,9 +38,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Calendar;
 
 
-public class HomeFragment extends Fragment{
+public class ExploreFragment extends Fragment{
     private final String TAG = this.getClass().getSimpleName();
-    private FragmentHomeBinding viewBinding;
+    FragmentExploreBinding viewBinding;
     private View view;
     private FloatingActionButton customizeHomeButton;
     private Chip chipTimeMachine;
@@ -72,7 +73,7 @@ public class HomeFragment extends Fragment{
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        viewBinding = FragmentHomeBinding.inflate(getLayoutInflater());
+        viewBinding = FragmentExploreBinding.inflate(getLayoutInflater());
         view = viewBinding.getRoot();
         Log.d(TAG, "SCIENCE_BOARD - onCreateView: called");
         return view;
@@ -89,7 +90,6 @@ public class HomeFragment extends Fragment{
         observeDatePickedFromTimeMachine();
 
         //
-        datePickerCalendarDateInMillis = System.currentTimeMillis();
     }
 
     @Override
@@ -113,15 +113,16 @@ public class HomeFragment extends Fragment{
     //------------------------------------------------------------------------------------- METHODS
 
     private void initView() {
-        Toolbar toolbar = viewBinding.toolbarHomeFragment;
-        TabLayout tabLayout = viewBinding.tablayoutHomeFragment;
-        ViewPager2 viewPager = viewBinding.viewPagerHomeFragment;
-        customizeHomeButton = viewBinding.floatingActionButtonHomeFragmentCustomizeTopics;
-        chipTimeMachine = viewBinding.chipHomeFragment;
-        fabTimeMachine = viewBinding.floatingActionButtonHomeFragmentTimeMachine;
+        Toolbar toolbar = viewBinding.toolbarExploreFragment;
+        TabLayout tabLayout = viewBinding.tablayoutExploreFragment;
+        ViewPager2 viewPager = viewBinding.viewPagerExploreFragment;
+        customizeHomeButton = viewBinding.floatingActionButtonExploreFragmentCustomizeTopics;
+        chipTimeMachine = viewBinding.chipExploreFragment;
+        fabTimeMachine = viewBinding.floatingActionButtonExploreFragmentTimeMachine;
 
         // values
         androidDefaultShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        datePickerCalendarDateInMillis = System.currentTimeMillis();
 
         // viewmodels
         timeMachineViewModel = new ViewModelProvider(requireActivity()).get(TimeMachineViewModel.class);
@@ -198,13 +199,12 @@ public class HomeFragment extends Fragment{
 
     private void observeDatePickedFromTimeMachine() {
         timeMachineViewModel.getObservablePickedDate().observe(getViewLifecycleOwner(), pickedDateInMillis-> {
-            if(pickedDateInMillis!=null && pickedDateInMillis>0) {
-                if(IsTheCurrentDate(pickedDateInMillis)) {
-                    removeTimeMachineModeLayout();
-                }
-                else {
-                    applyTimeMachineModeLayout(pickedDateInMillis);
-                }
+            Log.d(TAG, "observeDatePickedFromTimeMachine: called");
+            if(timeMachineViewModel.timeMachineIsEnabled()) {
+                applyTimeMachineModeLayout(pickedDateInMillis);
+            }
+            else {
+                removeTimeMachineModeLayout();
             }
         });
     }
@@ -241,18 +241,13 @@ public class HomeFragment extends Fragment{
         applyCrossfadeExit(fabTimeMachine, androidDefaultShortAnimationDuration);
     }
 
-    @NotNull
-    private Calendar convertMillisInCalendar(Long pickedDate) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(pickedDate);
-        return cal;
-    }
+
 
     /**
      * PRECONDITIONS:
      * the givenDate is guaranteed to be >0
      */
-    private boolean IsTheCurrentDate(long givenDateInMillis) {
+    private boolean isTheCurrentDate(long givenDateInMillis) {
         final Calendar currentDate = Calendar.getInstance();
         int year = currentDate.get(Calendar.YEAR);
         int month = currentDate.get(Calendar.MONTH);
@@ -266,7 +261,12 @@ public class HomeFragment extends Fragment{
         return (day==day2) && (month == month2) && (year == year2);
     }
 
-
+    @NotNull
+    private Calendar convertMillisInCalendar(Long pickedDate) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(pickedDate);
+        return cal;
+    }
 
     private void showCustomizeHomeFeedFragment() {
 
@@ -321,11 +321,6 @@ public class HomeFragment extends Fragment{
         return (this.isRemoving() || this.getActivity() == null || this.isDetached() || !this.isAdded() || this.getView() == null);
     }
 
-
-
-
-
-    //--------------------------------------------------------------------- methods
 
 
 }// end HomeFragment
