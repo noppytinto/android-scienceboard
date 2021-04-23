@@ -98,9 +98,7 @@ public class AllTabFragment extends Fragment implements
         observeArticlesFetched();
         observerNextArticlesFetched();
         observeCustomizationStatus();
-
     }
-
 
     @Override
     public void onDestroyView() {
@@ -109,6 +107,8 @@ public class AllTabFragment extends Fragment implements
     }
 
 
+
+    //----------------------------------------------------------------------------------------- METHODS
 
     private void observeTimeMachineStatus() {
         timeMachineViewModel.getObservablePickedDate().observe(getViewLifecycleOwner(), pickedDate-> {
@@ -145,9 +145,6 @@ public class AllTabFragment extends Fragment implements
         });
 
     }
-
-
-    //----------------------------------------------------------------------------------------- METHODS
 
     private void initView() {
         progressIndicator = viewBinding.progressIndicatorAllArticlesTabFragment;
@@ -330,7 +327,7 @@ public class AllTabFragment extends Fragment implements
     public void onArticleClicked(int position, View itemView) {
         Article article = (Article) recyclerAdapterArticlesList.getItem(position);
         if(article!=null) {
-            allTabViewModel.smartSaveInHistory(article);
+            allTabViewModel.saveInHistory(article);
 
 //            FragmentNavigator.Extras extras = new FragmentNavigator
 //                    .Extras

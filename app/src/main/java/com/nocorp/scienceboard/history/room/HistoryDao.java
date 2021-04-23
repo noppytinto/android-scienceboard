@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.rss.room;
+package com.nocorp.scienceboard.history.room;
 
 
 import androidx.room.Dao;
@@ -6,7 +6,7 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
-import com.nocorp.scienceboard.model.HistoryArticle;
+import com.nocorp.scienceboard.history.model.HistoryArticle;
 
 import java.util.List;
 
@@ -14,6 +14,10 @@ import java.util.List;
 public interface HistoryDao {
     @Query("SELECT * FROM HistoryArticle ORDER BY visited_date DESC")
     List<HistoryArticle> selectAll();
+
+    @Query("SELECT * FROM HistoryArticle ORDER BY visited_date DESC LIMIT 1")
+    HistoryArticle getLastVisitedArticle();
+
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insert(HistoryArticle article);

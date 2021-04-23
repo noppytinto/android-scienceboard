@@ -1,8 +1,10 @@
-package com.nocorp.scienceboard.model;
+package com.nocorp.scienceboard.history.model;
 
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+
+import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.utility.MyValues;
 
 

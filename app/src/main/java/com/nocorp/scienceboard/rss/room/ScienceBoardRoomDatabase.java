@@ -8,10 +8,11 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
+import com.nocorp.scienceboard.history.room.HistoryDao;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.BookmarkArticle;
 import com.nocorp.scienceboard.model.Source;
-import com.nocorp.scienceboard.model.HistoryArticle;
+import com.nocorp.scienceboard.history.model.HistoryArticle;
 import com.nocorp.scienceboard.topics.model.Topic;
 import com.nocorp.scienceboard.topics.room.TopicDao;
 import com.nocorp.scienceboard.topics.room.TopicWithSourcesDao;

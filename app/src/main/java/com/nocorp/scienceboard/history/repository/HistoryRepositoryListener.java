@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.rss.repository;
+package com.nocorp.scienceboard.history.repository;
 
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 

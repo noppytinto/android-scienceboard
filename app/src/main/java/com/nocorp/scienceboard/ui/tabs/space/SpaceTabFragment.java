@@ -81,17 +81,11 @@ public class SpaceTabFragment extends Fragment implements
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initiView();
-    }
 
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
         observeSourcesFetched();
         observeArticlesFetched();
         observerNextArticlesFetch();
     }
-
 
 
     @Override
@@ -229,7 +223,7 @@ public class SpaceTabFragment extends Fragment implements
     public void onArticleClicked(int position, View itemView) {
         Article article = (Article) recyclerAdapterArticlesList.getItem(position);
         if(article!=null) {
-            spaceTabViewModel.smartSaveInHistory(article);
+            spaceTabViewModel.saveInHistory(article);
             MobileNavigationDirections.ActionGlobalWebviewFragment action =
                     MobileNavigationDirections.actionGlobalWebviewFragment(article);
             Navigation.findNavController(view).navigate(action);

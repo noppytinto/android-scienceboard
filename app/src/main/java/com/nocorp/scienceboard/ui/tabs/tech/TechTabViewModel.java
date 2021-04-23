@@ -9,15 +9,16 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.nocorp.scienceboard.history.repository.HistoryRepository;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
-import com.nocorp.scienceboard.model.HistoryArticle;
+import com.nocorp.scienceboard.history.model.HistoryArticle;
 import com.nocorp.scienceboard.rss.repository.ArticleRepository;
 import com.nocorp.scienceboard.rss.repository.ArticlesRepositoryListener;
 import com.nocorp.scienceboard.rss.repository.SourceRepository;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
-import com.nocorp.scienceboard.rss.room.HistoryDao;
+import com.nocorp.scienceboard.history.room.HistoryDao;
 import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
 import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
@@ -31,12 +32,10 @@ public class TechTabViewModel extends AndroidViewModel implements ArticlesReposi
     private final String TECH_CATEGORY = "tech";
     private static List<Source> pickedSources;
     private static boolean taskIsRunning;
-    private static boolean saveInHistoryTaskIsRunning;
-    private static String lastVisitedArticleId;
-    private static long oldVisitedDate;
     private SourceRepository sourceRepository;
     private static List<ListItem> cachedArticles;
     private static List<DocumentSnapshot> oldestArticlesSnapshots;
+    private HistoryRepository historyRepository;
 
 
 
@@ -48,6 +47,7 @@ public class TechTabViewModel extends AndroidViewModel implements ArticlesReposi
         nextArticlesList = new MutableLiveData<>();
         articleRepository = new ArticleRepository(this);
         sourceRepository = new SourceRepository();
+        historyRepository = new HistoryRepository();
     }
 
 
@@ -170,86 +170,10 @@ public class TechTabViewModel extends AndroidViewModel implements ArticlesReposi
 
     //-------------------------------------------------------------- HISTORY
 
-    public void smartSaveInHistory(@NotNull Article givenArticle) {
-        if(lastVisitedArticleId==null || lastVisitedArticleId.isEmpty()) {
-            // no matches, save
-            saveInHistory(givenArticle);
-        }
-        else if(lastVisitedArticleId.equals(givenArticle.getId())){
-            // match, skip save
-            updateHistory(givenArticle);
-        }
-        else {
-            // initial save
-            saveInHistory(givenArticle);
-        }
-        // TODO: improve this branching
+    public void saveInHistory(@NotNull Article givenArticle) {
+        historyRepository.saveInHistory(givenArticle, getApplication());
     }
 
-    private void updateHistory(@NotNull Article givenArticle) {
-        HistoryDao dao = getHistoryDao(getApplication());
-
-        // TODO: prevent multiple thread spawning?
-        Runnable task = () -> {
-            // TODO null checks
-            long millis=System.currentTimeMillis();
-            HistoryArticle historyArticle = new HistoryArticle(givenArticle);
-            historyArticle.setVisitedDate(millis);
-            int result = dao.update(millis, lastVisitedArticleId, oldVisitedDate);
-
-            if(result>0) {
-                oldVisitedDate = millis;
-                Log.d(TAG, "SCIENCE_BOARD - updateHistory: updateed to the latest vidited date \n" + lastVisitedArticleId + "\n" + millis);
-            }
-            else {
-                Log.d(TAG, "SCIENCE_BOARD - updateHistory: cannot update history \n" + lastVisitedArticleId + "\n" + millis);
-            }
-        };
-
-        ThreadManager t = ThreadManager.getInstance();
-        try {
-            t.runTask(task);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.d(TAG, "SCIENCE_BOARD - updateHistory: cannot start thread " + e.getMessage());
-        }
-    }
-
-    private void saveInHistory(@NotNull Article givenArticle) {
-        HistoryDao dao = getHistoryDao(getApplication());
-
-        Runnable task = () -> {
-            try {
-                // TODO null checks
-                saveInHistoryTaskIsRunning = true;
-                long millis=System.currentTimeMillis();
-                HistoryArticle historyArticle = new HistoryArticle(givenArticle);
-                historyArticle.setVisitedDate(millis);
-                dao.insert(historyArticle);
-                lastVisitedArticleId = givenArticle.getId();
-                oldVisitedDate = millis;
-                saveInHistoryTaskIsRunning = false;
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.e(TAG, "SCIENCE_BOARD - saveInHistory: cannot save in history, " + e.getMessage());
-            }
-        };
-
-        if( ! saveInHistoryTaskIsRunning) {
-            ThreadManager t = ThreadManager.getInstance();
-            try {
-                t.runTask(task);
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.d(TAG, "SCIENCE_BOARD - saveInHistory: cannot start thread " + e.getMessage());
-            }
-        }
-    }
-
-    private HistoryDao getHistoryDao(Context context) {
-        ScienceBoardRoomDatabase roomDatabase = ScienceBoardRoomDatabase.getInstance(context);
-        return roomDatabase.getHistoryDao();
-    }
 
     private void sleepforNseconds(long seconds) {
         try {

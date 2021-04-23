@@ -22,7 +22,6 @@ import androidx.navigation.fragment.FragmentNavigator;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.viewpager2.widget.ViewPager2;
-
 import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -34,9 +33,7 @@ import com.nocorp.scienceboard.databinding.FragmentHomeBinding;
 import com.nocorp.scienceboard.ui.timemachine.DatePickerFragment;
 import com.nocorp.scienceboard.ui.timemachine.TimeMachineViewModel;
 import com.nocorp.scienceboard.viewpager.HomeViewPagerAdapter;
-
 import org.jetbrains.annotations.NotNull;
-
 import java.util.Calendar;
 
 
@@ -58,6 +55,7 @@ public class HomeFragment extends Fragment{
     private final int DATE_PICKER_DEFAULT_CHIP_STROKE_WIDTH = 0;
     private final int DATE_PICKER_SET_CHIP_STROKE_WIDTH = 7;
     private final int TABS_OFFSCREEN_PAGE_LIMIT = 1;
+    private long datePickerCalendarDateInMillis;
 
 
 
@@ -89,6 +87,9 @@ public class HomeFragment extends Fragment{
         customizeHomeButton.setOnClickListener(v -> showCustomizeHomeFeedFragment());
         //
         observeDatePickedFromTimeMachine();
+
+        //
+        datePickerCalendarDateInMillis = System.currentTimeMillis();
     }
 
     @Override
@@ -154,22 +155,22 @@ public class HomeFragment extends Fragment{
         TabLayoutMediator tabLayoutMediator = new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             switch (position) {
                 case 0:
-                    tab.setText(R.string.home_tab_name);
+                    tab.setText(R.string.home_tab_label);
                     break;
                 case 1:
-                    tab.setText(R.string.tech_tab_name);
+                    tab.setText(R.string.tech_tab_label);
                     break;
                 case 2:
-                    tab.setText(R.string.physics_tab_name);
+                    tab.setText(R.string.physics_tab_label);
                     break;
                 case 3:
-                    tab.setText(R.string.space_tab_name);
+                    tab.setText(R.string.space_tab_label);
                     break;
                 case 4:
-                    tab.setText(R.string.biology_tab_name);
+                    tab.setText(R.string.biology_tab_label);
                     break;
                 case 5:
-                    tab.setText(R.string.medicine_tab_name);
+                    tab.setText(R.string.medicine_tab_label);
                     break;
             }
         });
@@ -211,15 +212,20 @@ public class HomeFragment extends Fragment{
     private void showTimeMachineDatePicker() {
         final String DATE_PICKER_DIALOG_TAG = "datePickerDialog";
 
+        Bundle bundle = new Bundle();
+        bundle.putLong("givenDialogCalendarDate", datePickerCalendarDateInMillis);
+
         DialogFragment newFragment = new DatePickerFragment();
+        newFragment.setArguments(bundle);
         newFragment.show(requireActivity().getSupportFragmentManager(), DATE_PICKER_DIALOG_TAG);
     }
 
     private void applyTimeMachineModeLayout(Long pickedDateInMillis) {
-        Calendar cal = convertMillisInCalendar(pickedDateInMillis);
+        datePickerCalendarDateInMillis = pickedDateInMillis;
 
+        Calendar cal = convertMillisInCalendar(pickedDateInMillis);
         applyCrossfadeEnter(fabTimeMachine, androidDefaultShortAnimationDuration);
-        String ddmmyyyy_dateFormat = getString(R.string.formatted_date,
+        String ddmmyyyy_dateFormat = getString(R.string.slash_formatted_date,
                 cal.get(Calendar.DAY_OF_MONTH),
                 cal.get(Calendar.MONTH),
                 cal.get(Calendar.YEAR));
@@ -229,6 +235,7 @@ public class HomeFragment extends Fragment{
     }
 
     private void removeTimeMachineModeLayout() {
+        datePickerCalendarDateInMillis = System.currentTimeMillis();
         chipTimeMachine.setText(R.string.today_label_date_picker);
         chipTimeMachine.setChipStrokeWidth(DATE_PICKER_DEFAULT_CHIP_STROKE_WIDTH);
         applyCrossfadeExit(fabTimeMachine, androidDefaultShortAnimationDuration);

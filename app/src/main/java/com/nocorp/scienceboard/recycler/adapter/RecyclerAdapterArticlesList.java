@@ -17,7 +17,7 @@ import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.BookmarkArticle;
 import com.nocorp.scienceboard.model.LoadingView;
-import com.nocorp.scienceboard.model.HistoryArticle;
+import com.nocorp.scienceboard.history.model.HistoryArticle;
 import com.nocorp.scienceboard.recycler.viewholder.LoadingViewHolder;
 import com.nocorp.scienceboard.ui.viewholder.HistoryViewHolder;
 import com.nocorp.scienceboard.utility.ad.admob.model.ListAd;
