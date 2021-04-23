@@ -43,22 +43,22 @@ import java.util.Calendar;
 public class HomeFragment extends Fragment{
     private final String TAG = this.getClass().getSimpleName();
     private ViewPager2 viewPager;
-    private HomeViewModel homeViewModel;
     private View view;
     private TabLayout tabLayout;
     private FragmentHomeBinding viewBinding;
-    private FloatingActionButton topicsButton;
+    private FloatingActionButton customizeHomeButton;
     private Toolbar toolbar;
     private TimeMachineViewModel timeMachineViewModel;
     private Chip chipTimeMachine;
     private ExtendedFloatingActionButton fabTimeMachine;
 
     // animations
-    private int shortAnimationDuration;
+    private int androidDefaultShortAnimationDuration;
 
     // parameters
     private final int DATE_PICKER_DEFAULT_CHIP_STROKE_WIDTH = 0;
     private final int DATE_PICKER_SET_CHIP_STROKE_WIDTH = 7;
+    private final int TABS_OFFSCREEN_PAGE_LIMIT = 1;
 
 
     //------------------------------------------------------------------------------------- ANDROID METHODS
@@ -85,15 +85,9 @@ public class HomeFragment extends Fragment{
         Log.d(TAG, "SCIENCE_BOARD - onViewCreated: called");
         initView();
         chipTimeMachine.setOnClickListener(v -> showTimeMachineDatePicker());
-        topicsButton.setOnClickListener(v -> showCustomizeHomeFeedFragment());
+        customizeHomeButton.setOnClickListener(v -> showCustomizeHomeFeedFragment());
         //
         observeDatePickedFromTimeMachine();
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-//        adProvider.destroyAds();
     }
 
     @Override
@@ -102,94 +96,39 @@ public class HomeFragment extends Fragment{
         viewBinding = null;
     }
 
-
+//    @Override
+//    public void onDetach() {
+//        super.onDetach();
+////        adProvider.destroyAds();
+//    }
 
 
 
     //------------------------------------------------------------------------------------- METHODS
 
     private void initView() {
-        setupToolbar();
-
+        toolbar = viewBinding.toolbarHomeFragment;
         tabLayout = viewBinding.tablayoutHomeFragment;
         viewPager = viewBinding.viewPagerHomeFragment;
-        topicsButton = viewBinding.floatingActionButtonHomeFragmentCustomizeTopics;
+        customizeHomeButton = viewBinding.floatingActionButtonHomeFragmentCustomizeTopics;
         chipTimeMachine = viewBinding.chipHomeFragment;
         fabTimeMachine = viewBinding.floatingActionButtonHomeFragmentTimeMachine;
-        timeMachineViewModel = new ViewModelProvider(requireActivity()).get(TimeMachineViewModel.class);
-        shortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-        //
+        // values
+        androidDefaultShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+        // viewmodels
+        timeMachineViewModel = new ViewModelProvider(requireActivity()).get(TimeMachineViewModel.class);
+
+        // setups
+        setupToolbar(toolbar);
         setupTabs(tabLayout, viewPager);
     }
 
-    private void observeDatePickedFromTimeMachine() {
-        timeMachineViewModel.getObservablePickedDate().observe(getViewLifecycleOwner(), pickedDateInMillis-> {
-            if(pickedDateInMillis!=null && pickedDateInMillis>0) {
-                if(IsTheCurrentDate(pickedDateInMillis)) {
-                    removeTimeMachineModeLayout();
-                }
-                else {
-                    applyTimeMachineModeLayout(pickedDateInMillis);
-                }
-            }
-        });
-    }
-
-    private void showTimeMachineDatePicker() {
-        DialogFragment newFragment = new DatePickerFragment();
-        newFragment.show(requireActivity().getSupportFragmentManager(), "datePicker");
-    }
-
-    private void applyTimeMachineModeLayout(Long pickedDateInMillis) {
-        Calendar cal = convertMillisInCalendar(pickedDateInMillis);
-
-        applyCrossfadeEnter(fabTimeMachine);
-        String ddmmyyyy_dateFormat = getString(R.string.formatted_date,
-                cal.get(Calendar.DAY_OF_MONTH),
-                cal.get(Calendar.MONTH),
-                cal.get(Calendar.YEAR));
-        chipTimeMachine.setText(ddmmyyyy_dateFormat);
-        chipTimeMachine.setChipStrokeWidth(DATE_PICKER_SET_CHIP_STROKE_WIDTH);
-        chipTimeMachine.setChipStrokeColor(ColorStateList.valueOf(getResources().getColor(R.color.primary_blue)));
-    }
-
-    private void removeTimeMachineModeLayout() {
-        chipTimeMachine.setText(R.string.today_label_date_picker);
-        chipTimeMachine.setChipStrokeWidth(DATE_PICKER_DEFAULT_CHIP_STROKE_WIDTH);
-        applyCrossfadeExit(fabTimeMachine);
-    }
-
-    @NotNull
-    private Calendar convertMillisInCalendar(Long pickedDate) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(pickedDate);
-        return cal;
-    }
-
-    /**
-     * PRECONDITIONS:
-     * the givenDate is guaranteed to be >0
-     */
-    private boolean IsTheCurrentDate(long givenDateInMillis) {
-        final Calendar currentDate = Calendar.getInstance();
-        int year = currentDate.get(Calendar.YEAR);
-        int month = currentDate.get(Calendar.MONTH);
-        int day = currentDate.get(Calendar.DAY_OF_MONTH);
-
-        Calendar cal = convertMillisInCalendar(givenDateInMillis);
-        int year2 = cal.get(Calendar.YEAR);
-        int month2 = cal.get(Calendar.MONTH);
-        int day2 = cal.get(Calendar.DAY_OF_MONTH);
-
-        return (day==day2) && (month == month2) && (year == year2);
-    }
-
-    private void setupToolbar() {
+    private void setupToolbar(Toolbar toolbar) {
         NavController navController = Navigation.findNavController(view);
         AppBarConfiguration appBarConfiguration =
                 new AppBarConfiguration.Builder(navController.getGraph()).build();
-        toolbar = viewBinding.toolbarHomeFragment;
         NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration);
     }
 
@@ -199,8 +138,8 @@ public class HomeFragment extends Fragment{
 
         HomeViewPagerAdapter viewPagerAdapter = new HomeViewPagerAdapter(fm, lifecycle);
         viewPager.setAdapter(viewPagerAdapter);
-        viewPager.setUserInputEnabled(true); // disables horiz. swipe to scroll tabs gestures
-        viewPager.setOffscreenPageLimit(1);// TODO: this might solve the "blank tab" problem, but needs more investigation, since the default strategy makes more sense
+        viewPager.setUserInputEnabled(true); // disable/enable horiz. swipe to scroll tabs gestures
+        viewPager.setOffscreenPageLimit(TABS_OFFSCREEN_PAGE_LIMIT);// TODO: this might solve the "blank tab" problem, but needs more investigation, since the default strategy makes more sense
 
         setupTabsStyle(tabLayout, viewPager);
         defineOnTabChangedBehavior(viewPager);
@@ -241,15 +180,81 @@ public class HomeFragment extends Fragment{
                 switch (position) {
                     case 0:
                         Log.d(TAG, "onPageSelected: " + position);
-                        topicsButton.show();
+                        customizeHomeButton.show();
                         break;
                     default:
-                        topicsButton.hide();
+                        customizeHomeButton.hide();
 
                 }
             }
         });
     }
+
+    private void observeDatePickedFromTimeMachine() {
+        timeMachineViewModel.getObservablePickedDate().observe(getViewLifecycleOwner(), pickedDateInMillis-> {
+            if(pickedDateInMillis!=null && pickedDateInMillis>0) {
+                if(IsTheCurrentDate(pickedDateInMillis)) {
+                    removeTimeMachineModeLayout();
+                }
+                else {
+                    applyTimeMachineModeLayout(pickedDateInMillis);
+                }
+            }
+        });
+    }
+
+    private void showTimeMachineDatePicker() {
+        final String DATE_PICKER_DIALOG_TAG = "datePickerDialog";
+
+        DialogFragment newFragment = new DatePickerFragment();
+        newFragment.show(requireActivity().getSupportFragmentManager(), DATE_PICKER_DIALOG_TAG);
+    }
+
+    private void applyTimeMachineModeLayout(Long pickedDateInMillis) {
+        Calendar cal = convertMillisInCalendar(pickedDateInMillis);
+
+        applyCrossfadeEnter(fabTimeMachine, androidDefaultShortAnimationDuration);
+        String ddmmyyyy_dateFormat = getString(R.string.formatted_date,
+                cal.get(Calendar.DAY_OF_MONTH),
+                cal.get(Calendar.MONTH),
+                cal.get(Calendar.YEAR));
+        chipTimeMachine.setText(ddmmyyyy_dateFormat);
+        chipTimeMachine.setChipStrokeWidth(DATE_PICKER_SET_CHIP_STROKE_WIDTH);
+        chipTimeMachine.setChipStrokeColor(ColorStateList.valueOf(getResources().getColor(R.color.primary_blue)));
+    }
+
+    private void removeTimeMachineModeLayout() {
+        chipTimeMachine.setText(R.string.today_label_date_picker);
+        chipTimeMachine.setChipStrokeWidth(DATE_PICKER_DEFAULT_CHIP_STROKE_WIDTH);
+        applyCrossfadeExit(fabTimeMachine, androidDefaultShortAnimationDuration);
+    }
+
+    @NotNull
+    private Calendar convertMillisInCalendar(Long pickedDate) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(pickedDate);
+        return cal;
+    }
+
+    /**
+     * PRECONDITIONS:
+     * the givenDate is guaranteed to be >0
+     */
+    private boolean IsTheCurrentDate(long givenDateInMillis) {
+        final Calendar currentDate = Calendar.getInstance();
+        int year = currentDate.get(Calendar.YEAR);
+        int month = currentDate.get(Calendar.MONTH);
+        int day = currentDate.get(Calendar.DAY_OF_MONTH);
+
+        Calendar cal = convertMillisInCalendar(givenDateInMillis);
+        int year2 = cal.get(Calendar.YEAR);
+        int month2 = cal.get(Calendar.MONTH);
+        int day2 = cal.get(Calendar.DAY_OF_MONTH);
+
+        return (day==day2) && (month == month2) && (year == year2);
+    }
+
+
 
     private void showCustomizeHomeFeedFragment() {
 
@@ -257,43 +262,45 @@ public class HomeFragment extends Fragment{
         FragmentNavigator.Extras animations = new FragmentNavigator
                 .Extras
                 .Builder()
-                .addSharedElement(topicsButton, topicsButton.getTransitionName())
+                .addSharedElement(customizeHomeButton, customizeHomeButton.getTransitionName())
                 .build();
 
         Navigation.findNavController(view)
                 .navigate(R.id.action_navigation_home_to_topicsFragment,null,null, animations);
     }
 
-    private void applyCrossfadeEnter(View view) {
+    private void applyCrossfadeEnter(View view, int duration) {
+        final float STARTING_ALPHA = 0f;
+        final float ENDING_ALPHA = 1f;
+
         // Set the content view to 0% opacity but visible, so that it is visible
         // (but fully transparent) during the animation.
-        view.setAlpha(0f);
+        view.setAlpha(STARTING_ALPHA);
         view.setVisibility(View.VISIBLE);
 
         // Animate the content view to 100% opacity, and clear any animation
         // listener set on the view.
         view.animate()
-                .alpha(1f)
-                .setDuration(shortAnimationDuration)
+                .alpha(ENDING_ALPHA)
+                .setDuration(duration)
                 .setListener(null);
-
     }
 
-    private void applyCrossfadeExit(View view) {
+    private void applyCrossfadeExit(View view, int duration) {
+        final float STARTING_ALPHA = 0f;
+
         // Animate the loading view to 0% opacity. After the animation ends,
         // set its visibility to GONE as an optimization step (it won't
         // participate in layout passes, etc.)
         view.animate()
-                .alpha(0f)
-                .setDuration(shortAnimationDuration)
+                .alpha(STARTING_ALPHA)
+                .setDuration(duration)
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         view.setVisibility(View.GONE);
                     }
                 });
-
-
     }
 
 
