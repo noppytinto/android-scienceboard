@@ -203,22 +203,24 @@ public class AllTabFragment extends Fragment implements
                 if(timeMachineViewModel.isDateChanged()) {
                     Log.d(TAG, "observeTimeMachineStatus: using time machine");
                     timeMachineViewModel.setDateChanged(false);
-                    if (timeMachineViewModel.timeMachineIsEnabled()) {
-                        refreshArticles(pickedDate);
-                    } else {
-                        refreshArticles(currentDateInMillis);
-                    }
+                    refreshArticles();
                 }
             }
         });
     }
 
-    private void refreshArticles(long startingDate) {
+    private void refreshArticles() {
+        long targetDate = currentDateInMillis;
+
+        if (timeMachineViewModel.timeMachineIsEnabled()) {
+            targetDate = timeMachineViewModel.getPickedDate();
+        }
+
         allTabViewModel.fetchArticles_backInTime(
                 sourcesFetched,
                 NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
                 true,
-                startingDate);
+                targetDate);
     }
 
     private void observeCustomizationStatus() {
@@ -226,7 +228,7 @@ public class AllTabFragment extends Fragment implements
             Log.d(TAG, "observeCustomizationStatus: called");
 
             if(customizationCompleted) {
-                refreshArticles(currentDateInMillis);
+                refreshArticles();
             }
             else {
                 // ignore
@@ -310,11 +312,7 @@ public class AllTabFragment extends Fragment implements
     private void setupSwipeDownToRefresh() {
         swipeRefreshLayout.setOnRefreshListener(() -> {
             Log.d(TAG, "onRefresh called from SwipeRefreshLayout");
-
-            if(timeMachineViewModel.timeMachineIsEnabled())
-                refreshArticles(timeMachineViewModel.getPickedDate());
-            else
-                refreshArticles(currentDateInMillis);
+            refreshArticles();
         });
     }
 
