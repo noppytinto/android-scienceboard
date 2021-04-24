@@ -1,6 +1,5 @@
 package com.nocorp.scienceboard.ui.tabs.all;
 
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.os.Bundle;
@@ -8,7 +7,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -115,7 +113,6 @@ public class AllTabFragment extends Fragment implements
     //----------------------------------------------------------------------------------------- METHODS
 
     private void observeSourcesFetched() {
-
         sourceViewModel.getObservableAllSources().observe(getViewLifecycleOwner(), sources -> {
             Log.d(TAG, "observeSourcesFetched: called");
             if(sources == null) {
@@ -176,6 +173,8 @@ public class AllTabFragment extends Fragment implements
             }
         });
     }
+
+
 
     private void observerNextArticlesFetched() {
         allTabViewModel.getObservableNextArticlesList().observe(getViewLifecycleOwner(), fetchedArticles -> {
@@ -322,6 +321,9 @@ public class AllTabFragment extends Fragment implements
         Article article = (Article) recyclerAdapterArticlesList.getItem(position);
         if(article!=null) {
             allTabViewModel.saveInHistory(article);
+            article.setVisited(true);
+
+
 
 //            FragmentNavigator.Extras extras = new FragmentNavigator
 //                    .Extras
@@ -341,6 +343,23 @@ public class AllTabFragment extends Fragment implements
             Navigation.findNavController(view).navigate(action);
         }
     }
+
+    @Override
+    public void onBookmarksButtonClicked(int position) {
+        Article article = (Article) recyclerAdapterArticlesList.getItem(position);
+        if(article!=null) {
+            if(article.isBookmarked()) {
+                article.setBookmarked(false);
+                allTabViewModel.removeFromBookmarks(article);
+            }
+            else {
+                article.setBookmarked(true);
+                allTabViewModel.addToBookmarks(article);
+            }
+        }
+    }
+
+
 
     private void runToastOnUiThread(String message) {
         requireActivity().runOnUiThread(() -> {
@@ -372,4 +391,5 @@ public class AllTabFragment extends Fragment implements
     public void onDateChanged(long date) {
 
     }
+
 }// end AllArticlesTabFragment

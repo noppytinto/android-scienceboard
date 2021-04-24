@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
 import com.nocorp.scienceboard.history.model.HistoryArticle;
+import com.nocorp.scienceboard.model.Article;
 
 import java.util.List;
 
@@ -29,5 +30,8 @@ public interface HistoryDao {
 
     @Query("DELETE FROM HistoryArticle")
     public void nukeTable();
+
+    @Query("SELECT EXISTS(SELECT * FROM historyarticle WHERE id = :articleId)")
+    public boolean isInHistory(String articleId);
 
 }

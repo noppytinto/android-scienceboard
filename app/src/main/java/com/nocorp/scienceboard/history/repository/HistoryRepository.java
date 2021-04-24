@@ -168,5 +168,13 @@ public class HistoryRepository{
     }
 
 
-
+    public void historyCheck(List<ListItem> articles, Context context) {
+        HistoryDao dao = getHistoryDao(context);
+        for(ListItem article: articles) {
+            if(dao.isInHistory(((Article)article).getId()))
+                ((Article)article).setVisited(true);
+            else
+                ((Article)article).setVisited(false);
+        }
+    }
 }// end HistoryRepository

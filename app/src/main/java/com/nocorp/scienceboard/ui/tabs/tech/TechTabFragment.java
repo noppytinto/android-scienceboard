@@ -253,9 +253,10 @@ public class TechTabFragment extends Fragment implements
         }
     }
 
+    @Override
+    public void onBookmarksButtonClicked(int position) {
 
-
-
+    }
 
 
     private void runToastOnUiThread(String message) {

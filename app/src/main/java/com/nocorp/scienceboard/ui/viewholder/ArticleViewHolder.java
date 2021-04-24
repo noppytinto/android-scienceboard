@@ -7,11 +7,14 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.button.MaterialButton;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 
 public class ArticleViewHolder extends RecyclerView.ViewHolder  {
     public ImageView thumbnail;
+    public MaterialButton bookmarkButton;
+    public ImageView visitedIcon;
     public TextView title;
     public TextView pubDate;
     public CardView cardViewThumbnail;
@@ -27,13 +30,21 @@ public class ArticleViewHolder extends RecyclerView.ViewHolder  {
         this.pubDate = itemView.findViewById(R.id.textView_articleViewholder_info);
         this.cardViewThumbnail = itemView.findViewById(R.id.cardView_articleViewholder_thumbnail);
         this.containerTitle = itemView.findViewById(R.id.container_articleViewholder_title);
+        this.bookmarkButton = itemView.findViewById(R.id.toggleButton_articleViewholder_addToBookmarks);
+        this.visitedIcon = itemView.findViewById(R.id.imageView_articleViewholder_markedAsRead);
+
+        bookmarkButton.setOnClickListener(v -> {
+            listener.onBookmarksButtonClicked(getAdapterPosition());
+        });
 
         cardViewThumbnail.setOnClickListener(v -> {
-            this.listener.onArticleClicked(getAdapterPosition(), itemView);
+            listener.onArticleClicked(getAdapterPosition(), itemView);
+            bookmarkButton.setVisibility(View.VISIBLE);
         });
 
         containerTitle.setOnClickListener(v -> {
-            this.listener.onArticleClicked(getAdapterPosition(), itemView);
+            listener.onArticleClicked(getAdapterPosition(), itemView);
+            bookmarkButton.setVisibility(View.VISIBLE);
         });
 
     }

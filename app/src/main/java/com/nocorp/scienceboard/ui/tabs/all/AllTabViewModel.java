@@ -11,10 +11,13 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.nocorp.scienceboard.history.repository.HistoryRepository;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.history.model.HistoryArticle;
+import com.nocorp.scienceboard.model.BookmarkArticle;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.rss.repository.ArticleRepository;
 import com.nocorp.scienceboard.rss.repository.ArticlesRepositoryListener;
+import com.nocorp.scienceboard.rss.repository.BookmarksRepository;
 import com.nocorp.scienceboard.rss.repository.SourceRepository;
+import com.nocorp.scienceboard.rss.room.BookmarkDao;
 import com.nocorp.scienceboard.topics.repository.TopicRepository;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
@@ -34,8 +37,8 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
     private SourceRepository sourceRepository;
     private static List<ListItem> cachedArticles;
     private static List<DocumentSnapshot> oldestArticlesSnapshots;
-    private boolean timeMachineEnabled;
     private HistoryRepository historyRepository;
+    private BookmarksRepository bookmarksRepository;
 
 
 
@@ -48,6 +51,7 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
         articleRepository = new ArticleRepository(this);
         sourceRepository = new SourceRepository();
         historyRepository = new HistoryRepository();
+        bookmarksRepository = new BookmarksRepository();
     }
 
 
@@ -89,9 +93,18 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
 
             // publish results
             cachedArticles = articles;
+            historyCheck(cachedArticles);
+            bookmarksCheck(cachedArticles);
             setArticlesList(articles);
         }
+    }
 
+    private void historyCheck(List<ListItem> cachedArticles) {
+        historyRepository.historyCheck(cachedArticles, getApplication());
+    }
+
+    private void bookmarksCheck(List<ListItem> cachedArticles) {
+        bookmarksRepository.bookmarksCheck(cachedArticles, getApplication());
     }
 
     @Override
@@ -173,7 +186,7 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
     public void onNextArticlesFetchFailed(String cause) {
         taskIsRunning = false;
         setNextArticlesList(null);
-        Log.d(TAG, "SCIENCE_BOARD - onNextArticlesFetchFailed: " + cause);
+        Log.e(TAG, "SCIENCE_BOARD - onNextArticlesFetchFailed: " + cause);
     }
 
 
@@ -193,6 +206,14 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
         }
     }
 
+
+    public void addToBookmarks(Article givenArticle) {
+        bookmarksRepository.addToBookmarks(givenArticle, getApplication());
+    }
+
+    public void removeFromBookmarks(Article givenArticle) {
+        bookmarksRepository.removeFromBookmarks(givenArticle, getApplication());
+    }
 
 
 }// end AllArticlesTabViewModel

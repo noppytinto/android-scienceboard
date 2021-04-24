@@ -184,6 +184,11 @@ public class HistoryFragment extends Fragment implements
         }
     }
 
+    @Override
+    public void onBookmarksButtonClicked(int position) {
+
+    }
+
     private void showCenteredToast(String message) {
         if(toast!=null) toast.cancel();
         toast = Toast.makeText(requireContext(),message, Toast.LENGTH_SHORT);

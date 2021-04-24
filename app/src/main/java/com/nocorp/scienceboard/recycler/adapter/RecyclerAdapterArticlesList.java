@@ -48,6 +48,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
 
     public interface OnArticleClickedListener {
         public void onArticleClicked(int position, View itemView);
+        public void onBookmarksButtonClicked(int position);
     }
 
 
@@ -155,6 +156,21 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
         String thumbnailUrl = item.getThumbnailUrl();
         String readablePubDate = buildPubDate(item);
         String title = item.getTitle();
+        boolean visited = item.isVisited();
+        boolean bookmarked = item.isBookmarked();
+
+
+        if(visited)
+            holder.visitedIcon.setVisibility(View.VISIBLE);
+        else
+            holder.visitedIcon.setVisibility(View.GONE);
+
+
+        if(bookmarked)
+            holder.bookmarkButton.setChecked(true);
+        else
+            holder.bookmarkButton.setChecked(false);
+
 
         if(thumbnailUrl==null) {
             holder.hideCardView();
@@ -208,8 +224,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
                         .into(holder.thumbnail);
 
             } catch (Exception e) {
-                e.printStackTrace();
-                Log.d(TAG, "SCIENCE_BOARD - buildArticleItem: cannot set thumbnail in recycler " + e.getMessage());
+                Log.e(TAG, "SCIENCE_BOARD - buildArticleItem: cannot set thumbnail in recycler " + e.getMessage());
             }
         }
 
@@ -251,8 +266,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
                         .into(holder.thumbnail);
 
             } catch (Exception e) {
-                e.printStackTrace();
-                Log.d(TAG, "SCIENCE_BOARD - buildHistoryItem: cannot set thumbnail in recycler " + e.getMessage());
+                Log.e(TAG, "SCIENCE_BOARD - buildHistoryItem: cannot set thumbnail in recycler " + e.getMessage());
             }
         }
 

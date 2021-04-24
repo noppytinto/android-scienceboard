@@ -31,6 +31,8 @@ public class Article extends ListItem implements Comparable<Article>, Serializab
     @ColumnInfo(name = "source_real_name")
     private String sourceRealName;
     private List<String> keywords;
+    private boolean visited;
+    private boolean bookmarked;
 
 
     public Article() {
@@ -139,5 +141,21 @@ public class Article extends ListItem implements Comparable<Article>, Serializab
 
     public void setKeywords(List<String> keywords) {
         this.keywords = keywords;
+    }
+
+    public boolean isVisited() {
+        return visited;
+    }
+
+    public void setVisited(boolean visited) {
+        this.visited = visited;
+    }
+
+    public boolean isBookmarked() {
+        return bookmarked;
+    }
+
+    public void setBookmarked(boolean bookmarked) {
+        this.bookmarked = bookmarked;
     }
 }// end Article

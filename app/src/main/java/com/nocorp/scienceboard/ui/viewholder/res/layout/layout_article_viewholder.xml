@@ -51,7 +51,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:ellipsize="end"
-            android:maxLines="3"
+            android:maxLines="4"
             android:paddingBottom="5dp"
             android:textColor="@color/black"
             android:textSize="16sp"
@@ -60,17 +60,19 @@
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="Is my phone compatible with Boost Mobile?"
-            />
+            tools:text="Is my phone compatibIs my phone compatible with Boost Mobile?lIs my phone compatible with Boost Mobile?e with Boost Mobile?" />
 
         <TextView
             android:id="@+id/textView_articleViewholder_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:ellipsize="end"
             android:text="@string/test"
             android:textColor="@color/gray"
             android:textSize="12sp"
+            app:layout_constraintEnd_toStartOf="@+id/toggleButton_articleViewholder_addToBookmarks"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="@+id/textView_articleViewholder_title"
             app:layout_constraintTop_toBottomOf="@+id/textView_articleViewholder_title"
             tools:text="Physics / 1h" />
@@ -83,6 +85,8 @@
             android:layout_marginStart="8dp"
             android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="@+id/textView_articleViewholder_info"
+            app:layout_constraintEnd_toStartOf="@+id/toggleButton_articleViewholder_addToBookmarks"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toEndOf="@+id/textView_articleViewholder_info"
             app:layout_constraintTop_toTopOf="@+id/textView_articleViewholder_info"
             app:srcCompat="@drawable/ic_outlined_eye_gray"

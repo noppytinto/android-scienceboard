@@ -34,7 +34,8 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 
-public class MainActivity extends AppCompatActivity implements NavController.OnDestinationChangedListener {
+public class MainActivity extends AppCompatActivity
+        implements NavController.OnDestinationChangedListener {
     private final String TAG = this.getClass().getSimpleName();
     private NavController navController;
     private BottomNavigationView bottomNavBar;
@@ -52,7 +53,6 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
     private TopicRepository topicRepository;
     private TimeMachineViewModel timeMachineViewModel;
 
-
     //
     private final int NUM_ADS_TO_LOAD = 5;
 
@@ -69,9 +69,6 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
 
         loadTopics();
     }
-
-
-
 
     @Override
     protected void onResume() {
@@ -119,9 +116,16 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause: called");
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         viewBinding = null;
+        Log.d(TAG, "onDestroy: called");
     }
 
 
@@ -129,7 +133,6 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
 
 
     //------------------------------------------------------------------------------ MY METHODS
-
 
     private void initView() {
         viewBinding = ActivityMainBinding.inflate(getLayoutInflater());
@@ -337,8 +340,5 @@ public class MainActivity extends AppCompatActivity implements NavController.OnD
         toast = Toast.makeText(this,message, Toast.LENGTH_SHORT);
         toast.show();
     }
-
-
-
 
 }// end MainActivity

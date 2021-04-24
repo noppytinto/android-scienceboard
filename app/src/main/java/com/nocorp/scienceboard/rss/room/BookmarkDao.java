@@ -22,4 +22,7 @@ public interface BookmarkDao {
 
     @Query("SELECT 1 FROM BookmarkArticle WHERE id = :givenIdentifier")
     boolean checkDuplication(String givenIdentifier);
+
+    @Query("SELECT EXISTS(SELECT * FROM bookmarkarticle WHERE id = :articleId)")
+    public boolean isInBookmarks(String articleId);
 }
