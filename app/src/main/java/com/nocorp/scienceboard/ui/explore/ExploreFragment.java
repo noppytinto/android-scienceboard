@@ -46,7 +46,7 @@ public class ExploreFragment extends Fragment{
     private View view;
     private FloatingActionButton customizeHomeButton;
     private Chip chipTimeMachine;
-    private ExtendedFloatingActionButton timeMachineEnabledIndicator;
+    private FloatingActionButton timeMachineEnabledIndicator;
 
     // viewmodels
     private TimeMachineViewModel timeMachineViewModel;
@@ -238,6 +238,13 @@ public class ExploreFragment extends Fragment{
         chipTimeMachine.setText(ddmmyyyy_dateFormat);
         chipTimeMachine.setChipStrokeWidth(DATE_PICKER_SET_CHIP_STROKE_WIDTH);
         chipTimeMachine.setChipStrokeColor(ColorStateList.valueOf(getResources().getColor(R.color.primary_blue)));
+//        chipTimeMachine.setCloseIconVisible(true);
+//        chipTimeMachine.setOnCloseIconClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//
+//            }
+//        });
     }
 
     private void removeTimeMachineModeLayout() {

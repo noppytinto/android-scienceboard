@@ -157,18 +157,17 @@
         tools:visibility="visible" />
 
 
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/floatingActionButton_exploreFragment_timeMachine"
-        android:layout_width="35dp"
-        android:layout_height="35dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginBottom="16dp"
         android:clickable="false"
-        android:src="@drawable/ic_edit_white"
+        android:src="@drawable/ic_fast_rewind"
         android:visibility="gone"
         app:backgroundTint="@color/primary_blue"
         app:fabSize="mini"
-        app:icon="@drawable/ic_baseline_fast_rewind_24"
         app:layout_anchor="@id/viewPager_exploreFragment"
         app:layout_anchorGravity="bottom|left"
         tools:visibility="visible" />
