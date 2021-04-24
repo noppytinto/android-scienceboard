@@ -18,8 +18,8 @@
         app:layout_constraintDimensionRatio="w,16:10"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/cardView_historyViewHolder_title"
-        app:layout_constraintWidth_min="100dp"
-        app:layout_constraintWidth_max="100dp"
+        app:layout_constraintWidth_min="90dp"
+        app:layout_constraintWidth_max="90dp"
         >
 
         <ImageView
@@ -67,7 +67,6 @@
             android:id="@+id/textView_historyViewHolder_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:text="@string/test"
             android:textColor="@color/gray"

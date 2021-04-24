@@ -69,6 +69,8 @@
     <string name="slash_formatted_date">%1$d/%2$d/%3$d</string>
     <string name="today_label_date_picker">Today</string>
     <string name="date_picker_label">Go back in time!</string>
+    <string name="today_date_picker_label">Today</string>
+    <string name="scienceboard_logo_label">ScienceBoard</string>
 
 
 </resources>

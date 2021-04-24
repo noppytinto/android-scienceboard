@@ -17,7 +17,7 @@
             android:id="@+id/toolbar_exploreFragment"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:elevation="7dp"
+            android:elevation="10dp"
             app:layout_scrollFlags="scroll|enterAlways">
 
 
@@ -33,14 +33,12 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="start"
                     android:fontFamily="@font/playfair_display_black"
-                    android:text="ScienceBoard"
+                    android:text="@string/scienceboard_logo_label"
                     android:textColor="@color/black"
                     android:textSize="@dimen/fragment_title_text_size"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
-
-
 
 
                 <com.google.android.material.chip.Chip
@@ -49,9 +47,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
                     android:checkable="false"
-                    android:text="Today"
+                    android:text="@string/today_date_picker_label"
                     app:chipIcon="@drawable/ic_calendar"
-                    app:iconStartPadding="10dp"
+                    app:iconStartPadding="8dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
