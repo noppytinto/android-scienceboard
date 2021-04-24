@@ -13,10 +13,12 @@ import com.nocorp.scienceboard.ui.tabs.tech.TechTabFragment;
 
 public class HomeViewPagerAdapter extends FragmentStateAdapter {
     private final String TAG = this.getClass().getSimpleName();
+    private int itemCount;
 
     public HomeViewPagerAdapter(@NonNull FragmentManager fm,
-                                @NonNull Lifecycle lifecycle) {
+                                @NonNull Lifecycle lifecycle, int itemCount) {
         super(fm, lifecycle);
+        this.itemCount = itemCount;
     }
 
     @NonNull
@@ -48,6 +50,11 @@ public class HomeViewPagerAdapter extends FragmentStateAdapter {
 
     @Override
     public int getItemCount() {
-        return 6;
+        return itemCount;
     }
+
+//    public void removePage(int id) {
+//
+//    }
+
 }

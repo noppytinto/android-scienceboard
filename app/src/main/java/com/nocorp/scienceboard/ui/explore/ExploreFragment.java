@@ -33,6 +33,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.android.material.transition.MaterialElevationScale;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentExploreBinding;
+import com.nocorp.scienceboard.ui.tabs.tech.TechTabFragment;
 import com.nocorp.scienceboard.ui.timemachine.DatePickerFragment;
 import com.nocorp.scienceboard.ui.timemachine.TimeMachineViewModel;
 import com.nocorp.scienceboard.viewpager.HomeViewPagerAdapter;
@@ -62,6 +63,8 @@ public class ExploreFragment extends Fragment{
     private final int TABS_OFFSCREEN_PAGE_LIMIT = 1;
     private long datePickerCalendarDateInMillis;
     private int MONTH_OFFSET_CORRECTION = 1;
+    private int TAB_COUNT = 6;
+
 
 
 
@@ -150,11 +153,10 @@ public class ExploreFragment extends Fragment{
         FragmentManager fm = getChildFragmentManager();
         Lifecycle lifecycle = getViewLifecycleOwner().getLifecycle();
 
-        HomeViewPagerAdapter viewPagerAdapter = new HomeViewPagerAdapter(fm, lifecycle);
+        HomeViewPagerAdapter viewPagerAdapter = new HomeViewPagerAdapter(fm, lifecycle, TAB_COUNT);
         viewPager.setAdapter(viewPagerAdapter);
         viewPager.setUserInputEnabled(true); // disable/enable horiz. swipe to scroll tabs gestures
         viewPager.setOffscreenPageLimit(TABS_OFFSCREEN_PAGE_LIMIT);// TODO: this might solve the "blank tab" problem, but needs more investigation, since the default strategy makes more sense
-
         setupTabsStyle(tabLayout, viewPager);
         defineOnTabChangedBehavior(viewPager);
     }
@@ -183,6 +185,11 @@ public class ExploreFragment extends Fragment{
             }
         });
         tabLayoutMediator.attach();
+
+
+
+//        viewPager.removeViewAt(2);
+//        tabLayout.removeViewAt(2);
     }
 
     private void defineOnTabChangedBehavior(ViewPager2 viewPager) {
