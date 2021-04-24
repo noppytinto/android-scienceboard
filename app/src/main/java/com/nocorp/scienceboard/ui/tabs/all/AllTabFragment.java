@@ -115,36 +115,33 @@ public class AllTabFragment extends Fragment implements
 
     private void observeSourcesFetched() {
 
-        sourceViewModel.getObservableAllSources().observe(getViewLifecycleOwner(), new Observer<List<Source>>() {
-            @Override
-            public void onChanged(List<Source> sources) {
-                Log.d(TAG, "observeSourcesFetched: called");
-                if(sources == null) {
-                    //TODO: error message
-                    Log.e(TAG, "SCIENCE_BOARD - loadSources: an error occurrend when fetching sources");
-                    showCenteredToast("an error occurred when fetching sources from remote DB");
-                }
-                else if(sources.isEmpty()) {
-                    //TODO: warning message, no topics in memory
-                    Log.w(TAG, "SCIENCE_BOARD - loadSources: no sources in remote DB");
-                }
-                else {
-                    // TODO
-                    sourcesFetched = new ArrayList<>(sources);
-                    long targetDate = currentDateInMillis;
+        sourceViewModel.getObservableAllSources().observe(getViewLifecycleOwner(), sources -> {
+            Log.d(TAG, "observeSourcesFetched: called");
+            if(sources == null) {
+                //TODO: error message
+                Log.e(TAG, "SCIENCE_BOARD - loadSources: an error occurrend when fetching sources");
+                showCenteredToast("an error occurred when fetching sources from remote DB");
+            }
+            else if(sources.isEmpty()) {
+                //TODO: warning message, no topics in memory
+                Log.w(TAG, "SCIENCE_BOARD - loadSources: no sources in remote DB");
+            }
+            else {
+                // TODO
+                sourcesFetched = new ArrayList<>(sources);
+                long targetDate = currentDateInMillis;
 
-                    Log.d(TAG, "onChanged: using sources");
-                    if (timeMachineViewModel.timeMachineIsEnabled()) {
-                        targetDate = timeMachineViewModel.getPickedDate();
-                    }
-
-                    allTabViewModel.fetchArticles_backInTime(
-                            sources,
-                            NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
-                            false,
-                            targetDate);
-
+                Log.d(TAG, "onChanged: using sources");
+                if (timeMachineViewModel.timeMachineIsEnabled()) {
+                    targetDate = timeMachineViewModel.getPickedDate();
                 }
+
+                allTabViewModel.fetchArticles_backInTime(
+                        sources,
+                        NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
+                        false,
+                        targetDate);
+
             }
         });
     }
@@ -197,14 +194,13 @@ public class AllTabFragment extends Fragment implements
     }
 
     private void observeTimeMachineStatus() {
-        timeMachineViewModel.getObservablePickedDate().observe(getViewLifecycleOwner(), new Observer<Long>() {
-            @Override
-            public void onChanged(Long pickedDate) {
-                if(timeMachineViewModel.isDateChanged()) {
-                    Log.d(TAG, "observeTimeMachineStatus: using time machine");
-                    timeMachineViewModel.setDateChanged(false);
-                    refreshArticles();
-                }
+        timeMachineViewModel.getObservablePickedDate().observe(getViewLifecycleOwner(), pickedDate -> {
+            if(timeMachineViewModel.isDateChanged()) {
+                Log.d(TAG, "observeTimeMachineStatus: using time machine");
+                timeMachineViewModel.setDateChanged(false);
+                recyclerAdapterArticlesList.clearList();
+                progressIndicator.setVisibility(View.VISIBLE);
+                refreshArticles();
             }
         });
     }

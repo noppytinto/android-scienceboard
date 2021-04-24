@@ -2,12 +2,15 @@ package com.nocorp.scienceboard.ui.explore;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -21,7 +24,6 @@ import androidx.navigation.Navigation;
 import androidx.navigation.fragment.FragmentNavigator;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-import androidx.viewbinding.ViewBinding;
 import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -44,13 +46,15 @@ public class ExploreFragment extends Fragment{
     private View view;
     private FloatingActionButton customizeHomeButton;
     private Chip chipTimeMachine;
-    private ExtendedFloatingActionButton fabTimeMachine;
+    private ExtendedFloatingActionButton timeMachineEnabledIndicator;
 
     // viewmodels
     private TimeMachineViewModel timeMachineViewModel;
 
     // animations
     private int androidDefaultShortAnimationDuration;
+    private final long ANIMATION_DURATION = 4000L;
+    private ObjectAnimator objectAnimator;
 
     // parameters
     private final int DATE_PICKER_DEFAULT_CHIP_STROKE_WIDTH = 0;
@@ -119,7 +123,7 @@ public class ExploreFragment extends Fragment{
         ViewPager2 viewPager = viewBinding.viewPagerExploreFragment;
         customizeHomeButton = viewBinding.floatingActionButtonExploreFragmentCustomizeTopics;
         chipTimeMachine = viewBinding.chipExploreFragment;
-        fabTimeMachine = viewBinding.floatingActionButtonExploreFragmentTimeMachine;
+        timeMachineEnabledIndicator = viewBinding.floatingActionButtonExploreFragmentTimeMachine;
 
         // values
         androidDefaultShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
@@ -225,9 +229,8 @@ public class ExploreFragment extends Fragment{
 
     private void applyTimeMachineModeLayout(Long pickedDateInMillis) {
         datePickerCalendarDateInMillis = pickedDateInMillis;
-
         Calendar cal = convertMillisInCalendar(pickedDateInMillis);
-        applyCrossfadeEnter(fabTimeMachine, androidDefaultShortAnimationDuration);
+        blinkView(timeMachineEnabledIndicator);
         String ddmmyyyy_dateFormat = getString(R.string.slash_formatted_date,
                 cal.get(Calendar.DAY_OF_MONTH),
                 cal.get(Calendar.MONTH)+MONTH_OFFSET_CORRECTION,
@@ -241,7 +244,7 @@ public class ExploreFragment extends Fragment{
         datePickerCalendarDateInMillis = System.currentTimeMillis();
         chipTimeMachine.setText(R.string.today_label_date_picker);
         chipTimeMachine.setChipStrokeWidth(DATE_PICKER_DEFAULT_CHIP_STROKE_WIDTH);
-        applyCrossfadeExit(fabTimeMachine, androidDefaultShortAnimationDuration);
+        stopBlinkingView(timeMachineEnabledIndicator);
     }
 
 
@@ -282,6 +285,41 @@ public class ExploreFragment extends Fragment{
 
         Navigation.findNavController(view)
                 .navigate(R.id.action_navigation_home_to_topicsFragment,null,null, animations);
+    }
+
+
+    private void blinkView(View view) {
+        view.setVisibility(View.VISIBLE);
+        fadeIn(view);
+    }
+
+    private void fadeIn(View view) {
+        objectAnimator = ObjectAnimator.ofFloat(view, "alpha", 0f, 1f);
+        objectAnimator.setDuration(ANIMATION_DURATION);
+        objectAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+        objectAnimator.setRepeatCount(ObjectAnimator.INFINITE);
+        objectAnimator.setRepeatMode(ObjectAnimator.REVERSE);
+        objectAnimator.start();
+    }
+
+
+    private void fadeOut(View view) {
+        ObjectAnimator objectAnimator = ObjectAnimator.ofFloat(view, "alpha", 1f, 0f);
+        objectAnimator.setDuration(2000L);
+        objectAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                fadeIn(view);
+            }
+        });
+        objectAnimator.start();
+    }
+
+    private void stopBlinkingView(View view) {
+        if(objectAnimator!=null) {
+            objectAnimator.cancel();
+            view.setVisibility(View.GONE);
+        }
     }
 
     private void applyCrossfadeEnter(View view, int duration) {

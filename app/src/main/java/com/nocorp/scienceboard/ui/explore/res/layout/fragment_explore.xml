@@ -121,24 +121,6 @@
     <!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
 
 
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/floatingActionButton_exploreFragment_timeMachine"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginBottom="16dp"
-        android:clickable="false"
-        android:src="@drawable/ic_edit_white"
-        android:text="Time Machine mode"
-        android:textAllCaps="false"
-        android:textSize="12sp"
-        android:visibility="gone"
-        app:backgroundTint="@color/primary_blue"
-        app:fabSize="mini"
-        app:icon="@drawable/ic_baseline_fast_rewind_24"
-        app:layout_anchor="@id/viewPager_exploreFragment"
-        app:layout_anchorGravity="bottom|left"
-        tools:visibility="visible" />
 
 
 
@@ -172,7 +154,23 @@
         app:layout_anchorGravity="bottom|right|end"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_behavior="com.nocorp.scienceboard.behavior.ScrollAwareFABBehavior"
+        tools:visibility="visible" />
 
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/floatingActionButton_exploreFragment_timeMachine"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="16dp"
+        android:clickable="false"
+        android:src="@drawable/ic_edit_white"
+        android:visibility="gone"
+        app:backgroundTint="@color/primary_blue"
+        app:fabSize="mini"
+        app:icon="@drawable/ic_baseline_fast_rewind_24"
+        app:layout_anchor="@id/viewPager_exploreFragment"
+        app:layout_anchorGravity="bottom|left"
         tools:visibility="visible" />
 
 
