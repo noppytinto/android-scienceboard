@@ -6,6 +6,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.nocorp.scienceboard.R;
@@ -16,7 +17,7 @@ public class HistoryViewHolder extends RecyclerView.ViewHolder  {
     public TextView title;
     public TextView pubDate;
     public CardView cardViewThumbnail;
-    public CardView cardViewTitle;
+    public ConstraintLayout cardViewTitle;
     public RecyclerAdapterArticlesList.OnArticleClickedListener listener;
 
 
