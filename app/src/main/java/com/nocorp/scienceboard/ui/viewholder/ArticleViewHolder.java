@@ -5,6 +5,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
@@ -14,7 +15,7 @@ public class ArticleViewHolder extends RecyclerView.ViewHolder  {
     public TextView title;
     public TextView pubDate;
     public CardView cardViewThumbnail;
-    public CardView cardViewTitle;
+    public ConstraintLayout containerTitle;
     public RecyclerAdapterArticlesList.OnArticleClickedListener listener;
 
 
@@ -25,13 +26,13 @@ public class ArticleViewHolder extends RecyclerView.ViewHolder  {
         this.title = itemView.findViewById(R.id.textView_articleViewholder_title);
         this.pubDate = itemView.findViewById(R.id.textView_articleViewholder_info);
         this.cardViewThumbnail = itemView.findViewById(R.id.cardView_articleViewholder_thumbnail);
-        this.cardViewTitle = itemView.findViewById(R.id.cardView_articleViewholder_title);
+        this.containerTitle = itemView.findViewById(R.id.container_articleViewholder_title);
 
         cardViewThumbnail.setOnClickListener(v -> {
             this.listener.onArticleClicked(getAdapterPosition(), itemView);
         });
 
-        cardViewTitle.setOnClickListener(v -> {
+        containerTitle.setOnClickListener(v -> {
             this.listener.onArticleClicked(getAdapterPosition(), itemView);
         });
 

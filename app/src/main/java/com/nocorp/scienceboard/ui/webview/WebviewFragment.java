@@ -645,7 +645,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         webviewViewModel.getObservableAddToBookmarksResponse().observe(getViewLifecycleOwner(), addedToBookmarks -> {
             if(addedToBookmarks) {
                 showCenteredToast("saved in bookmarks");
-                changeMenuItemIcon(bookmarkMenuItem, R.drawable.ic_bookmark_added_orange);
+                changeMenuItemIcon(bookmarkMenuItem, R.drawable.ic_bookmark_added_yellow);
                 articleAlreadyInBookmarks = true;
             }
             else {
@@ -822,7 +822,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
                 R.style.ScienceBoard_Button_Chip_Choice);
         newChip.setChipDrawable(chipDrawable);
         newChip.setText(name);
-        newChip.setTextAppearance(R.style.Cinemates_Button_Chip_Choice_TextAppearance);
+        newChip.setTextAppearance(R.style.ScienceBoard_Button_Chip_Choice_TextAppearance);
 
         int i = chipId++;
         newChip.setId(i);
@@ -952,7 +952,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         webviewViewModel.getObservableBookmarkDuplicationResponse().observe(getViewLifecycleOwner(), alreadyInBookmarks -> {
             if(alreadyInBookmarks) {
                 articleAlreadyInBookmarks = true;
-                changeMenuItemIcon(bookmarkMenuItem, R.drawable.ic_bookmark_added_orange);
+                changeMenuItemIcon(bookmarkMenuItem, R.drawable.ic_bookmark_added_yellow);
             }
             else articleAlreadyInBookmarks = false;
         });

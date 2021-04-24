@@ -4,7 +4,8 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/light_gray"
+    android:layout_marginLeft="8dp"
+    android:layout_marginRight="8dp"
     >
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -19,11 +20,13 @@
             android:layout_marginStart="8dp"
             android:background="@color/light_gray"
             app:cardCornerRadius="3dp"
-            app:cardElevation="0dp"
+            app:cardElevation="7dp"
             app:layout_constraintDimensionRatio="w,16:10"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/cardView2"
-            app:layout_constraintWidth_min="150dp">
+            app:layout_constraintWidth_min="150dp"
+            app:layout_constraintWidth_max="150dp"
+            >
 
 
             <ImageView
@@ -37,46 +40,37 @@
 
         </androidx.cardview.widget.CardView>
 
-        <androidx.cardview.widget.CardView
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/cardView2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="32dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginBottom="4dp"
-            android:background="@color/white"
-            app:cardCornerRadius="3dp"
-            app:cardElevation="@dimen/default_elevation"
+            android:layout_marginBottom="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHeight_min="100dp"
             app:layout_constraintStart_toEndOf="@+id/cardView_layoutNativeAdArticlesListLevel_adImage"
             app:layout_constraintTop_toTopOf="parent">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/white">
-
-                <TextView
+            <TextView
                     android:id="@+id/textView_layoutNativeAdArticlesListLevel_headline"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="16dp"
-                    android:ellipsize="end"
-                    android:maxLines="4"
-                    android:paddingBottom="5dp"
-                    android:textColor="@color/black"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.0"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:text="ad name" />
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:ellipsize="end"
+                android:maxLines="3"
+                android:paddingBottom="5dp"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="ad name"
+                />
 
                 <ImageView
                     android:id="@+id/textView_layoutNativeAdArticlesListLevel_adAttribution"
@@ -104,9 +98,17 @@
                     app:layout_constraintTop_toBottomOf="@+id/textView_layoutNativeAdArticlesListLevel_headline"
                     app:strokeColor="@color/light_gray"
                     tools:text="visit" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-        </androidx.cardview.widget.CardView>
+        <View
+            android:id="@+id/divider_layoutNativeAdArticlesListLevel"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginEnd="8dp"
+            android:background="#ECECEC"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/cardView2"
+            app:layout_constraintTop_toBottomOf="@+id/cardView2" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
