@@ -15,10 +15,12 @@
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar_exploreFragment"
+            style="@style/ScienceBoard.Toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:elevation="10dp"
-            app:layout_scrollFlags="scroll|enterAlways">
+            app:layout_scrollFlags="scroll|enterAlways"
+            >
 
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -32,10 +34,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="start"
-                    android:fontFamily="@font/playfair_display_black"
                     android:text="@string/scienceboard_logo_label"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/fragment_title_text_size"
+                    style="@style/ScienceBoard.Toolbar.Logo"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -68,10 +68,8 @@
             android:layout_height="40dp"
             android:minHeight="30dp"
             app:layout_scrollFlags="snap"
-            app:tabIndicatorColor="@color/orange"
-            app:tabIndicatorHeight="@dimen/tab_indicator_height"
-            app:tabMode="scrollable"
-            app:tabRippleColor="@color/orange">
+            style="@style/ScienceBoard.Tab.Tablayout"
+            >
 
             <com.google.android.material.tabs.TabItem
                 android:layout_width="wrap_content"

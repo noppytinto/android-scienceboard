@@ -2,7 +2,7 @@
     <!-- Base application theme. -->
     <style name="Theme.ScienceBoard" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/black</item>
+        <item name="colorPrimary">@color/dark</item>
         <item name="colorPrimaryVariant">@color/black</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
@@ -12,6 +12,32 @@
         <!-- Customize your theme here. -->
         <item name="colorError">@color/red</item>
         <item name="colorOnError">@color/white</item>
+        <item name="colorSurface">@color/black</item>
+
+
+
+        <!-- TEXT -->
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="logoTextColor">@color/white</item>
+
+        <!-- TABS -->
+        <item name="myTabTextColor">@color/dark_gray</item>
+        <item name="tabSelectedTextColor">@color/white</item>
+
+        <!-- TOOLBAR -->
+        <item name="toolbarBackground">@color/black</item>
+        <item name="toolbarTitleTextColor">@color/white</item>
+
+        <!-- ARTICLE VIEWHOLDER -->
+        <item name="articleDividerColor">@color/gray_300</item>
+        <item name="articleBookmarksIconColor">@color/gray_300</item>
+        <item name="articleCheckedBookmarksIconColor">@color/yellow_A700</item>
+        <item name="articleBookmarksIconRippleColor">@color/yellow_A700</item>
+
+
+
+
+
 
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
@@ -36,7 +62,7 @@
 
 
     <style name="ScienceBoard.PopupMenuListView" parent="@style/Widget.AppCompat.ListView.DropDown">
-        <item name="android:divider">@color/light_gray</item>
+        <item name="android:divider">@color/gray_500</item>
         <item name="android:dividerHeight">1dp</item>
     </style>
 

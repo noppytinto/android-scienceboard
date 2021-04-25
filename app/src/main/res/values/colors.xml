@@ -1,14 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    // theme colors
+    <color name="dark">#1C1C1C</color>
+
+
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
-    <color name="light_gray">#F2F2F2</color>
-    <color name="gray">#6E6E6E</color>
     <color name="orange_light">#F65700</color>
     <color name="orange_dark">#872F00</color>
     <color name="green">#4CAF50</color>
     <color name="red">#D32F2F</color>
+
+
+    <!-- GRAY -->
+    <color name="gray_900">#212121</color>
+    <color name="gray_800">#424242</color>
+    <color name="gray_700">#616161</color>
+    <color name="gray_600">#757575</color>
+    <color name="gray_500">#9E9E9E</color>
+    <color name="gray_400">#BDBDBD</color>
+    <color name="gray_300">#E0E0E0</color>
+    <color name="gray_200">#EEEEEE</color>
+
+    <color name="gray">@color/gray_800</color>
+    <color name="light_gray">@color/gray_500</color>
+
+
+
+
+    <!-- YELLOW -->
+    <color name="yellow_A700">#FFD600</color>
+
+
+
+
+
+
+
+
 
 
 

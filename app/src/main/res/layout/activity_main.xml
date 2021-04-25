@@ -16,6 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:elevation="@dimen/default_elevation"
+            android:background="?attr/colorPrimary"
             app:titleTextColor="?colorOnPrimary">
 
         </androidx.appcompat.widget.Toolbar>

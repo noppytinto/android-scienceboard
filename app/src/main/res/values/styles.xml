@@ -92,6 +92,26 @@
 
 
 
+    <!-- TABS -->
+    <style name="ScienceBoard.Tab.Tablayout" parent="Widget.MaterialComponents.TabLayout">
+        <item name="tabIndicatorColor">@color/orange</item>
+        <item name="tabIndicatorHeight">4dp</item>
+        <item name="tabMode">scrollable</item>
+        <item name="tabRippleColor">@color/orange</item>
+        <item name="tabTextColor">?attr/myTabTextColor</item>
+    </style>
 
+
+    <!-- TOOLBAR -->
+    <style name="ScienceBoard.Toolbar" parent="Widget.MaterialComponents.Toolbar">
+        <item name="android:background">?attr/toolbarBackground</item>
+        <item name="titleTextColor">?attr/toolbarTitleTextColor</item>
+    </style>
+
+    <style name="ScienceBoard.Toolbar.Logo" parent="Widget.MaterialComponents.TextView">
+        <item name="android:textColor">?attr/logoTextColor</item>
+        <item name="android:textSize">@dimen/logo_text_size</item>
+        <item name="android:fontFamily">@font/playfair_display_black</item>
+    </style>
 
 </resources>

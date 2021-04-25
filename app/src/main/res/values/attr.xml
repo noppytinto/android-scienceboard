@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="tabSe" format="reference"/>
+    <attr name="textColorDisConnected" format="reference"/>
+
+
+    <attr name="toolbarBackground" format="reference|color"/>
+    <attr name="myTabTextColor" format="reference|color"/>
+    <attr name="toolbarTitleTextColor" format="reference|color"/>
+
+
+    <attr name="logoTextColor" format="reference|color"/>
+
+
+    <!-- ARTICLE VIEWHOLDER -->
+    <attr name="articleDividerColor" format="reference|color"/>
+    <attr name="articleBookmarksIconColor" format="reference|color"/>
+    <attr name="articleCheckedBookmarksIconColor" format="reference|color"/>
+    <attr name="articleBookmarksIconRippleColor" format="reference|color"/>
+
+
+</resources>
