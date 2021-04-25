@@ -15,10 +15,11 @@ import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.model.Article;
-import com.nocorp.scienceboard.model.BookmarkArticle;
+import com.nocorp.scienceboard.bookmarks.model.BookmarkArticle;
 import com.nocorp.scienceboard.model.LoadingView;
 import com.nocorp.scienceboard.history.model.HistoryArticle;
 import com.nocorp.scienceboard.recycler.viewholder.LoadingViewHolder;
+import com.nocorp.scienceboard.ui.viewholder.BookmarkViewHolder;
 import com.nocorp.scienceboard.ui.viewholder.HistoryViewHolder;
 import com.nocorp.scienceboard.utility.ad.admob.model.ListAd;
 import com.nocorp.scienceboard.ui.viewholder.ArticleViewHolder;
@@ -45,6 +46,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
     private static final int SMALL_AD_TYPE = 2;
     private static final int HISTORY_ARTICLE_TYPE = 3;
     private static final int BOOKMARK_ARTICLE_TYPE = 4;
+
 
     public interface OnArticleClickedListener {
         public void onArticleClicked(int position, View itemView);
@@ -106,9 +108,8 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
             return new HistoryViewHolder(view, listener);
         }
         else if(viewType == BOOKMARK_ARTICLE_TYPE) {
-            //TODO create visited article view holder
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_article_viewholder, parent, false);
-            return new ArticleViewHolder(view, listener);
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_bookmark_viewholder, parent, false);
+            return new BookmarkViewHolder(view, listener);
         }
         else {
             return new ArticleViewHolder(null, listener);
@@ -139,11 +140,10 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
             buildHistoryItem((HistoryViewHolder) holder, article);
         }
         else if(getItemViewType(position) == BOOKMARK_ARTICLE_TYPE) {
-            //TODO create BookmarkedArticle view holder
             BookmarkArticle article = (BookmarkArticle) recyclerList.get(position);
 
             //
-            buildArticleItem((ArticleViewHolder) holder, article);
+            buildBookmarkItem((BookmarkViewHolder) holder, article);
         }
 
     }
@@ -170,6 +170,101 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
             holder.bookmarkButton.setChecked(true);
         else
             holder.bookmarkButton.setChecked(false);
+
+
+        if(thumbnailUrl==null) {
+            holder.hideCardView();
+        }
+        else {
+            holder.showCardView();
+            try {
+                // TODO: crahses on andorid 21 (resource "thumbnail" not found)
+                RequestOptions gildeOptions = new RequestOptions()
+                        .fallback(R.drawable.broken_image)
+                        .placeholder(R.drawable.placeholder_image)
+                        .fitCenter();
+//                        .error(R.drawable.default_avatar)
+//                        .diskCacheStrategy(DiskCacheStrategy.ALL);
+//                        .priority(Priority.HIGH);
+
+
+//                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+//                    Glide.with(holder.itemView.getContext())
+//                            .load(thumbnailUrl)
+//                            .apply(gildeOptions)
+//                            .transition(withCrossFade())
+//                            .thumbnail(/*sizeMultiplier = 0.25% less than original*/ 0.25f)
+//                            .listener(new RequestListener<Drawable>() {
+//                                          @Override
+//                                          public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+//                                              holder.hideCardView();
+//                                              return false;
+//                                          }
+//
+//                                          @Override
+//                                          public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+////                                          holder.showCardView();
+//                                              return false;
+//                                          }
+//                                      }
+//                            )
+//                            .into(holder.thumbnail);
+//                } else {
+//                    Glide.with(holder.itemView.getContext())
+//                            .load(thumbnailUrl)
+//                            .apply(gildeOptions)
+//                            .thumbnail(/*sizeMultiplier = 0.25% less than original*/ 0.25f)
+//                            .into(holder.thumbnail);
+//                }
+                Glide.with(holder.itemView.getContext())
+                        .load(thumbnailUrl)
+                        .apply(gildeOptions)
+                        .thumbnail(/*sizeMultiplier = 0.25% less than original*/ THUMBNAIL_SIZE_MULTIPLIER)
+                        .transition(withCrossFade())
+                        .into(holder.thumbnail);
+
+            } catch (Exception e) {
+                Log.e(TAG, "SCIENCE_BOARD - buildArticleItem: cannot set thumbnail in recycler " + e.getMessage());
+            }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            holder.title.setText(Html.fromHtml(title, Html.FROM_HTML_MODE_COMPACT));
+        } else {
+            holder.title.setText(Html.fromHtml(title));
+        }
+
+        //
+        String sourceName = item.getSourceRealName();
+        if(sourceName != null) readablePubDate = sourceName + " / " + readablePubDate;
+
+        holder.pubDate.setText(readablePubDate);
+    }
+
+    private void buildBookmarkItem(BookmarkViewHolder holder, Article item) {
+        String thumbnailUrl = item.getThumbnailUrl();
+        String readablePubDate = buildPubDate(item);
+        String title = item.getTitle();
+        boolean isVisited = item.isVisited();
+        boolean isSelected = item.isSelected();
+        boolean isEditable = item.isEditable();
+
+
+        if(isEditable)
+            holder.checkbox.setVisibility(View.VISIBLE);
+        else
+            holder.checkbox.setVisibility(View.GONE);
+
+        if(isVisited)
+            holder.visitedIcon.setVisibility(View.VISIBLE);
+        else
+            holder.visitedIcon.setVisibility(View.GONE);
+
+
+        if(isSelected)
+            holder.checkbox.setChecked(true);
+        else
+            holder.checkbox.setChecked(false);
 
 
         if(thumbnailUrl==null) {
@@ -303,6 +398,10 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
         return ( (recyclerList != null) && (recyclerList.size() != 0) ? recyclerList.get(position) : null);
     }
 
+    public List<ListItem> getAllItems() {
+        return recyclerList;
+    }
+
     public void loadNewData(List<ListItem> newList) {
         recyclerList = newList;
         notifyDataSetChanged();
@@ -342,8 +441,52 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
         }
     }
 
+    public void removeItem(ListItem item) {
+        if(recyclerList!=null) {
+            recyclerList.remove(item);
+            notifyDataSetChanged();
+        }
+    }
 
 
+
+    public void enableEditMode() {
+        if(recyclerList!=null) {
+            for(ListItem article : recyclerList) {
+                article.setEditable(true);
+                article.setSelected(false);
+            }
+            notifyDataSetChanged();
+        }
+    }
+
+    public void  disableEditMode() {
+        if(recyclerList!=null) {
+            for(ListItem article : recyclerList) {
+                article.setEditable(false);
+                article.setSelected(false);
+            }
+            notifyDataSetChanged();
+        }
+    }
+
+    public void selectAllItems() {
+        if(recyclerList!=null) {
+            for(ListItem article : recyclerList) {
+                article.setSelected(true);
+            }
+            notifyDataSetChanged();
+        }
+    }
+
+    public void deselectAllItems() {
+        if(recyclerList!=null) {
+            for(ListItem article : recyclerList) {
+                article.setSelected(false);
+            }
+            notifyDataSetChanged();
+        }
+    }
 
 
 }// end RecyclerAdapterFeedsList

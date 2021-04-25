@@ -7,6 +7,8 @@ import com.nocorp.scienceboard.utility.MyValues.ItemType;
 public abstract class ListItem {
     @Ignore
     private ItemType itemType;
+    private boolean isSelected;
+    private boolean isEditable;
 
     public ListItem() {
     }
@@ -17,5 +19,22 @@ public abstract class ListItem {
 
     public void setItemType(ItemType itemType) {
         this.itemType = itemType;
+    }
+
+
+    public boolean isSelected() {
+        return isSelected;
+    }
+
+    public void setSelected(boolean selected) {
+        isSelected = selected;
+    }
+
+    public boolean isEditable() {
+        return isEditable;
+    }
+
+    public void setEditable(boolean editable) {
+        isEditable = editable;
     }
 }

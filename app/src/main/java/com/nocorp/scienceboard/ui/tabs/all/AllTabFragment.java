@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,11 +20,14 @@ import android.widget.Toast;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.nocorp.scienceboard.MobileNavigationDirections;
 import com.nocorp.scienceboard.R;
+import com.nocorp.scienceboard.bookmarks.repository.BookmarksListOnChangedListener;
+import com.nocorp.scienceboard.bookmarks.repository.OnBookmarksCheckedListener;
 import com.nocorp.scienceboard.databinding.FragmentAllTabBinding;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
+import com.nocorp.scienceboard.ui.bookmarks.BookmarksViewModel;
 import com.nocorp.scienceboard.ui.timemachine.OnDateChangedListener;
 import com.nocorp.scienceboard.ui.timemachine.TimeMachineViewModel;
 import com.nocorp.scienceboard.ui.topics.TopicsViewModel;
@@ -36,7 +38,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AllTabFragment extends Fragment implements
-        RecyclerAdapterArticlesList.OnArticleClickedListener, OnDateChangedListener {
+        RecyclerAdapterArticlesList.OnArticleClickedListener,
+        OnDateChangedListener,
+        BookmarksListOnChangedListener {
 
     private final String TAG = this.getClass().getSimpleName();
     private FragmentAllTabBinding viewBinding;
@@ -52,6 +56,7 @@ public class AllTabFragment extends Fragment implements
     private SourceViewModel sourceViewModel;
     private TopicsViewModel topicsViewModel;
     private TimeMachineViewModel timeMachineViewModel;
+    private BookmarksViewModel bookmarksViewModel;
 
     //
     private AdProvider adProvider;
@@ -61,7 +66,7 @@ public class AllTabFragment extends Fragment implements
 
     //
     private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 10;
-    private final int AD_DISTANCE = 5; // distance between teh ads (in terms of items)
+    private final int AD_DISTANCE = 5; // distance between ads (in terms of items)
     private long currentDateInMillis;
 
 
@@ -134,7 +139,7 @@ public class AllTabFragment extends Fragment implements
                     targetDate = timeMachineViewModel.getPickedDate();
                 }
 
-                allTabViewModel.fetchArticles_backInTime(
+                allTabViewModel.fetchArticles(
                         sources,
                         NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
                         false,
@@ -212,7 +217,7 @@ public class AllTabFragment extends Fragment implements
             targetDate = timeMachineViewModel.getPickedDate();
         }
 
-        allTabViewModel.fetchArticles_backInTime(
+        allTabViewModel.fetchArticles(
                 sourcesFetched,
                 NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
                 true,
@@ -245,6 +250,8 @@ public class AllTabFragment extends Fragment implements
         sourceViewModel = new ViewModelProvider(requireActivity()).get(SourceViewModel.class);
         allTabViewModel = new ViewModelProvider(this).get(AllTabViewModel.class);
         topicsViewModel = new ViewModelProvider(requireActivity()).get(TopicsViewModel.class);
+        bookmarksViewModel = new ViewModelProvider(requireActivity()).get(BookmarksViewModel.class);
+        bookmarksViewModel.setBookmarksListOnChangedListener(this);
         //
         currentDateInMillis = System.currentTimeMillis();
 
@@ -377,7 +384,7 @@ public class AllTabFragment extends Fragment implements
     private void showCenteredToast(String message) {
         if(toast!=null) toast.cancel();
         toast = Toast.makeText(requireContext(),message, Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.CENTER, 0, 0);
+//        toast.setGravity(Gravity.CENTER, 0, 0);
         toast.show();
     }
 
@@ -392,4 +399,10 @@ public class AllTabFragment extends Fragment implements
 
     }
 
+    @Override
+    public void onBookmarksListChanged() {
+        allTabViewModel.asyncBookmarksCheck(recyclerAdapterArticlesList.getAllItems(), () -> {
+            recyclerAdapterArticlesList.notifyDataSetChanged();
+        });
+    }
 }// end AllArticlesTabFragment

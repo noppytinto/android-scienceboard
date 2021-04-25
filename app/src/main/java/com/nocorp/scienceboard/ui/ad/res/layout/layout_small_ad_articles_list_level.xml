@@ -16,16 +16,15 @@
         <androidx.cardview.widget.CardView
             android:id="@+id/cardView_layoutNativeAdArticlesListLevel_adImage"
             android:layout_width="0dp"
-            android:layout_height="100dp"
+            android:layout_height="90dp"
             android:layout_marginStart="8dp"
-            android:background="@color/light_gray"
             app:cardCornerRadius="3dp"
             app:cardElevation="7dp"
             app:layout_constraintDimensionRatio="w,16:10"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/cardView2"
-            app:layout_constraintWidth_min="150dp"
-            app:layout_constraintWidth_max="150dp"
+            app:layout_constraintWidth_min="120dp"
+            app:layout_constraintWidth_max="120dp"
             >
 
 
@@ -45,20 +44,19 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHeight_min="100dp"
+            app:layout_constraintHeight_min="90dp"
             app:layout_constraintStart_toEndOf="@+id/cardView_layoutNativeAdArticlesListLevel_adImage"
             app:layout_constraintTop_toTopOf="parent">
 
             <TextView
-                    android:id="@+id/textView_layoutNativeAdArticlesListLevel_headline"
+                android:id="@+id/textView_layoutNativeAdArticlesListLevel_headline"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
                 android:ellipsize="end"
                 android:maxLines="3"
                 android:paddingBottom="5dp"
@@ -69,35 +67,36 @@
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:text="ad name"
-                />
+                tools:text="ad name" />
 
-                <ImageView
-                    android:id="@+id/textView_layoutNativeAdArticlesListLevel_adAttribution"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="4dp"
-                    android:layout_marginBottom="4dp"
-                    android:adjustViewBounds="true"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/buttonlayoutNativeAdArticlesListLevel_action"
-                    app:layout_constraintVertical_bias="1.0"
-                    app:srcCompat="@drawable/ic_ad_badge" />
+            <ImageView
+                android:id="@+id/textView_layoutNativeAdArticlesListLevel_adAttribution"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:layout_marginBottom="4dp"
+                android:adjustViewBounds="true"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/buttonlayoutNativeAdArticlesListLevel_action"
+                app:layout_constraintVertical_bias="1.0"
+                app:srcCompat="@drawable/ic_ad_badge" />
 
 
-                <Button
-                    android:id="@+id/buttonlayoutNativeAdArticlesListLevel_action"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:padding="3dp"
-                    android:textColor="@color/gray"
-                    app:layout_constraintEnd_toEndOf="@+id/textView_layoutNativeAdArticlesListLevel_headline"
-                    app:layout_constraintStart_toStartOf="@+id/textView_layoutNativeAdArticlesListLevel_headline"
-                    app:layout_constraintTop_toBottomOf="@+id/textView_layoutNativeAdArticlesListLevel_headline"
-                    app:strokeColor="@color/light_gray"
-                    tools:text="visit" />
+            <Button
+                android:id="@+id/buttonlayoutNativeAdArticlesListLevel_action"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:padding="3dp"
+                android:textColor="@color/gray"
+                app:layout_constraintEnd_toEndOf="@+id/textView_layoutNativeAdArticlesListLevel_headline"
+                app:layout_constraintStart_toStartOf="@+id/textView_layoutNativeAdArticlesListLevel_headline"
+                app:layout_constraintTop_toBottomOf="@+id/textView_layoutNativeAdArticlesListLevel_headline"
+                app:strokeColor="#ECECEC"
+                tools:text="visit" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <View

@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/option_webviewMenu_stop"
+        android:id="@+id/option_historyMenu_deleteAll"
         android:icon="@drawable/ic_delete"
         android:title="@string/string_clear_history"
         app:showAsAction="always" />

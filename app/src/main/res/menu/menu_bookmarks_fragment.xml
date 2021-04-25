@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <item
+        android:id="@+id/option_bookmarksMenu_selectAll"
+        android:icon="@drawable/ic_select_all_white"
+        android:title="Select All"
+        android:visible="false"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/option_bookmarksMenu_edit"
+        android:icon="@drawable/ic_edit_white"
+        android:title="Edit"
+        android:visible="false"
+        app:showAsAction="always" />
+
+
+    <item
+        android:id="@+id/option_bookmarksMenu_delete"
+        android:icon="@drawable/ic_delete"
+        android:title="Delete"
+        android:visible="false"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/option_bookmarksMenu_exit"
+        android:icon="@drawable/ic_clear"
+        android:title="Exit"
+        android:visible="false"
+        app:showAsAction="always" />
+
+
+</menu>

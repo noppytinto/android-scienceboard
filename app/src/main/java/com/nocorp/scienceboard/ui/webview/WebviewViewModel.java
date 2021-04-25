@@ -10,9 +10,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.nocorp.scienceboard.model.Article;
-import com.nocorp.scienceboard.model.BookmarkArticle;
+import com.nocorp.scienceboard.bookmarks.model.BookmarkArticle;
 import com.nocorp.scienceboard.system.ThreadManager;
-import com.nocorp.scienceboard.rss.room.BookmarkDao;
+import com.nocorp.scienceboard.bookmarks.room.BookmarkDao;
 import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
 
 import org.jetbrains.annotations.NotNull;

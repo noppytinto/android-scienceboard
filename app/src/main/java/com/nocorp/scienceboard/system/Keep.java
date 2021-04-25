@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard;
+package com.nocorp.scienceboard.system;
 
 
 import android.content.Context;

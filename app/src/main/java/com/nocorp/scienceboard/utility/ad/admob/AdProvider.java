@@ -42,19 +42,16 @@ public class AdProvider {
     public void initAdMob(Context context) {
         if(adMobInitialized) return;
 
-        MobileAds.initialize(context, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
-                Log.d(AdProvider.class.getSimpleName(), "SCIENCEBOARD - onInitializationComplete: admob initilized");
-                adMobInitialized = true;
-            }
+        MobileAds.initialize(context, initializationStatus -> {
+            Log.d(AdProvider.class.getSimpleName(), "SCIENCE_BOARD - onInitializationComplete: admob initilized");
+            adMobInitialized = true;
         });
     }
 
     public static AdProvider getInstance() {
         if(singletonInstance==null) {
             singletonInstance = new AdProvider();
-            Log.d(AdProvider.class.getSimpleName(), "SCIENCEBOARD - getInstance: ad provider instantiated, now call initAdMob()");
+            Log.d(AdProvider.class.getSimpleName(), "SCIENCE_BOARD - getInstance: ad provider instantiated, now call initAdMob()");
 
         }
 
@@ -72,11 +69,11 @@ public class AdProvider {
         List<ListItem> oldList = new ArrayList<>(listToPopulate);
 
         if( ! adMobInitialized) {
-            Log.d(TAG, "SCIENCEBOARD - populateListWithAds: admob not initilized");
+            Log.e(TAG, "SCIENCE_BOARD - populateListWithAds: admob not initilized");
             return oldList;
         }
         if(nativeAds==null || nativeAds.size()==0) {
-            Log.d(TAG, "SCIENCEBOARD - populateListWithAds: nativeAds list is empty");
+            Log.e(TAG, "SCIENCE_BOARD - populateListWithAds: nativeAds list is empty");
             return oldList;
         }
 
@@ -121,7 +118,7 @@ public class AdProvider {
 
     public void loadSomeAds(int adsToLoad, Context context) {
         if( ! adMobInitialized) {
-            Log.d(TAG, "SCIENCEBOARD - loadSomeAds: admob not initilized");
+            Log.e(TAG, "SCIENCEBOARD - loadSomeAds: admob not initilized");
 //            return;
         }
 
@@ -132,17 +129,17 @@ public class AdProvider {
                     // Show the ad.
                     if (viewDestroyed) {
                         ad.destroy();
-                        Log.d(TAG, "SCIENCEBOARD - onActivityCreated: ad destroyed");
+                        Log.d(TAG, "SCIENCE_BOARD - onActivityCreated: ad destroyed");
                         return;
                     }
 
                     if (adLoader.isLoading()) {
                         // The AdLoader is still loading ads.
                         // Expect more adLoaded or onAdFailedToLoad callbacks.
-                        Log.d(TAG, "SCIENCEBOARD - onActivityCreated: ad loading");
+                        Log.d(TAG, "SCIENCE_BOARD - onActivityCreated: ad loading");
 
                     } else {
-                        Log.d(TAG, "SCIENCEBOARD - onActivityCreated: ad loaded");
+                        Log.d(TAG, "SCIENCE_BOARD - onActivityCreated: ad loaded");
                         // The AdLoader has finished loading ads.
                         nativeAds.add(ad);
 //                        displayNativeAd(nativeAd);
@@ -152,13 +149,13 @@ public class AdProvider {
                     @Override
                     public void onAdFailedToLoad(LoadAdError adError) {
                         // Handle the failure by logging, altering the UI, and so on.
-                        Log.d(TAG, "SCIENCEBOARD - onAdFailedToLoad: ad failed to load");
+                        Log.e(TAG, "SCIENCE_BOARD - onAdFailedToLoad: ad failed to load");
                     }
 
                     @Override
                     public void onAdClicked() {
                         // Log the click event or other custom behavior.
-                        Log.d(TAG, "SCIENCEBOARD - onAdClicked: ad clicked");
+                        Log.d(TAG, "SCIENCE_BOARD - onAdClicked: ad clicked");
                     }
 
                 })

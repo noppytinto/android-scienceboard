@@ -9,7 +9,7 @@
     >
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/cardView_articleViewholder_thumbnail"
+        android:id="@+id/cardView_bookmarkViewholder_thumbnail"
         android:layout_width="0dp"
         android:layout_height="90dp"
         android:layout_marginStart="8dp"
@@ -17,13 +17,13 @@
         app:cardElevation="7dp"
         app:layout_constraintDimensionRatio="w,16:10"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/container_articleViewholder_title"
+        app:layout_constraintTop_toTopOf="@+id/container_bookmarkViewholder_title"
         app:layout_constraintWidth_min="120dp"
         app:layout_constraintWidth_max="120dp"
         >
 
         <ImageView
-            android:id="@+id/imageView_articleViewholder_thumbnail"
+            android:id="@+id/imageView_bookmarkViewholder_thumbnail"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
@@ -32,7 +32,7 @@
     </androidx.cardview.widget.CardView>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/container_articleViewholder_title"
+        android:id="@+id/container_bookmarkViewholder_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -42,11 +42,11 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_min="90dp"
-        app:layout_constraintStart_toEndOf="@+id/cardView_articleViewholder_thumbnail"
+        app:layout_constraintStart_toEndOf="@+id/cardView_bookmarkViewholder_thumbnail"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/textView_articleViewholder_title"
+            android:id="@+id/textView_bookmarkViewholder_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:ellipsize="end"
@@ -55,66 +55,65 @@
             android:textColor="@color/black"
             android:textSize="16sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/toggleButton_bookmarkViewholder_checkbox"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Is my phone compatibIs my phone compatible with Boost Mobile?lIs my phone compatible with Boost Mobile?e with Boost Mobile?" />
 
         <TextView
-            android:id="@+id/textView_articleViewholder_info"
+            android:id="@+id/textView_bookmarkViewholder_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:text="@string/test"
             android:textColor="@color/gray"
             android:textSize="12sp"
-            app:layout_constraintEnd_toStartOf="@+id/toggleButton_articleViewholder_addToBookmarks"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/textView_articleViewholder_title"
-            app:layout_constraintTop_toBottomOf="@+id/textView_articleViewholder_title"
+            app:layout_constraintStart_toStartOf="@+id/textView_bookmarkViewholder_title"
+            app:layout_constraintTop_toBottomOf="@+id/textView_bookmarkViewholder_title"
             tools:text="Physics / 1h" />
 
         <!-- TODO -->
         <ImageView
-            android:id="@+id/imageView_articleViewholder_markedAsRead"
+            android:id="@+id/imageView_bookmarkViewholder_markedAsRead"
             android:layout_width="15dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="@+id/textView_articleViewholder_info"
-            app:layout_constraintEnd_toStartOf="@+id/toggleButton_articleViewholder_addToBookmarks"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toEndOf="@+id/textView_articleViewholder_info"
-            app:layout_constraintTop_toTopOf="@+id/textView_articleViewholder_info"
+            app:layout_constraintBottom_toBottomOf="@+id/textView_bookmarkViewholder_info"
+            app:layout_constraintStart_toEndOf="@+id/textView_bookmarkViewholder_info"
+            app:layout_constraintTop_toTopOf="@+id/textView_bookmarkViewholder_info"
             app:srcCompat="@drawable/ic_outlined_eye_gray"
             tools:visibility="visible" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/toggleButton_articleViewholder_addToBookmarks"
+            android:id="@+id/toggleButton_bookmarkViewholder_checkbox"
             style="@style/ScienceBoard.Button.OutlinedButton.IconOnly"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checkable="true"
             android:hapticFeedbackEnabled="true"
+            android:visibility="gone"
             app:backgroundTint="@android:color/transparent"
-            app:icon="@drawable/selector_bookmark_icon_viewholder"
-            app:iconTint="@color/selector_add_bookmark_button"
+            app:icon="@drawable/selector_select_bookmark_icon_viewholder"
+            app:iconTint="@color/selector_select_bookmark_button"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:rippleColor="@color/yellow" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:rippleColor="@color/red"
+            tools:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <View
-        android:id="@+id/divider_articleViewholder"
+        android:id="@+id/divider_bookmarkViewholder"
         android:layout_width="0dp"
         android:layout_height="1dp"
         android:layout_marginEnd="8dp"
-        android:background="#ECECEC"
+        android:background="@color/viewholder_divider"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/container_articleViewholder_title"
-        app:layout_constraintTop_toBottomOf="@+id/container_articleViewholder_title" />
+        app:layout_constraintStart_toStartOf="@+id/container_bookmarkViewholder_title"
+        app:layout_constraintTop_toBottomOf="@+id/container_bookmarkViewholder_title" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

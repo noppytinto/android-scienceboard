@@ -7,8 +7,11 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.nocorp.scienceboard.rss.repository.BookmarkRepositoryListener;
-import com.nocorp.scienceboard.rss.repository.BookmarksRepository;
+import com.nocorp.scienceboard.bookmarks.repository.BookmarksListOnChangedListener;
+import com.nocorp.scienceboard.history.repository.HistoryRepository;
+import com.nocorp.scienceboard.model.Article;
+import com.nocorp.scienceboard.bookmarks.repository.BookmarkRepositoryListener;
+import com.nocorp.scienceboard.bookmarks.repository.BookmarksRepository;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 
@@ -19,6 +22,8 @@ public class BookmarksViewModel extends AndroidViewModel implements BookmarkRepo
     private MutableLiveData<List<ListItem>> articlesList;
     private BookmarksRepository bookmarksRepository;
     private static boolean taskIsRunning;
+    private HistoryRepository historyRepository;
+    private BookmarksListOnChangedListener bookmarksListOnChangedListener;
 
 
     //------------------------------------------------------------ CONSTRUCTORS
@@ -28,6 +33,7 @@ public class BookmarksViewModel extends AndroidViewModel implements BookmarkRepo
         super(application);
         articlesList = new MutableLiveData<>();
         bookmarksRepository = new BookmarksRepository(this);
+        historyRepository = new HistoryRepository();
     }
 
 
@@ -42,6 +48,9 @@ public class BookmarksViewModel extends AndroidViewModel implements BookmarkRepo
         this.articlesList.postValue(articlesList);
     }
 
+    public void setBookmarksListOnChangedListener(BookmarksListOnChangedListener bookmarksListOnChangedListener) {
+        this.bookmarksListOnChangedListener = bookmarksListOnChangedListener;
+    }
 
     //------------------------------------------------------------ METHODS
 
@@ -57,21 +66,24 @@ public class BookmarksViewModel extends AndroidViewModel implements BookmarkRepo
             ThreadManager threadManager = ThreadManager.getInstance();
             threadManager.runTask(task);
         }
-
     }
-
 
     @Override
     public void onBookmarksFetchCompleted(List<ListItem> articles) {
         taskIsRunning = false;
         if(articles != null && articles.size()>0) {
+            historyCheck(articles);
             setArticlesList(articles);
             Log.d(TAG, "SCIENCE_BOARD - onBookmarksFetchCompleted: articles fetched from ROOM");
         }
         else {
             setArticlesList(null);
-            Log.d(TAG, "SCIENCE_BOARD - onBookmarksFetchCompleted: article list is empty");
+            Log.e(TAG, "SCIENCE_BOARD - onBookmarksFetchCompleted: article list is empty");
         }
+    }
+
+    private void historyCheck(List<ListItem> articles) {
+        historyRepository.historyCheck(articles, getApplication());
     }
 
     @Override
@@ -88,6 +100,11 @@ public class BookmarksViewModel extends AndroidViewModel implements BookmarkRepo
     @Override
     public void onBookmarksDuplicationCheckFailed(String cause) {
         // ignore
+    }
+
+
+    public void removeArticlesFromBookmarks(List<Article> articlesToRemove) {
+        bookmarksRepository.removeArticlesFromBookmark(articlesToRemove, getApplication(), bookmarksListOnChangedListener);
     }
 
 

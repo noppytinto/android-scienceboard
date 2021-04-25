@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
 
 
-        Fragment navHostFragment = getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
+//        Fragment navHostFragment = getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
 
 
         // Passing each menu ID as a set of Ids because each
@@ -256,9 +256,6 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-
-
-
     private void hideBottomBar() {
         if(bottomNavBar!=null)
             bottomNavBar.setVisibility(View.GONE);
@@ -340,5 +337,12 @@ public class MainActivity extends AppCompatActivity
         toast = Toast.makeText(this,message, Toast.LENGTH_SHORT);
         toast.show();
     }
+
+    public void changeToolbarTitle(String value) {
+        if(toolbar!=null) {
+            toolbar.setTitle(value);
+        }
+    }
+
 
 }// end MainActivity

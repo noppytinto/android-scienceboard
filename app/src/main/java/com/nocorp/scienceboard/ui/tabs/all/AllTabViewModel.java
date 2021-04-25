@@ -1,28 +1,24 @@
 package com.nocorp.scienceboard.ui.tabs.all;
 
 import android.app.Application;
-import android.content.Context;
 import android.util.Log;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.nocorp.scienceboard.bookmarks.repository.OnBookmarksCheckedListener;
 import com.nocorp.scienceboard.history.repository.HistoryRepository;
 import com.nocorp.scienceboard.model.Article;
-import com.nocorp.scienceboard.history.model.HistoryArticle;
-import com.nocorp.scienceboard.model.BookmarkArticle;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.rss.repository.ArticleRepository;
 import com.nocorp.scienceboard.rss.repository.ArticlesRepositoryListener;
-import com.nocorp.scienceboard.rss.repository.BookmarksRepository;
+import com.nocorp.scienceboard.bookmarks.repository.BookmarksRepository;
 import com.nocorp.scienceboard.rss.repository.SourceRepository;
-import com.nocorp.scienceboard.rss.room.BookmarkDao;
 import com.nocorp.scienceboard.topics.repository.TopicRepository;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
-import com.nocorp.scienceboard.history.room.HistoryDao;
-import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
+
 import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +30,7 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
     private ArticleRepository articleRepository;
     private static List<Source> pickedSources;
     private static boolean taskIsRunning;
+    private static boolean bookmarksChecksTaskIsRunning;
     private SourceRepository sourceRepository;
     private static List<ListItem> cachedArticles;
     private static List<DocumentSnapshot> oldestArticlesSnapshots;
@@ -99,12 +96,12 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
         }
     }
 
-    private void historyCheck(List<ListItem> cachedArticles) {
-        historyRepository.historyCheck(cachedArticles, getApplication());
+    private void historyCheck(List<ListItem> articles) {
+        historyRepository.historyCheck(articles, getApplication());
     }
 
-    private void bookmarksCheck(List<ListItem> cachedArticles) {
-        bookmarksRepository.bookmarksCheck(cachedArticles, getApplication());
+    private void bookmarksCheck(List<ListItem> articles) {
+        bookmarksRepository.bookmarksCheck(articles, getApplication());
     }
 
     @Override
@@ -114,21 +111,36 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
         // TODO
     }
 
+    public void asyncBookmarksCheck(List<ListItem> articles, OnBookmarksCheckedListener listener) {
+        if(articles == null || articles.isEmpty()) return;
+
+        if(!bookmarksChecksTaskIsRunning) {
+
+            Runnable task = () -> {
+                bookmarksRepository.bookmarksCheck(articles, getApplication());
+                bookmarksChecksTaskIsRunning = false;
+                listener.onComplete();
+            };
+
+            ThreadManager threadManager = ThreadManager.getInstance();
+            threadManager.runTask(task);
+        }
+    }
 
 
 
     //-------------------------------------------------------------- FETCH TIME MACHINE ARTICLES
 
-    public void fetchArticles_backInTime(List<Source> givenSources, int numArticlesForEachSource, boolean forced, long startingDateinMillis) {
+    public void fetchArticles(List<Source> givenSources, int numArticlesForEachSource, boolean forced, long startingDateinMillis) {
         if(forced) {
-            downloadArticlesFromFollowedTopics_backInTime(givenSources, numArticlesForEachSource, startingDateinMillis);
+            downloadArticlesFromFollowedTopics(givenSources, numArticlesForEachSource, startingDateinMillis);
         }
         else {
-            tryCachedArticles_backInTime(givenSources, numArticlesForEachSource, startingDateinMillis);
+            tryCachedArticles(givenSources, numArticlesForEachSource, startingDateinMillis);
         }
     }
 
-    private void downloadArticlesFromFollowedTopics_backInTime(List<Source> givenSources, int numArticlesForEachSource, long startingDateinMillis) {
+    private void downloadArticlesFromFollowedTopics(List<Source> givenSources, int numArticlesForEachSource, long startingDateinMillis) {
         if( ! taskIsRunning) {
             Runnable task = () -> {
                 cachedArticles = new ArrayList<>();
@@ -143,9 +155,9 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
         }
     }
 
-    private void tryCachedArticles_backInTime(List<Source> givenSources, int numArticlesForEachSource, long startingDateinMillis) {
+    private void tryCachedArticles(List<Source> givenSources, int numArticlesForEachSource, long startingDateinMillis) {
         if(cachedArticles == null) {
-            downloadArticlesFromFollowedTopics_backInTime(givenSources, numArticlesForEachSource, startingDateinMillis);
+            downloadArticlesFromFollowedTopics(givenSources, numArticlesForEachSource, startingDateinMillis);
         }
         else {
             setArticlesList(cachedArticles);

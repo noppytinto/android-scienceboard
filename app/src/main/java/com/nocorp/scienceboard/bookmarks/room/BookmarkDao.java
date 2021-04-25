@@ -1,11 +1,11 @@
-package com.nocorp.scienceboard.rss.room;
+package com.nocorp.scienceboard.bookmarks.room;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
-import com.nocorp.scienceboard.model.BookmarkArticle;
+import com.nocorp.scienceboard.bookmarks.model.BookmarkArticle;
 
 import java.util.List;
 

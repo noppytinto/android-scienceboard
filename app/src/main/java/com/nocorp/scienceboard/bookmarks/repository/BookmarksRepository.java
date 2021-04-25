@@ -1,17 +1,15 @@
-package com.nocorp.scienceboard.rss.repository;
+package com.nocorp.scienceboard.bookmarks.repository;
 
 import android.content.Context;
 import android.util.Log;
 
-import com.nocorp.scienceboard.history.room.HistoryDao;
 import com.nocorp.scienceboard.model.Article;
-import com.nocorp.scienceboard.model.BookmarkArticle;
+import com.nocorp.scienceboard.bookmarks.model.BookmarkArticle;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
-import com.nocorp.scienceboard.rss.room.BookmarkDao;
+import com.nocorp.scienceboard.bookmarks.room.BookmarkDao;
 import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
-
-import org.jetbrains.annotations.NotNull;
+import com.nocorp.scienceboard.utility.MyValues;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +52,7 @@ public class BookmarksRepository {
             if(temp!=null && temp.size()>0) {
                 result = new ArrayList<>();
                 for(Article article : temp) {
+                    article.setBookmarked(true);
                     result.add((BookmarkArticle) article);
                 }
             }
@@ -77,10 +76,12 @@ public class BookmarksRepository {
     public void bookmarksCheck(List<ListItem> articles, Context context) {
         BookmarkDao dao = getBookmarkDao(context);
         for(ListItem article: articles) {
-            if(dao.isInBookmarks(((Article)article).getId()))
-                ((Article)article).setBookmarked(true);
-            else
-                ((Article)article).setBookmarked(false);
+            if(article.getItemType() == MyValues.ItemType.ARTICLE) {
+                if(dao.isInBookmarks(((Article)article).getId()))
+                    ((Article)article).setBookmarked(true);
+                else
+                    ((Article)article).setBookmarked(false);
+            }
         }
     }
 
@@ -94,7 +95,7 @@ public class BookmarksRepository {
                 bookmarkArticle.setSavedDate(millis);
                 dao.insert(bookmarkArticle);
             } catch (Exception e) {
-                Log.e(TAG, "SCEINCE_BOARD - addToBookmarks: cannot insert in bookmarks " + e.getMessage());
+                Log.e(TAG, "SCIENCE_BOARD - addToBookmarks: cannot insert in bookmarks " + e.getMessage());
             }
         };
 
@@ -113,7 +114,7 @@ public class BookmarksRepository {
                 BookmarkDao dao = getBookmarkDao(context);
                 dao.delete(article.getId());
             } catch (Exception e) {
-                Log.e(TAG, "SCEINCE_BOARD - removeFromBookmarks: cannot remove from bookmarks " + e.getMessage());
+                Log.e(TAG, "SCIENCE_BOARD - removeFromBookmarks: cannot remove from bookmarks " + e.getMessage());
             }
         };
 
@@ -122,6 +123,35 @@ public class BookmarksRepository {
             t.runTask(task);
         } catch (Exception e) {
             Log.e(TAG, "SCIENCE_BOARD - removeFromBookmarks: cannot start thread " + e.getMessage());
+        }
+    }
+
+
+    public void removeArticlesFromBookmark(List<Article> articlesToRemove,
+                                           Context context,
+                                           BookmarksListOnChangedListener bookmarksListOnChangedListener) {
+        if(articlesToRemove==null) return;
+
+        Runnable task = () -> {
+            // TODO null checks
+            try {
+                BookmarkDao dao = getBookmarkDao(context);
+
+                for(Article article: articlesToRemove) {
+                    dao.delete(article.getId());
+                }
+
+                bookmarksListOnChangedListener.onBookmarksListChanged();
+            } catch (Exception e) {
+                Log.e(TAG, "SCIENCE_BOARD - removeArticlesFromBookmark: cannot remove from bookmarks " + e.getMessage());
+            }
+        };
+
+        ThreadManager t = ThreadManager.getInstance();
+        try {
+            t.runTask(task);
+        } catch (Exception e) {
+            Log.e(TAG, "SCIENCE_BOARD - removeArticlesFromBookmark: cannot start thread " + e.getMessage());
         }
     }
 
