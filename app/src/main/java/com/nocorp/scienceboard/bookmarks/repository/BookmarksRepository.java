@@ -85,7 +85,7 @@ public class BookmarksRepository {
         }
     }
 
-    public void addToBookmarks(Article givenArticle, Context context) {
+    public void addToBookmarks_async(Article givenArticle, Context context) {
         Runnable task = () -> {
             // TODO null checks
             try {
@@ -95,7 +95,7 @@ public class BookmarksRepository {
                 bookmarkArticle.setSavedDate(millis);
                 dao.insert(bookmarkArticle);
             } catch (Exception e) {
-                Log.e(TAG, "SCIENCE_BOARD - addToBookmarks: cannot insert in bookmarks " + e.getMessage());
+                Log.e(TAG, "SCIENCE_BOARD - addToBookmarks_async: cannot insert in bookmarks, cause: " + e.getMessage());
             }
         };
 
@@ -103,18 +103,32 @@ public class BookmarksRepository {
         try {
             t.runTask(task);
         } catch (Exception e) {
-            Log.e(TAG, "SCIENCE_BOARD - saveInBookmarks: cannot start thread " + e.getMessage());
+            Log.e(TAG, "SCIENCE_BOARD - addToBookmarks_async: cannot start thread, cause: " + e.getMessage());
         }
     }
 
-    public void removeFromBookmarks(Article article, Context context) {
+    public void addToBookmarks_sync(Article givenArticle, Context context, AddToBookmarksListener addToBookmarksListener) {
+        try {
+            BookmarkDao dao = getBookmarkDao(context);
+            long millis=System.currentTimeMillis();
+            BookmarkArticle bookmarkArticle = new BookmarkArticle(givenArticle);
+            bookmarkArticle.setSavedDate(millis);
+            dao.insert(bookmarkArticle);
+            addToBookmarksListener.onAddToBookmarksCompleted();
+        } catch (Exception e) {
+            Log.e(TAG, "SCIENCE_BOARD - addToBookmarks_sync: cannot insert in bookmarks, cause: " + e.getMessage());
+//            addToBookmarksListener.onAddToBookmarksCompleted();
+        }
+    }
+
+    public void removeFromBookmarks_async(Article article, Context context) {
         Runnable task = () -> {
             // TODO null checks
             try {
                 BookmarkDao dao = getBookmarkDao(context);
                 dao.delete(article.getId());
             } catch (Exception e) {
-                Log.e(TAG, "SCIENCE_BOARD - removeFromBookmarks: cannot remove from bookmarks " + e.getMessage());
+                Log.e(TAG, "SCIENCE_BOARD - removeFromBookmarks_async: cannot remove from bookmarks, cause: " + e.getMessage());
             }
         };
 
@@ -122,7 +136,18 @@ public class BookmarksRepository {
         try {
             t.runTask(task);
         } catch (Exception e) {
-            Log.e(TAG, "SCIENCE_BOARD - removeFromBookmarks: cannot start thread " + e.getMessage());
+            Log.e(TAG, "SCIENCE_BOARD - removeFromBookmarks_async: cannot start thread, cause: " + e.getMessage());
+        }
+    }
+
+    public void removeFromBookmarks_sync(Article article, Context context, RemoveFromBookmarksListener removeFromBookmarksListener) {
+        // TODO null checks
+        try {
+            BookmarkDao dao = getBookmarkDao(context);
+            dao.delete(article.getId());
+            removeFromBookmarksListener.onRemoveFromBookmarksCompleted();
+        } catch (Exception e) {
+            Log.e(TAG, "SCIENCE_BOARD - removeFromBookmarks_async: cannot remove from bookmarks, cause: " + e.getMessage());
         }
     }
 
@@ -143,7 +168,7 @@ public class BookmarksRepository {
 
                 bookmarksListOnChangedListener.onBookmarksListChanged();
             } catch (Exception e) {
-                Log.e(TAG, "SCIENCE_BOARD - removeArticlesFromBookmark: cannot remove from bookmarks " + e.getMessage());
+                Log.e(TAG, "SCIENCE_BOARD - removeArticlesFromBookmark: cannot remove from bookmarks, cause: " + e.getMessage());
             }
         };
 
@@ -151,7 +176,7 @@ public class BookmarksRepository {
         try {
             t.runTask(task);
         } catch (Exception e) {
-            Log.e(TAG, "SCIENCE_BOARD - removeArticlesFromBookmark: cannot start thread " + e.getMessage());
+            Log.e(TAG, "SCIENCE_BOARD - removeArticlesFromBookmark: cannot start thread, cause: " + e.getMessage());
         }
     }
 

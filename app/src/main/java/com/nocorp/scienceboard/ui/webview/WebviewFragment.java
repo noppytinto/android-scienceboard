@@ -42,6 +42,7 @@ import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentWebviewBinding;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.system.MyOkHttpClient;
+import com.nocorp.scienceboard.ui.bookmarks.BookmarksViewModel;
 
 import net.dankito.readability4j.Readability4J;
 import net.dankito.readability4j.extended.Readability4JExtended;
@@ -67,12 +68,16 @@ import okhttp3.ResponseBody;
 public class WebviewFragment extends Fragment implements androidx.appcompat.widget.Toolbar.OnMenuItemClickListener {
     private final String TAG = this.getClass().getSimpleName();
     private FragmentWebviewBinding viewBinding;
-    private WebviewViewModel webviewViewModel;
     private View view;
     private LinearProgressIndicator progressIndicator;
     private Snackbar snackbar;
     private Toolbar toolbar;
     private Toast toast;
+
+
+    // viewmodels
+    private BookmarksViewModel bookmarksViewModel;
+    private WebviewViewModel webviewViewModel;
 
 
     // main webview
@@ -168,7 +173,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initiView(view);
+        initView(view);
         Bundle arguments = getArguments();
 
         if(arguments!=null) {
@@ -177,6 +182,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
             this.webpageUrl = currentArticle.getWebpageUrl();
             this.sourceName = currentArticle.getSourceRealName();
             this.keywords = currentArticle.getKeywords();
+            this.articleAlreadyInBookmarks = currentArticle.isBookmarked();
 
             if(sourceName!=null && !sourceName.isEmpty()) {
                 //TODO
@@ -244,7 +250,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         }
         else if(item.getItemId() == R.id.option_webviewMenu_bookmark) {
             if(articleAlreadyInBookmarks) {
-                removeFromBookmarksAction(currentArticle.getId());
+                removeFromBookmarksAction(currentArticle);
             }
             else {
                 addToBookmarksAction(currentArticle);
@@ -325,7 +331,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
 
     //------------------------------------------------------------------------------------ METHODS
 
-    private void initiView(@NonNull View view) {
+    private void initView(@NonNull View view) {
         toolbar = viewBinding.toolbarWebviewFragment;
         toolbar.setOnMenuItemClickListener(this);
         toolbar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
@@ -334,11 +340,14 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         currentTextSize = DEFAULT_TEXT_SIZE;
         stopMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_stop);
         bookmarkMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_bookmark);
-        webviewViewModel = new ViewModelProvider(this).get(WebviewViewModel.class);
         chipGroup = viewBinding.includeWebviewFragment.chipGroupBottomSheetWebview;
         chipsContainer = viewBinding.includeWebviewFragment.containerBottomSheetWebview;
         chips = new ArrayList<>();
         selectedKeywords = new ArrayList<>();
+
+        // viewmodels
+        bookmarksViewModel = new ViewModelProvider(requireActivity()).get(BookmarksViewModel.class);
+        webviewViewModel = new ViewModelProvider(requireActivity()).get(WebviewViewModel.class);
 
         // read mode
         webViewReadmode = viewBinding.webViewWebviewFragmentReadMode;
@@ -655,7 +664,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
         webviewViewModel.addToBookmarks(article);
     }
 
-    private void removeFromBookmarksAction(String articleId) {
+    private void removeFromBookmarksAction(Article article) {
         webviewViewModel.getObservableRemovedFromBookmarksResponse().observe(getViewLifecycleOwner(), removedFromBookmarks -> {
             if(removedFromBookmarks) {
                 showCenteredToast("removed from bookmarks");
@@ -666,7 +675,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
                 // TODO: fail message
             }
         });
-        webviewViewModel.removeFromBookmarks(articleId);
+        webviewViewModel.removeFromBookmarks(article);
     }
 
 
@@ -949,14 +958,20 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     }
 
     private void checkIfAlreadyInBookmarks() {
-        webviewViewModel.getObservableBookmarkDuplicationResponse().observe(getViewLifecycleOwner(), alreadyInBookmarks -> {
-            if(alreadyInBookmarks) {
-                articleAlreadyInBookmarks = true;
-                changeMenuItemIcon(bookmarkMenuItem, R.drawable.ic_bookmark_added_yellow);
-            }
-            else articleAlreadyInBookmarks = false;
-        });
-        webviewViewModel.checkIsInBookmarks(currentArticle);
+        if(articleAlreadyInBookmarks) {
+            changeMenuItemIcon(bookmarkMenuItem, R.drawable.ic_bookmark_added_yellow);
+        }
+        else {// if false, try again
+            webviewViewModel.getObservableBookmarkDuplicationResponse().observe(getViewLifecycleOwner(), alreadyInBookmarks -> {
+                if(alreadyInBookmarks) {
+                    articleAlreadyInBookmarks = true;
+                    changeMenuItemIcon(bookmarkMenuItem, R.drawable.ic_bookmark_added_yellow);
+                }
+                else articleAlreadyInBookmarks = false;
+            });
+            webviewViewModel.checkIsInBookmarks(currentArticle);
+        }
+
     }
 
     private void showLoadCompletedSnackbar(Context context) {

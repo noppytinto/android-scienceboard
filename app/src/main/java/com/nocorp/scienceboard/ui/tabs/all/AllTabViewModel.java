@@ -220,11 +220,11 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
 
 
     public void addToBookmarks(Article givenArticle) {
-        bookmarksRepository.addToBookmarks(givenArticle, getApplication());
+        bookmarksRepository.addToBookmarks_async(givenArticle, getApplication());
     }
 
     public void removeFromBookmarks(Article givenArticle) {
-        bookmarksRepository.removeFromBookmarks(givenArticle, getApplication());
+        bookmarksRepository.removeFromBookmarks_async(givenArticle, getApplication());
     }
 
 

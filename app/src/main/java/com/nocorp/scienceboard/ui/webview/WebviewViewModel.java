@@ -9,6 +9,9 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.nocorp.scienceboard.bookmarks.repository.AddToBookmarksListener;
+import com.nocorp.scienceboard.bookmarks.repository.BookmarksListOnChangedListener;
+import com.nocorp.scienceboard.bookmarks.repository.BookmarksRepository;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.bookmarks.model.BookmarkArticle;
 import com.nocorp.scienceboard.system.ThreadManager;
@@ -28,7 +31,8 @@ public class WebviewViewModel extends AndroidViewModel {
     private static boolean addingToBookmarksTaskIsRunning;
     private MutableLiveData<Boolean> removedFromBookmarksResponse;
     private static boolean removeFromBookmarksTaskIsRunning;
-
+    private BookmarksRepository bookmarksRepository;
+    private BookmarksListOnChangedListener bookmarksListOnChangedListener;
 
 
 
@@ -41,7 +45,7 @@ public class WebviewViewModel extends AndroidViewModel {
         markAsVisitedResponse = new MutableLiveData<>();
         bookmarkDuplicationResponse = new MutableLiveData<>();
         removedFromBookmarksResponse = new MutableLiveData<>();
-
+        bookmarksRepository = new BookmarksRepository();
     }
 
 
@@ -83,7 +87,13 @@ public class WebviewViewModel extends AndroidViewModel {
         this.bookmarkDuplicationResponse.postValue(response);
     }
 
+    public BookmarksListOnChangedListener getBookmarksListOnChangedListener() {
+        return bookmarksListOnChangedListener;
+    }
 
+    public void setBookmarksListOnChangedListener(BookmarksListOnChangedListener bookmarksListOnChangedListener) {
+        this.bookmarksListOnChangedListener = bookmarksListOnChangedListener;
+    }
 
     //------------------------------------------------------------ METHODS
 
@@ -109,19 +119,15 @@ public class WebviewViewModel extends AndroidViewModel {
     }
 
     public void addToBookmarks(@NotNull Article givenArticle) {
-        BookmarkDao dao = getBookmarkDao(getApplication());
-
         Runnable task = () -> {
             // TODO null checks
             try {
                 addingToBookmarksTaskIsRunning = true;
-                long millis=System.currentTimeMillis();
-                BookmarkArticle bookmarkArticle = new BookmarkArticle(givenArticle);
-                bookmarkArticle.setSavedDate(millis);
-                dao.insert(bookmarkArticle);
-                setAddToBookmarksResponse(true);
+                bookmarksRepository.addToBookmarks_sync(givenArticle, getApplication(), () -> {
+                    setAddToBookmarksResponse(true);
+                    bookmarksListOnChangedListener.onBookmarksListChanged();
+                });
             } catch (Exception e) {
-                e.printStackTrace();
                 Log.e(TAG, "SCEINCE_BOARD - addToBookmarks: cannot insert in bookmarks " + e.getMessage());
                 setAddToBookmarksResponse(false);
             }
@@ -133,25 +139,23 @@ public class WebviewViewModel extends AndroidViewModel {
             try {
                 t.runTask(task);
             } catch (Exception e) {
-                e.printStackTrace();
                 Log.e(TAG, "SCIENCE_BOARD - saveInBookmarks: cannot start thread " + e.getMessage());
             }
         }
 
     }
 
-    public void removeFromBookmarks(@NotNull String articleId) {
-        BookmarkDao dao = getBookmarkDao(getApplication());
-
+    public void removeFromBookmarks(@NotNull Article givenArticle) {
         Runnable task = () -> {
             // TODO null checks
             try {
                 removeFromBookmarksTaskIsRunning = true;
-                dao.delete(articleId);
-                setRemovedFromBookmarksResponse(true);
+                bookmarksRepository.removeFromBookmarks_sync(givenArticle, getApplication(), () -> {
+                    setRemovedFromBookmarksResponse(true);
+                    bookmarksListOnChangedListener.onBookmarksListChanged();
+                });
             } catch (Exception e) {
-                e.printStackTrace();
-                Log.d(TAG, "SCEINCE_BOARD - removeFromBookmarks: cannot remove from bookmarks " + e.getMessage());
+                Log.e(TAG, "SCIENCE_BOARD - removeFromBookmarks: cannot remove from bookmarks, cause: " + e.getMessage());
                 setRemovedFromBookmarksResponse(false);
             }
             removeFromBookmarksTaskIsRunning = false;
@@ -162,8 +166,7 @@ public class WebviewViewModel extends AndroidViewModel {
             try {
                 t.runTask(task);
             } catch (Exception e) {
-                e.printStackTrace();
-                Log.d(TAG, "SCIENCE_BOARD - removeFromBookmarks: cannot start thread " + e.getMessage());
+                Log.e(TAG, "SCIENCE_BOARD - removeFromBookmarks: cannot start thread, cause: " + e.getMessage());
                 setRemovedFromBookmarksResponse(false);
             }
         }

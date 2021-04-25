@@ -32,6 +32,7 @@ import com.nocorp.scienceboard.ui.timemachine.OnDateChangedListener;
 import com.nocorp.scienceboard.ui.timemachine.TimeMachineViewModel;
 import com.nocorp.scienceboard.ui.topics.TopicsViewModel;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
+import com.nocorp.scienceboard.ui.webview.WebviewViewModel;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
 import java.util.ArrayList;
@@ -57,6 +58,7 @@ public class AllTabFragment extends Fragment implements
     private TopicsViewModel topicsViewModel;
     private TimeMachineViewModel timeMachineViewModel;
     private BookmarksViewModel bookmarksViewModel;
+    private WebviewViewModel webviewViewModel;
 
     //
     private AdProvider adProvider;
@@ -252,6 +254,9 @@ public class AllTabFragment extends Fragment implements
         topicsViewModel = new ViewModelProvider(requireActivity()).get(TopicsViewModel.class);
         bookmarksViewModel = new ViewModelProvider(requireActivity()).get(BookmarksViewModel.class);
         bookmarksViewModel.setBookmarksListOnChangedListener(this);
+        webviewViewModel = new ViewModelProvider(requireActivity()).get(WebviewViewModel.class);
+        webviewViewModel.setBookmarksListOnChangedListener(this);
+
         //
         currentDateInMillis = System.currentTimeMillis();
 
