@@ -9,33 +9,52 @@
         <item name="colorSecondary">@color/teal_200</item>
         <item name="colorSecondaryVariant">@color/teal_200</item>
         <item name="colorOnSecondary">@color/black</item>
-        <!-- Customize your theme here. -->
         <item name="colorError">@color/red</item>
         <item name="colorOnError">@color/white</item>
-        <item name="colorSurface">@color/black</item>
-
-
+        <item name="colorSurface">@color/dark</item>
+        <item name="colorAccent">@color/orange</item>
+        <item name="android:textColorSecondary">@color/white</item> <!-- ("more icon" menu) -->
+        <!-- Customize your theme here. -->
 
         <!-- TEXT -->
-        <item name="android:textColorPrimary">@color/white</item>
-        <item name="logoTextColor">@color/white</item>
+        <item name="android:textColor">@color/white</item>
 
         <!-- TABS -->
         <item name="myTabTextColor">@color/dark_gray</item>
         <item name="tabSelectedTextColor">@color/white</item>
+        <item name="tabsBackgroundColor">@color/black</item>
 
         <!-- TOOLBAR -->
-        <item name="toolbarBackground">@color/black</item>
+        <item name="toolbarBackgroundColor">@color/black</item>
         <item name="toolbarTitleTextColor">@color/white</item>
+        <item name="menuItemColor">@color/white</item>
+        <!-- WEBVIEW TOOLBAR -->
+        <item name="webViewToolbarBackgroundColor">@color/dark</item>
+        <item name="webViewToolbarTitleTextColor">@color/white</item>
+        <item name="webViewToolbarMenuItemColor">@color/white</item>
+        <!-- EXPLORE TOOLBAR -->
+        <item name="logoTextColor">@color/white</item>
+        <item name="exploreToolbarBackgroundColor">@color/black</item>
+        <item name="exploreToolbarTitleTextColor">@color/white</item>
+        <!-- BOOKMARKS TOOLBAR -->
+        <item name="exitEditBookmarksIconColor">@color/white</item>
+        <item name="selectAllBookmarksIconColor">@color/white</item>
+        <item name="editBookmarksIconColor">@color/white</item>
 
         <!-- ARTICLE VIEWHOLDER -->
-        <item name="articleDividerColor">@color/gray_300</item>
-        <item name="articleBookmarksIconColor">@color/gray_300</item>
+        <item name="articleDividerColor">@color/gray_800</item>
+        <item name="articleBookmarksIconColor">@color/gray_700</item>
         <item name="articleCheckedBookmarksIconColor">@color/yellow_A700</item>
         <item name="articleBookmarksIconRippleColor">@color/yellow_A700</item>
+        <item name="articleSourcesInfoTextColor">@color/gray_500</item>
 
+        <!-- DIALOGS -->
+        <item name="alterDialogButtonTextColor">@color/white</item>
 
-
+        <!-- AD BUTTON -->
+        <item name="adButtonTextColor">@color/gray_600</item>
+        <item name="adButtonStrokeColor">@color/gray_700</item>
+        <item name="adButtonRippleColor">@color/orange</item>
 
 
 
@@ -44,11 +63,6 @@
 <!--        <item name="android:windowLightStatusBar" tools:targetApi="23">true</item>-->
         <!-- Customize your theme here. -->
 
-        <item name="actionMenuTextColor">@color/black</item>
-        <item name="android:actionMenuTextColor">@color/black</item>
-        <item name="colorPrimaryDark">@color/black</item>
-        <item name="colorAccent">@color/orange_light</item>
-        <item name="android:textColor">@color/black</item>
 
         <!-- dropdown menu style -->
 <!--        <item name="android:dropDownListViewStyle">@style/ScienceBoard.PopupMenuListView</item>-->

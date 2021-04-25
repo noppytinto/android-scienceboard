@@ -620,7 +620,7 @@ public class WebviewFragment extends Fragment implements androidx.appcompat.widg
     }
 
     private void clearCacheCookiesAction() {
-        new MaterialAlertDialogBuilder(requireContext())
+        new MaterialAlertDialogBuilder(requireContext(), R.style.ScieceBoard_Dialog_MaterialAlertDialog)
                 .setTitle("Do you want clear cache/cookies?")
                 .setPositiveButton("yes", (dialog, listener) -> {
                     //

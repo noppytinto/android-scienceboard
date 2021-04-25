@@ -15,9 +15,9 @@
             android:id="@+id/toolbar_mainActivity"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:elevation="@dimen/default_elevation"
-            android:background="?attr/colorPrimary"
-            app:titleTextColor="?colorOnPrimary">
+            android:elevation="@dimen/default_toolbar_elevation"
+            style="@style/ScienceBoard.Toolbar"
+            >
 
         </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>

@@ -99,19 +99,67 @@
         <item name="tabMode">scrollable</item>
         <item name="tabRippleColor">@color/orange</item>
         <item name="tabTextColor">?attr/myTabTextColor</item>
+        <item name="android:backgroundTint">?attr/tabsBackgroundColor</item>
     </style>
 
 
     <!-- TOOLBAR -->
     <style name="ScienceBoard.Toolbar" parent="Widget.MaterialComponents.Toolbar">
-        <item name="android:background">?attr/toolbarBackground</item>
+        <item name="android:background">?attr/toolbarBackgroundColor</item>
         <item name="titleTextColor">?attr/toolbarTitleTextColor</item>
+        <item name="android:elevation">@dimen/default_toolbar_elevation</item>
     </style>
+    <!-- WEBVIEW TOOLBAR -->
+    <style name="ScienceBoard.Toolbar.WebViewToolbar" parent="Widget.MaterialComponents.Toolbar">
+        <item name="android:background">?attr/webViewToolbarBackgroundColor</item>
+        <item name="titleTextColor">?attr/webViewToolbarTitleTextColor</item>
+        <item name="android:elevation">@dimen/default_toolbar_elevation</item>
+        <item name="contentInsetStartWithNavigation">0dp</item>
+        <item name="navigationIcon">@drawable/ic_back_arrow</item>
+        <item name="actionOverflowButtonStyle">@color/red</item>
+        <item name="android:actionMenuTextColor">@color/red</item>
+        <item name="menuItemColor">@color/red</item>
+        <item name="popupMenuBackground">@color/red</item>
+    </style>
+    <!-- EXPLORE TOOLBAR -->
+    <style name="ScienceBoard.Toolbar.ExploreToolbar" parent="Widget.MaterialComponents.Toolbar">
+        <item name="android:background">?attr/exploreToolbarBackgroundColor</item>
+        <item name="titleTextColor">?attr/exploreToolbarTitleTextColor</item>
+    </style>
+
 
     <style name="ScienceBoard.Toolbar.Logo" parent="Widget.MaterialComponents.TextView">
         <item name="android:textColor">?attr/logoTextColor</item>
         <item name="android:textSize">@dimen/logo_text_size</item>
         <item name="android:fontFamily">@font/playfair_display_black</item>
+    </style>
+
+
+
+
+    <!-- DIALOGS -->
+    <style name="ScieceBoard.Dialog.MaterialAlertDialog" parent="@style/ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="buttonBarPositiveButtonStyle">@style/PositiveButtonStyle</item>
+        <item name="buttonBarNegativeButtonStyle">@style/NegativeButtonStyle</item>
+        <item name="buttonBarNeutralButtonStyle">@style/NeutralButtonStyle</item>
+    </style>
+    <style name="PositiveButtonStyle" parent="@style/Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">?attr/alterDialogButtonTextColor</item>
+    </style>
+    <style name="NegativeButtonStyle" parent="@style/Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">?attr/alterDialogButtonTextColor</item>
+    </style>
+    <style name="NeutralButtonStyle" parent="@style/Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">?attr/alterDialogButtonTextColor</item>
+    </style>
+
+
+    <!-- AD BUTTON -->
+    <style name="ScienceBoard.Button.AdButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:textColor">?attr/adButtonTextColor</item>
+        <item name="rippleColor">?attr/adButtonRippleColor</item>
+        <item name="android:padding">3dp</item>
+        <item name="strokeColor">?attr/adButtonStrokeColor</item>
     </style>
 
 </resources>

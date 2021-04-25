@@ -6,7 +6,7 @@
 
     <item
         android:id="@+id/option_webviewMenu_stop"
-        android:icon="@drawable/ic_stop"
+        android:icon="@drawable/ic_stop_red"
         android:title="Stop"
         app:showAsAction="always" />
 
@@ -50,10 +50,9 @@
     </group>
 
 
-
-
     <item
         android:id="@+id/option_webviewMenu_delete"
+        android:icon="@drawable/ic_cleaning_services"
         android:title="Clear cache/cookies"
         app:showAsAction="never" />
 

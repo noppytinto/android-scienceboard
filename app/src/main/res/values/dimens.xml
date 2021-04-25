@@ -30,6 +30,7 @@
     <dimen name="chip_stroke_width">1dp</dimen>
     <dimen name="chip_text_size">12sp</dimen>
     <dimen name="chip_letter_spacing">0.01</dimen>
+    <dimen name="default_toolbar_elevation">10dp</dimen>
 
 
 </resources>

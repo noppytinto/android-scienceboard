@@ -119,7 +119,7 @@ public class HistoryFragment extends Fragment implements
 
     //-------------------------------------------------------------- MY METHODS
     private void clearHistoryAction() {
-        new MaterialAlertDialogBuilder(requireContext())
+        new MaterialAlertDialogBuilder(requireContext(), R.style.ScieceBoard_Dialog_MaterialAlertDialog)
                 .setTitle("Do you want clear the history?")
                 .setPositiveButton("yes", (dialog, listener) -> {
                     //

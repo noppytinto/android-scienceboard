@@ -60,7 +60,6 @@
                 android:ellipsize="end"
                 android:maxLines="3"
                 android:paddingBottom="5dp"
-                android:textColor="@color/black"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -85,17 +84,14 @@
 
             <Button
                 android:id="@+id/buttonlayoutNativeAdArticlesListLevel_action"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/ScienceBoard.Button.AdButton"
                 android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
-                android:padding="3dp"
-                android:textColor="@color/gray"
                 app:layout_constraintEnd_toEndOf="@+id/textView_layoutNativeAdArticlesListLevel_headline"
                 app:layout_constraintStart_toStartOf="@+id/textView_layoutNativeAdArticlesListLevel_headline"
                 app:layout_constraintTop_toBottomOf="@+id/textView_layoutNativeAdArticlesListLevel_headline"
-                app:strokeColor="#ECECEC"
                 tools:text="visit" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -104,7 +100,7 @@
             android:layout_width="0dp"
             android:layout_height="1dp"
             android:layout_marginEnd="8dp"
-            android:background="#ECECEC"
+            android:background="?attr/articleDividerColor"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/cardView2"
             app:layout_constraintTop_toBottomOf="@+id/cardView2" />

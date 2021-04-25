@@ -4,12 +4,34 @@
     <attr name="textColorDisConnected" format="reference"/>
 
 
-    <attr name="toolbarBackground" format="reference|color"/>
-    <attr name="myTabTextColor" format="reference|color"/>
+
+    <!-- TOOLBAR -->
+    <attr name="toolbarBackgroundColor" format="reference|color"/>
     <attr name="toolbarTitleTextColor" format="reference|color"/>
-
-
+    <attr name="menuItemColor" format="reference|color"/>
+    <!-- TOOLBAR -->
+    <attr name="webViewToolbarBackgroundColor" format="reference|color"/>
+    <attr name="webViewToolbarTitleTextColor" format="reference|color"/>
+    <attr name="webViewToolbarMenuItemColor" format="reference|color"/>
+    <!-- EXPLORE TOOLBAR -->
     <attr name="logoTextColor" format="reference|color"/>
+    <attr name="exploreToolbarBackgroundColor" format="reference|color"/>
+    <attr name="exploreToolbarTitleTextColor" format="reference|color"/>
+    <!-- BOOKMARKS TOOLBAR -->
+    <attr name="selectAllBookmarksIconColor" format="reference|color"/>
+    <attr name="exitEditBookmarksIconColor" format="reference|color"/>
+    <attr name="editBookmarksIconColor" format="reference|color"/>
+
+
+
+
+    <!-- TABS -->
+    <attr name="tabsBackgroundColor" format="reference|color"/>
+    <attr name="myTabTextColor" format="reference|color"/>
+
+
+    <!-- TEXT -->
+
 
 
     <!-- ARTICLE VIEWHOLDER -->
@@ -17,6 +39,18 @@
     <attr name="articleBookmarksIconColor" format="reference|color"/>
     <attr name="articleCheckedBookmarksIconColor" format="reference|color"/>
     <attr name="articleBookmarksIconRippleColor" format="reference|color"/>
+    <attr name="articleSourcesInfoTextColor" format="reference|color"/>
+    <attr name="articleTitleTextColor" format="reference|color"/>
+
+
+    <!-- DIALOGS -->
+    <attr name="alterDialogButtonTextColor" format="reference|color"/>
+
+    <!-- BUTTON -->
+    <attr name="adButtonTextColor" format="reference|color"/>
+    <attr name="adButtonStrokeColor" format="reference|color"/>
+    <attr name="adButtonRippleColor" format="reference|color"/>
+
 
 
 </resources>

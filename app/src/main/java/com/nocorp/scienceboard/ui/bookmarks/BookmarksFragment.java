@@ -177,7 +177,7 @@ public class BookmarksFragment extends Fragment implements
             return true;
         }
         else if(itemId == R.id.option_bookmarksMenu_delete) {
-            new MaterialAlertDialogBuilder(requireContext())
+            new MaterialAlertDialogBuilder(requireContext(), R.style.ScieceBoard_Dialog_MaterialAlertDialog)
                     .setTitle("Do you want delete selected items?")
                     .setPositiveButton("yes", (dialog, listener) -> {
                         removeArticlesFromBookmarks();

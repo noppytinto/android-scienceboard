@@ -6,14 +6,14 @@
 
     <item
         android:id="@+id/option_bookmarksMenu_selectAll"
-        android:icon="@drawable/ic_select_all_white"
+        android:icon="@drawable/ic_select_all_bookmarks"
         android:title="Select All"
         android:visible="false"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/option_bookmarksMenu_edit"
-        android:icon="@drawable/ic_edit_white"
+        android:icon="@drawable/ic_edit_bookmarks"
         android:title="Edit"
         android:visible="false"
         app:showAsAction="always" />
@@ -28,7 +28,7 @@
 
     <item
         android:id="@+id/option_bookmarksMenu_exit"
-        android:icon="@drawable/ic_clear"
+        android:icon="@drawable/ic_exit_edit_bookmarks"
         android:title="Exit"
         android:visible="false"
         app:showAsAction="always" />
