@@ -73,4 +73,9 @@
     <string name="scienceboard_logo_label">ScienceBoard</string>
 
 
+    <!-- VIEWHOLDERS -->
+    <!-- TODO -->
+    <string name="article_source_and_pub_date_info">%1$s / %2$s</string>
+
+
 </resources>

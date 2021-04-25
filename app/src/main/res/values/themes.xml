@@ -11,8 +11,9 @@
         <item name="colorOnSecondary">@color/white</item>
         <item name="colorError">@color/red</item>
         <item name="colorOnError">@color/white</item>
-        <item name="colorSurface">@color/white</item>
+        <item name="colorSurface">@color/white</item> <!-- (chips background) -->
         <item name="colorAccent">@color/orange</item>
+        <item name="android:colorBackground">@color/gray_100</item> <!-- (background) -->
         <item name="android:textColorSecondary">@color/white</item> <!-- ("more icon" menu) -->
         <!-- Customize your theme here. -->
 
@@ -43,10 +44,10 @@
 
         <!-- ARTICLE VIEWHOLDER -->
         <item name="articleDividerColor">@color/gray_300</item>
-        <item name="articleBookmarksIconColor">@color/gray_300</item>
+        <item name="articleBookmarksIconColor">@color/gray_350</item>
         <item name="articleCheckedBookmarksIconColor">@color/yellow_A700</item>
         <item name="articleBookmarksIconRippleColor">@color/yellow_A700</item>
-        <item name="articleSourcesInfoTextColor">@color/gray_500</item>
+        <item name="articleSourcesInfoTextColor">@color/gray_600</item>
 
         <!-- DIALOGS -->
         <item name="alterDialogButtonTextColor">@color/black</item>
