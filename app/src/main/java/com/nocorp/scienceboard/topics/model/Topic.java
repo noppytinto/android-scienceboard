@@ -17,6 +17,8 @@ public class Topic {
 
     @ColumnInfo(name = "display_name")
     private String displayName;
+    @ColumnInfo(name = "thumbnail_url")
+    private String thumbnailUrl;
 
 
     public Topic() {
@@ -70,4 +72,11 @@ public class Topic {
         this.displayName = displayName;
     }
 
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
+    }
+
+    public void setThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
+    }
 }// end Topic

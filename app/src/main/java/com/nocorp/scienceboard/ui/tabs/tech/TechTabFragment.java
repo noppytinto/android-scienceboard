@@ -16,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.nocorp.scienceboard.MobileNavigationDirections;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentTechTabBinding;
 import com.nocorp.scienceboard.model.Article;
@@ -247,9 +246,9 @@ public class TechTabFragment extends Fragment implements
         Article article = (Article) recyclerAdapterArticlesList.getItem(position);
         if(article!=null) {
             techTabViewModel.saveInHistory(article);
-            MobileNavigationDirections.ActionGlobalWebviewFragment action =
-                    MobileNavigationDirections.actionGlobalWebviewFragment(article);
-            Navigation.findNavController(view).navigate(action);
+//            MobileNavigationDirections.ActionGlobalWebviewFragment action =
+//                    MobileNavigationDirections.actionGlobalWebviewFragment(article);
+//            Navigation.findNavController(view).navigate(action);
         }
     }
 

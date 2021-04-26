@@ -22,7 +22,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.nocorp.scienceboard.MainActivity;
-import com.nocorp.scienceboard.MobileNavigationDirections;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentBookmarksBinding;
 import com.nocorp.scienceboard.model.Article;
@@ -248,9 +247,9 @@ public class BookmarksFragment extends Fragment implements
     }
 
     private void openArticle(Article article) {
-        MobileNavigationDirections.ActionGlobalWebviewFragment action =
-                MobileNavigationDirections.actionGlobalWebviewFragment(article);
-        Navigation.findNavController(view).navigate(action);
+//        MobileNavigationDirections.ActionGlobalWebviewFragment action =
+//                MobileNavigationDirections.actionGlobalWebviewFragment(article);
+//        Navigation.findNavController(view).navigate(action);
     }
 
 

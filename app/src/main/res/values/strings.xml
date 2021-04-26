@@ -33,8 +33,8 @@
 
     <!-- BOTTOM NAV BAR -->
     <string name="explore_bottom_bar_label">Explore</string>
-    <string name="bookmarks_bottom_bar_label">Bookmarks</string>
-    <string name="history_bottom_bar_label">History</string>
+    <string name="bookmarks_bottom_nav_label">Bookmarks</string>
+    <string name="history_bottom_nav_label">History</string>
 
 
     <!-- TABS -->
@@ -76,6 +76,7 @@
     <!-- VIEWHOLDERS -->
     <!-- TODO -->
     <string name="article_source_and_pub_date_info">%1$s / %2$s</string>
+    <string name="home_bottom_nav_label">Home</string>
 
 
 </resources>

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -23,13 +24,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
-import androidx.navigation.NavigatorProvider;
-import androidx.navigation.fragment.FragmentNavigator;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
@@ -45,6 +43,7 @@ public class MainActivity extends AppCompatActivity
     private Toolbar toolbar;
     private ActionBar appBar;
     private Toast toast;
+    private AppBarConfiguration appBarConfiguration;
 
     //
     private AdProvider adProvider;
@@ -82,15 +81,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-//    /**
-//     * enable toolbar back button
-//     */
-//    @Override
-//    public boolean onSupportNavigateUp() {
-//        navController.navigateUp();
-//        return super.onSupportNavigateUp();
-//    }
-
     /**
      * listen for bottom navigation, destination changes
      */
@@ -98,7 +88,7 @@ public class MainActivity extends AppCompatActivity
     public void onDestinationChanged(@NonNull NavController controller,
                                      @NonNull NavDestination destination,
                                      @Nullable Bundle arguments) {
-        if(destination.getId() == R.id.navigation_explore) {
+        if(destination.getId() == R.id.homeFragment) {
             hideToolbar();
             showBottomBar();
         }
@@ -113,6 +103,20 @@ public class MainActivity extends AppCompatActivity
             showToolbar();
             showBottomBar();
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        return NavigationUI.onNavDestinationSelected(item, navController)
+                || super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        return NavigationUI.navigateUp(navController, appBarConfiguration)
+                || super.onSupportNavigateUp();
     }
 
     @Override
@@ -144,23 +148,21 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         appBar = getSupportActionBar();
         // Enable the Up button
-        if(appBar!=null) appBar.setDisplayHomeAsUpEnabled(true);
+//        if(appBar!=null) appBar.setDisplayHomeAsUpEnabled(true);
         bottomNavBar = viewBinding.includeMainActivity.bottomNavView;
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
 
 
-//        Fragment navHostFragment = getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
 
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_explore, R.id.navigation_bookmarks, R.id.navigation_history)
+        appBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.homeFragment, R.id.bookmarksFragment, R.id.historyFragment)
                 .build();
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(bottomNavBar, navController);
         navController.addOnDestinationChangedListener(this);
-
 
 
 //        FragmentNavigator navigator = new Keep(this, navHostFragment.getChildFragmentManager(), R.id.nav_host_fragment);
@@ -196,6 +198,17 @@ public class MainActivity extends AppCompatActivity
 
 
     }// end initView()
+
+
+
+
+
+
+
+
+
+
+
 
     private void initAdProvider(Context context, int numAdsToLoad) {
         AdProvider adProvider = AdProvider.getInstance();
@@ -328,7 +341,7 @@ public class MainActivity extends AppCompatActivity
     private void showCenteredToast(String message) {
         if(toast!=null) toast.cancel();
         toast = Toast.makeText(this,message, Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.CENTER, 0, 0);
+//        toast.setGravity(Gravity.CENTER, 0, 0);
         toast.show();
     }
 

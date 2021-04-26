@@ -20,7 +20,6 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.nocorp.scienceboard.MobileNavigationDirections;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentPhysicsTabBinding;
 import com.nocorp.scienceboard.model.Article;
@@ -229,9 +228,9 @@ public class PhysicsTabFragment extends Fragment implements
         Article article = (Article) recyclerAdapterArticlesList.getItem(position);
         if(article!=null) {
             physicsTabViewModel.saveInHistory(article);
-            MobileNavigationDirections.ActionGlobalWebviewFragment action =
-                    MobileNavigationDirections.actionGlobalWebviewFragment(article);
-            Navigation.findNavController(view).navigate(action);
+//            MobileNavigationDirections.ActionGlobalWebviewFragment action =
+//                    MobileNavigationDirections.actionGlobalWebviewFragment(article);
+//            Navigation.findNavController(view).navigate(action);
         }
     }
 

@@ -127,6 +127,9 @@ public class AllTabViewModel extends AndroidViewModel implements ArticlesReposit
         }
     }
 
+    public List<Source> getPickedSources() {
+        return pickedSources;
+    }
 
 
     //-------------------------------------------------------------- FETCH TIME MACHINE ARTICLES

@@ -98,6 +98,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.3.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.gridlayout:gridlayout:1.0.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
@@ -154,6 +155,9 @@ dependencies {
 
     // https://mvnrepository.com/artifact/androidx.navigation/navigation-fragment
     implementation group: 'androidx.navigation', name: 'navigation-fragment', version: '2.3.5'
+
+    // PALETTE
+    implementation 'com.android.support:palette-v7:30.0.0'
 
 
 
