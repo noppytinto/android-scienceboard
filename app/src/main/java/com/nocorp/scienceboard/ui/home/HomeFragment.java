@@ -1,5 +1,6 @@
 package com.nocorp.scienceboard.ui.home;
 
+import android.graphics.Rect;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -55,6 +56,7 @@ public class HomeFragment extends Fragment implements
     private RecyclerAdapterMyTopics recyclerAdapterMyTopics;
     private RecyclerAdapterArticlesList recyclerAdapterArticlesList;
     private RecyclerView recyclerViewArticles;
+    private RecyclerView recyclerViewTopics;
 
 
     // viewmodel
@@ -125,7 +127,7 @@ public class HomeFragment extends Fragment implements
         //
         initRecycleViewTopics();
         initRecycleViewArticles();
-        enableEndlessScroll(nestedScrollView);
+        setupEndlessScroll(nestedScrollView);
         setupSwipeDownToRefresh(currentDateInMillis);
 
 
@@ -146,61 +148,15 @@ public class HomeFragment extends Fragment implements
     }
 
 
+
+
+
     //---------------------------------------------------------------------------------------- METHODS
 
-    private void initRecycleViewTopics() {
-        RecyclerView recyclerView = viewBinding.recyclerViewHomeFragmentTopics;
-        GridLayoutManager manager = new GridLayoutManager(requireContext(), 2, GridLayoutManager.VERTICAL, false);
-        recyclerView.setLayoutManager(manager);
-        recyclerAdapterMyTopics = new RecyclerAdapterMyTopics(new ArrayList<>(), this);
-        recyclerView.setAdapter(recyclerAdapterMyTopics);
-    }
-
-
-    private void initRecycleViewArticles() {
-        recyclerViewArticles = viewBinding.recyclerViewHomeFragmentHeadlines;
-        recyclerViewArticles.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerViewArticles.setNestedScrollingEnabled(false);
-        recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this);
-        recyclerViewArticles.setAdapter(recyclerAdapterArticlesList);
-//        initScrollListener();
-    }
-
-    @Override
-    public void onArticleClicked(int position, View itemView) {
-        Article article = (Article) recyclerAdapterArticlesList.getItem(position);
-        if(article!=null) {
-            allTabViewModel.saveInHistory(article);
-            article.setVisited(true);
 
 
 
-//            FragmentNavigator.Extras extras = new FragmentNavigator
-//                    .Extras
-//                    .Builder()
-//                    .addSharedElement(view, view.getTransitionName())
-//                    .build();
-
-            NavGraphDirections.ActionGlobalWebviewFragment action =
-                    HomeFragmentDirections.actionGlobalWebviewFragment(article);
-            Navigation.findNavController(view).navigate(action);
-
-//
-//            MobileNavigationDirections.ActionGlobalWebviewFragment action =
-//                    MobileNavigationDirections.actionGlobalWebviewFragment(article);
-//            Navigation.findNavController(view).navigate(action, extras);
-
-//            MobileNavigationDirections.ActionGlobalWebviewFragment action =
-//                    MobileNavigationDirections.actionGlobalWebviewFragment(article);
-//            Navigation.findNavController(view).navigate(action);
-        }
-    }
-
-    @Override
-    public void onBookmarksButtonClicked(int position) {
-
-    }
-
+    //---------------- observing viewmodels
 
     private void observeSourcesFetched() {
         sourceViewModel.getObservableAllSources().observe(getViewLifecycleOwner(), sources -> {
@@ -237,15 +193,6 @@ public class HomeFragment extends Fragment implements
             }
         });
     }
-
-
-
-    @Override
-    public void onTopicCoverClicked(int position) {
-
-    }
-
-
 
     private void observeArticlesFetched() {
         allTabViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), resultArticles -> {
@@ -294,6 +241,56 @@ public class HomeFragment extends Fragment implements
     }
 
 
+
+
+    //---------------- listeners
+
+    @Override
+    public void onArticleClicked(int position, View itemView) {
+        Article article = (Article) recyclerAdapterArticlesList.getItem(position);
+        if(article!=null) {
+            allTabViewModel.saveInHistory(article);
+            article.setVisited(true);
+
+
+
+//            FragmentNavigator.Extras extras = new FragmentNavigator
+//                    .Extras
+//                    .Builder()
+//                    .addSharedElement(view, view.getTransitionName())
+//                    .build();
+
+            NavGraphDirections.ActionGlobalWebviewFragment action =
+                    HomeFragmentDirections.actionGlobalWebviewFragment(article);
+            Navigation.findNavController(view).navigate(action);
+
+//
+//            MobileNavigationDirections.ActionGlobalWebviewFragment action =
+//                    MobileNavigationDirections.actionGlobalWebviewFragment(article);
+//            Navigation.findNavController(view).navigate(action, extras);
+
+//            MobileNavigationDirections.ActionGlobalWebviewFragment action =
+//                    MobileNavigationDirections.actionGlobalWebviewFragment(article);
+//            Navigation.findNavController(view).navigate(action);
+        }
+    }
+
+    @Override
+    public void onBookmarksButtonClicked(int position) {
+
+    }
+
+    @Override
+    public void onTopicCoverClicked(int position) {
+
+    }
+
+
+
+
+    //----------------
+
+
     private List<String> setTopicsThumbnails(List<ListItem> articles, List<Topic> topics, List<Source> sources) {
         List<String> result = null;
         if(topics==null || topics.isEmpty()) return result;
@@ -306,22 +303,22 @@ public class HomeFragment extends Fragment implements
 
         for(Topic topic: topics) {
             String topicId = topic.getId();
-                for(Source source: sourcesTarget) {
-                    if(source.getCategories().contains(topicId)) {
-                        String sourceId = source.getId();
-                        for(ListItem listItem: articles) {
-                            Article article = ((Article) listItem);
-                            if(sourceId.equals(article.getSourceId())) {
-                                String thumbnailUrl = article.getThumbnailUrl();
-                                if(thumbnailUrl!=null) {
-                                    topic.setThumbnailUrl(thumbnailUrl);
-                                    break;
-                                }
+            for(Source source: sourcesTarget) {
+                if(source.getCategories().contains(topicId)) {
+                    String sourceId = source.getId();
+                    for(ListItem listItem: articles) {
+                        Article article = ((Article) listItem);
+                        if(sourceId.equals(article.getSourceId())) {
+                            String thumbnailUrl = article.getThumbnailUrl();
+                            if(thumbnailUrl!=null) {
+                                topic.setThumbnailUrl(thumbnailUrl);
+                                break;
                             }
                         }
-                        break;
                     }
+                    break;
                 }
+            }
         }
 
 
@@ -330,6 +327,58 @@ public class HomeFragment extends Fragment implements
 
         return result;
     }
+
+
+
+
+
+
+    private void initRecycleViewTopics() {
+        recyclerViewTopics = viewBinding.recyclerViewHomeFragmentTopics;
+        GridLayoutManager manager = new GridLayoutManager(requireContext(), 2, GridLayoutManager.VERTICAL, false);
+        recyclerViewTopics.setLayoutManager(manager);
+        recyclerAdapterMyTopics = new RecyclerAdapterMyTopics(new ArrayList<>(), this);
+        recyclerViewTopics.setAdapter(recyclerAdapterMyTopics);
+    }
+
+
+    private void initRecycleViewArticles() {
+        recyclerViewArticles = viewBinding.recyclerViewHomeFragmentHeadlines;
+        recyclerViewArticles.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this);
+        recyclerViewArticles.setAdapter(recyclerAdapterArticlesList);
+
+//        initScrollListener();
+    }
+
+
+
+    private void viewIsVisible(NestedScrollView scrollView, View view) {
+        if (view.isShown()) {
+            // view is within the visible window
+            Log.d(TAG, "viewIsVisible: view is visible");
+        } else {
+            // view is not within the visible window
+            Log.d(TAG, "viewIsVisible: view is NOT visible");
+        }
+    }
+
+    private void viewIsVisibleInLayout(NestedScrollView scrollView, View view) {
+        Rect scrollBounds = new Rect();
+        scrollView.getHitRect(scrollBounds);
+        if (view.getLocalVisibleRect(scrollBounds)) {
+            // view is within the visible window
+            Log.d(TAG, "viewIsVisibleInLayout: view is visible");
+        } else {
+            // view is not within the visible window
+            Log.d(TAG, "viewIsVisibleInLayout: view is NOT visible");
+        }
+    }
+
+
+
+
+
 
 
     private List<Source> getASourceForEachTopic(List<Source> sources, List<Topic> topics) {
@@ -403,15 +452,16 @@ public class HomeFragment extends Fragment implements
         allTabViewModel.fetchNextArticles(NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE);
     }
 
-    private void enableEndlessScroll(NestedScrollView nestedScrollView) {
+    private void setupEndlessScroll(NestedScrollView nestedScrollView) {
         if (nestedScrollView != null) {
-
             nestedScrollView.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
                 if (scrollY > oldScrollY) {
 //                    Log.d(TAG, "Scroll DOWN");
+                    viewIsVisibleInLayout(nestedScrollView, recyclerViewTopics);
                 }
                 if (scrollY < oldScrollY) {
 //                    Log.d(TAG, "Scroll UP");
+                    viewIsVisibleInLayout(nestedScrollView, recyclerViewTopics);
                 }
 
                 if (scrollY == 0) {
