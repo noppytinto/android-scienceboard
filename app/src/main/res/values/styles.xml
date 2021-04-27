@@ -162,4 +162,14 @@
         <item name="strokeColor">?attr/adButtonStrokeColor</item>
     </style>
 
+
+
+    <style name="ScieceBoard.Toolbar.CollapsingToolbar.ExpandendTitleTextAppearance" parent="TextAppearance.MaterialComponents.Headline3">
+        <item name="android:textColor">@android:color/transparent</item>
+    </style>
+
+    <style name="ScieceBoard.Toolbar.CollapsingToolbar.CollapsedTitleTextAppearance" parent="TextAppearance.MaterialComponents.Headline3">
+        <item name="android:textColor">@color/black</item>
+    </style>
+
 </resources>

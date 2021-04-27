@@ -1,5 +1,7 @@
 package com.nocorp.scienceboard.ui.home;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.graphics.Rect;
 import android.os.Bundle;
 
@@ -18,6 +20,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.nocorp.scienceboard.NavGraphDirections;
@@ -51,6 +54,7 @@ public class HomeFragment extends Fragment implements
     private Toast toast;
     private NestedScrollView nestedScrollView;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private ImageButton switchTopicButton;
 
     // recycler
     private RecyclerAdapterMyTopics recyclerAdapterMyTopics;
@@ -77,8 +81,10 @@ public class HomeFragment extends Fragment implements
     private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 10;
     private final int AD_DISTANCE = 5; // distance between ads (in terms of items)
     private long currentDateInMillis;
-    private boolean isLoading = false;
-
+    private boolean recyclerIsLoading = false;
+    // animations
+    private int shortAnimationDuration;
+    private boolean switchButtonIsVisible;
 
 
     //---------------------------------------------------------------------------------------- CONSTRUCTORS
@@ -86,6 +92,8 @@ public class HomeFragment extends Fragment implements
     public static HomeFragment newInstance() {
         return new HomeFragment();
     }
+
+
 
 
 
@@ -104,15 +112,13 @@ public class HomeFragment extends Fragment implements
     public void onViewCreated(@NonNull @NotNull View view,
                               @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        //
+        // views
         nestedScrollView = viewBinding.nestedScrollViewHomeFragment;
         swipeRefreshLayout = viewBinding.swipeRefreshLayoutHomeFragment;
         swipeRefreshLayout.setColorSchemeResources(R.color.orange);
-
-        //
-        adProvider = AdProvider.getInstance(); // is not guaranteed that
-
+        recyclerViewTopics = viewBinding.recyclerViewHomeFragmentTopics;
+        recyclerViewArticles = viewBinding.recyclerViewHomeFragmentHeadlines;
+        switchTopicButton = viewBinding.imageButtonHomeFragmentSwitchTopic;
 
         // viewmodels
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
@@ -122,21 +128,22 @@ public class HomeFragment extends Fragment implements
 
         //
         currentDateInMillis = System.currentTimeMillis();
+        adProvider = AdProvider.getInstance(); // is not guaranteed that
+        // Retrieve and cache the system's default "short" animation time.
+        shortAnimationDuration = getResources().getInteger(
+                android.R.integer.config_shortAnimTime);
 
 
         //
-        initRecycleViewTopics();
-        initRecycleViewArticles();
-        setupEndlessScroll(nestedScrollView);
-        setupSwipeDownToRefresh(currentDateInMillis);
-
+        initRecycleViewTopics(recyclerViewTopics);
+        initRecycleViewArticles(recyclerViewArticles);
+        setupScrollListener(nestedScrollView);
+        setupSwipeDownToRefresh(swipeRefreshLayout, currentDateInMillis);
 
         //
         observeSourcesFetched();
         observeArticlesFetched();
         observerNextArticlesFetched();
-
-
 
     }// end onViewCreated
 
@@ -200,11 +207,11 @@ public class HomeFragment extends Fragment implements
             swipeRefreshLayout.setRefreshing(false);
 
             if(resultArticles==null) {
-                isLoading = false;
+                recyclerIsLoading = false;
 //                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
             }
             else if(resultArticles.isEmpty()) {
-                isLoading = false;
+                recyclerIsLoading = false;
                 // TODO this should only be called when the list is empty,
                 // when errors occurs should be the case above
 
@@ -218,7 +225,7 @@ public class HomeFragment extends Fragment implements
                 articlesToDisplay = new ArrayList<>(resultArticles);
                 recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
 //                showCenteredToast("articles fetched");
-                isLoading = false;
+                recyclerIsLoading = false;
             }
         });
     }
@@ -226,7 +233,7 @@ public class HomeFragment extends Fragment implements
     private void observerNextArticlesFetched() {
         allTabViewModel.getObservableNextArticlesList().observe(getViewLifecycleOwner(), fetchedArticles -> {
             Log.d(TAG, "getObservableNextArticlesList: called");
-            isLoading = false;
+            recyclerIsLoading = false;
             recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
 
             if(fetchedArticles!=null && !fetchedArticles.isEmpty()) {
@@ -333,26 +340,24 @@ public class HomeFragment extends Fragment implements
 
 
 
-    private void initRecycleViewTopics() {
-        recyclerViewTopics = viewBinding.recyclerViewHomeFragmentTopics;
-        GridLayoutManager manager = new GridLayoutManager(requireContext(), 2, GridLayoutManager.VERTICAL, false);
-        recyclerViewTopics.setLayoutManager(manager);
+    private void initRecycleViewTopics(RecyclerView recyclerView) {
+        GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), 2, GridLayoutManager.VERTICAL, false);
+        recyclerView.setLayoutManager(layoutManager);
         recyclerAdapterMyTopics = new RecyclerAdapterMyTopics(new ArrayList<>(), this);
-        recyclerViewTopics.setAdapter(recyclerAdapterMyTopics);
+        recyclerView.setAdapter(recyclerAdapterMyTopics);
     }
 
 
-    private void initRecycleViewArticles() {
-        recyclerViewArticles = viewBinding.recyclerViewHomeFragmentHeadlines;
-        recyclerViewArticles.setLayoutManager(new LinearLayoutManager(requireContext()));
+    private void initRecycleViewArticles(RecyclerView recyclerView) {
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this);
-        recyclerViewArticles.setAdapter(recyclerAdapterArticlesList);
-
-//        initScrollListener();
+        recyclerView.setAdapter(recyclerAdapterArticlesList);
     }
 
 
-
+    /**
+     * check whether view is in VSISIBLE/INVISIBLE state
+     */
     private void viewIsVisible(NestedScrollView scrollView, View view) {
         if (view.isShown()) {
             // view is within the visible window
@@ -363,18 +368,65 @@ public class HomeFragment extends Fragment implements
         }
     }
 
+    /**
+     * check whether view is visible to the user
+     * (in terms of visible screen bounds)
+     */
     private void viewIsVisibleInLayout(NestedScrollView scrollView, View view) {
         Rect scrollBounds = new Rect();
         scrollView.getHitRect(scrollBounds);
         if (view.getLocalVisibleRect(scrollBounds)) {
             // view is within the visible window
-            Log.d(TAG, "viewIsVisibleInLayout: view is visible");
+//            Log.d(TAG, "viewIsVisibleInLayout: view is visible");
+            if(switchButtonIsVisible) {
+                Log.d(TAG, "viewIsVisibleInLayout: switch button is now gone");
+                applyCrossfadeExit(switchTopicButton, shortAnimationDuration);
+                switchButtonIsVisible = false;
+            }
         } else {
             // view is not within the visible window
-            Log.d(TAG, "viewIsVisibleInLayout: view is NOT visible");
+//            Log.d(TAG, "viewIsVisibleInLayout: view is NOT visible");
+            if( ! switchButtonIsVisible) {
+                Log.d(TAG, "viewIsVisibleInLayout: switch button is now visible");
+                applyCrossfadeEnter(switchTopicButton, shortAnimationDuration);
+                switchButtonIsVisible = true;
+            }
         }
     }
 
+    private void applyCrossfadeEnter(View view, int duration) {
+        final float STARTING_ALPHA = 0f;
+        final float ENDING_ALPHA = 1f;
+
+        // Set the content view to 0% opacity but visible, so that it is visible
+        // (but fully transparent) during the animation.
+        view.setAlpha(STARTING_ALPHA);
+        view.setVisibility(View.VISIBLE);
+
+        // Animate the content view to 100% opacity, and clear any animation
+        // listener set on the view.
+        view.animate()
+                .alpha(ENDING_ALPHA)
+                .setDuration(duration)
+                .setListener(null);
+    }
+
+    private void applyCrossfadeExit(View view, int duration) {
+        final float STARTING_ALPHA = 0f;
+
+        // Animate the loading view to 0% opacity. After the animation ends,
+        // set its visibility to GONE as an optimization step (it won't
+        // participate in layout passes, etc.)
+        view.animate()
+                .alpha(STARTING_ALPHA)
+                .setDuration(duration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        view.setVisibility(View.GONE);
+                    }
+                });
+    }
 
 
 
@@ -411,39 +463,34 @@ public class HomeFragment extends Fragment implements
 
 
 
-    private void initScrollListener() {
-        recyclerViewArticles.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
+//    private void initScrollListener() {
+//        recyclerViewArticles.addOnScrollListener(new RecyclerView.OnScrollListener() {
+//            @Override
+//            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+//                super.onScrolled(recyclerView, dx, dy);
+//
+//                LinearLayoutManager linearLayoutManager =
+//                        (LinearLayoutManager) recyclerView.getLayoutManager();
+//
+//                if (!recyclerIsLoading) {
+//                    if (reachedTheBottomOfList(linearLayoutManager)) {
+//                        // NOTE:
+//                        // this resolve the "cannot call this method in a scroll callback" exception
+//                        // it happens when we are adding elements while scrolling
+//                        recyclerView.post(() -> {
+//                            Log.d(TAG, "SCIENCE_BOARD - initScrollListener: reached the end of the recycler");
+//                            loadMoreArticles();
+//                        });
+//
+//                    }
+//                }
+//            }
+//        });
+//    }
 
-                LinearLayoutManager linearLayoutManager =
-                        (LinearLayoutManager) recyclerView.getLayoutManager();
-
-                if (!isLoading) {
-                    if (reachedTheBottomOfList(linearLayoutManager)) {
-                        // NOTE:
-                        // this resolve the "cannot call this method in a scroll callback" exception
-                        // it happens when we are adding elements while scrolling
-                        recyclerView.post(() -> {
-                            Log.d(TAG, "SCIENCE_BOARD - initScrollListener: reached the end of the recycler");
-                            loadMoreArticles();
-                        });
-
-                    }
-                }
-            }
-        });
-    }
-
-    private boolean reachedTheBottomOfList(LinearLayoutManager linearLayoutManager) {
-        return linearLayoutManager != null &&
-                (articlesToDisplay != null && !articlesToDisplay.isEmpty()) &&
-                linearLayoutManager.findLastCompletelyVisibleItemPosition() == articlesToDisplay.size() - 1;
-    }
 
     private void loadMoreArticles() {
-        isLoading = true;
+        recyclerIsLoading = true;
 
         // adding loading view
         recyclerAdapterArticlesList.addLoadingView(articlesToDisplay);
@@ -452,9 +499,16 @@ public class HomeFragment extends Fragment implements
         allTabViewModel.fetchNextArticles(NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE);
     }
 
-    private void setupEndlessScroll(NestedScrollView nestedScrollView) {
+    private boolean reachedTheBottomOfList(LinearLayoutManager linearLayoutManager) {
+        return linearLayoutManager != null &&
+                (articlesToDisplay != null && !articlesToDisplay.isEmpty()) &&
+                linearLayoutManager.findLastCompletelyVisibleItemPosition() == articlesToDisplay.size() - 1;
+    }
+
+    private void setupScrollListener(NestedScrollView nestedScrollView) {
         if (nestedScrollView != null) {
-            nestedScrollView.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+            nestedScrollView.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener)
+                    (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
                 if (scrollY > oldScrollY) {
 //                    Log.d(TAG, "Scroll DOWN");
                     viewIsVisibleInLayout(nestedScrollView, recyclerViewTopics);
@@ -464,30 +518,21 @@ public class HomeFragment extends Fragment implements
                     viewIsVisibleInLayout(nestedScrollView, recyclerViewTopics);
                 }
 
-                if (scrollY == 0) {
-                    Log.d(TAG, "TOP SCROLL");
-                }
+//                if (scrollY == 0) {
+//                    Log.d(TAG, "TOP SCROLL");
+//                }
 
                 if (scrollY == (v.getChildAt(0).getMeasuredHeight() - v.getMeasuredHeight())) {
-                    Log.d(TAG, "BOTTOM SCROLL");
-//                        if (!isRecyclerViewWaitingtoLaadData) //check for scroll down
-//                        {
-//
-//                            if (!loadedAllItems) {
-//                                showUnSentData();
-//                            }
-//                        }
-
-                    if (!isLoading) {
+                    Log.d(TAG, "setupEndlessScroll: BOTTOM SCROLL");
+                    if ( ! recyclerIsLoading) {
                         loadMoreArticles();
-
                     }
                 }
             });
         }
     }
 
-    private void setupSwipeDownToRefresh(long targetDate) {
+    private void setupSwipeDownToRefresh(SwipeRefreshLayout swipeRefreshLayout, long targetDate) {
         swipeRefreshLayout.setOnRefreshListener(() -> {
             Log.d(TAG, "onRefresh called from SwipeRefreshLayout");
             refreshArticles(targetDate);
@@ -507,8 +552,10 @@ public class HomeFragment extends Fragment implements
     }
 
 
-    //---------------------------------------------------------------------------------------- UTILITY METHODS
 
+
+
+    //---------------------------------------------------------------------------------------- UTILITY METHODS
 
     private void showCenteredToast(String message) {
         if(toast!=null) toast.cancel();

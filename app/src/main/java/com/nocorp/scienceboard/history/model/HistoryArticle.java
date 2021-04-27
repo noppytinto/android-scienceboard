@@ -9,8 +9,7 @@ import com.nocorp.scienceboard.utility.MyValues;
 
 
 @Entity(primaryKeys = {"id", "visited_date"})
-public
-class HistoryArticle extends Article {
+public class HistoryArticle extends Article {
     @ColumnInfo(name = "visited_date")
     @NonNull
     private long visitedDate;

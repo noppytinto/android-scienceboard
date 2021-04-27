@@ -9,8 +9,7 @@
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbar_exploreFragment"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/white">
+        android:layout_height="wrap_content">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar_exploreFragment"
@@ -18,8 +17,8 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:elevation="0dp"
-            app:layout_scrollFlags="scroll|enterAlways"
-            app:titleTextColor="@color/white">
+            >
+<!--            app:layout_scrollFlags="scroll|enterAlways"-->
 
 
             <androidx.constraintlayout.widget.ConstraintLayout
