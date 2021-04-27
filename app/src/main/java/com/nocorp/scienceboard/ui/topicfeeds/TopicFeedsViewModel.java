@@ -30,21 +30,30 @@ public class TopicFeedsViewModel extends AndroidViewModel implements
     private MutableLiveData<List<ListItem>> articlesList;
     private MutableLiveData<List<ListItem>> nextArticlesList;
     private ArticleRepository articleRepository;
-    private static List<Source> pickedSources;
-    private static boolean taskIsRunning;
-    private static boolean bookmarksChecksTaskIsRunning;
     private SourceRepository sourceRepository;
-    private static List<ListItem> cachedArticles;
-    private static List<DocumentSnapshot> oldestArticlesSnapshots;
     private HistoryRepository historyRepository;
     private BookmarksRepository bookmarksRepository;
 
+    //static
+//    private static List<Source> pickedSources;
+//    private static boolean taskIsRunning;
+//    private static boolean bookmarksChecksTaskIsRunning;
+//    private static List<ListItem> cachedArticles;
+//    private static List<DocumentSnapshot> oldestArticlesSnapshots;
+    private List<Source> pickedSources;
+    private boolean taskIsRunning;
+    private boolean bookmarksChecksTaskIsRunning;
+    private List<ListItem> cachedArticles;
+    private List<DocumentSnapshot> oldestArticlesSnapshots;
 
 
+    
     //-------------------------------------------------------------------------------------------- CONSTRUCTORS
 
     public TopicFeedsViewModel(Application application) {
         super(application);
+//        cachedArticles = null;
+//        pickedSources = null;
         articlesList = new MutableLiveData<>();
         nextArticlesList = new MutableLiveData<>();
         articleRepository = new ArticleRepository(this);
