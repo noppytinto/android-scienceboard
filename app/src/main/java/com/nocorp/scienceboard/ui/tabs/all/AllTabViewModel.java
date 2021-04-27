@@ -150,7 +150,7 @@ public class AllTabViewModel
                 cachedArticles = new ArrayList<>();
                 taskIsRunning = true;
                 // pick sources for ALL tab, only once
-                pickedSources = sourceRepository.getAsourceForEachFollowedCategory_randomly(givenSources, TopicRepository.getCachedTopics());
+                pickedSources = sourceRepository.getAsourceForEachFollowedCategory_randomly(givenSources, TopicRepository.getCachedAllTopics());
                 articleRepository.getArticles_backInTime(pickedSources, numArticlesForEachSource, getApplication(), startingDateinMillis);
             };
 

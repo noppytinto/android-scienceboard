@@ -1,17 +1,21 @@
 package com.nocorp.scienceboard.ui.topicfeeds;
 
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.widget.NestedScrollView;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
+import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -20,8 +24,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.nocorp.scienceboard.NavGraphDirections;
 import com.nocorp.scienceboard.R;
@@ -44,7 +53,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
+
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
 public class TopicFeedsFragment extends Fragment implements
         RecyclerAdapterArticlesList.OnArticleClickedListener,
@@ -58,6 +70,8 @@ public class TopicFeedsFragment extends Fragment implements
     private NestedScrollView nestedScrollView;
     private SwipeRefreshLayout swipeRefreshLayout;
     private Toast toast;
+    private ImageView toolbarImage;
+    private Toolbar toolbar;
 
     // recycler
     private RecyclerAdapterArticlesList recyclerAdapterArticlesList;
@@ -118,6 +132,8 @@ public class TopicFeedsFragment extends Fragment implements
         if(arguments!=null) {
             currentTopic = TopicFeedsFragmentArgs.fromBundle(arguments).getTopicArgument();
 
+            toolbar.setTitle(currentTopic.getDisplayName());
+
             observeSourcesFetched();
             observeArticlesFetched();
             observerNextArticlesFetch();
@@ -161,6 +177,8 @@ public class TopicFeedsFragment extends Fragment implements
         swipeRefreshLayout = viewBinding.swipeRefreshTopicFeedsFragment;
         swipeRefreshLayout.setColorSchemeResources(R.color.orange_light);
         recyclerViewArticles = viewBinding.recyclerViewTopicFeedsFragment;
+        toolbarImage = viewBinding.imageViewTopicFeedsFragmentAppBar;
+        toolbar = viewBinding.toolbarTopicFeedsFragment;
 
         //
         currentDateInMillis = System.currentTimeMillis();
@@ -240,6 +258,7 @@ public class TopicFeedsFragment extends Fragment implements
                 recyclerAdapterArticlesList.clearList();
             }
             else {
+                setImageToToolbar(toolbarImage, resultArticles, toolbar);
                 resultArticles = adProvider.populateListWithAds(resultArticles, AD_DISTANCE);
                 articlesToDisplay = new ArrayList<>(resultArticles);
                 recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
@@ -247,6 +266,86 @@ public class TopicFeedsFragment extends Fragment implements
                 recyclerIsLoading = false;
             }
         });
+    }
+
+
+    private void setImageToToolbar(ImageView imageView, List<ListItem> articles, Toolbar toolbar) {
+        List<ListItem> randomizedList = new ArrayList<>(articles);
+        Collections.shuffle(randomizedList);
+
+        Article article = (Article) randomizedList.get(0);
+        String thumbnailUrl = article.getThumbnailUrl();
+
+        try {
+            RequestOptions gildeOptions = new RequestOptions()
+                    .fallback(R.drawable.placeholder_image)
+                    .placeholder(R.drawable.placeholder_image)
+                    .fitCenter();
+
+            Glide.with(requireContext())
+                    .load(thumbnailUrl)
+                    .apply(gildeOptions)
+//                    .thumbnail(/*sizeMultiplier = 0.25% less than original*/ THUMBNAIL_SIZE_MULTIPLIER)
+                    .transition(withCrossFade())
+                    .into(imageView);
+
+//            RequestOptions gildeOptions = new RequestOptions()
+//                    .fallback(R.drawable.placeholder_image)
+//                    .placeholder(R.drawable.placeholder_image)
+//                    .centerCrop();
+//
+//            Glide.with(requireContext())
+//                    .asBitmap()
+//                    .load(thumbnailUrl)
+//                    .apply(gildeOptions)
+//                    .into(new CustomTarget<Bitmap>() {
+//                        @Override
+//                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+//                            imageView.setImageBitmap(resource);
+//                            applyDominantoColor(resource, toolbar);
+//                        }
+//
+//                        @Override
+//                        public void onLoadCleared(@Nullable Drawable placeholder) {
+////                            holder.thumbnail.setImageDrawable(placeholder);
+//                        }
+//
+//                        @Override
+//                        public void onLoadFailed(@Nullable Drawable errorDrawable) {
+//                            super.onLoadFailed(errorDrawable);
+//                            imageView.setImageDrawable(errorDrawable);
+//                        }
+//                    });
+
+
+        } catch (Exception e) {
+            Log.e(TAG, "SCIENCE_BOARD - setImageToToolbar: cannot set thumbnail in toolbar, cause: " + e.getMessage());
+        }
+    }
+
+    private void applyDominantoColor(@NonNull Bitmap resource, @NonNull Toolbar toolbar) {
+        Palette myPalette = createPaletteSync(resource);
+        Palette.Swatch vibrant = myPalette.getDominantSwatch();
+        if(vibrant != null){
+            setDominantColors(toolbar, vibrant);
+        }
+        else {
+            vibrant = myPalette.getDarkVibrantSwatch();
+            if(vibrant != null){
+                setDominantColors(toolbar, vibrant);
+            }
+            else {
+                toolbar.setTitleTextColor(getResources().getColor(R.color.black));
+            }
+        }
+    }
+
+    private void setDominantColors(@NonNull Toolbar toolbar, Palette.Swatch vibrant) {
+        int titleColor = vibrant.getBodyTextColor();
+        toolbar.setTitleTextColor(titleColor);
+
+        int backgroundColor = vibrant.getRgb();
+        toolbar.setBackgroundColor(backgroundColor);
     }
 
     private void observerNextArticlesFetch() {
@@ -263,6 +362,12 @@ public class TopicFeedsFragment extends Fragment implements
                 // todo
             }
         });
+    }
+
+    // Generate palette synchronously and return it
+    public Palette createPaletteSync(Bitmap bitmap) {
+        Palette p = Palette.from(bitmap).generate();
+        return p;
     }
 
     private void observeTimeMachineStatus() {

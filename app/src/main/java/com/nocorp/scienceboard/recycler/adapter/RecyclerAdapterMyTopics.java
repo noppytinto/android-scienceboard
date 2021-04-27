@@ -99,7 +99,7 @@ public class RecyclerAdapterMyTopics extends
 
                     @Override
                     public void onLoadCleared(@Nullable Drawable placeholder) {
-                        holder.thumbnail.setImageDrawable(placeholder);
+//                        holder.thumbnail.setImageDrawable(placeholder);
                     }
 
                     @Override

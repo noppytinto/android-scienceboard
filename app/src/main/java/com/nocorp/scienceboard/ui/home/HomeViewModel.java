@@ -17,8 +17,6 @@ import com.nocorp.scienceboard.rss.repository.ArticleRepository;
 import com.nocorp.scienceboard.rss.repository.ArticlesRepositoryListener;
 import com.nocorp.scienceboard.rss.repository.SourceRepository;
 import com.nocorp.scienceboard.system.ThreadManager;
-import com.nocorp.scienceboard.topics.model.Topic;
-import com.nocorp.scienceboard.topics.repository.OnTopicsFetchedListener;
 import com.nocorp.scienceboard.topics.repository.TopicRepository;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 
@@ -114,7 +112,7 @@ public class HomeViewModel extends AndroidViewModel implements
                 cachedArticles = new ArrayList<>();
                 taskIsRunning = true;
                 // pick sources for ALL tab, only once
-                pickedSources = sourceRepository.getAsourceForEachFollowedCategory_randomly(givenSources, TopicRepository.getCachedTopics());
+                pickedSources = sourceRepository.getAsourceForEachFollowedCategory_randomly(givenSources, TopicRepository.getCachedAllTopics());
                 articleRepository.getArticles_backInTime(
                         pickedSources,
                         numArticlesForEachSource,

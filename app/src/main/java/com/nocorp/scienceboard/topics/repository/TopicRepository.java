@@ -15,7 +15,8 @@ import java.util.List;
 
 public class TopicRepository {
     private final String TAG = this.getClass().getSimpleName();
-    private static List<Topic> cachedTopics;
+    private static List<Topic> cachedAllTopics;
+    private static List<Topic> cachedFollowedTopics;
 
 
 
@@ -38,12 +39,11 @@ public class TopicRepository {
      */
     public void init(Context context, OnTopicRepositoryInitilizedListener listener) {
         // (will be relevant only on the first app launch)
-        cachedTopics = buildTopics_eventually();
+        cachedAllTopics = buildTopics_eventually();
 
         //
-        saveTopicsInRoom(cachedTopics, context, listener);
+        saveTopicsInRoom(cachedAllTopics, context, listener);
     }
-
 
 
     /**
@@ -114,11 +114,11 @@ public class TopicRepository {
             try {
                 // NOTE: if a topic extist, will be ignored
                 TopicDao dao = getTopicDao(context);
-                cachedTopics = dao.selectAll();
-                listener.onComplete(cachedTopics);
+                cachedAllTopics = dao.selectAll();
+                listener.onComplete(cachedAllTopics);
             } catch (Exception e) {
                 Log.e(TAG, "SCIENCE_BOARD - getTopicsFromRoom: cannot get topics from Room, cause:" + e.getMessage());
-                listener.onFailed(e.getMessage(), cachedTopics);
+                listener.onFailed(e.getMessage(), cachedAllTopics);
             }
         };
 
@@ -127,7 +127,7 @@ public class TopicRepository {
             t.runTask(task);
         } catch (Exception e) {
             Log.e(TAG, "SCIENCE_BOARD - getTopicsFromRoom: cannot start thread " + e.getMessage());
-            listener.onFailed(e.getMessage(), cachedTopics);
+            listener.onFailed(e.getMessage(), cachedAllTopics);
         }
     }
 
@@ -136,8 +136,8 @@ public class TopicRepository {
         return roomDatabase.getTopicDao();
     }
 
-    public static List<Topic> getCachedTopics() {
-        return cachedTopics;
+    public static List<Topic> getCachedAllTopics() {
+        return cachedAllTopics;
     }
 
     public void updateAll(List<Topic> topicsToUpdate, Context context, OnTopicRepositoryUpdatedListener listener) {
@@ -148,10 +148,10 @@ public class TopicRepository {
                 dao.updateAll(topicsToUpdate);
 
                 // update cached topics
-                cachedTopics = dao.selectAll();
+                cachedAllTopics = dao.selectAll();
 
                 //
-                listener.onComplete(cachedTopics);
+                listener.onComplete(cachedAllTopics);
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.e(TAG, "SCIENCE_BOARD - follow: cannot update topics in Room, cause:" + e.getMessage());
@@ -168,5 +168,7 @@ public class TopicRepository {
             listener.onFailed(e.getMessage());
         }
     }
+
+
 
 }// end TopicRepository

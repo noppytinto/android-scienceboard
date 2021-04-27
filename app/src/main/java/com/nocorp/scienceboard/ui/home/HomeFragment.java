@@ -2,6 +2,7 @@ package com.nocorp.scienceboard.ui.home;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.graphics.Rect;
 import android.os.Bundle;
 
@@ -11,6 +12,7 @@ import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.FragmentNavigator;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,6 +25,8 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.transition.MaterialElevationScale;
 import com.nocorp.scienceboard.NavGraphDirections;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.bookmarks.repository.BookmarksListOnChangedListener;
@@ -33,14 +37,15 @@ import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterMyTopics;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
 import com.nocorp.scienceboard.topics.model.Topic;
+import com.nocorp.scienceboard.topics.repository.TopicRepository;
 import com.nocorp.scienceboard.ui.bookmarks.BookmarksViewModel;
-import com.nocorp.scienceboard.ui.tabs.all.AllTabViewModel;
 import com.nocorp.scienceboard.ui.timemachine.OnDateChangedListener;
 import com.nocorp.scienceboard.ui.timemachine.TimeMachineViewModel;
 import com.nocorp.scienceboard.ui.topics.TopicsViewModel;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.ui.webview.WebviewViewModel;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
+import com.yandex.metrica.impl.ob.To;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -60,6 +65,7 @@ public class HomeFragment extends Fragment implements
     private SwipeRefreshLayout swipeRefreshLayout;
     private ImageButton switchTopicButton;
     private Toast toast;
+    private FloatingActionButton customizeHomeButton;
 
     // recycler
     private RecyclerAdapterMyTopics recyclerAdapterMyTopics;
@@ -90,7 +96,8 @@ public class HomeFragment extends Fragment implements
     // animations
     private int shortAnimationDuration;
     private boolean switchButtonIsVisible;
-
+    private final long ANIMATION_DURATION = 4000L;
+    private ObjectAnimator objectAnimator;
 
     //---------------------------------------------------------------------------------------- CONSTRUCTORS
 
@@ -103,6 +110,14 @@ public class HomeFragment extends Fragment implements
 
 
     //---------------------------------------------------------------------------------------- ANDROID METHODS
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+//        setExitTransition(new Hold().setDuration(1000));
+        setExitTransition(new MaterialElevationScale(/* growing= */ false));
+        setReenterTransition(new MaterialElevationScale(/* growing= */ true));
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -172,10 +187,7 @@ public class HomeFragment extends Fragment implements
                         false,
                         startingDate);
 
-
-
-                topics = topicsViewModel.getObservableTopicsList().getValue();
-
+                topics = extractFollowedTopics(TopicRepository.getCachedAllTopics());
             }
         });
     }
@@ -242,9 +254,8 @@ public class HomeFragment extends Fragment implements
     private void observeCustomizationStatus() {
         topicsViewModel.getObservableCustomizationStatus().observe(getViewLifecycleOwner(), customizationCompleted -> {
             Log.d(TAG, "observeCustomizationStatus: called");
-
             if(customizationCompleted) {
-                refreshArticles();
+                refreshArticlesAndTopics();
             }
             else {
                 // ignore
@@ -340,6 +351,8 @@ public class HomeFragment extends Fragment implements
         recyclerViewTopics = viewBinding.recyclerViewHomeFragmentTopics;
         recyclerViewArticles = viewBinding.recyclerViewHomeFragmentHeadlines;
         switchTopicButton = viewBinding.imageButtonHomeFragmentSwitchTopic;
+        customizeHomeButton = viewBinding.floatingActionButtonHomeFragmentCustomizeTopics;
+        customizeHomeButton.setOnClickListener(v -> showCustomizeHomeFeedFragment(customizeHomeButton));
 
         //
         currentDateInMillis = System.currentTimeMillis();
@@ -473,11 +486,62 @@ public class HomeFragment extends Fragment implements
                 startingDate);
     }
 
+    private void refreshArticlesAndTopics() {
+        long startingDate = currentDateInMillis;
+
+        if (timeMachineViewModel.timeMachineIsEnabled()) {
+            startingDate = timeMachineViewModel.getPickedDate();
+        }
+
+        topics = extractFollowedTopics(TopicRepository.getCachedAllTopics());
+
+        homeViewModel.fetchArticles(
+                sourcesFetched,
+                NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
+                true,
+                startingDate);
+    }
+
+
+
+
+
+    //------------------------------------------
+
+    private void showCustomizeHomeFeedFragment(FloatingActionButton customizeHomeButton) {
+
+        // add container transformation animation
+        FragmentNavigator.Extras animations = new FragmentNavigator
+                .Extras
+                .Builder()
+                .addSharedElement(customizeHomeButton, customizeHomeButton.getTransitionName())
+                .build();
+
+        Navigation.findNavController(view)
+                .navigate(R.id.action_homeFragment_to_topicsFragment,null,null, animations);
+    }
+
+
 
 
 
 
     //---------------------------------------------------------------------------------------- UTILITY METHODS
+
+    private List<Topic> extractFollowedTopics(List<Topic> topics) {
+        List<Topic> result = null;
+        if(topics==null || topics.isEmpty()) return result;
+
+        result = new ArrayList<>();
+
+        for (Topic topic: topics) {
+            if(topic.getFollowed() == true) {
+                result.add(topic);
+            }
+        }
+
+        return result;
+    }
 
     /**
      * check whether view is in VSISIBLE/INVISIBLE state

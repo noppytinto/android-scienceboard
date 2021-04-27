@@ -15,6 +15,10 @@ public interface TopicDao {
     @Query("SELECT * FROM topic")
     List<Topic> selectAll();
 
+    @Query("SELECT * FROM topic WHERE followed = 1 ")
+    List<Topic> selectFollowedTopics();
+
+
     @Query("SELECT * FROM topic WHERE id = :givenValue")
     List<Topic> selectById(String givenValue);
 

@@ -224,7 +224,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
                         .into(holder.thumbnail);
 
             } catch (Exception e) {
-                Log.e(TAG, "SCIENCE_BOARD - buildArticleItem: cannot set thumbnail in recycler " + e.getMessage());
+                Log.e(TAG, "SCIENCE_BOARD - buildArticleItem: cannot set thumbnail in recycler, cause: " + e.getMessage());
             }
         }
 
