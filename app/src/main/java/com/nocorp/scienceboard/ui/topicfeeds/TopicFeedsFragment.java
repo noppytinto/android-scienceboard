@@ -1,4 +1,7 @@
-package com.nocorp.scienceboard.ui.home;
+package com.nocorp.scienceboard.ui.topicfeeds;
+
+import androidx.core.widget.NestedScrollView;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -7,11 +10,8 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -20,24 +20,22 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.nocorp.scienceboard.NavGraphDirections;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.bookmarks.repository.BookmarksListOnChangedListener;
-import com.nocorp.scienceboard.databinding.FragmentHomeBinding;
+import com.nocorp.scienceboard.databinding.FragmentTopicFeedsBinding;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
-import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterMyTopics;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
 import com.nocorp.scienceboard.topics.model.Topic;
 import com.nocorp.scienceboard.ui.bookmarks.BookmarksViewModel;
-import com.nocorp.scienceboard.ui.tabs.all.AllTabViewModel;
+import com.nocorp.scienceboard.ui.home.HomeFragmentDirections;
 import com.nocorp.scienceboard.ui.timemachine.OnDateChangedListener;
 import com.nocorp.scienceboard.ui.timemachine.TimeMachineViewModel;
-import com.nocorp.scienceboard.ui.topics.TopicsViewModel;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.ui.webview.WebviewViewModel;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
@@ -45,45 +43,39 @@ import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
-
-public class HomeFragment extends Fragment implements
-        RecyclerAdapterMyTopics.TopicCoverListener,
+public class TopicFeedsFragment extends Fragment implements
         RecyclerAdapterArticlesList.OnArticleClickedListener,
         OnDateChangedListener,
-        BookmarksListOnChangedListener {
+        BookmarksListOnChangedListener
+{
     private final String TAG = this.getClass().getSimpleName();
+    private FragmentTopicFeedsBinding viewBinding;
     private View view;
-    private FragmentHomeBinding viewBinding;
+    private CircularProgressIndicator progressIndicator;
     private NestedScrollView nestedScrollView;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private ImageButton switchTopicButton;
     private Toast toast;
 
     // recycler
-    private RecyclerAdapterMyTopics recyclerAdapterMyTopics;
     private RecyclerAdapterArticlesList recyclerAdapterArticlesList;
     private RecyclerView recyclerViewArticles;
-    private RecyclerView recyclerViewTopics;
 
-
-    // viewmodel
-    private HomeViewModel homeViewModel;
+    // viewmodels
+    private TopicFeedsViewModel topicFeedsViewModel;
     private SourceViewModel sourceViewModel;
-    private TopicsViewModel topicsViewModel;
     private TimeMachineViewModel timeMachineViewModel;
     private WebviewViewModel webviewViewModel;
     private BookmarksViewModel bookmarksViewModel;
-
-
 
     //
     private AdProvider adProvider;
     private List<Source> sourcesFetched;
     private List<ListItem> articlesToDisplay;
-    private List<Topic> topics;
-    private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 2;
+    private Topic currentTopic;
+    private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 1;
     private final int AD_DISTANCE = 5; // distance between ads (in terms of items)
     private long currentDateInMillis;
     private boolean recyclerIsLoading = false;
@@ -92,40 +84,47 @@ public class HomeFragment extends Fragment implements
     private boolean switchButtonIsVisible;
 
 
-    //---------------------------------------------------------------------------------------- CONSTRUCTORS
 
-    public static HomeFragment newInstance() {
-        return new HomeFragment();
+
+
+    //--------------------------------------------------------------------------------------------- CONSTRUCTORS
+
+    public static TopicFeedsFragment newInstance() {
+        Log.d(TopicFeedsFragment.class.getSimpleName(), "SCIENCE_BOARD - newInstance: called");
+        return new TopicFeedsFragment();
     }
 
 
 
 
-
-    //---------------------------------------------------------------------------------------- ANDROID METHODS
+    //--------------------------------------------------------------------------------------------- ANDROID METHODS
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        viewBinding = FragmentHomeBinding.inflate(getLayoutInflater());
+        viewBinding = FragmentTopicFeedsBinding.inflate(getLayoutInflater());
         view = viewBinding.getRoot();
+        Log.d(TAG, "SCIENCE_BOARD - onCreateView: called");
         return view;
     }
 
     @Override
-    public void onViewCreated(@NonNull @NotNull View view,
-                              @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initView();
+        initiView();
 
-        //
-        observeSourcesFetched();
-        observeArticlesFetched();
-        observerNextArticlesFetched();
-        observeCustomizationStatus();
-        observeTimeMachineStatus();
+        Bundle arguments = getArguments();
 
-    }// end onViewCreated
+        if(arguments!=null) {
+            currentTopic = TopicFeedsFragmentArgs.fromBundle(arguments).getTopicArgument();
+
+            observeSourcesFetched();
+            observeArticlesFetched();
+            observerNextArticlesFetch();
+            observeTimeMachineStatus();
+
+        }
+    }
 
     @Override
     public void onDestroyView() {
@@ -137,7 +136,36 @@ public class HomeFragment extends Fragment implements
 
 
 
-    //---------------------------------------------------------------------------------------- METHODS
+    //--------------------------------------------------------------------------------------------- METHODS
+
+    private void initiView() {
+        nestedScrollView = viewBinding.nestedScrollViewTopicFeedsFragment;
+        progressIndicator = viewBinding.progressIndicatorTopicFeedsFragment;
+        swipeRefreshLayout = viewBinding.swipeRefreshTopicFeedsFragment;
+        swipeRefreshLayout.setColorSchemeResources(R.color.orange_light);
+        recyclerViewArticles = viewBinding.recyclerViewTopicFeedsFragment;
+
+        //
+        currentDateInMillis = System.currentTimeMillis();
+        adProvider = AdProvider.getInstance(); // is not guaranteed that
+        // Retrieve and cache the system's default "short" animation time.
+        shortAnimationDuration = getResources().getInteger(
+                android.R.integer.config_shortAnimTime);
+
+        // viewmodels
+        topicFeedsViewModel = new ViewModelProvider(this).get(TopicFeedsViewModel.class);
+        sourceViewModel = new ViewModelProvider(requireActivity()).get(SourceViewModel.class);
+        timeMachineViewModel = new ViewModelProvider(requireActivity()).get(TimeMachineViewModel.class);
+        bookmarksViewModel = new ViewModelProvider(requireActivity()).get(BookmarksViewModel.class);
+        bookmarksViewModel.setBookmarksListOnChangedListener(this);
+        webviewViewModel = new ViewModelProvider(requireActivity()).get(WebviewViewModel.class);
+        webviewViewModel.setBookmarksListOnChangedListener(this);
+
+        //
+        initRecycleView(recyclerViewArticles);
+        setupScrollListener(nestedScrollView);
+        setupSwipeDownToRefresh(swipeRefreshLayout);
+    }
 
 
 
@@ -166,24 +194,21 @@ public class HomeFragment extends Fragment implements
                     startingDate = timeMachineViewModel.getPickedDate();
                 }
 
-                homeViewModel.fetchArticles(
+                topicFeedsViewModel.fetchArticles(
                         sources,
                         NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
                         false,
+                        currentTopic.getId(),
                         startingDate);
-
-
-
-                topics = topicsViewModel.getObservableTopicsList().getValue();
-
             }
         });
     }
 
     private void observeArticlesFetched() {
-        homeViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), resultArticles -> {
+        topicFeedsViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), resultArticles -> {
             Log.d(TAG, "getObservableArticlesList: called");
             swipeRefreshLayout.setRefreshing(false);
+            progressIndicator.setVisibility(View.GONE);
 
             if(resultArticles==null) {
                 recyclerIsLoading = false;
@@ -198,10 +223,6 @@ public class HomeFragment extends Fragment implements
                 recyclerAdapterArticlesList.clearList();
             }
             else {
-                //
-                setTopicsThumbnails(resultArticles, topics, homeViewModel.getPickedSources());
-                recyclerAdapterMyTopics.loadNewData(topics);
-                //
                 resultArticles = adProvider.populateListWithAds(resultArticles, AD_DISTANCE);
                 articlesToDisplay = new ArrayList<>(resultArticles);
                 recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
@@ -211,9 +232,8 @@ public class HomeFragment extends Fragment implements
         });
     }
 
-    private void observerNextArticlesFetched() {
-        homeViewModel.getObservableNextArticlesList().observe(getViewLifecycleOwner(), fetchedArticles -> {
-            Log.d(TAG, "getObservableNextArticlesList: called");
+    private void observerNextArticlesFetch() {
+        topicFeedsViewModel.getObservableNextArticlesList().observe(getViewLifecycleOwner(), fetchedArticles -> {
             recyclerIsLoading = false;
             recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
 
@@ -239,19 +259,6 @@ public class HomeFragment extends Fragment implements
         });
     }
 
-    private void observeCustomizationStatus() {
-        topicsViewModel.getObservableCustomizationStatus().observe(getViewLifecycleOwner(), customizationCompleted -> {
-            Log.d(TAG, "observeCustomizationStatus: called");
-
-            if(customizationCompleted) {
-                refreshArticles();
-            }
-            else {
-                // ignore
-            }
-        });
-    }
-
 
 
 
@@ -262,39 +269,11 @@ public class HomeFragment extends Fragment implements
     public void onArticleClicked(int position, View itemView) {
         Article article = (Article) recyclerAdapterArticlesList.getItem(position);
         if(article!=null) {
-            homeViewModel.saveInHistory(article);
+            topicFeedsViewModel.saveInHistory(article);
             article.setVisited(true);
 
-
-
-//            FragmentNavigator.Extras extras = new FragmentNavigator
-//                    .Extras
-//                    .Builder()
-//                    .addSharedElement(view, view.getTransitionName())
-//                    .build();
-
             NavGraphDirections.ActionGlobalWebviewFragment action =
-                    HomeFragmentDirections.actionGlobalWebviewFragment(article);
-            Navigation.findNavController(view).navigate(action);
-
-//
-//            MobileNavigationDirections.ActionGlobalWebviewFragment action =
-//                    MobileNavigationDirections.actionGlobalWebviewFragment(article);
-//            Navigation.findNavController(view).navigate(action, extras);
-
-//            MobileNavigationDirections.ActionGlobalWebviewFragment action =
-//                    MobileNavigationDirections.actionGlobalWebviewFragment(article);
-//            Navigation.findNavController(view).navigate(action);
-        }
-    }
-
-    @Override
-    public void onTopicCoverClicked(int position) {
-        Topic clickedTopic = recyclerAdapterMyTopics.getItem(position);
-
-        if(clickedTopic!=null) {
-            NavGraphDirections.ActionGlobalTopicFeedsFragment action =
-                    HomeFragmentDirections.actionGlobalTopicFeedsFragment(clickedTopic);
+                    TopicFeedsFragmentDirections.actionGlobalWebviewFragment(article);
             Navigation.findNavController(view).navigate(action);
         }
     }
@@ -305,11 +284,11 @@ public class HomeFragment extends Fragment implements
         if(article!=null) {
             if(article.isBookmarked()) {
                 article.setBookmarked(false);
-                homeViewModel.removeFromBookmarks(article);
+                topicFeedsViewModel.removeFromBookmarks(article);
             }
             else {
                 article.setBookmarked(true);
-                homeViewModel.addToBookmarks(article);
+                topicFeedsViewModel.addToBookmarks(article);
             }
         }
     }
@@ -321,7 +300,7 @@ public class HomeFragment extends Fragment implements
 
     @Override
     public void onBookmarksListChanged() {
-        homeViewModel.asyncBookmarksCheck(recyclerAdapterArticlesList.getAllItems(), () -> {
+        topicFeedsViewModel.asyncBookmarksCheck(recyclerAdapterArticlesList.getAllItems(), () -> {
             recyclerAdapterArticlesList.notifyDataSetChanged();
         });
     }
@@ -329,87 +308,10 @@ public class HomeFragment extends Fragment implements
 
 
 
-
     //----------------------------------------------------------
 
-    private void initView() {
-        // views
-        nestedScrollView = viewBinding.nestedScrollViewHomeFragment;
-        swipeRefreshLayout = viewBinding.swipeRefreshLayoutHomeFragment;
-        swipeRefreshLayout.setColorSchemeResources(R.color.orange);
-        recyclerViewTopics = viewBinding.recyclerViewHomeFragmentTopics;
-        recyclerViewArticles = viewBinding.recyclerViewHomeFragmentHeadlines;
-        switchTopicButton = viewBinding.imageButtonHomeFragmentSwitchTopic;
-
-        //
-        currentDateInMillis = System.currentTimeMillis();
-        adProvider = AdProvider.getInstance(); // is not guaranteed that
-        // Retrieve and cache the system's default "short" animation time.
-        shortAnimationDuration = getResources().getInteger(
-                android.R.integer.config_shortAnimTime);
-
-        // viewmodels
-        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
-        sourceViewModel = new ViewModelProvider(requireActivity()).get(SourceViewModel.class);
-        topicsViewModel = new ViewModelProvider(requireActivity()).get(TopicsViewModel.class);
-        timeMachineViewModel = new ViewModelProvider(requireActivity()).get(TimeMachineViewModel.class);
-        bookmarksViewModel = new ViewModelProvider(requireActivity()).get(BookmarksViewModel.class);
-        bookmarksViewModel.setBookmarksListOnChangedListener(this);
-        webviewViewModel = new ViewModelProvider(requireActivity()).get(WebviewViewModel.class);
-        webviewViewModel.setBookmarksListOnChangedListener(this);
-
-        //
-        initRecycleViewTopics(recyclerViewTopics);
-        initRecycleViewArticles(recyclerViewArticles);
-        setupScrollListener(nestedScrollView);
-        setupSwipeDownToRefresh(swipeRefreshLayout);
-    }
-
-    private List<String> setTopicsThumbnails(List<ListItem> articles, List<Topic> topics, List<Source> sources) {
-        List<String> result = null;
-        if(topics==null || topics.isEmpty()) return result;
-        if(articles==null || articles.isEmpty()) return result;
-
-
-        result = new ArrayList<>();
-        List<Source> sourcesTarget = sources;
-
-
-        for(Topic topic: topics) {
-            String topicId = topic.getId();
-            for(Source source: sourcesTarget) {
-                if(source.getCategories().contains(topicId)) {
-                    String sourceId = source.getId();
-                    for(ListItem listItem: articles) {
-                        Article article = ((Article) listItem);
-                        if(sourceId.equals(article.getSourceId())) {
-                            String thumbnailUrl = article.getThumbnailUrl();
-                            if(thumbnailUrl!=null) {
-                                topic.setThumbnailUrl(thumbnailUrl);
-                                break;
-                            }
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-
-
-
-
-
-        return result;
-    }
-
-    private void initRecycleViewTopics(RecyclerView recyclerView) {
-        GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), 2, GridLayoutManager.VERTICAL, false);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerAdapterMyTopics = new RecyclerAdapterMyTopics(new ArrayList<>(), this);
-        recyclerView.setAdapter(recyclerAdapterMyTopics);
-    }
-
-    private void initRecycleViewArticles(RecyclerView recyclerView) {
+    private void initRecycleView(RecyclerView recyclerView) {
+        // defining Recycler view
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this);
         recyclerView.setAdapter(recyclerAdapterArticlesList);
@@ -419,26 +321,26 @@ public class HomeFragment extends Fragment implements
         if (nestedScrollView != null) {
             nestedScrollView.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener)
                     (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
-                if (scrollY > oldScrollY) {
+                        if (scrollY > oldScrollY) {
 //                    Log.d(TAG, "Scroll DOWN");
-                    viewIsVisibleInLayout(nestedScrollView, recyclerViewTopics);
-                }
-                if (scrollY < oldScrollY) {
+//                            viewIsVisibleInLayout(nestedScrollView, recyclerViewTopics);
+                        }
+                        if (scrollY < oldScrollY) {
 //                    Log.d(TAG, "Scroll UP");
-                    viewIsVisibleInLayout(nestedScrollView, recyclerViewTopics);
-                }
+//                            viewIsVisibleInLayout(nestedScrollView, recyclerViewTopics);
+                        }
 
 //                if (scrollY == 0) {
 //                    Log.d(TAG, "TOP SCROLL");
 //                }
 
-                if (scrollY == (v.getChildAt(0).getMeasuredHeight() - v.getMeasuredHeight())) {
-                    Log.d(TAG, "setupEndlessScroll: BOTTOM SCROLL");
-                    if ( ! recyclerIsLoading) {
-                        loadMoreArticles();
-                    }
-                }
-            });
+                        if (scrollY == (v.getChildAt(0).getMeasuredHeight() - v.getMeasuredHeight())) {
+                            Log.d(TAG, "setupEndlessScroll: BOTTOM SCROLL");
+                            if ( ! recyclerIsLoading) {
+                                loadMoreArticles();
+                            }
+                        }
+                    });
         }
     }
 
@@ -449,12 +351,12 @@ public class HomeFragment extends Fragment implements
         recyclerAdapterArticlesList.addLoadingView(articlesToDisplay);
 
         // load new items
-        homeViewModel.fetchNextArticles(NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE);
+        topicFeedsViewModel.fetchNextArticles(NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE);
     }
 
     private void setupSwipeDownToRefresh(SwipeRefreshLayout swipeRefreshLayout) {
         swipeRefreshLayout.setOnRefreshListener(() -> {
-            Log.d(TAG, "onRefresh called from SwipeRefreshLayout");
+            Log.i(TAG, "onRefresh called from SwipeRefreshLayout");
             refreshArticles();
         });
     }
@@ -466,31 +368,16 @@ public class HomeFragment extends Fragment implements
             startingDate = timeMachineViewModel.getPickedDate();
         }
 
-        homeViewModel.fetchArticles(
+        topicFeedsViewModel.fetchArticles(
                 sourcesFetched,
                 NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
                 true,
+                currentTopic.getId(),
                 startingDate);
     }
 
 
-
-
-
     //---------------------------------------------------------------------------------------- UTILITY METHODS
-
-    /**
-     * check whether view is in VSISIBLE/INVISIBLE state
-     */
-    private void viewIsVisible(NestedScrollView scrollView, View view) {
-        if (view.isShown()) {
-            // view is within the visible window
-            Log.d(TAG, "viewIsVisible: view is visible");
-        } else {
-            // view is not within the visible window
-            Log.d(TAG, "viewIsVisible: view is NOT visible");
-        }
-    }
 
     /**
      * check whether view is visible to the user
@@ -504,7 +391,7 @@ public class HomeFragment extends Fragment implements
 //            Log.d(TAG, "viewIsVisibleInLayout: view is visible");
             if(switchButtonIsVisible) {
                 Log.d(TAG, "viewIsVisibleInLayout: switch button is now gone");
-                applyCrossfadeExit(switchTopicButton, shortAnimationDuration);
+//                applyCrossfadeExit(switchTopicButton, shortAnimationDuration);
                 switchButtonIsVisible = false;
             }
         } else {
@@ -512,7 +399,7 @@ public class HomeFragment extends Fragment implements
 //            Log.d(TAG, "viewIsVisibleInLayout: view is NOT visible");
             if( ! switchButtonIsVisible) {
                 Log.d(TAG, "viewIsVisibleInLayout: switch button is now visible");
-                applyCrossfadeEnter(switchTopicButton, shortAnimationDuration);
+//                applyCrossfadeEnter(switchTopicButton, shortAnimationDuration);
                 switchButtonIsVisible = true;
             }
         }
@@ -552,12 +439,30 @@ public class HomeFragment extends Fragment implements
                 });
     }
 
+    private void runToastOnUiThread(String message) {
+        requireActivity().runOnUiThread(() -> {
+                    try {
+                        if(toast!=null) toast.cancel();
+                        toast = Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT);
+                        toast.show();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+        );
+    }
+
     private void showCenteredToast(String message) {
         if(toast!=null) toast.cancel();
         toast = Toast.makeText(requireContext(),message, Toast.LENGTH_SHORT);
 //        toast.setGravity(Gravity.CENTER, 0, 0);
         toast.show();
     }
+    @NotNull
+    private Calendar convertMillisInCalendar(Long pickedDate) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(pickedDate);
+        return cal;
+    }
 
-
-}// end HomeFragment
+}// end TopicFeedsFragment

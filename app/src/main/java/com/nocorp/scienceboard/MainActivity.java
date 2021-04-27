@@ -99,6 +99,9 @@ public class MainActivity extends AppCompatActivity
         else if(destination.getId() == R.id.topicsFragment) {
             hideToolbar();
         }
+        else if(destination.getId() == R.id.topicFeedsFragment) {
+            hideToolbar();
+        }
         else {
             showToolbar();
             showBottomBar();
@@ -148,7 +151,7 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         appBar = getSupportActionBar();
         // Enable the Up button
-//        if(appBar!=null) appBar.setDisplayHomeAsUpEnabled(true);
+        if(appBar!=null) appBar.setDisplayHomeAsUpEnabled(true);
         bottomNavBar = viewBinding.includeMainActivity.bottomNavView;
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
 
@@ -198,16 +201,6 @@ public class MainActivity extends AppCompatActivity
 
 
     }// end initView()
-
-
-
-
-
-
-
-
-
-
 
 
     private void initAdProvider(Context context, int numAdsToLoad) {

@@ -128,14 +128,14 @@ public class RecyclerAdapterMyTopics extends
                 setDominantColors(holder, vibrant);
             }
             else {
-                holder.topicNameLabel.setTextColor(holder.itemView.getContext().getResources().getColor(R.color.black));
+                holder.topicNameLabel.setTextColor(holder.itemView.getContext().getResources().getColor(R.color.white));
             }
         }
     }
 
     private void setDominantColors(@NonNull TopicCoverViewHolder holder, Palette.Swatch vibrant) {
-        int titleColor = vibrant.getBodyTextColor();
-        holder.topicNameLabel.setTextColor(titleColor);
+//        int titleColor = vibrant.getBodyTextColor();
+//        holder.topicNameLabel.setTextColor(titleColor);
 
         int backgroundColor = vibrant.getRgb();
         holder.container.setBackgroundColor(backgroundColor);

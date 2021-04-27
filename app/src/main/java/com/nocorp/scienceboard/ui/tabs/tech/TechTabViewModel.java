@@ -24,7 +24,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TechTabViewModel extends AndroidViewModel implements ArticlesRepositoryListener {
+public class TechTabViewModel extends AndroidViewModel implements
+        ArticlesRepositoryListener {
     private final String TAG = this.getClass().getSimpleName();
     private MutableLiveData<List<ListItem>> articlesList;
     private MutableLiveData<List<ListItem>> nextArticlesList;

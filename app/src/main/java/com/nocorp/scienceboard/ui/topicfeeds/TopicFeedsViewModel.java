@@ -1,4 +1,4 @@
-package com.nocorp.scienceboard.ui.home;
+package com.nocorp.scienceboard.ui.topicfeeds;
 
 import android.app.Application;
 import android.util.Log;
@@ -17,9 +17,6 @@ import com.nocorp.scienceboard.rss.repository.ArticleRepository;
 import com.nocorp.scienceboard.rss.repository.ArticlesRepositoryListener;
 import com.nocorp.scienceboard.rss.repository.SourceRepository;
 import com.nocorp.scienceboard.system.ThreadManager;
-import com.nocorp.scienceboard.topics.model.Topic;
-import com.nocorp.scienceboard.topics.repository.OnTopicsFetchedListener;
-import com.nocorp.scienceboard.topics.repository.TopicRepository;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HomeViewModel extends AndroidViewModel implements
+public class TopicFeedsViewModel extends AndroidViewModel implements
         ArticlesRepositoryListener {
     private final String TAG = this.getClass().getSimpleName();
     private MutableLiveData<List<ListItem>> articlesList;
@@ -46,7 +43,7 @@ public class HomeViewModel extends AndroidViewModel implements
 
     //-------------------------------------------------------------------------------------------- CONSTRUCTORS
 
-    public HomeViewModel(Application application) {
+    public TopicFeedsViewModel(Application application) {
         super(application);
         articlesList = new MutableLiveData<>();
         nextArticlesList = new MutableLiveData<>();
@@ -85,36 +82,42 @@ public class HomeViewModel extends AndroidViewModel implements
 
     //-------------------------------------------------------------------------------------------- METHODS
 
-
     //-------------------------------------------------------------- FETCH ARTICLES
 
     public void fetchArticles(List<Source> givenSources,
                               int numArticlesForEachSource,
                               boolean forced,
+                              String topicId,
                               long startingDateinMillis) {
         if(forced) {
-            downloadArticlesFromFollowedTopics(
+            downloadArticlesFromTopic(
                     givenSources,
                     numArticlesForEachSource,
+                    topicId,
                     startingDateinMillis);
         }
         else {
-            tryCachedArticles(givenSources,
+            tryCachedArticles(
+                    givenSources,
                     numArticlesForEachSource,
+                    topicId,
                     startingDateinMillis);
         }
     }
 
-    private void downloadArticlesFromFollowedTopics(
+    private void downloadArticlesFromTopic(
             List<Source> givenSources,
             int numArticlesForEachSource,
+            String topicId,
             long startingDateinMillis) {
         if( ! taskIsRunning) {
             Runnable task = () -> {
                 cachedArticles = new ArrayList<>();
                 taskIsRunning = true;
                 // pick sources for ALL tab, only once
-                pickedSources = sourceRepository.getAsourceForEachFollowedCategory_randomly(givenSources, TopicRepository.getCachedTopics());
+                if(pickedSources == null || pickedSources.isEmpty()) {
+                    pickedSources = sourceRepository.getAllSourcesOfThisCategory(givenSources, topicId);
+                }
                 articleRepository.getArticles_backInTime(
                         pickedSources,
                         numArticlesForEachSource,
@@ -127,9 +130,9 @@ public class HomeViewModel extends AndroidViewModel implements
         }
     }
 
-    private void tryCachedArticles(List<Source> givenSources, int numArticlesForEachSource, long startingDateinMillis) {
+    private void tryCachedArticles(List<Source> givenSources, int numArticlesForEachSource, String topicId, long startingDateinMillis) {
         if(cachedArticles == null) {
-            downloadArticlesFromFollowedTopics(givenSources, numArticlesForEachSource, startingDateinMillis);
+            downloadArticlesFromTopic(givenSources, numArticlesForEachSource, topicId, startingDateinMillis);
         }
         else {
             setArticlesList(cachedArticles);
@@ -152,6 +155,7 @@ public class HomeViewModel extends AndroidViewModel implements
             bookmarksCheck(cachedArticles);
             setArticlesList(articles);
         }
+
     }
 
     @Override
@@ -160,8 +164,6 @@ public class HomeViewModel extends AndroidViewModel implements
 
         // TODO
     }
-
-
 
 
 
@@ -195,8 +197,9 @@ public class HomeViewModel extends AndroidViewModel implements
     public void onNextArticlesFetchFailed(String cause) {
         taskIsRunning = false;
         setNextArticlesList(null);
-        Log.e(TAG, "SCIENCE_BOARD - onNextArticlesFetchFailed: " + cause);
+        Log.d(TAG, "SCIENCE_BOARD - onNextArticlesFetchFailed: " + cause);
     }
+
 
 
 
@@ -211,7 +214,8 @@ public class HomeViewModel extends AndroidViewModel implements
         bookmarksRepository.bookmarksCheck(articles, getApplication());
     }
 
-    public void asyncBookmarksCheck(List<ListItem> articles, OnBookmarksCheckedListener listener) {
+    public void asyncBookmarksCheck(List<ListItem> articles,
+                                    OnBookmarksCheckedListener listener) {
         if(articles == null || articles.isEmpty()) return;
 
         if(!bookmarksChecksTaskIsRunning) {
@@ -248,4 +252,4 @@ public class HomeViewModel extends AndroidViewModel implements
     }
 
 
-}// end HomeViewModel
+}// end TopicFeedsViewModel

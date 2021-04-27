@@ -78,4 +78,20 @@
         android:id="@+id/mainActivity"
         android:name="com.nocorp.scienceboard.MainActivity"
         android:label="MainActivity" />
+    <fragment
+        android:id="@+id/topicFeedsFragment"
+        android:name="com.nocorp.scienceboard.ui.topicfeeds.TopicFeedsFragment"
+        android:label="fragment_topic_feeds"
+        tools:layout="@layout/fragment_topic_feeds" >
+        <argument
+            android:name="topic_argument"
+            app:argType="com.nocorp.scienceboard.topics.model.Topic" />
+    </fragment>
+    <action
+        android:id="@+id/action_global_topicFeedsFragment"
+        app:destination="@id/topicFeedsFragment"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
 </navigation>

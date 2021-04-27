@@ -6,8 +6,10 @@ import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
+
 @Entity
-public class Topic {
+public class Topic implements Serializable {
     @PrimaryKey
     @NonNull
     private String id;

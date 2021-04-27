@@ -65,7 +65,8 @@ import okhttp3.OkHttpClient;
 
 import okhttp3.ResponseBody;
 
-public class WebviewFragment extends Fragment implements androidx.appcompat.widget.Toolbar.OnMenuItemClickListener {
+public class WebviewFragment extends Fragment implements
+        androidx.appcompat.widget.Toolbar.OnMenuItemClickListener {
     private final String TAG = this.getClass().getSimpleName();
     private FragmentWebviewBinding viewBinding;
     private View view;

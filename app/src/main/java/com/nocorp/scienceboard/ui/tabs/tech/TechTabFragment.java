@@ -32,7 +32,8 @@ import java.util.Calendar;
 import java.util.List;
 
 public class TechTabFragment extends Fragment implements
-        RecyclerAdapterArticlesList.OnArticleClickedListener {
+        RecyclerAdapterArticlesList.OnArticleClickedListener
+{
     private final String TAG = this.getClass().getSimpleName();
     private TechTabViewModel techTabViewModel;
     private FragmentTechTabBinding viewBinding;
