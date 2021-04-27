@@ -19,7 +19,6 @@
             app:expandedTitleTextAppearance="@style/ScieceBoard.Toolbar.CollapsingToolbar.ExpandendTitleTextAppearance"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
             app:layout_scrollInterpolator="@android:anim/decelerate_interpolator"
-            app:title="Tech"
             app:titleEnabled="true"
             app:toolbarId="@+id/toolbar_topicFeedsFragment">
 
@@ -41,7 +40,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
-                app:title="Tech"
                 app:titleTextAppearance="@style/ScieceBoard.Toolbar.TitleTextAppearance"
                 >
 

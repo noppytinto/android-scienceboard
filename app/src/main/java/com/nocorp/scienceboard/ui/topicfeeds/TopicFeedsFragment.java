@@ -132,7 +132,8 @@ public class TopicFeedsFragment extends Fragment implements
         if(arguments!=null) {
             currentTopic = TopicFeedsFragmentArgs.fromBundle(arguments).getTopicArgument();
 
-            toolbar.setTitle(currentTopic.getDisplayName());
+            String displayName = currentTopic.getDisplayName();
+            toolbar.setTitle(displayName);
 
             observeSourcesFetched();
             observeArticlesFetched();
