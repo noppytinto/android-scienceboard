@@ -4,11 +4,12 @@ import android.content.Context;
 import android.util.Log;
 
 import com.nocorp.scienceboard.history.model.HistoryArticle;
+import com.nocorp.scienceboard.history.room.HistoryDao;
 import com.nocorp.scienceboard.model.Article;
+import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
-import com.nocorp.scienceboard.history.room.HistoryDao;
-import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
+import com.nocorp.scienceboard.utility.MyValues;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -172,15 +173,18 @@ public class HistoryRepository{
         Log.d(TAG, "historyCheck: " + articles);
         HistoryDao dao = getHistoryDao(context);
         for(ListItem article: articles) {
-            Article current = (Article)article;
-            if(dao.isInHistory(current.getId())){
-                Log.d(TAG, "historyCheck: " + current.getTitle() + " is in hisotry");
-                current.setVisited(true);
-            }
-            else {
-                Log.d(TAG, "historyCheck: " + current.getTitle() + " is NOT in hisotry");
-                current.setVisited(false);
+            if(article.getItemType() == MyValues.ItemType.ARTICLE) {
+                Article current = (Article)article;
+                if(dao.isInHistory(current.getId())){
+                    Log.d(TAG, "historyCheck: " + current.getTitle() + " is in hisotry");
+                    current.setVisited(true);
+                }
+                else {
+                    Log.d(TAG, "historyCheck: " + current.getTitle() + " is NOT in hisotry");
+                    current.setVisited(false);
+                }
             }
         }
     }
+
 }// end HistoryRepository

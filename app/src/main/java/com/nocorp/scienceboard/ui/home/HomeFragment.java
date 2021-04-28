@@ -5,6 +5,12 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,17 +19,9 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.FragmentNavigator;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.transition.MaterialElevationScale;
@@ -47,7 +45,6 @@ import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.ui.webview.WebviewViewModel;
 import com.nocorp.scienceboard.utility.MyValues;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
-import com.yandex.metrica.impl.ob.To;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -355,7 +352,6 @@ public class HomeFragment extends Fragment implements
 
 
 
-
     //----------------------------------------------------------
 
     private void initView() {
@@ -492,8 +488,8 @@ public class HomeFragment extends Fragment implements
                 linearLayoutManager.findLastCompletelyVisibleItemPosition() == articlesToDisplay.size() - 1;
     }
 
-
     private void loadMoreArticles() {
+        Log.d(TAG, "loadMoreArticles: called");
         recyclerIsLoading = true;
 
         // adding loading view
@@ -539,14 +535,6 @@ public class HomeFragment extends Fragment implements
                 true,
                 startingDate);
     }
-
-
-
-
-
-    //------------------------------------------
-
-
 
 
 

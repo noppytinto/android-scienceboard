@@ -11,17 +11,16 @@ import com.nocorp.scienceboard.topics.model.Topic;
 import com.nocorp.scienceboard.topics.repository.OnTopicRepositoryUpdatedListener;
 import com.nocorp.scienceboard.topics.repository.OnTopicsFetchedListener;
 import com.nocorp.scienceboard.topics.repository.TopicRepository;
-import com.nocorp.scienceboard.topics.repository.TopicRepositoryListener;
 
 import java.util.List;
 
 public class TopicsViewModel extends AndroidViewModel {
     private final String TAG = this.getClass().getSimpleName();
     private MutableLiveData<List<Topic>> topicsList;
-    private TopicRepository topicRepository;
-
     private MutableLiveData<Boolean> customizationStatus;
 
+    // repository
+    private TopicRepository topicRepository;
 
     //
     private static boolean taskIsRunning;

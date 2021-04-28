@@ -13,6 +13,7 @@ import com.nocorp.scienceboard.bookmarks.repository.OnBookmarksCheckedListener;
 import com.nocorp.scienceboard.history.repository.HistoryRepository;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.Source;
+import com.nocorp.scienceboard.repository.GeneralRepository;
 import com.nocorp.scienceboard.rss.repository.ArticleRepository;
 import com.nocorp.scienceboard.rss.repository.ArticlesRepositoryListener;
 import com.nocorp.scienceboard.rss.repository.SourceRepository;
@@ -39,6 +40,7 @@ public class HomeViewModel extends AndroidViewModel implements
     private static List<DocumentSnapshot> oldestArticlesSnapshots;
     private HistoryRepository historyRepository;
     private BookmarksRepository bookmarksRepository;
+    private GeneralRepository generalRepository;
 
 
 
@@ -52,6 +54,7 @@ public class HomeViewModel extends AndroidViewModel implements
         sourceRepository = new SourceRepository();
         historyRepository = new HistoryRepository();
         bookmarksRepository = new BookmarksRepository();
+        generalRepository = new GeneralRepository();
     }
 
 
@@ -146,8 +149,9 @@ public class HomeViewModel extends AndroidViewModel implements
 
             // publish results
             cachedArticles = articles;
-            historyCheck(cachedArticles);
-            bookmarksCheck(cachedArticles);
+            historyAndBookmarksCheck(articles);
+//            historyCheck(cachedArticles);
+//            bookmarksCheck(cachedArticles);
             setArticlesList(articles);
         }
     }
@@ -185,6 +189,7 @@ public class HomeViewModel extends AndroidViewModel implements
         oldestArticlesSnapshots = new ArrayList<>(oldestArticles);
 
         // publish results
+        historyAndBookmarksCheck(newArticles);
         cachedArticles.addAll(newArticles);
         setNextArticlesList(cachedArticles);
     }
@@ -207,6 +212,11 @@ public class HomeViewModel extends AndroidViewModel implements
 
     private void bookmarksCheck(List<ListItem> articles) {
         bookmarksRepository.bookmarksCheck(articles, getApplication());
+    }
+
+    private void historyAndBookmarksCheck(List<ListItem> articles) {
+        if(articles==null) return;
+        generalRepository.historyAndBookmarksCheck_sync(articles, getApplication());
     }
 
     public void asyncBookmarksCheck(List<ListItem> articles, OnBookmarksCheckedListener listener) {
