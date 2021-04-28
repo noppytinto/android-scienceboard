@@ -5,12 +5,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.topicfeeds.TopicFeedsFragment"
+    android:fitsSystemWindows="true"
+
     >
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbar_topicFeedsFragment"
-        android:layout_height="192dp"
-        android:layout_width="match_parent">
+        android:layout_height="250dp"
+        android:layout_width="match_parent"
+        android:fitsSystemWindows="true"
+        >
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
@@ -19,8 +23,9 @@
             app:expandedTitleTextAppearance="@style/ScieceBoard.Toolbar.CollapsingToolbar.ExpandendTitleTextAppearance"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
             app:layout_scrollInterpolator="@android:anim/decelerate_interpolator"
-            app:titleEnabled="true"
-            app:toolbarId="@+id/toolbar_topicFeedsFragment">
+            app:toolbarId="@+id/toolbar_topicFeedsFragment"
+            android:fitsSystemWindows="true"
+            >
 
             <ImageView
                 android:id="@+id/imageView_topicFeedsFragment_appBar"
@@ -28,6 +33,7 @@
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
                 app:layout_collapseMode="parallax"
+                android:fitsSystemWindows="true"
                 />
 
             <View
@@ -35,15 +41,12 @@
                 android:layout_height="match_parent"
                 android:background="@drawable/gradient_topic_feeds_fragment" />
 
-            <androidx.appcompat.widget.Toolbar
+            <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar_topicFeedsFragment"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
-                app:titleTextAppearance="@style/ScieceBoard.Toolbar.TitleTextAppearance"
-                >
-
-            </androidx.appcompat.widget.Toolbar>
+                app:titleTextAppearance="@style/ScieceBoard.Toolbar.TitleTextAppearance" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 

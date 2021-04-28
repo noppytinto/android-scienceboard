@@ -249,7 +249,7 @@ public class BookmarksFragment extends Fragment implements
 
     private void openArticle(Article article) {
         NavGraphDirections.ActionGlobalWebviewFragment action =
-                BookmarksFragmentDirections.actionGlobalWebviewFragment(article);
+                NavGraphDirections.actionGlobalWebviewFragment(article);
         Navigation.findNavController(view).navigate(action);
     }
 

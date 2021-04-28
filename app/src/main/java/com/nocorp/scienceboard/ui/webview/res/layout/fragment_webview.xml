@@ -5,9 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.webview.WebviewFragment"
-    >
-    <!--    android:transitionName="shared_element_container"-->
 
+    >
+<!--    android:transitionName="@string/transformation_article_to_webview"-->
+<!--    android:transitionGroup="true"-->
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar_webviewFragment"

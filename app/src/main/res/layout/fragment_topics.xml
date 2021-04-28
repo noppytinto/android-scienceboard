@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".ui.topics.TopicsFragment"
     android:transitionName="shared_element_container"
+    android:transitionGroup="true"
     >
 
 

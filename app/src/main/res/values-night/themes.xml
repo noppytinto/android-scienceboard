@@ -41,6 +41,9 @@
         <item name="exitEditBookmarksIconColor">@color/white</item>
         <item name="selectAllBookmarksIconColor">@color/white</item>
         <item name="editBookmarksIconColor">@color/white</item>
+        <!-- TOPIC FEEDS TOOLBAR -->
+        <item name="navigationIconColor">@color/black</item>
+<!--        <item name="navigationIconTint">@color/red</item>-->
 
         <!-- ARTICLE VIEWHOLDER -->
         <item name="articleDividerColor">@color/gray_800</item>

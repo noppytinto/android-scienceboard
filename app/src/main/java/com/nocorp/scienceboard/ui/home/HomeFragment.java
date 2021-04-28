@@ -73,7 +73,6 @@ public class HomeFragment extends Fragment implements
     private RecyclerView recyclerViewArticles;
     private RecyclerView recyclerViewTopics;
 
-
     // viewmodel
     private HomeViewModel homeViewModel;
     private SourceViewModel sourceViewModel;
@@ -81,8 +80,6 @@ public class HomeFragment extends Fragment implements
     private TimeMachineViewModel timeMachineViewModel;
     private WebviewViewModel webviewViewModel;
     private BookmarksViewModel bookmarksViewModel;
-
-
 
     //
     private AdProvider adProvider;
@@ -98,6 +95,11 @@ public class HomeFragment extends Fragment implements
     private boolean switchButtonIsVisible;
     private final long ANIMATION_DURATION = 4000L;
     private ObjectAnimator objectAnimator;
+
+
+
+
+
 
     //---------------------------------------------------------------------------------------- CONSTRUCTORS
 
@@ -276,26 +278,16 @@ public class HomeFragment extends Fragment implements
             homeViewModel.saveInHistory(article);
             article.setVisited(true);
 
-
-
-//            FragmentNavigator.Extras extras = new FragmentNavigator
+            // add container transformation animation
+//            FragmentNavigator.Extras animations = new FragmentNavigator
 //                    .Extras
 //                    .Builder()
-//                    .addSharedElement(view, view.getTransitionName())
+//                    .addSharedElement(itemView, itemView.getTransitionName())
 //                    .build();
 
             NavGraphDirections.ActionGlobalWebviewFragment action =
-                    HomeFragmentDirections.actionGlobalWebviewFragment(article);
+                    NavGraphDirections.actionGlobalWebviewFragment(article);
             Navigation.findNavController(view).navigate(action);
-
-//
-//            MobileNavigationDirections.ActionGlobalWebviewFragment action =
-//                    MobileNavigationDirections.actionGlobalWebviewFragment(article);
-//            Navigation.findNavController(view).navigate(action, extras);
-
-//            MobileNavigationDirections.ActionGlobalWebviewFragment action =
-//                    MobileNavigationDirections.actionGlobalWebviewFragment(article);
-//            Navigation.findNavController(view).navigate(action);
         }
     }
 
@@ -305,7 +297,7 @@ public class HomeFragment extends Fragment implements
 
         if(clickedTopic!=null) {
             NavGraphDirections.ActionGlobalTopicFeedsFragment action =
-                    HomeFragmentDirections.actionGlobalTopicFeedsFragment(clickedTopic);
+                    NavGraphDirections.actionGlobalTopicFeedsFragment(clickedTopic);
             Navigation.findNavController(view).navigate(action);
         }
     }
@@ -335,6 +327,22 @@ public class HomeFragment extends Fragment implements
         homeViewModel.asyncBookmarksCheck(recyclerAdapterArticlesList.getAllItems(), () -> {
             recyclerAdapterArticlesList.notifyDataSetChanged();
         });
+    }
+
+    private void showCustomizeHomeFeedFragment(FloatingActionButton customizeHomeButton) {
+        // add container transformation animation
+        FragmentNavigator.Extras animations = new FragmentNavigator
+                .Extras
+                .Builder()
+                .addSharedElement(customizeHomeButton, customizeHomeButton.getTransitionName())
+                .build();
+
+        Navigation.findNavController(view)
+                .navigate(
+                        R.id.action_homeFragment_to_topicsFragment,
+                        null,
+                        null,
+                        animations);
     }
 
 
@@ -508,18 +516,7 @@ public class HomeFragment extends Fragment implements
 
     //------------------------------------------
 
-    private void showCustomizeHomeFeedFragment(FloatingActionButton customizeHomeButton) {
 
-        // add container transformation animation
-        FragmentNavigator.Extras animations = new FragmentNavigator
-                .Extras
-                .Builder()
-                .addSharedElement(customizeHomeButton, customizeHomeButton.getTransitionName())
-                .build();
-
-        Navigation.findNavController(view)
-                .navigate(R.id.action_homeFragment_to_topicsFragment,null,null, animations);
-    }
 
 
 

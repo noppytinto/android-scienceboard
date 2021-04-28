@@ -7,14 +7,19 @@ import androidx.lifecycle.ViewModelProvider;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,6 +29,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -31,6 +38,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.nocorp.scienceboard.NavGraphDirections;
 import com.nocorp.scienceboard.R;
@@ -71,7 +79,7 @@ public class TopicFeedsFragment extends Fragment implements
     private SwipeRefreshLayout swipeRefreshLayout;
     private Toast toast;
     private ImageView toolbarImage;
-    private Toolbar toolbar;
+    private MaterialToolbar toolbar;
 
     // recycler
     private RecyclerAdapterArticlesList recyclerAdapterArticlesList;
@@ -96,6 +104,9 @@ public class TopicFeedsFragment extends Fragment implements
     // animations
     private int shortAnimationDuration;
     private boolean switchButtonIsVisible;
+    // statusbar color
+    private int previousStatusBarColor;
+    private int previousNavigationIcon;
 
 
 
@@ -166,6 +177,7 @@ public class TopicFeedsFragment extends Fragment implements
     public void onDetach() {
         Log.d(TAG, "onDetach: ");
         super.onDetach();
+        restoreToolbarColor();
     }
 
 
@@ -180,6 +192,8 @@ public class TopicFeedsFragment extends Fragment implements
         recyclerViewArticles = viewBinding.recyclerViewTopicFeedsFragment;
         toolbarImage = viewBinding.imageViewTopicFeedsFragmentAppBar;
         toolbar = viewBinding.toolbarTopicFeedsFragment;
+        setupToolbar(toolbar);
+
 
         //
         currentDateInMillis = System.currentTimeMillis();
@@ -396,7 +410,7 @@ public class TopicFeedsFragment extends Fragment implements
             article.setVisited(true);
 
             NavGraphDirections.ActionGlobalWebviewFragment action =
-                    TopicFeedsFragmentDirections.actionGlobalWebviewFragment(article);
+                    NavGraphDirections.actionGlobalWebviewFragment(article);
             Navigation.findNavController(view).navigate(action);
         }
     }
@@ -438,6 +452,35 @@ public class TopicFeedsFragment extends Fragment implements
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this);
         recyclerView.setAdapter(recyclerAdapterArticlesList);
+    }
+
+    private void setupToolbar(Toolbar toolbar) {
+        NavController navController = Navigation.findNavController(view);
+        AppBarConfiguration appBarConfiguration =
+                new AppBarConfiguration.Builder(navController.getGraph()).build();
+        NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration);
+
+//        toolbar.setNavigationIcon();
+
+        // set transparent toolbar
+        setTransparentToolbar();
+    }
+
+    private void setTransparentToolbar() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = requireActivity().getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            previousStatusBarColor = window.getStatusBarColor();
+            window.setStatusBarColor(Color.TRANSPARENT);
+        }
+    }
+
+    private void restoreToolbarColor() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = requireActivity().getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(previousStatusBarColor);
+        }
     }
 
     private void setupScrollListener(NestedScrollView nestedScrollView) {

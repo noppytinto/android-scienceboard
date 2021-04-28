@@ -33,7 +33,7 @@
         <item name="webViewToolbarBackgroundColor">@color/dark</item>
         <item name="webViewToolbarTitleTextColor">@color/white</item>
         <item name="webViewToolbarMenuItemColor">@color/white</item>
-        <!-- EXPLORE TOOLBAR -->
+        <!-- HOME TOOLBAR -->
         <item name="logoTextColor">@color/black</item>
         <item name="exploreToolbarBackgroundColor">@color/white</item>
         <item name="exploreToolbarTitleTextColor">@color/white</item>
@@ -41,6 +41,9 @@
         <item name="exitEditBookmarksIconColor">@color/black</item>
         <item name="selectAllBookmarksIconColor">@color/black</item>
         <item name="editBookmarksIconColor">@color/black</item>
+        <!-- TOPIC FEEDS TOOLBAR -->
+        <item name="navigationIconColor">@color/black</item>
+<!--        <item name="navigationIconTint">@color/red</item>-->
 
         <!-- ARTICLE VIEWHOLDER -->
         <item name="articleDividerColor">@color/gray_300</item>
@@ -66,7 +69,9 @@
 
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
-<!--        <item name="android:windowLightStatusBar" tools:targetApi="23">true</item>-->
+<!--        <item name="android:statusBarColor" tools:targetApi="l">@android:color/transparent</item>-->
+
+        <!--        <item name="android:windowLightStatusBar" tools:targetApi="23">true</item>-->
         <!-- Customize your theme here. -->
 
 
@@ -84,5 +89,9 @@
         <item name="android:divider">@color/gray_500</item>
         <item name="android:dividerHeight">1dp</item>
     </style>
+
+
+<!--    <style name="Theme.ScienceBoard.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />-->
+<!--    <style name="Theme.ScienceBoard.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />-->
 
 </resources>

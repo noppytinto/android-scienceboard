@@ -37,7 +37,6 @@ public class TopicsFragment extends Fragment implements RecyclerAdapterCustomize
     private List<Topic> topicsFetched;
     private ExtendedFloatingActionButton floatingActionButton;
 
-
     //
     private List<Topic> topicsToUpdate;
 

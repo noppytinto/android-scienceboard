@@ -154,12 +154,13 @@ public class WebviewFragment extends Fragment implements
         transform.setDrawingViewId(R.id.nav_host_fragment);
 //        transform.setContainerColor(Color.WHITE);
 //        transform.setFadeMode(MaterialContainerTransform.FADE_MODE_THROUGH);
-//        transform.setDuration(700);
-//        transform.setAllContainerColors(getResources().getColor(R.color.orange_light));
+        transform.setDuration(700);
+        transform.setAllContainerColors(getResources().getColor(R.color.white));
 
         setSharedElementEnterTransition(transform);
 //        setSharedElementReturnTransition(transform);
     }
+
 
 
     @Override

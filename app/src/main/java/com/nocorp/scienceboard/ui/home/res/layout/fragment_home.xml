@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.home.HomeFragment"
-    android:transitionGroup="true"
     >
 
     <com.google.android.material.appbar.AppBarLayout
@@ -91,31 +90,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <TextView
-                    android:id="@+id/textView_homeFragment_myTopicsLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="24dp"
-                    android:fontFamily="@font/roboto_bold"
-                    android:text="My Topics"
-                    android:textSize="24sp"
-                    android:visibility="gone"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recyclerView_homeFragment_topics"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:layout_marginTop="16dp"
                     android:layout_marginEnd="8dp"
+                    android:layout_marginTop="32dp"
                     android:scrollbars="vertical"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView_homeFragment_myTopicsLabel" />
+                    app:layout_constraintTop_toTopOf="parent" />
 
 
                 <TextView
@@ -125,7 +112,7 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="40dp"
                     android:fontFamily="@font/roboto_bold"
-                    android:text="Headlines"
+                    android:text="@string/headlines_label"
                     android:textSize="24sp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/recyclerView_homeFragment_topics" />
@@ -161,25 +148,6 @@
         app:backgroundTint="@color/orange"
         android:visibility="visible"
         />
-
-<!--    <com.google.android.material.floatingactionbutton.FloatingActionButton-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginEnd="16dp"-->
-<!--        android:layout_marginBottom="16dp"-->
-<!--        android:clickable="true"-->
-<!--        android:src="@drawable/ic_edit_bookmarks"-->
-<!--        android:transitionName="shared_element_container"-->
-<!--        android:visibility="gone"-->
-<!--        app:backgroundTint="@color/orange_light"-->
-<!--        app:fabSize="mini"-->
-<!--        app:layout_anchor="@id/viewPager_exploreFragment"-->
-<!--        app:layout_anchorGravity="bottom|right|end"-->
-<!--        app:layout_behavior="com.nocorp.scienceboard.behavior.ScrollAwareFABBehavior"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        tools:visibility="visible"-->
-<!--        -->
-<!--        />-->
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

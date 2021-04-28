@@ -21,6 +21,8 @@
     <attr name="selectAllBookmarksIconColor" format="reference|color"/>
     <attr name="exitEditBookmarksIconColor" format="reference|color"/>
     <attr name="editBookmarksIconColor" format="reference|color"/>
+    <!-- TOPIC FEEDS TOOLBAR -->
+    <attr name="navigationIconColor" format="reference|color"/>
 
 
 

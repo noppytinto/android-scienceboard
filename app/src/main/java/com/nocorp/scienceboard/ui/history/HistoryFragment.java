@@ -175,7 +175,7 @@ public class HistoryFragment extends Fragment implements
         Article article = (Article) recyclerAdapterArticlesList.getItem(position);
         if (article != null) {
             NavGraphDirections.ActionGlobalWebviewFragment action =
-                    HistoryFragmentDirections.actionGlobalWebviewFragment(article);
+                    NavGraphDirections.actionGlobalWebviewFragment(article);
             Navigation.findNavController(view).navigate(action);
         }
     }
