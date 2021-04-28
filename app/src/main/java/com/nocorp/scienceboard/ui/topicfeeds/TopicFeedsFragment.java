@@ -35,6 +35,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
@@ -75,7 +76,6 @@ public class TopicFeedsFragment extends Fragment implements
     private FragmentTopicFeedsBinding viewBinding;
     private View view;
     private CircularProgressIndicator progressIndicator;
-    private NestedScrollView nestedScrollView;
     private SwipeRefreshLayout swipeRefreshLayout;
     private Toast toast;
     private ImageView toolbarImage;
@@ -185,7 +185,6 @@ public class TopicFeedsFragment extends Fragment implements
     //--------------------------------------------------------------------------------------------- METHODS
 
     private void initiView() {
-        nestedScrollView = viewBinding.nestedScrollViewTopicFeedsFragment;
         progressIndicator = viewBinding.progressIndicatorTopicFeedsFragment;
         swipeRefreshLayout = viewBinding.swipeRefreshTopicFeedsFragment;
         swipeRefreshLayout.setColorSchemeResources(R.color.orange_light);
@@ -213,7 +212,7 @@ public class TopicFeedsFragment extends Fragment implements
 
         //
         initRecycleView(recyclerViewArticles);
-        setupScrollListener(nestedScrollView);
+        setupScrollListener(recyclerViewArticles);
         setupSwipeDownToRefresh(swipeRefreshLayout);
     }
 
@@ -295,6 +294,7 @@ public class TopicFeedsFragment extends Fragment implements
             RequestOptions gildeOptions = new RequestOptions()
                     .fallback(R.drawable.placeholder_image)
                     .placeholder(R.drawable.placeholder_image)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .fitCenter();
 
             Glide.with(requireContext())
@@ -450,7 +450,7 @@ public class TopicFeedsFragment extends Fragment implements
     private void initRecycleView(RecyclerView recyclerView) {
         // defining Recycler view
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this);
+        recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this, null);
         recyclerView.setAdapter(recyclerAdapterArticlesList);
     }
 
@@ -483,32 +483,64 @@ public class TopicFeedsFragment extends Fragment implements
         }
     }
 
-    private void setupScrollListener(NestedScrollView nestedScrollView) {
-        if (nestedScrollView != null) {
-            nestedScrollView.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener)
-                    (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
-                        if (scrollY > oldScrollY) {
-//                    Log.d(TAG, "Scroll DOWN");
-//                            viewIsVisibleInLayout(nestedScrollView, recyclerViewTopics);
-                        }
-                        if (scrollY < oldScrollY) {
-//                    Log.d(TAG, "Scroll UP");
-//                            viewIsVisibleInLayout(nestedScrollView, recyclerViewTopics);
-                        }
+    private void setupScrollListener(RecyclerView recyclerView) {
+//        if (nestedScrollView != null) {
+//            nestedScrollView.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener)
+//                    (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+//                        if (scrollY > oldScrollY) {
+////                    Log.d(TAG, "Scroll DOWN");
+////                            viewIsVisibleInLayout(nestedScrollView, recyclerViewTopics);
+//                        }
+//                        if (scrollY < oldScrollY) {
+////                    Log.d(TAG, "Scroll UP");
+////                            viewIsVisibleInLayout(nestedScrollView, recyclerViewTopics);
+//                        }
+//
+////                if (scrollY == 0) {
+////                    Log.d(TAG, "TOP SCROLL");
+////                }
+//
+//                        if (scrollY == (v.getChildAt(0).getMeasuredHeight() - v.getMeasuredHeight())) {
+//                            Log.d(TAG, "setupEndlessScroll: BOTTOM SCROLL");
+//                            if ( ! recyclerIsLoading) {
+//                                loadMoreArticles();
+//                            }
+//                        }
+//                    });
+//        }
 
-//                if (scrollY == 0) {
-//                    Log.d(TAG, "TOP SCROLL");
-//                }
 
-                        if (scrollY == (v.getChildAt(0).getMeasuredHeight() - v.getMeasuredHeight())) {
-                            Log.d(TAG, "setupEndlessScroll: BOTTOM SCROLL");
-                            if ( ! recyclerIsLoading) {
-                                loadMoreArticles();
-                            }
-                        }
-                    });
-        }
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                LinearLayoutManager linearLayoutManager =
+                        (LinearLayoutManager) recyclerView.getLayoutManager();
+
+                if (!recyclerIsLoading) {
+                    if (reachedTheBottomOfList(linearLayoutManager)) {
+                        // NOTE:
+                        // this resolve the "cannot call this method in a scroll callback" exception
+                        // it happens when we are adding elements while scrolling
+                        recyclerView.post(() -> {
+                            Log.d(TAG, "SCIENCE_BOARD - setupScrollListener: reached the end of the recycler");
+                            loadMoreArticles();
+                        });
+
+                    }
+                }
+            }
+        });
+
     }
+
+    private boolean reachedTheBottomOfList(LinearLayoutManager linearLayoutManager) {
+        return linearLayoutManager != null &&
+                (articlesToDisplay != null && !articlesToDisplay.isEmpty()) &&
+                linearLayoutManager.findLastCompletelyVisibleItemPosition() == articlesToDisplay.size() - 1;
+    }
+
 
     private void loadMoreArticles() {
         recyclerIsLoading = true;

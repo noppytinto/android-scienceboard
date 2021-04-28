@@ -32,6 +32,7 @@ import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.bookmarks.repository.BookmarksListOnChangedListener;
 import com.nocorp.scienceboard.databinding.FragmentHomeBinding;
 import com.nocorp.scienceboard.model.Article;
+import com.nocorp.scienceboard.model.MyTopics;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterMyTopics;
@@ -44,6 +45,7 @@ import com.nocorp.scienceboard.ui.timemachine.TimeMachineViewModel;
 import com.nocorp.scienceboard.ui.topics.TopicsViewModel;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.ui.webview.WebviewViewModel;
+import com.nocorp.scienceboard.utility.MyValues;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 import com.yandex.metrica.impl.ob.To;
 
@@ -61,17 +63,14 @@ public class HomeFragment extends Fragment implements
     private final String TAG = this.getClass().getSimpleName();
     private View view;
     private FragmentHomeBinding viewBinding;
-    private NestedScrollView nestedScrollView;
     private SwipeRefreshLayout swipeRefreshLayout;
     private ImageButton switchTopicButton;
     private Toast toast;
     private FloatingActionButton customizeHomeButton;
 
     // recycler
-    private RecyclerAdapterMyTopics recyclerAdapterMyTopics;
     private RecyclerAdapterArticlesList recyclerAdapterArticlesList;
     private RecyclerView recyclerViewArticles;
-    private RecyclerView recyclerViewTopics;
 
     // viewmodel
     private HomeViewModel homeViewModel;
@@ -213,16 +212,22 @@ public class HomeFragment extends Fragment implements
             }
             else {
                 //
-                setTopicsThumbnails(resultArticles, topics, homeViewModel.getPickedSources());
-                recyclerAdapterMyTopics.loadNewData(topics);
+
                 //
+                setTopicsThumbnails(resultArticles, topics, homeViewModel.getPickedSources());
                 resultArticles = adProvider.populateListWithAds(resultArticles, AD_DISTANCE);
                 articlesToDisplay = new ArrayList<>(resultArticles);
+                populateWithMyTopics(topics, articlesToDisplay);
                 recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
 //                showCenteredToast("articles fetched");
                 recyclerIsLoading = false;
             }
         });
+    }
+
+    private void populateWithMyTopics(List<Topic> topics, List<ListItem> listItems) {
+        MyTopics myTopics = new MyTopics(topics);
+        listItems.add(0, myTopics); // add topics
     }
 
     private void observerNextArticlesFetched() {
@@ -234,6 +239,7 @@ public class HomeFragment extends Fragment implements
             if(fetchedArticles!=null && !fetchedArticles.isEmpty()) {
                 fetchedArticles = adProvider.populateListWithAds(fetchedArticles, AD_DISTANCE);
                 articlesToDisplay = new ArrayList<>(fetchedArticles);
+                populateWithMyTopics(topics, articlesToDisplay);
                 recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
             }
             else {
@@ -293,6 +299,7 @@ public class HomeFragment extends Fragment implements
 
     @Override
     public void onTopicCoverClicked(int position) {
+        RecyclerAdapterMyTopics recyclerAdapterMyTopics = recyclerAdapterArticlesList.getRecyclerAdapterMyTopics();
         Topic clickedTopic = recyclerAdapterMyTopics.getItem(position);
 
         if(clickedTopic!=null) {
@@ -353,11 +360,9 @@ public class HomeFragment extends Fragment implements
 
     private void initView() {
         // views
-        nestedScrollView = viewBinding.nestedScrollViewHomeFragment;
         swipeRefreshLayout = viewBinding.swipeRefreshLayoutHomeFragment;
         swipeRefreshLayout.setColorSchemeResources(R.color.orange);
-        recyclerViewTopics = viewBinding.recyclerViewHomeFragmentTopics;
-        recyclerViewArticles = viewBinding.recyclerViewHomeFragmentHeadlines;
+        recyclerViewArticles = viewBinding.recyclerViewHomeFragment;
         switchTopicButton = viewBinding.imageButtonHomeFragmentSwitchTopic;
         customizeHomeButton = viewBinding.floatingActionButtonHomeFragmentCustomizeTopics;
         customizeHomeButton.setOnClickListener(v -> showCustomizeHomeFeedFragment(customizeHomeButton));
@@ -380,16 +385,15 @@ public class HomeFragment extends Fragment implements
         webviewViewModel.setBookmarksListOnChangedListener(this);
 
         //
-        initRecycleViewTopics(recyclerViewTopics);
         initRecycleViewArticles(recyclerViewArticles);
-        setupScrollListener(nestedScrollView);
+        setupScrollListener(recyclerViewArticles);
         setupSwipeDownToRefresh(swipeRefreshLayout);
     }
 
-    private List<String> setTopicsThumbnails(List<ListItem> articles, List<Topic> topics, List<Source> sources) {
+    private List<String> setTopicsThumbnails(List<ListItem> listItems, List<Topic> topics, List<Source> sources) {
         List<String> result = null;
         if(topics==null || topics.isEmpty()) return result;
-        if(articles==null || articles.isEmpty()) return result;
+        if(listItems==null || listItems.isEmpty()) return result;
 
 
         result = new ArrayList<>();
@@ -401,15 +405,18 @@ public class HomeFragment extends Fragment implements
             for(Source source: sourcesTarget) {
                 if(source.getCategories().contains(topicId)) {
                     String sourceId = source.getId();
-                    for(ListItem listItem: articles) {
-                        Article article = ((Article) listItem);
-                        if(sourceId.equals(article.getSourceId())) {
-                            String thumbnailUrl = article.getThumbnailUrl();
-                            if(thumbnailUrl!=null) {
-                                topic.setThumbnailUrl(thumbnailUrl);
-                                break;
+                    for(ListItem listItem: listItems) {
+                        if(listItem.getItemType() == MyValues.ItemType.ARTICLE) {
+                            Article article = ((Article) listItem);
+                            if(sourceId.equals(article.getSourceId())) {
+                                String thumbnailUrl = article.getThumbnailUrl();
+                                if(thumbnailUrl!=null) {
+                                    topic.setThumbnailUrl(thumbnailUrl);
+                                    break;
+                                }
                             }
                         }
+
                     }
                     break;
                 }
@@ -423,45 +430,68 @@ public class HomeFragment extends Fragment implements
         return result;
     }
 
-    private void initRecycleViewTopics(RecyclerView recyclerView) {
-        GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), 2, GridLayoutManager.VERTICAL, false);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerAdapterMyTopics = new RecyclerAdapterMyTopics(new ArrayList<>(), this);
-        recyclerView.setAdapter(recyclerAdapterMyTopics);
-    }
-
     private void initRecycleViewArticles(RecyclerView recyclerView) {
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this);
+        recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this, this);
         recyclerView.setAdapter(recyclerAdapterArticlesList);
     }
 
-    private void setupScrollListener(NestedScrollView nestedScrollView) {
-        if (nestedScrollView != null) {
-            nestedScrollView.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener)
-                    (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
-                if (scrollY > oldScrollY) {
-//                    Log.d(TAG, "Scroll DOWN");
-                    viewIsVisibleInLayout(nestedScrollView, recyclerViewTopics);
-                }
-                if (scrollY < oldScrollY) {
-//                    Log.d(TAG, "Scroll UP");
-                    viewIsVisibleInLayout(nestedScrollView, recyclerViewTopics);
-                }
-
-//                if (scrollY == 0) {
-//                    Log.d(TAG, "TOP SCROLL");
+    private void setupScrollListener(RecyclerView recyclerView) {
+//        if (nestedScrollView != null) {
+//            nestedScrollView.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener)
+//                    (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+//                if (scrollY > oldScrollY) {
+////                    Log.d(TAG, "Scroll DOWN");
+//                    viewIsVisibleInLayout(nestedScrollView, recyclerViewTopics);
 //                }
+//                if (scrollY < oldScrollY) {
+////                    Log.d(TAG, "Scroll UP");
+//                    viewIsVisibleInLayout(nestedScrollView, recyclerViewTopics);
+//                }
+//
+////                if (scrollY == 0) {
+////                    Log.d(TAG, "TOP SCROLL");
+////                }
+//
+//                if (scrollY == (v.getChildAt(0).getMeasuredHeight() - v.getMeasuredHeight())) {
+//                    Log.d(TAG, "setupEndlessScroll: BOTTOM SCROLL");
+//                    if ( ! recyclerIsLoading) {
+//                        loadMoreArticles();
+//                    }
+//                }
+//            });
+//        }
 
-                if (scrollY == (v.getChildAt(0).getMeasuredHeight() - v.getMeasuredHeight())) {
-                    Log.d(TAG, "setupEndlessScroll: BOTTOM SCROLL");
-                    if ( ! recyclerIsLoading) {
-                        loadMoreArticles();
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                LinearLayoutManager linearLayoutManager =
+                        (LinearLayoutManager) recyclerView.getLayoutManager();
+
+                if (!recyclerIsLoading) {
+                    if (reachedTheBottomOfList(linearLayoutManager)) {
+                        // NOTE:
+                        // this resolve the "cannot call this method in a scroll callback" exception
+                        // it happens when we are adding elements while scrolling
+                        recyclerView.post(() -> {
+                            Log.d(TAG, "SCIENCE_BOARD - setupScrollListener: reached the end of the recycler");
+                            loadMoreArticles();
+                        });
+
                     }
                 }
-            });
-        }
+            }
+        });
     }
+
+    private boolean reachedTheBottomOfList(LinearLayoutManager linearLayoutManager) {
+        return linearLayoutManager != null &&
+                (articlesToDisplay != null && !articlesToDisplay.isEmpty()) &&
+                linearLayoutManager.findLastCompletelyVisibleItemPosition() == articlesToDisplay.size() - 1;
+    }
+
 
     private void loadMoreArticles() {
         recyclerIsLoading = true;

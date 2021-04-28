@@ -217,7 +217,7 @@ public class BookmarksFragment extends Fragment implements
         // defining Recycler view
         recyclerView = viewBinding.recyclerViewBookmarksFragment;
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this);
+        recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this, null);
         recyclerView.setAdapter(recyclerAdapterArticlesList);
     }
 

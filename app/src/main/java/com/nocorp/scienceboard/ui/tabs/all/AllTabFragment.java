@@ -269,7 +269,7 @@ public class AllTabFragment extends Fragment implements
         recyclerView = viewBinding.recyclerViewAllArticlesTabFragment;
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 //        recyclerView.addItemDecoration(new DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL));
-        recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this);
+        recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this, null);
         recyclerView.setAdapter(recyclerAdapterArticlesList);
 //        SnapHelper snapHelper = new LinearSnapHelper();
 //        snapHelper.attachToRecyclerView(recyclerView);

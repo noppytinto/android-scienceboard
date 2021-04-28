@@ -114,7 +114,7 @@ public class SpaceTabFragment extends Fragment implements
         // defining Recycler view
         recyclerView = viewBinding.recyclerViewSpaceTabFragment;
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this);
+        recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this, null);
         recyclerView.setAdapter(recyclerAdapterArticlesList);
         initScrollListener();
     }

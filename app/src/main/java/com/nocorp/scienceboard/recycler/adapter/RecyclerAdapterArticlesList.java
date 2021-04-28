@@ -1,5 +1,6 @@
 package com.nocorp.scienceboard.recycler.adapter;
 
+import android.content.Context;
 import android.os.Build;
 import android.text.Html;
 import android.util.Log;
@@ -8,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -18,7 +20,10 @@ import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.bookmarks.model.BookmarkArticle;
 import com.nocorp.scienceboard.model.LoadingView;
 import com.nocorp.scienceboard.history.model.HistoryArticle;
+import com.nocorp.scienceboard.model.MyTopics;
 import com.nocorp.scienceboard.recycler.viewholder.LoadingViewHolder;
+import com.nocorp.scienceboard.recycler.viewholder.MyTopicsViewholder;
+import com.nocorp.scienceboard.topics.model.Topic;
 import com.nocorp.scienceboard.ui.viewholder.BookmarkViewHolder;
 import com.nocorp.scienceboard.ui.viewholder.HistoryViewHolder;
 import com.nocorp.scienceboard.utility.ad.admob.model.ListAd;
@@ -31,6 +36,7 @@ import com.nocorp.scienceboard.utility.MyValues;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
@@ -38,7 +44,9 @@ import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOption
 public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final String TAG = this.getClass().getSimpleName();
     private List<ListItem> recyclerList;
-    private OnArticleClickedListener listener;
+    private OnArticleClickedListener onArticleClickedListener;
+    private RecyclerAdapterMyTopics.TopicCoverListener topicCoverListener;
+    private RecyclerAdapterMyTopics recyclerAdapterMyTopics;
     private final float THUMBNAIL_SIZE_MULTIPLIER = 0.50f;
 
     private static final int LOADING_VIEW_TYPE = 0;
@@ -46,6 +54,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
     private static final int SMALL_AD_TYPE = 2;
     private static final int HISTORY_ARTICLE_TYPE = 3;
     private static final int BOOKMARK_ARTICLE_TYPE = 4;
+    private static final int MY_TOPICS_LIST_TYPE = 5;
 
 
     public interface OnArticleClickedListener {
@@ -56,9 +65,10 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
 
     //------------------------------------------------------------------------CONSTRUCTORS
 
-    public RecyclerAdapterArticlesList(List<ListItem> recyclerList, OnArticleClickedListener listener) {
+    public RecyclerAdapterArticlesList(List<ListItem> recyclerList, OnArticleClickedListener onArticleClickedListener, RecyclerAdapterMyTopics.TopicCoverListener topicCoverListener) {
         this.recyclerList = recyclerList;
-        this.listener = listener;
+        this.onArticleClickedListener = onArticleClickedListener;
+        this.topicCoverListener = topicCoverListener;
     }
 
 
@@ -81,6 +91,8 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
                 return HISTORY_ARTICLE_TYPE;
             case BOOKMARK_ARTICLE:
                 return BOOKMARK_ARTICLE_TYPE;
+            case MY_TOPICS_LIST:
+                return MY_TOPICS_LIST_TYPE;
             default:
                 return 0;
         }
@@ -97,7 +109,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
         }
         if(viewType == ARTICLE_TYPE) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_article_viewholder, parent, false);
-            return new ArticleViewHolder(view, listener);
+            return new ArticleViewHolder(view, onArticleClickedListener);
         }
         else if(viewType == SMALL_AD_TYPE) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_small_ad_articles_list_level, parent, false);
@@ -105,14 +117,18 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
         }
         else if(viewType == HISTORY_ARTICLE_TYPE) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_history_viewholder, parent, false);
-            return new HistoryViewHolder(view, listener);
+            return new HistoryViewHolder(view, onArticleClickedListener);
         }
         else if(viewType == BOOKMARK_ARTICLE_TYPE) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_bookmark_viewholder, parent, false);
-            return new BookmarkViewHolder(view, listener);
+            return new BookmarkViewHolder(view, onArticleClickedListener);
+        }
+        else if(viewType == MY_TOPICS_LIST_TYPE) {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_my_topics_list_viewholder, parent, false);
+            return new MyTopicsViewholder(view, topicCoverListener);
         }
         else {
-            return new ArticleViewHolder(null, listener);
+            return new ArticleViewHolder(null, onArticleClickedListener);
         }
     }
 
@@ -145,7 +161,24 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
             //
             buildBookmarkItem((BookmarkViewHolder) holder, article);
         }
+        else if(getItemViewType(position) == MY_TOPICS_LIST_TYPE) {
+            MyTopics myTopics = (MyTopics) recyclerList.get(position);
 
+            //
+            buildMyTopicsItem((MyTopicsViewholder) holder, myTopics);
+        }
+    }
+
+    private void buildMyTopicsItem(MyTopicsViewholder holder, MyTopics item) {
+        List<Topic> myTopics = item.getMyTopics();
+        if(myTopics!=null) {
+            recyclerAdapterMyTopics = holder.recyclerAdapterMyTopics;
+            holder.recyclerAdapterMyTopics.loadNewData(myTopics);
+        }
+    }
+
+    public RecyclerAdapterMyTopics getRecyclerAdapterMyTopics() {
+        return recyclerAdapterMyTopics;
     }
 
     private void buildLoadingViewItem(LoadingViewHolder holder, int position) {
@@ -408,7 +441,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
     }
 
     public void clearList() {
-        if(recyclerList!=null) {
+        if(recyclerList !=null) {
             recyclerList.clear();
             notifyDataSetChanged();
         }
@@ -442,7 +475,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
     }
 
     public void removeItem(ListItem item) {
-        if(recyclerList!=null) {
+        if(recyclerList !=null) {
             recyclerList.remove(item);
             notifyDataSetChanged();
         }
@@ -451,7 +484,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
 
 
     public void enableEditMode() {
-        if(recyclerList!=null) {
+        if(recyclerList !=null) {
             for(ListItem article : recyclerList) {
                 article.setEditable(true);
                 article.setSelected(false);
@@ -461,7 +494,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
     }
 
     public void  disableEditMode() {
-        if(recyclerList!=null) {
+        if(recyclerList !=null) {
             for(ListItem article : recyclerList) {
                 article.setEditable(false);
                 article.setSelected(false);
@@ -471,7 +504,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
     }
 
     public void selectAllItems() {
-        if(recyclerList!=null) {
+        if(recyclerList !=null) {
             for(ListItem article : recyclerList) {
                 article.setSelected(true);
             }
@@ -480,7 +513,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
     }
 
     public void deselectAllItems() {
-        if(recyclerList!=null) {
+        if(recyclerList !=null) {
             for(ListItem article : recyclerList) {
                 article.setSelected(false);
             }

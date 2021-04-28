@@ -7,7 +7,8 @@ public class MyValues {
         SMALL_AD,
         HISTORY_ARTICLE,
         BOOKMARK_ARTICLE,
-        LOADING_VIEW
+        LOADING_VIEW,
+        MY_TOPICS_LIST
     }
 
     public enum SourceCategory {
