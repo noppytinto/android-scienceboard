@@ -89,6 +89,10 @@ public class TopicFeedsViewModel extends AndroidViewModel implements
 
 
 
+
+
+
+
     //-------------------------------------------------------------------------------------------- METHODS
 
     //-------------------------------------------------------------- FETCH ARTICLES
@@ -173,6 +177,8 @@ public class TopicFeedsViewModel extends AndroidViewModel implements
 
         // TODO
     }
+
+
 
 
 

@@ -72,6 +72,7 @@ public class TopicFeedsFragment extends Fragment implements
         OnDateChangedListener,
         BookmarksListOnChangedListener
 {
+
     private final String TAG = this.getClass().getSimpleName();
     private FragmentTopicFeedsBinding viewBinding;
     private View view;
@@ -182,6 +183,8 @@ public class TopicFeedsFragment extends Fragment implements
 
 
 
+
+
     //--------------------------------------------------------------------------------------------- METHODS
 
     private void initiView() {
@@ -281,7 +284,6 @@ public class TopicFeedsFragment extends Fragment implements
             }
         });
     }
-
 
     private void setImageToToolbar(ImageView imageView, List<ListItem> articles, Toolbar toolbar) {
         List<ListItem> randomizedList = new ArrayList<>(articles);
@@ -541,7 +543,6 @@ public class TopicFeedsFragment extends Fragment implements
                 linearLayoutManager.findLastCompletelyVisibleItemPosition() == articlesToDisplay.size() - 1;
     }
 
-
     private void loadMoreArticles() {
         recyclerIsLoading = true;
 
@@ -573,6 +574,8 @@ public class TopicFeedsFragment extends Fragment implements
                 currentTopic.getId(),
                 startingDate);
     }
+
+
 
 
     //---------------------------------------------------------------------------------------- UTILITY METHODS
@@ -662,5 +665,7 @@ public class TopicFeedsFragment extends Fragment implements
         cal.setTimeInMillis(pickedDate);
         return cal;
     }
+
+
 
 }// end TopicFeedsFragment

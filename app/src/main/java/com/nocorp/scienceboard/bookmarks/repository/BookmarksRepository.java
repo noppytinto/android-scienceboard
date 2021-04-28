@@ -74,13 +74,19 @@ public class BookmarksRepository {
     }
 
     public void bookmarksCheck(List<ListItem> articles, Context context) {
+        Log.d(TAG, "bookmarksCheck: " + articles);
         BookmarkDao dao = getBookmarkDao(context);
         for(ListItem article: articles) {
             if(article.getItemType() == MyValues.ItemType.ARTICLE) {
-                if(dao.isInBookmarks(((Article)article).getId()))
-                    ((Article)article).setBookmarked(true);
-                else
-                    ((Article)article).setBookmarked(false);
+                Article current = (Article)article;
+                if(dao.isInBookmarks(current.getId())) {
+                    Log.d(TAG, "bookmarksCheck: " + current.getTitle() + " is in bookmarks");
+                    current.setBookmarked(true);
+                }
+                else {
+                    Log.d(TAG, "bookmarksCheck: " + current.getTitle() + " is in bookmarks");
+                    current.setBookmarked(false);
+                }
             }
         }
     }

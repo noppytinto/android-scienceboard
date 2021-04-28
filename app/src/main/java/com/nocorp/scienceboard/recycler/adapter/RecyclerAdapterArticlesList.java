@@ -436,6 +436,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
     }
 
     public void loadNewData(List<ListItem> newList) {
+        Log.d(TAG, "loadNewData: called");
         recyclerList = newList;
         notifyDataSetChanged();
     }

@@ -169,12 +169,18 @@ public class HistoryRepository{
 
 
     public void historyCheck(List<ListItem> articles, Context context) {
+        Log.d(TAG, "historyCheck: " + articles);
         HistoryDao dao = getHistoryDao(context);
         for(ListItem article: articles) {
-            if(dao.isInHistory(((Article)article).getId()))
-                ((Article)article).setVisited(true);
-            else
-                ((Article)article).setVisited(false);
+            Article current = (Article)article;
+            if(dao.isInHistory(current.getId())){
+                Log.d(TAG, "historyCheck: " + current.getTitle() + " is in hisotry");
+                current.setVisited(true);
+            }
+            else {
+                Log.d(TAG, "historyCheck: " + current.getTitle() + " is NOT in hisotry");
+                current.setVisited(false);
+            }
         }
     }
 }// end HistoryRepository
