@@ -1,28 +1,19 @@
 package com.nocorp.scienceboard.ui.timemachine;
 
-import androidx.lifecycle.ViewModelProvider;
-
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-import com.nocorp.scienceboard.R;
-import com.nocorp.scienceboard.databinding.FragmentAllTabBinding;
 import com.nocorp.scienceboard.databinding.FragmentTimeMachineBinding;
-import com.nocorp.scienceboard.rss.repository.SourceViewModel;
-import com.nocorp.scienceboard.ui.tabs.all.AllTabViewModel;
-import com.nocorp.scienceboard.ui.topics.TopicsViewModel;
-import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
+
 
 public class TimeMachineFragment extends Fragment {
     private final String TAG = this.getClass().getSimpleName();
-
     private TimeMachineViewModel timeMachineViewModel;
     private View view;
     private FragmentTimeMachineBinding viewBinding;

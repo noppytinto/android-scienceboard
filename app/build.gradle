@@ -51,41 +51,14 @@ android {
     sourceSets {
         main.res.srcDirs += [
                 'src/main/java/com/nocorp/scienceboard/res',
+                'src/main/java/com/nocorp/scienceboard/recycler/viewholder/res',
                 'src/main/java/com/nocorp/scienceboard/ui/home/res',
                 'src/main/java/com/nocorp/scienceboard/ui/viewholder/res',
                 'src/main/java/com/nocorp/scienceboard/ui/webview/res',
-                'src/main/java/com/nocorp/scienceboard/recycler/viewholder/res',
                 'src/main/java/com/nocorp/scienceboard/ui/history/res',
                 'src/main/java/com/nocorp/scienceboard/ui/explore/res',
                 'src/main/java/com/nocorp/scienceboard/ui/bookmarks/res',
-                'src/main/java/com/nocorp/scienceboard/ui/ad/res',
-
-                'src/main/java/com/nocorp/scienceboard/ui/tabs/base/res',
-
-                'src/main/java/com/nocorp/scienceboard/ui/tabs/all/res',
-                'src/main/java/com/nocorp/scienceboard/ui/tabs/tech/res',
-
-                'src/main/java/com/nocorp/scienceboard/ui/tabs/physics/res',
-
-                'src/main/java/com/nocorp/scienceboard/ui/tabs/space/res',
-                'src/main/java/com/nocorp/scienceboard/ui/tabs/space/res',
-
-
-                'src/main/java/com/nocorp/scienceboard/ui/tabs/medicine/res',
-                'src/main/java/com/nocorp/scienceboard/ui/tabs/biology/res',
-                'src/main/java/com/nocorp/scienceboard/ui/tabs/geology/res',
-                'src/main/java/com/nocorp/scienceboard/ui/tabs/chemistry/res',
-                'src/main/java/com/nocorp/scienceboard/ui/tabs/psicology/res',
-
-                'src/main/java/com/nocorp/scienceboard/ui/tabs/tech/gpu/res',
-                'src/main/java/com/nocorp/scienceboard/ui/tabs/tech/android/res',
-                'src/main/java/com/nocorp/scienceboard/ui/tabs/tech/apple/res',
-                'src/main/java/com/nocorp/scienceboard/ui/tabs/tech/pc/res',
-                'src/main/java/com/nocorp/scienceboard/ui/tabs/tech/linux/res',
-                'src/main/java/com/nocorp/scienceboard/ui/tabs/tech/gaming/res',
-                'src/main/java/com/nocorp/scienceboard/ui/tabs/tech/security/res',
-
-
+                'src/main/java/com/nocorp/scienceboard/ui/ad/res'
         ]
     }
 }

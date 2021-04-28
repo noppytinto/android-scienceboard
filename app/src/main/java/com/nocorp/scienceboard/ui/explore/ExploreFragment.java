@@ -26,17 +26,15 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.chip.Chip;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.android.material.transition.MaterialElevationScale;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentExploreBinding;
-import com.nocorp.scienceboard.ui.tabs.tech.TechTabFragment;
 import com.nocorp.scienceboard.ui.timemachine.DatePickerFragment;
 import com.nocorp.scienceboard.ui.timemachine.TimeMachineViewModel;
-import com.nocorp.scienceboard.viewpager.HomeViewPagerAdapter;
+
 import org.jetbrains.annotations.NotNull;
 import java.util.Calendar;
 
@@ -153,12 +151,12 @@ public class ExploreFragment extends Fragment{
         FragmentManager fm = getChildFragmentManager();
         Lifecycle lifecycle = getViewLifecycleOwner().getLifecycle();
 
-        HomeViewPagerAdapter viewPagerAdapter = new HomeViewPagerAdapter(fm, lifecycle, TAB_COUNT);
-        viewPager.setAdapter(viewPagerAdapter);
-        viewPager.setUserInputEnabled(true); // disable/enable horiz. swipe to scroll tabs gestures
-        viewPager.setOffscreenPageLimit(TABS_OFFSCREEN_PAGE_LIMIT);// TODO: this might solve the "blank tab" problem, but needs more investigation, since the default strategy makes more sense
-        setupTabsStyle(tabLayout, viewPager);
-        defineOnTabChangedBehavior(viewPager);
+//        HomeViewPagerAdapter viewPagerAdapter = new HomeViewPagerAdapter(fm, lifecycle, TAB_COUNT);
+//        viewPager.setAdapter(viewPagerAdapter);
+//        viewPager.setUserInputEnabled(true); // disable/enable horiz. swipe to scroll tabs gestures
+//        viewPager.setOffscreenPageLimit(TABS_OFFSCREEN_PAGE_LIMIT);// TODO: this might solve the "blank tab" problem, but needs more investigation, since the default strategy makes more sense
+//        setupTabsStyle(tabLayout, viewPager);
+//        defineOnTabChangedBehavior(viewPager);
     }
 
     private void setupTabsStyle(TabLayout tabLayout, ViewPager2 viewPager) {
