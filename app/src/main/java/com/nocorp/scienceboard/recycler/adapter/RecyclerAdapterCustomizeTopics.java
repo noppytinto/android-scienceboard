@@ -13,8 +13,8 @@ import com.nocorp.scienceboard.topics.model.Topic;
 
 import java.util.List;
 
-public class RecyclerAdapterTopics extends
-        RecyclerView.Adapter<RecyclerAdapterTopics.TopicViewHolder> {
+public class RecyclerAdapterCustomizeTopics extends
+        RecyclerView.Adapter<RecyclerAdapterCustomizeTopics.TopicViewHolder> {
     private final String TAG = this.getClass().getSimpleName();
     private List<Topic> recyclerList;
 
@@ -26,8 +26,8 @@ public class RecyclerAdapterTopics extends
     }
 
 
-    public RecyclerAdapterTopics(List<Topic> list,
-                                 FollowChipListener listener) {
+    public RecyclerAdapterCustomizeTopics(List<Topic> list,
+                                          FollowChipListener listener) {
         this.recyclerList = list;
         this.listener = listener;
 

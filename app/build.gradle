@@ -51,6 +51,7 @@ android {
     sourceSets {
         main.res.srcDirs += [
                 'src/main/java/com/nocorp/scienceboard/res',
+                'src/main/java/com/nocorp/scienceboard/ui/home/res',
                 'src/main/java/com/nocorp/scienceboard/ui/viewholder/res',
                 'src/main/java/com/nocorp/scienceboard/ui/webview/res',
                 'src/main/java/com/nocorp/scienceboard/recycler/viewholder/res',

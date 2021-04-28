@@ -22,18 +22,17 @@ import com.google.android.material.transition.MaterialContainerTransform;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentTopicsBinding;
 import com.nocorp.scienceboard.topics.model.Topic;
-import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterTopics;
-import com.nocorp.scienceboard.topics.repository.OnTopicRepositoryUpdatedListener;
+import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterCustomizeTopics;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TopicsFragment extends Fragment implements RecyclerAdapterTopics.FollowChipListener {
+public class TopicsFragment extends Fragment implements RecyclerAdapterCustomizeTopics.FollowChipListener {
     private final String TAG = this.getClass().getSimpleName();
     private TopicsViewModel topicsViewModel;
     private View view;
     private RecyclerView recyclerView;
-    private RecyclerAdapterTopics recyclerAdapterTopics;
+    private RecyclerAdapterCustomizeTopics recyclerAdapterCustomizeTopics;
     private FragmentTopicsBinding viewBinding;
     private List<Topic> topicsFetched;
     private ExtendedFloatingActionButton floatingActionButton;
@@ -95,7 +94,7 @@ public class TopicsFragment extends Fragment implements RecyclerAdapterTopics.Fo
             if(topics!=null && !topics.isEmpty()) {
                 // TODO
                 this.topicsFetched = new ArrayList<>(topics);
-                recyclerAdapterTopics.loadNewData(topics);
+                recyclerAdapterCustomizeTopics.loadNewData(topics);
             }
         });
     }
@@ -113,8 +112,8 @@ public class TopicsFragment extends Fragment implements RecyclerAdapterTopics.Fo
     private void initRecycleView(RecyclerView recyclerView) {
         // defining Recycler view
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerAdapterTopics = new RecyclerAdapterTopics(new ArrayList<>(), this);
-        recyclerView.setAdapter(recyclerAdapterTopics);
+        recyclerAdapterCustomizeTopics = new RecyclerAdapterCustomizeTopics(new ArrayList<>(), this);
+        recyclerView.setAdapter(recyclerAdapterCustomizeTopics);
         recyclerView.addItemDecoration(new DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL));
 //        SnapHelper snapHelper = new LinearSnapHelper();
 //        snapHelper.attachToRecyclerView(recyclerView);
@@ -138,7 +137,7 @@ public class TopicsFragment extends Fragment implements RecyclerAdapterTopics.Fo
 
     @Override
     public void onFollowChipChecked(int position, View view) {
-        Topic topic = recyclerAdapterTopics.getItem(position);
+        Topic topic = recyclerAdapterCustomizeTopics.getItem(position);
         if(topic!=null) {
             topicsToUpdate.remove(topic);
             topic.setFollowed(true);
@@ -151,7 +150,7 @@ public class TopicsFragment extends Fragment implements RecyclerAdapterTopics.Fo
 
     @Override
     public void onFollowChipUnchecked(int position, View view) {
-        Topic topic = recyclerAdapterTopics.getItem(position);
+        Topic topic = recyclerAdapterCustomizeTopics.getItem(position);
         if(topic!=null) {
             topicsToUpdate.remove(topic);
             topic.setFollowed(false);
