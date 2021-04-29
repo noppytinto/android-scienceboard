@@ -61,6 +61,7 @@
                     android:checkable="false"
                     android:text="@string/today_date_picker_label"
                     app:chipIcon="@drawable/ic_calendar"
+                    app:closeIconTint="@color/red"
                     app:iconStartPadding="8dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -77,6 +78,22 @@
         layout="@layout/content_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floatingActionButton_exploreFragment_timeMachine"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="64dp"
+        android:clickable="false"
+        android:src="@drawable/ic_fast_rewind"
+        android:visibility="gone"
+        app:backgroundTint="@color/primary_blue"
+        app:fabSize="mini"
+        app:layout_anchorGravity="bottom|left"
+        tools:visibility="visible"
+        app:layout_anchor="@+id/include_mainActivity"
+        />
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

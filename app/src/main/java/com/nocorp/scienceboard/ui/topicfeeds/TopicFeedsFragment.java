@@ -195,7 +195,7 @@ public class TopicFeedsFragment extends Fragment implements
         recyclerViewArticles = viewBinding.recyclerViewTopicFeedsFragment;
         toolbarImage = viewBinding.imageViewTopicFeedsFragmentAppBar;
         toolbar = viewBinding.toolbarTopicFeedsFragment;
-        setupToolbar(toolbar);
+        initToolbar(toolbar);
 
 
         //
@@ -457,12 +457,12 @@ public class TopicFeedsFragment extends Fragment implements
         recyclerView.setAdapter(recyclerAdapterArticlesList);
     }
 
-    private void setupToolbar(Toolbar toolbar) {
+    private void initToolbar(Toolbar toolbar) {
         NavController navController = Navigation.findNavController(view);
         AppBarConfiguration appBarConfiguration =
                 new AppBarConfiguration.Builder(navController.getGraph()).build();
         NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration);
-        
+
         // set transparent toolbar
 //        setTransparentStatusBar();
     }

@@ -1,21 +1,28 @@
 package com.nocorp.scienceboard;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.chip.Chip;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.nocorp.scienceboard.databinding.ActivityMainBinding;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
 import com.nocorp.scienceboard.system.ConnectionManager;
 import com.nocorp.scienceboard.topics.repository.OnTopicRepositoryInitilizedListener;
 import com.nocorp.scienceboard.topics.repository.TopicRepository;
+import com.nocorp.scienceboard.ui.timemachine.DatePickerFragment;
 import com.nocorp.scienceboard.ui.timemachine.TimeMachineViewModel;
 import com.nocorp.scienceboard.ui.topics.TopicsViewModel;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
@@ -25,12 +32,17 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Calendar;
 
 
 public class MainActivity extends AppCompatActivity
@@ -48,6 +60,7 @@ public class MainActivity extends AppCompatActivity
     private TextView toolbarTextLogo;
     private Chip chipTimeMachine;
     private View toolbarInnerContainer;
+    private FloatingActionButton timeMachineEnabledIndicator;
 
     //
     private AdProvider adProvider;
@@ -57,7 +70,13 @@ public class MainActivity extends AppCompatActivity
     private TimeMachineViewModel timeMachineViewModel;
 
     //
+    private final int DATE_PICKER_DEFAULT_CHIP_STROKE_WIDTH = 0;
+    private final int DATE_PICKER_SET_CHIP_STROKE_WIDTH = 7;
+    private long datePicked;
+    private int MONTH_OFFSET_CORRECTION = 1;
     private final int NUM_ADS_TO_LOAD = 5;
+    private final long ANIMATION_DURATION = 4000L;
+    private ObjectAnimator objectAnimator;
 
 
 
@@ -70,6 +89,7 @@ public class MainActivity extends AppCompatActivity
         initView();
         initAdProvider(this, NUM_ADS_TO_LOAD);
 
+        observeDatePickedFromTimeMachine();
         loadTopics();
     }
 
@@ -157,6 +177,10 @@ public class MainActivity extends AppCompatActivity
         toolbarTextLogo = viewBinding.textViewMainActivityToolbarLogo;
         chipTimeMachine = viewBinding.chipMainActivityTimeMachine;
         toolbarInnerContainer = viewBinding.constraintActivityMainActivityToolbarInnerContainer;
+        chipTimeMachine.setOnClickListener(v -> showTimeMachineDatePicker());
+        datePicked = System.currentTimeMillis();
+        timeMachineEnabledIndicator = viewBinding.floatingActionButtonExploreFragmentTimeMachine;
+
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -224,10 +248,76 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
+    private void observeDatePickedFromTimeMachine() {
+        timeMachineViewModel.getObservablePickedDate().observe(this, pickedDateInMillis-> {
+            Log.d(TAG, "observeDatePickedFromTimeMachine: called");
+            if(timeMachineViewModel.timeMachineIsEnabled()) {
+                applyTimeMachineModeLayout(pickedDateInMillis);
+            }
+            else {
+                removeTimeMachineModeLayout();
+            }
+        });
+    }
+
 
 
 
     //--------------------------------------------------
+
+    private void showTimeMachineDatePicker() {
+        final String DATE_PICKER_DIALOG_TAG = "datePickerDialog";
+
+        Bundle bundle = new Bundle();
+        bundle.putLong("givenDialogCalendarDate", datePicked);
+
+        DialogFragment newFragment = new DatePickerFragment();
+        newFragment.setArguments(bundle);
+        newFragment.show(getSupportFragmentManager(), DATE_PICKER_DIALOG_TAG);
+    }
+
+    private void applyTimeMachineModeLayout(Long pickedDateInMillis) {
+        Log.d(TAG, "applyTimeMachineModeLayout: called");
+        datePicked = pickedDateInMillis;
+        Calendar cal = convertMillisInCalendar(pickedDateInMillis);
+        blinkView(timeMachineEnabledIndicator);
+        String ddmmyyyy_dateFormat = getString(R.string.slash_formatted_date,
+                cal.get(Calendar.DAY_OF_MONTH),
+                cal.get(Calendar.MONTH)+MONTH_OFFSET_CORRECTION,
+                cal.get(Calendar.YEAR));
+        chipTimeMachine.setText(ddmmyyyy_dateFormat);
+        chipTimeMachine.setChipStrokeWidth(DATE_PICKER_SET_CHIP_STROKE_WIDTH);
+        chipTimeMachine.setChipStrokeColor(ColorStateList.valueOf(getResources().getColor(R.color.primary_blue)));
+        chipTimeMachine.setCloseIconVisible(true);
+        chipTimeMachine.setOnCloseIconClickListener(v -> {
+            removeTimeMachineModeLayout();
+            timeMachineViewModel.setPickedDate(datePicked);
+        });
+//        chipTimeMachine.setCloseIconVisible(true);
+//        chipTimeMachine.setOnCloseIconClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//
+//            }
+//        });
+    }
+
+    private void removeTimeMachineModeLayout() {
+        Log.d(TAG, "removeTimeMachineModeLayout: called");
+        datePicked = System.currentTimeMillis();
+        chipTimeMachine.setText(R.string.today_label_date_picker);
+        chipTimeMachine.setChipStrokeWidth(DATE_PICKER_DEFAULT_CHIP_STROKE_WIDTH);
+        chipTimeMachine.setCloseIconVisible(false);
+        chipTimeMachine.setOnCloseIconClickListener(null);
+        stopBlinkingView(timeMachineEnabledIndicator);
+    }
+
+    @NotNull
+    private Calendar convertMillisInCalendar(Long pickedDate) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(pickedDate);
+        return cal;
+    }
 
     private void loadTopics() {
         observeFetchedTopics();
@@ -289,6 +379,41 @@ public class MainActivity extends AppCompatActivity
 
 
     //-------------------------------------------------- UTILITIES
+
+
+    private void blinkView(View view) {
+        view.setVisibility(View.VISIBLE);
+        fadeIn(view);
+    }
+
+    private void fadeIn(View view) {
+        objectAnimator = ObjectAnimator.ofFloat(view, "alpha", 0f, 1f);
+        objectAnimator.setDuration(ANIMATION_DURATION);
+        objectAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+        objectAnimator.setRepeatCount(ObjectAnimator.INFINITE);
+        objectAnimator.setRepeatMode(ObjectAnimator.REVERSE);
+        objectAnimator.start();
+    }
+
+
+    private void fadeOut(View view) {
+        ObjectAnimator objectAnimator = ObjectAnimator.ofFloat(view, "alpha", 1f, 0f);
+        objectAnimator.setDuration(2000L);
+        objectAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                fadeIn(view);
+            }
+        });
+        objectAnimator.start();
+    }
+
+    private void stopBlinkingView(View view) {
+        if(objectAnimator!=null) {
+            objectAnimator.cancel();
+            view.setVisibility(View.GONE);
+        }
+    }
 
     private void hideView(View view) {
         if(view!=null)
