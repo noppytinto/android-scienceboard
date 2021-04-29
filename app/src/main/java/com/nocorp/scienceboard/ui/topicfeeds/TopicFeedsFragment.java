@@ -119,6 +119,13 @@ public class TopicFeedsFragment extends Fragment implements
 
     //--------------------------------------------------------------------------------------------- ANDROID METHODS
 
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setTransparentStatusBar();
+    }
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
@@ -145,7 +152,6 @@ public class TopicFeedsFragment extends Fragment implements
             observeArticlesFetched();
             observerNextArticlesFetch();
             observeTimeMachineStatus();
-
         }
     }
 
@@ -160,7 +166,7 @@ public class TopicFeedsFragment extends Fragment implements
     public void onPause() {
         Log.d(TAG, "onPause: ");
         super.onPause();
-        restoreToolbarColor();
+        restoreStatusbarColor();
     }
 
     @Override
@@ -168,13 +174,13 @@ public class TopicFeedsFragment extends Fragment implements
         Log.d(TAG, "onDestroy: ");
         super.onDestroy();
     }
-
-    @Override
-    public void onDetach() {
-        Log.d(TAG, "onDetach: ");
-        super.onDetach();
-        restoreToolbarColor();
-    }
+//
+//    @Override
+//    public void onDetach() {
+//        Log.d(TAG, "onDetach: ");
+//        super.onDetach();
+//        restoreToolbarColor();
+//    }
 
 
 
@@ -456,27 +462,29 @@ public class TopicFeedsFragment extends Fragment implements
         AppBarConfiguration appBarConfiguration =
                 new AppBarConfiguration.Builder(navController.getGraph()).build();
         NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration);
-
-//        toolbar.setNavigationIcon();
-
+        
         // set transparent toolbar
-        setTransparentToolbar();
+//        setTransparentStatusBar();
     }
 
-    private void setTransparentToolbar() {
+    private void setTransparentStatusBar() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Log.d(TAG, "setTransparentStatusBar: called");
             Window window = requireActivity().getWindow();
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             previousStatusBarColor = window.getStatusBarColor();
             window.setStatusBarColor(Color.TRANSPARENT);
+            Log.d(TAG, "setTransparentStatusBar: previousStatusBarColor: " + previousStatusBarColor);
         }
     }
 
-    private void restoreToolbarColor() {
+    private void restoreStatusbarColor() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Log.d(TAG, "restoreStatusbarColor: called");
             Window window = requireActivity().getWindow();
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(previousStatusBarColor);
+            Log.d(TAG, "restoreStatusbarColor: previousStatusBarColor: " + previousStatusBarColor);
         }
     }
 
