@@ -10,6 +10,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
@@ -64,6 +65,9 @@ import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 
 import okhttp3.ResponseBody;
+
+import static android.webkit.WebSettings.FORCE_DARK_OFF;
+import static android.webkit.WebSettings.FORCE_DARK_ON;
 
 public class WebviewFragment extends Fragment implements
         androidx.appcompat.widget.Toolbar.OnMenuItemClickListener {
@@ -686,6 +690,16 @@ public class WebviewFragment extends Fragment implements
 
 
     //---------------------------------------------------------
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    private void enableDarkMode(WebSettings webSettings) {
+        webSettings.setForceDark(FORCE_DARK_ON);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    private void disableDarkMode(WebSettings webSettings) {
+        webSettings.setForceDark(FORCE_DARK_OFF);
+    }
 
     private void defineBottomSheetBehavior() {
         final BottomSheetBehavior behavior = BottomSheetBehavior.from(bottomSheet);

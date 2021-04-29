@@ -27,7 +27,6 @@ import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentHistoryBinding;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
-import com.nocorp.scienceboard.ui.home.HomeFragmentDirections;
 
 import java.util.ArrayList;
 
@@ -43,6 +42,11 @@ public class HistoryFragment extends Fragment implements
     private View view;
     private CircularProgressIndicator progressIndicator;
 
+    //
+    private MenuItem deleteMenuItem;
+
+    //
+    private boolean listIsEmpty;
 
 
     //--------------------------------------------------------------------- CONSTRUCTORS
@@ -81,9 +85,11 @@ public class HistoryFragment extends Fragment implements
                 recyclerAdapterArticlesList.clearList();
                 swipeRefreshLayout.setRefreshing(false);
                 progressIndicator.setVisibility(View.GONE);
+                updateMenu(true);
 //                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
             }
             else {
+                updateMenu(false);
                 swipeRefreshLayout.setRefreshing(false);
                 progressIndicator.setVisibility(View.GONE);
                 recyclerAdapterArticlesList.loadNewData(articles);
@@ -97,6 +103,23 @@ public class HistoryFragment extends Fragment implements
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.menu_history_fragment, menu);
+        deleteMenuItem = menu.findItem(R.id.option_historyMenu_deleteAll);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        if(listIsEmpty) {
+            deleteMenuItem.setVisible(false);
+        }
+        else {
+            deleteMenuItem.setVisible(true);
+        }
+    }
+
+    private void updateMenu(boolean listIsEmpty) {
+        this.listIsEmpty = listIsEmpty;
+        requireActivity().invalidateOptionsMenu();
     }
 
     @Override
@@ -126,6 +149,7 @@ public class HistoryFragment extends Fragment implements
                     //
                     clearHistory();
                     dialog.dismiss();
+                    updateMenu(true);
                     showCenteredToast("history deleted");
 
                 })

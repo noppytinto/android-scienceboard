@@ -55,7 +55,6 @@
         android:id="@+id/swipeRefresh_topicFeedsFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         >
 

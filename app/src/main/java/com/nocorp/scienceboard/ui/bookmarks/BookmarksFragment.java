@@ -102,11 +102,13 @@ public class BookmarksFragment extends Fragment implements
             progressIndicator.setVisibility(View.GONE);
 
             if(articles==null || articles.isEmpty()) {
-                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
+//                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
+                Log.d(TAG, "SCIENCE_BOARD - onViewCreated: " + getString(R.string.string_articles_fetch_fail_message));
             }
             else {
                 recyclerAdapterArticlesList.loadNewData(articles);
-                showCenteredToast("bookmarks fetched");
+//                showCenteredToast("bookmarks fetched");
+                Log.d(TAG, "SCIENCE_BOARD - onViewCreated: bookmarks fetched");
             }
 
             // update top menu items visibili
@@ -377,16 +379,23 @@ public class BookmarksFragment extends Fragment implements
         try {
             ((MainActivity)requireActivity()).changeToolbarTitle("Selected: " + (selectedItems.size() - articlesToRemove.size()));
         } catch (Exception e) {
-            Log.e(TAG, "removeArticlesFromBookmarks: an error occurred when updateing selected items counter, cause: " + e.getMessage() );
+            Log.e(TAG, "removeArticlesFromBookmarks: an error occurred when updating selected items counter, cause: " + e.getMessage() );
         }
 
-        // il bookmarks list is empty then exit from edito mode
+        // il bookmarks list is empty then exit from edit mode
         if(recyclerAdapterArticlesList.getAllItems()==null || recyclerAdapterArticlesList.getAllItems().isEmpty()){
             stopEditingModeAction();
             ((MainActivity)requireActivity()).changeToolbarTitle("Bookmarks");
         }
+        else {
+            // update item menu
+            allItemsSelected = false;
+            atLeastOneItemSelected = false;
+            selectedItems.clear();
+            requireActivity().invalidateOptionsMenu();
+        }
 
-        selectedItems.clear();
+        //
         Log.d(TAG, "selectItem: " + selectedItems);
     }
 
