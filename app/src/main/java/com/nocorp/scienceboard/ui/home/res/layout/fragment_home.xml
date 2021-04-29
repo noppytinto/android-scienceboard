@@ -7,78 +7,11 @@
     tools:context=".ui.home.HomeFragment"
     >
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appbar_homeFragment"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar_homeFragment"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            >
-<!--            app:layout_scrollFlags="scroll|enterAlways"-->
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/transition_container_home"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-
-                <TextView
-                    android:id="@+id/textView_homeFragment_toolbarLogo"
-                    style="@style/ScienceBoard.Toolbar.Logo"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="start"
-                    android:text="@string/scienceboard_logo_label"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <ImageButton
-                    android:id="@+id/imageButton_homeFragment_switchTopic"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginStart="4dp"
-                    android:background="@drawable/shape_switch_topic_button_home_toolbar"
-                    android:clickable="true"
-                    android:paddingTop="0dp"
-                    android:paddingBottom="0dp"
-                    android:src="@drawable/ic_arrow_down_home_toolbar"
-                    android:visibility="gone"
-                    app:layout_constraintBottom_toBottomOf="@+id/textView_homeFragment_toolbarLogo"
-                    app:layout_constraintStart_toEndOf="@+id/textView_homeFragment_toolbarLogo"
-                    app:layout_constraintTop_toTopOf="@+id/textView_homeFragment_toolbarLogo"
-                    app:rippleColor="@color/white"
-                    tools:visibility="visible" />
-
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_homeFragment_timeMachine"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:checkable="false"
-                    android:text="@string/today_date_picker_label"
-                    app:chipIcon="@drawable/ic_calendar"
-                    app:iconStartPadding="8dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.appcompat.widget.Toolbar>
-
-
-
-    </com.google.android.material.appbar.AppBarLayout>
-
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefreshLayout_homeFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="?attr/actionBarSize"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
         <androidx.recyclerview.widget.RecyclerView

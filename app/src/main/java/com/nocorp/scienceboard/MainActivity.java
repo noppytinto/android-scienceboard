@@ -3,12 +3,13 @@ package com.nocorp.scienceboard;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.chip.Chip;
 import com.google.android.material.snackbar.Snackbar;
 import com.nocorp.scienceboard.databinding.ActivityMainBinding;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
@@ -44,6 +45,9 @@ public class MainActivity extends AppCompatActivity
     private ActionBar appBar;
     private Toast toast;
     private AppBarConfiguration appBarConfiguration;
+    private TextView toolbarTextLogo;
+    private Chip chipTimeMachine;
+    private View toolbarInnerContainer;
 
     //
     private AdProvider adProvider;
@@ -89,14 +93,15 @@ public class MainActivity extends AppCompatActivity
                                      @NonNull NavDestination destination,
                                      @Nullable Bundle arguments) {
         if(destination.getId() == R.id.homeFragment) {
-            hideToolbar();
+            showView(toolbarInnerContainer);
             showBottomBar();
+            showToolbar();
         }
         else if(destination.getId() == R.id.webviewFragment) {
             hideToolbar();
             hideBottomBar();
         }
-        else if(destination.getId() == R.id.topicsFragment) {
+        else if(destination.getId() == R.id.customizeTopicsFragment) {
             hideToolbar();
         }
         else if(destination.getId() == R.id.topicFeedsFragment) {
@@ -105,6 +110,7 @@ public class MainActivity extends AppCompatActivity
         else {
             showToolbar();
             showBottomBar();
+            hideView(toolbarInnerContainer);
         }
     }
 
@@ -120,12 +126,6 @@ public class MainActivity extends AppCompatActivity
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         return NavigationUI.navigateUp(navController, appBarConfiguration)
                 || super.onSupportNavigateUp();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.d(TAG, "onPause: called");
     }
 
     @Override
@@ -154,9 +154,9 @@ public class MainActivity extends AppCompatActivity
         if(appBar!=null) appBar.setDisplayHomeAsUpEnabled(true);
         bottomNavBar = viewBinding.includeMainActivity.bottomNavView;
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-
-
-
+        toolbarTextLogo = viewBinding.textViewMainActivityToolbarLogo;
+        chipTimeMachine = viewBinding.chipMainActivityTimeMachine;
+        toolbarInnerContainer = viewBinding.constraintActivityMainActivityToolbarInnerContainer;
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -202,12 +202,32 @@ public class MainActivity extends AppCompatActivity
 
     }// end initView()
 
-
     private void initAdProvider(Context context, int numAdsToLoad) {
         AdProvider adProvider = AdProvider.getInstance();
         adProvider.initAdMob(context);
         adProvider.loadSomeAds(numAdsToLoad, context);
     }
+
+
+
+
+    //-------------------------------------------------- observing
+    private void observeFetchedTopics() {
+        topicsViewModel.getObservableTopicsList().observe(this, topics -> {
+            if(topics == null || topics.isEmpty()) {
+                //TODO: warning message, no topics in memory
+                Log.w(TAG, "SCIENCE_BOARD - loadTopics: no topics in Room");
+            }
+            else {
+                loadSources();
+            }
+        });
+    }
+
+
+
+
+    //--------------------------------------------------
 
     private void loadTopics() {
         observeFetchedTopics();
@@ -233,18 +253,6 @@ public class MainActivity extends AppCompatActivity
         topicsViewModel.fetchTopics();
     }
 
-    private void observeFetchedTopics() {
-        topicsViewModel.getObservableTopicsList().observe(this, topics -> {
-            if(topics == null || topics.isEmpty()) {
-                //TODO: warning message, no topics in memory
-                Log.w(TAG, "SCIENCE_BOARD - loadTopics: no topics in Room");
-            }
-            else {
-                loadSources();
-            }
-        });
-    }
-
     private void loadSources() {
         sourceViewModel.getObservableAllSources().observe(this, sources -> {
             if(sources == null || sources.isEmpty()) {
@@ -261,6 +269,36 @@ public class MainActivity extends AppCompatActivity
         sourceViewModel.loadSourcesFromRemoteDb();
     }
 
+    private void retryAction() {
+        boolean internetAvailable = ConnectionManager.getInternetStatus(this);
+        if(internetAvailable) {
+            showGreenSnackbar(getString(R.string.string_internet_available));
+        }
+        else {
+            showErrorSnackbar(getString(R.string.string_no_internet_connection));
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+    //-------------------------------------------------- UTILITIES
+
+    private void hideView(View view) {
+        if(view!=null)
+            view.setVisibility(View.GONE);
+    }
+
+    private void showView(View view) {
+        if (view != null)
+            view.setVisibility(View.VISIBLE);
+    }
 
     private void hideBottomBar() {
         if(bottomNavBar!=null)
@@ -306,16 +344,6 @@ public class MainActivity extends AppCompatActivity
         return getResources().getColor(resourceId);
     }
 
-    private void retryAction() {
-        boolean internetAvailable = ConnectionManager.getInternetStatus(this);
-        if(internetAvailable) {
-            showGreenSnackbar(getString(R.string.string_internet_available));
-        }
-        else {
-            showErrorSnackbar(getString(R.string.string_no_internet_connection));
-        }
-    }
-
     private void showGreenSnackbar(String message) {
         try {
             if(snackbar!=null && snackbar.isShown()) snackbar.dismiss(); // dismiss any previous snackbar
@@ -349,6 +377,5 @@ public class MainActivity extends AppCompatActivity
             toolbar.setTitle(value);
         }
     }
-
 
 }// end MainActivity

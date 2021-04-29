@@ -93,6 +93,7 @@ public class HomeViewModel extends AndroidViewModel implements
                               int numArticlesForEachSource,
                               boolean forced,
                               long startingDateinMillis) {
+        Log.d(TAG, "fetchArticles: called, forced:" + forced);
         if(forced) {
             downloadArticlesFromFollowedTopics(
                     givenSources,

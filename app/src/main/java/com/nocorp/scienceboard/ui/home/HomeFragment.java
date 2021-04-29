@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.transition.MaterialElevationScale;
 import com.nocorp.scienceboard.NavGraphDirections;
@@ -61,7 +62,6 @@ public class HomeFragment extends Fragment implements
     private View view;
     private FragmentHomeBinding viewBinding;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private ImageButton switchTopicButton;
     private Toast toast;
     private FloatingActionButton customizeHomeButton;
 
@@ -359,7 +359,6 @@ public class HomeFragment extends Fragment implements
         swipeRefreshLayout = viewBinding.swipeRefreshLayoutHomeFragment;
         swipeRefreshLayout.setColorSchemeResources(R.color.orange);
         recyclerViewArticles = viewBinding.recyclerViewHomeFragment;
-        switchTopicButton = viewBinding.imageButtonHomeFragmentSwitchTopic;
         customizeHomeButton = viewBinding.floatingActionButtonHomeFragmentCustomizeTopics;
         customizeHomeButton.setOnClickListener(v -> showCustomizeHomeFeedFragment(customizeHomeButton));
 
@@ -583,7 +582,6 @@ public class HomeFragment extends Fragment implements
 //            Log.d(TAG, "viewIsVisibleInLayout: view is visible");
             if(switchButtonIsVisible) {
                 Log.d(TAG, "viewIsVisibleInLayout: switch button is now gone");
-                applyCrossfadeExit(switchTopicButton, shortAnimationDuration);
                 switchButtonIsVisible = false;
             }
         } else {
@@ -591,7 +589,6 @@ public class HomeFragment extends Fragment implements
 //            Log.d(TAG, "viewIsVisibleInLayout: view is NOT visible");
             if( ! switchButtonIsVisible) {
                 Log.d(TAG, "viewIsVisibleInLayout: switch button is now visible");
-                applyCrossfadeEnter(switchTopicButton, shortAnimationDuration);
                 switchButtonIsVisible = true;
             }
         }

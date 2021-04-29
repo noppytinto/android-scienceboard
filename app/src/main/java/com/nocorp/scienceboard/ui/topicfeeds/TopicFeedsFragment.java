@@ -160,6 +160,7 @@ public class TopicFeedsFragment extends Fragment implements
     public void onPause() {
         Log.d(TAG, "onPause: ");
         super.onPause();
+        restoreToolbarColor();
     }
 
     @Override

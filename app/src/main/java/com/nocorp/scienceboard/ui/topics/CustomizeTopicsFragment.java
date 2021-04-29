@@ -20,20 +20,20 @@ import android.view.ViewGroup;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.transition.MaterialContainerTransform;
 import com.nocorp.scienceboard.R;
-import com.nocorp.scienceboard.databinding.FragmentTopicsBinding;
+import com.nocorp.scienceboard.databinding.FragmentCustomizeTopicsBinding;
 import com.nocorp.scienceboard.topics.model.Topic;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterCustomizeTopics;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TopicsFragment extends Fragment implements RecyclerAdapterCustomizeTopics.FollowChipListener {
+public class CustomizeTopicsFragment extends Fragment implements RecyclerAdapterCustomizeTopics.FollowChipListener {
     private final String TAG = this.getClass().getSimpleName();
     private TopicsViewModel topicsViewModel;
     private View view;
     private RecyclerView recyclerView;
     private RecyclerAdapterCustomizeTopics recyclerAdapterCustomizeTopics;
-    private FragmentTopicsBinding viewBinding;
+    private FragmentCustomizeTopicsBinding viewBinding;
     private List<Topic> topicsFetched;
     private ExtendedFloatingActionButton floatingActionButton;
 
@@ -44,8 +44,8 @@ public class TopicsFragment extends Fragment implements RecyclerAdapterCustomize
 
     //-------------------------------------------------------------------------------------------- CONSTRUCTORS
 
-    public static TopicsFragment newInstance() {
-        return new TopicsFragment();
+    public static CustomizeTopicsFragment newInstance() {
+        return new CustomizeTopicsFragment();
     }
 
 
@@ -62,7 +62,7 @@ public class TopicsFragment extends Fragment implements RecyclerAdapterCustomize
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        viewBinding = FragmentTopicsBinding.inflate(getLayoutInflater());
+        viewBinding = FragmentCustomizeTopicsBinding.inflate(getLayoutInflater());
         view = viewBinding.getRoot();
         return view;
     }

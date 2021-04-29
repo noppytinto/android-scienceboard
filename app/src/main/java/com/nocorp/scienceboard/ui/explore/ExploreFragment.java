@@ -294,9 +294,9 @@ public class ExploreFragment extends Fragment{
                 .Builder()
                 .addSharedElement(customizeHomeButton, customizeHomeButton.getTransitionName())
                 .build();
-
-        Navigation.findNavController(view)
-                .navigate(R.id.action_navigation_home_to_topicsFragment,null,null, animations);
+//
+//        Navigation.findNavController(view)
+//                .navigate(R.id.action_navigation_home_to_topicsFragment,null,null, animations);
     }
 
 
