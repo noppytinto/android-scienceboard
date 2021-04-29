@@ -123,8 +123,8 @@
     </style>
     <!-- EXPLORE TOOLBAR -->
     <style name="ScienceBoard.Toolbar.ExploreToolbar" parent="Widget.MaterialComponents.Toolbar">
-        <item name="android:background">?attr/exploreToolbarBackgroundColor</item>
-        <item name="titleTextColor">?attr/exploreToolbarTitleTextColor</item>
+        <item name="android:background">?attr/homeToolbarBackgroundColor</item>
+        <item name="titleTextColor">?attr/homeToolbarTitleTextColor</item>
     </style>
 
 
@@ -173,10 +173,16 @@
         parent="TextAppearance.MaterialComponents.Headline3">
         <item name="android:textColor">@color/black</item>
     </style>
-    <!-- TOOLBAR -->
-    <style name="ScieceBoard.Toolbar.TitleTextAppearance"
+    <!-- TOPIC FEEDS TOOLBAR -->
+    <style name="ScienceBoard.Toolbar.TopicFeeds" parent="ThemeOverlay.MaterialComponents.Toolbar.Primary">
+        <!-- This attributes is used by navigation icon and overflow icon -->
+        <item name="colorOnPrimary">?attr/navigationIconColor</item>
+    </style>
+    <style name="ScienceBoard.Toolbar.TitleTextAppearance"
         parent="@style/TextAppearance.MaterialComponents.Headline6">
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@android:color/black</item>
     </style>
+
+
 </resources>

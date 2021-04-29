@@ -13,10 +13,10 @@
     <attr name="webViewToolbarBackgroundColor" format="reference|color"/>
     <attr name="webViewToolbarTitleTextColor" format="reference|color"/>
     <attr name="webViewToolbarMenuItemColor" format="reference|color"/>
-    <!-- EXPLORE TOOLBAR -->
+    <!-- HOME TOOLBAR -->
     <attr name="logoTextColor" format="reference|color"/>
-    <attr name="exploreToolbarBackgroundColor" format="reference|color"/>
-    <attr name="exploreToolbarTitleTextColor" format="reference|color"/>
+    <attr name="homeToolbarBackgroundColor" format="reference|color"/>
+    <attr name="homeToolbarTitleTextColor" format="reference|color"/>
     <!-- BOOKMARKS TOOLBAR -->
     <attr name="selectAllBookmarksIconColor" format="reference|color"/>
     <attr name="exitEditBookmarksIconColor" format="reference|color"/>

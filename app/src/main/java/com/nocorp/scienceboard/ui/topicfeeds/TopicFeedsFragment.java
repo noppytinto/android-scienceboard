@@ -34,6 +34,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.nocorp.scienceboard.NavGraphDirections;
@@ -75,6 +76,7 @@ public class TopicFeedsFragment extends Fragment implements
     private Toast toast;
     private ImageView toolbarImage;
     private MaterialToolbar toolbar;
+    private CollapsingToolbarLayout collapsingToolbar;
 
     // recycler
     private RecyclerAdapterArticlesList recyclerAdapterArticlesList;
@@ -102,6 +104,9 @@ public class TopicFeedsFragment extends Fragment implements
     // statusbar color
     private int previousStatusBarColor;
     private int previousNavigationIcon;
+    // cover dominant colors
+    private int backgroundDominantColor;
+    private int titleDominantoColor;
 
 
 
@@ -195,6 +200,7 @@ public class TopicFeedsFragment extends Fragment implements
         recyclerViewArticles = viewBinding.recyclerViewTopicFeedsFragment;
         toolbarImage = viewBinding.imageViewTopicFeedsFragmentAppBar;
         toolbar = viewBinding.toolbarTopicFeedsFragment;
+        collapsingToolbar = viewBinding.collapsingToolbarTopicFeedsFragment;
         initToolbar(toolbar);
 
 
@@ -341,20 +347,15 @@ public class TopicFeedsFragment extends Fragment implements
         }
     }
 
-    private void applyDominantColor(@NonNull Bitmap resource, @NonNull Toolbar toolbar) {
+    private void applyDominantoColor(@NonNull Bitmap resource, @NonNull Toolbar toolbar) {
         Palette myPalette = createPaletteSync(resource);
-        Palette.Swatch vibrant = myPalette.getDominantSwatch();
-        if(vibrant != null){
-            setDominantColors(toolbar, vibrant);
-        }
-        else {
-            vibrant = myPalette.getDarkVibrantSwatch();
-            if(vibrant != null){
-                setDominantColors(toolbar, vibrant);
-            }
-            else {
-                toolbar.setTitleTextColor(getResources().getColor(R.color.black));
-            }
+        Palette.Swatch swatch = myPalette.getDominantSwatch();
+        if(swatch != null){
+            titleDominantoColor = swatch.getBodyTextColor();
+            backgroundDominantColor = swatch.getRgb();
+
+//            collapsingToolbar.setContentScrimColor(backgroundDominantColor);
+//            collapsingToolbar.setCollapsedTitleTextColor(titleDominantoColor);
         }
     }
 
