@@ -2,11 +2,16 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+<!--    <item-->
+<!--        android:id="@+id/option_homeFragment_timeMachine"-->
+<!--        android:icon="@drawable/ic_calendar"-->
+<!--        android:title="Today"-->
+<!--        app:showAsAction="ifRoom|withText" />-->
 
     <item
-        android:id="@+id/option_homeFragment_timeMachine"
-        android:icon="@drawable/ic_calendar"
-        android:title="Today"
-        app:showAsAction="ifRoom|withText" />
+        android:id="@+id/option_homeFragment_changeTheme"
+        android:icon="@drawable/ic_moon"
+        android:title="Dark Mode"
+        app:showAsAction="always" />
 
 </menu>

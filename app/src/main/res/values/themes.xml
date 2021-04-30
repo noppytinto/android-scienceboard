@@ -68,7 +68,10 @@
 
         <!-- topic item in customize topic fragment -->
         <item name="topicItemTextColor_customizeTopicsFragment">@color/black</item>
-
+        <!-- switch theme button -->
+        <item name="switchThemeMoonIconColor">#A2D8FF</item>
+        <!-- switch theme button -->
+        <item name="switchThemeSunIconColor">#FFFAB3</item>
 
 
 

@@ -85,6 +85,7 @@
     <string name="newgative_button_message_switch_topic_dialog">Cancel</string>
     <string name="warning_message_on_unfollowing_topic">you must follow at least one topic</string>
     <string name="your_re_topic_list_is_empty">Your\'re topic list is empty!</string>
+    <string name="preference_app_theme_key">app_theme</string>
 
 
 </resources>

@@ -34,6 +34,9 @@
     <!-- switch topic FAB -->
     <attr name="switchTopicFABbackgroundColor" format="reference|color"/>
     <attr name="switchTopicFABiconColor" format="reference|color"/>
+    <!-- switch theme -->
+    <attr name="switchThemeMoonIconColor" format="reference|color"/>
+    <attr name="switchThemeSunIconColor" format="reference|color"/>
 
 
 

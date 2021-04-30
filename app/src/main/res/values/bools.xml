@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="preference_app_theme_default_value_key">false</bool>
+</resources>

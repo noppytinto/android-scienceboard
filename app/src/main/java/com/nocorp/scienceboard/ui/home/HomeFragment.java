@@ -3,10 +3,15 @@ package com.nocorp.scienceboard.ui.home;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -14,6 +19,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -66,6 +72,7 @@ public class HomeFragment extends Fragment implements
     private FloatingActionButton switchTopicButton;
     private View includeEmptyTopicsMessage;
     private Button addTopicButton;
+    private MenuItem switchThemeMenuItem;
 
     // recycler
     private RecyclerAdapterArticlesList recyclerAdapterArticlesList;
@@ -93,6 +100,7 @@ public class HomeFragment extends Fragment implements
     private boolean switchButtonIsVisible;
     private final long ANIMATION_DURATION = 4000L;
     private ObjectAnimator objectAnimator;
+    private static boolean darkModeEnabled;
 
 
 
@@ -117,6 +125,7 @@ public class HomeFragment extends Fragment implements
 //        setExitTransition(new Hold().setDuration(1000));
         setExitTransition(new MaterialElevationScale(/* growing= */ false));
         setReenterTransition(new MaterialElevationScale(/* growing= */ true));
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -148,9 +157,79 @@ public class HomeFragment extends Fragment implements
         viewBinding = null;
     }
 
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_home, menu);
+        switchThemeMenuItem = menu.findItem(R.id.option_homeFragment_changeTheme);
+        checkDarkMode();
+    }
 
+    private void checkDarkMode() {
+        SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
+        boolean defaultValue = getResources().getBoolean(R.bool.preference_app_theme_default_value_key);
+        darkModeEnabled = sharedPref.getBoolean(getString(R.string.preference_app_theme_key), defaultValue);
 
+        if(darkModeEnabled) {
+            changeMenuItemIcon(switchThemeMenuItem, R.drawable.ic_sun);
+        }
+        else {
+            changeMenuItemIcon(switchThemeMenuItem, R.drawable.ic_moon);
+        }
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if(item.getItemId() == R.id.option_homeFragment_changeTheme) {
+            switchTheme(switchThemeMenuItem);
+            return true;
+        }
+        return false;
+    }
+
+    private void switchTheme(MenuItem swithcThemeMenuItem) {
+        Log.d(TAG, "enableDarkMode: clicked");
+        if(darkModeEnabled) {
+            enableDaylightMode();
+            changeMenuItemIcon(swithcThemeMenuItem, R.drawable.ic_sun);
+            // writing preference
+            SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putBoolean(getString(R.string.preference_app_theme_key), false);
+            editor.apply();
+        }
+        else {
+            darkModeEnabled = true;
+            changeMenuItemIcon(swithcThemeMenuItem, R.drawable.ic_moon);
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+
+            // writing preference
+            SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putBoolean(getString(R.string.preference_app_theme_key), true);
+            editor.apply();
+        }
+    }
+
+    private void changeMenuItemIcon(MenuItem menuItem, int resourceId) {
+        if(menuItem==null) return;
+
+        try {
+            menuItem.setIcon(resourceId);
+            Log.d(TAG, "changeMenuItemIcon: changed");
+        } catch (Exception e) {
+            Log.e(TAG, "SCIENCE_BOARD - changeMenuItemICon: cannot change icon, cause:" + e.getMessage() );
+        }
+    }
+
+    private void enableDaylightMode() {
+        darkModeEnabled = false;
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+    }
 
     //---------------------------------------------------------------------------------------- METHODS
 
