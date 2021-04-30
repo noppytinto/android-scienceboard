@@ -100,6 +100,7 @@ public class RecyclerAdapterMyTopics extends
             buildTopicCoverItem((TopicCoverViewHolder) holder, topic);
         }
         else if(getItemViewType(position) == CUSTOMIZE_MY_TOPICS_BUTTON_TYPE) {
+            Log.d(TAG, "onBindViewHolder: created customize button");
             CustomizeMyTopicsButton customizeMyTopicsButton =
                     (CustomizeMyTopicsButton) recyclerList.get(position);
 

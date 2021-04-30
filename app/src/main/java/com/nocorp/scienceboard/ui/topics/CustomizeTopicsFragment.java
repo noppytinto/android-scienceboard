@@ -56,7 +56,7 @@ public class CustomizeTopicsFragment extends Fragment implements RecyclerAdapter
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setEnterTransition();
+//        setEnterTransition();
     }
 
     @Override
@@ -125,7 +125,7 @@ public class CustomizeTopicsFragment extends Fragment implements RecyclerAdapter
         transform.setDrawingViewId(R.id.nav_host_fragment);
 //        transform.setContainerColor(Color.WHITE);
 //        transform.setFadeMode(MaterialContainerTransform.FADE_MODE_THROUGH);
-        transform.setDuration(700);
+        transform.setDuration(300);
         transform.setAllContainerColors(getResources().getColor(R.color.white));
 
         setSharedElementEnterTransition(transform);

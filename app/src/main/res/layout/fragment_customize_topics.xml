@@ -5,10 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.topics.CustomizeTopicsFragment"
-    android:transitionName="shared_element_container"
-    android:transitionGroup="true"
-    >
 
+    >
+<!--    android:transitionName="shared_element_container"-->
+<!--    android:transitionGroup="true"-->
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView_topicsFragment"

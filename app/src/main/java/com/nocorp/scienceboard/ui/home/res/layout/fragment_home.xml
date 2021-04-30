@@ -30,18 +30,17 @@
 
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingActionButton_homeFragment_customizeTopics"
+        android:id="@+id/floatingActionButton_homeFragment_switchTopic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:src="@drawable/ic_edit_bookmarks"
-        app:layout_behavior="com.nocorp.scienceboard.behavior.ScrollAwareFABBehavior"
-        app:fabSize="mini"
-        android:transitionName="shared_element_container"
-        app:backgroundTint="@color/orange"
+        android:src="@drawable/ic_list_bulleted"
+        android:transitionName="@string/transition_switch_topic_to_my_topics_list"
         android:visibility="visible"
-        />
+        app:backgroundTint="@color/black"
+        app:fabSize="mini"
+        app:layout_behavior="com.nocorp.scienceboard.behavior.ScrollAwareFABBehavior" />
 
 
 

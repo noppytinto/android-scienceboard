@@ -9,7 +9,6 @@
         style="@style/ScienceBoard.Button.OutlinedButton.CustomizeMyTopics"
         android:layout_width="match_parent"
         android:layout_height="55dp"
-        android:text="@string/plus_symbol"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
         app:layout_constraintBottom_toBottomOf="parent"

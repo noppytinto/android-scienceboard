@@ -3,6 +3,7 @@ package com.nocorp.scienceboard.ui.home;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.content.DialogInterface;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,6 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.transition.MaterialElevationScale;
 import com.nocorp.scienceboard.NavGraphDirections;
@@ -28,6 +30,7 @@ import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.bookmarks.repository.BookmarksListOnChangedListener;
 import com.nocorp.scienceboard.databinding.FragmentHomeBinding;
 import com.nocorp.scienceboard.model.Article;
+import com.nocorp.scienceboard.model.CustomizeMyTopicsButton;
 import com.nocorp.scienceboard.model.MyTopics;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
@@ -46,7 +49,10 @@ import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -60,7 +66,7 @@ public class HomeFragment extends Fragment implements
     private FragmentHomeBinding viewBinding;
     private SwipeRefreshLayout swipeRefreshLayout;
     private Toast toast;
-    private FloatingActionButton customizeHomeButton;
+    private FloatingActionButton switchTopicButton;
 
     // recycler
     private RecyclerAdapterArticlesList recyclerAdapterArticlesList;
@@ -226,6 +232,8 @@ public class HomeFragment extends Fragment implements
         List<ListItem> convertedList = new ArrayList<>();
         if(topics!=null) {
             convertedList = new ArrayList<>(topics);
+            // add customize button to the end
+            convertedList.add(new CustomizeMyTopicsButton());
         }
 
         myTopics.setMyTopics(convertedList);
@@ -369,8 +377,8 @@ public class HomeFragment extends Fragment implements
         swipeRefreshLayout = viewBinding.swipeRefreshLayoutHomeFragment;
         swipeRefreshLayout.setColorSchemeResources(R.color.orange);
         recyclerViewArticles = viewBinding.recyclerViewHomeFragment;
-        customizeHomeButton = viewBinding.floatingActionButtonHomeFragmentCustomizeTopics;
-//        customizeHomeButton.setOnClickListener(v -> showCustomizeHomeFeedFragment(customizeHomeButton));
+        switchTopicButton = viewBinding.floatingActionButtonHomeFragmentSwitchTopic;
+        switchTopicButton.setOnClickListener(v -> showSwitchTopicDialog());
 
         //
         currentDateInMillis = System.currentTimeMillis();
@@ -393,6 +401,27 @@ public class HomeFragment extends Fragment implements
         initRecycleViewArticles(recyclerViewArticles);
         setupScrollListener(recyclerViewArticles);
         setupSwipeDownToRefresh(swipeRefreshLayout);
+    }
+
+    private void showSwitchTopicDialog() {
+        // todo
+
+        List<String> list = new ArrayList<>();
+        list.add("stock1");
+        list.add("stock2");
+
+        CharSequence[] items = list.toArray(new CharSequence[0]);
+
+//        String[] items = new String[stockList.size()];
+//        items = stockList.toArray(items);
+
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Go to:")
+                .setItems(items, (dialog, which) -> {
+
+                })
+        .show();
+
     }
 
     private List<String> setTopicsThumbnails(List<ListItem> listItems, List<Topic> topics, List<Source> sources) {

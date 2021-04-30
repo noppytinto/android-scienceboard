@@ -80,6 +80,7 @@
     <string name="headlines_label">Headlines</string>
     <string name="transformation_article_to_webview">transformation_article_to_webview</string>
     <string name="plus_symbol">+</string>
+    <string name="transition_switch_topic_to_my_topics_list">transition_switch_topic_to_my_topics_list</string>
 
 
 </resources>

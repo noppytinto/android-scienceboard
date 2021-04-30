@@ -168,8 +168,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
     private void buildMyTopicsItem(MyTopicsViewholder holder, MyTopics item) {
         List<ListItem> myTopics = item.getMyTopics();
         if(myTopics!=null) {
-            // add customize button to the end
-            myTopics.add(new CustomizeMyTopicsButton());
+
 
             //
             recyclerAdapterMyTopics = holder.recyclerAdapterMyTopics;
