@@ -5,9 +5,10 @@ import android.app.Dialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.DatePicker;
+
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
-import com.nocorp.scienceboard.R;
+
 import java.util.Calendar;
 
 public class DatePickerFragment extends DialogFragment
@@ -42,7 +43,7 @@ public class DatePickerFragment extends DialogFragment
             Log.d(TAG, "onCreateDialog: " + day + "/" + month + "/" + year + "/" );
 
             // Create a new instance of DatePickerDialog and return it
-            dialog = new DatePickerDialog(requireActivity(), this, year, month, day);
+            dialog = new DatePickerDialog(requireContext(), /*R.style.Theme_AppCompat_Dialog,*/ this, year, month, day);
             setupDatePickerDialog(dialog);
         }
 
@@ -73,7 +74,7 @@ public class DatePickerFragment extends DialogFragment
 
     private void setupDatePickerDialog(DatePickerDialog dialog) {
         dialog.getDatePicker().setMaxDate(System.currentTimeMillis());
-        dialog.setTitle(getString(R.string.date_picker_label));
+//        dialog.setTitle(getString(R.string.date_picker_label));
     }
 
 }// end DatePickerFragment

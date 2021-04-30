@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -18,12 +17,10 @@ import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
-import androidx.navigation.fragment.FragmentNavigator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.transition.MaterialElevationScale;
 import com.nocorp.scienceboard.NavGraphDirections;
@@ -223,7 +220,15 @@ public class HomeFragment extends Fragment implements
     }
 
     private void populateWithMyTopics(List<Topic> topics, List<ListItem> listItems) {
-        MyTopics myTopics = new MyTopics(topics);
+        MyTopics myTopics = new MyTopics();
+
+        // convert Topic --> to ListItem, for recycler list
+        List<ListItem> convertedList = new ArrayList<>();
+        if(topics!=null) {
+            convertedList = new ArrayList<>(topics);
+        }
+
+        myTopics.setMyTopics(convertedList);
         listItems.add(0, myTopics); // add topics
     }
 
@@ -297,13 +302,22 @@ public class HomeFragment extends Fragment implements
     @Override
     public void onTopicCoverClicked(int position) {
         RecyclerAdapterMyTopics recyclerAdapterMyTopics = recyclerAdapterArticlesList.getRecyclerAdapterMyTopics();
-        Topic clickedTopic = recyclerAdapterMyTopics.getItem(position);
+        ListItem listItem = recyclerAdapterMyTopics.getItem(position);
 
-        if(clickedTopic!=null) {
-            NavGraphDirections.ActionGlobalTopicFeedsFragment action =
-                    NavGraphDirections.actionGlobalTopicFeedsFragment(clickedTopic);
-            Navigation.findNavController(view).navigate(action);
+        if(listItem.getItemType() == MyValues.ItemType.TOPIC) {
+            Topic clickedTopic = (Topic) listItem;
+            if(clickedTopic!=null) {
+                NavGraphDirections.ActionGlobalTopicFeedsFragment action =
+                        NavGraphDirections.actionGlobalTopicFeedsFragment(clickedTopic);
+                Navigation.findNavController(view).navigate(action);
+            }
         }
+
+    }
+
+    @Override
+    public void onCustomizeMyTopicsButtonClicked(int position) {
+        showCustomizeHomeFeedFragment();
     }
 
     @Override
@@ -333,20 +347,16 @@ public class HomeFragment extends Fragment implements
         });
     }
 
-    private void showCustomizeHomeFeedFragment(FloatingActionButton customizeHomeButton) {
-        // add container transformation animation
-        FragmentNavigator.Extras animations = new FragmentNavigator
-                .Extras
-                .Builder()
-                .addSharedElement(customizeHomeButton, customizeHomeButton.getTransitionName())
-                .build();
+    private void showCustomizeHomeFeedFragment() {
+//        // add container transformation animation
+//        FragmentNavigator.Extras animations = new FragmentNavigator
+//                .Extras
+//                .Builder()
+//                .addSharedElement(view, view.getTransitionName())
+//                .build();
 
         Navigation.findNavController(view)
-                .navigate(
-                        R.id.action_homeFragment_to_topicsFragment,
-                        null,
-                        null,
-                        animations);
+                .navigate(R.id.action_homeFragment_to_topicsFragment);
     }
 
 
@@ -360,7 +370,7 @@ public class HomeFragment extends Fragment implements
         swipeRefreshLayout.setColorSchemeResources(R.color.orange);
         recyclerViewArticles = viewBinding.recyclerViewHomeFragment;
         customizeHomeButton = viewBinding.floatingActionButtonHomeFragmentCustomizeTopics;
-        customizeHomeButton.setOnClickListener(v -> showCustomizeHomeFeedFragment(customizeHomeButton));
+//        customizeHomeButton.setOnClickListener(v -> showCustomizeHomeFeedFragment(customizeHomeButton));
 
         //
         currentDateInMillis = System.currentTimeMillis();

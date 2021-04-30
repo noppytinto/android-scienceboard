@@ -18,6 +18,8 @@ public class RecyclerAdapterCustomizeTopics extends
     private final String TAG = this.getClass().getSimpleName();
     private List<Topic> recyclerList;
 
+
+
     private FollowChipListener listener;
     public interface FollowChipListener {
         void onFollowChipChecked(int position, View view);

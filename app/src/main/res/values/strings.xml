@@ -79,6 +79,7 @@
     <string name="home_bottom_nav_label">Home</string>
     <string name="headlines_label">Headlines</string>
     <string name="transformation_article_to_webview">transformation_article_to_webview</string>
+    <string name="plus_symbol">+</string>
 
 
 </resources>

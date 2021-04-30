@@ -8,7 +8,9 @@ public class MyValues {
         HISTORY_ARTICLE,
         BOOKMARK_ARTICLE,
         LOADING_VIEW,
-        MY_TOPICS_LIST
+        MY_TOPICS_LIST,
+        TOPIC,
+        CUSTOMIZE_MY_TOPICS_BUTTON
     }
 
     public enum SourceCategory {

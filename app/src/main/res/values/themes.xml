@@ -15,6 +15,7 @@
         <item name="colorAccent">@color/orange</item>
         <item name="android:colorBackground">@color/gray_100</item> <!-- (background) -->
         <item name="android:textColorSecondary">@color/white</item> <!-- ("more icon" menu) -->
+<!--        <item name="android:datePickerStyle">@style/ScienceBoard.DatePicker</item>-->
         <!-- Customize your theme here. -->
 
         <!-- TEXT -->

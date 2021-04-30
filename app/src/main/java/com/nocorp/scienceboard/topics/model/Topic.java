@@ -6,10 +6,13 @@ import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
+import com.nocorp.scienceboard.ui.viewholder.ListItem;
+import com.nocorp.scienceboard.utility.MyValues;
+
 import java.io.Serializable;
 
 @Entity
-public class Topic implements Serializable {
+public class Topic extends ListItem implements Serializable {
     @PrimaryKey
     @NonNull
     private String id;
@@ -23,15 +26,30 @@ public class Topic implements Serializable {
     private String thumbnailUrl;
 
 
+
+
+    //------------------------------------------------------------ CONSTRUCTORS
+
     public Topic() {
+        setItemType(MyValues.ItemType.TOPIC);
     }
 
     @Ignore
     public Topic(@NonNull String id, String displayName) {
+        setItemType(MyValues.ItemType.TOPIC);
         this.id = id;
         this.displayName = displayName;
         followed = true;
     }
+
+
+
+
+
+
+
+
+    //------------------------------------------------------------
 
     public String getId() {
         return id;

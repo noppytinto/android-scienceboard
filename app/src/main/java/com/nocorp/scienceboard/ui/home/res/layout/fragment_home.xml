@@ -7,6 +7,13 @@
     tools:context=".ui.home.HomeFragment"
     >
 
+<!--    <include-->
+<!--        android:id="@+id/include_mainActivity"-->
+<!--        layout="@layout/layout_empty_message_home_fragment"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent" />-->
+
+
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefreshLayout_homeFragment"
         android:layout_width="match_parent"

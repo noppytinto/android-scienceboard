@@ -1,6 +1,5 @@
 package com.nocorp.scienceboard.recycler.adapter;
 
-import android.content.Context;
 import android.os.Build;
 import android.text.Html;
 import android.util.Log;
@@ -9,34 +8,31 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.nocorp.scienceboard.R;
-import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.bookmarks.model.BookmarkArticle;
-import com.nocorp.scienceboard.model.LoadingView;
 import com.nocorp.scienceboard.history.model.HistoryArticle;
+import com.nocorp.scienceboard.model.Article;
+import com.nocorp.scienceboard.model.CustomizeMyTopicsButton;
+import com.nocorp.scienceboard.model.LoadingView;
 import com.nocorp.scienceboard.model.MyTopics;
 import com.nocorp.scienceboard.recycler.viewholder.LoadingViewHolder;
 import com.nocorp.scienceboard.recycler.viewholder.MyTopicsViewholder;
-import com.nocorp.scienceboard.topics.model.Topic;
+import com.nocorp.scienceboard.ui.viewholder.ArticleViewHolder;
 import com.nocorp.scienceboard.ui.viewholder.BookmarkViewHolder;
 import com.nocorp.scienceboard.ui.viewholder.HistoryViewHolder;
-import com.nocorp.scienceboard.utility.ad.admob.model.ListAd;
-import com.nocorp.scienceboard.ui.viewholder.ArticleViewHolder;
-import com.nocorp.scienceboard.ui.viewholder.SmallAdViewHolder;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
+import com.nocorp.scienceboard.ui.viewholder.SmallAdViewHolder;
 import com.nocorp.scienceboard.utility.MyUtilities;
 import com.nocorp.scienceboard.utility.MyValues;
-
+import com.nocorp.scienceboard.utility.ad.admob.model.ListAd;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
@@ -107,7 +103,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_loading_viewholder, parent, false);
             return new LoadingViewHolder(view);
         }
-        if(viewType == ARTICLE_TYPE) {
+        else if(viewType == ARTICLE_TYPE) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_article_viewholder, parent, false);
             return new ArticleViewHolder(view, onArticleClickedListener);
         }
@@ -137,7 +133,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
         if(getItemViewType(position) == LOADING_VIEW_TYPE) {
             buildLoadingViewItem((LoadingViewHolder) holder, position);
         }
-        if(getItemViewType(position) == ARTICLE_TYPE) {
+        else if(getItemViewType(position) == ARTICLE_TYPE) {
             Article article = (Article) recyclerList.get(position);
 
             //
@@ -170,8 +166,12 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
     }
 
     private void buildMyTopicsItem(MyTopicsViewholder holder, MyTopics item) {
-        List<Topic> myTopics = item.getMyTopics();
+        List<ListItem> myTopics = item.getMyTopics();
         if(myTopics!=null) {
+            // add customize button to the end
+            myTopics.add(new CustomizeMyTopicsButton());
+
+            //
             recyclerAdapterMyTopics = holder.recyclerAdapterMyTopics;
             holder.recyclerAdapterMyTopics.loadNewData(myTopics);
         }

@@ -87,6 +87,12 @@
         <item name="strokeWidth">0dp</item>
     </style>
 
+    <style name="ScienceBoard.Button.OutlinedButton.CustomizeMyTopics" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="strokeColor">@color/gray_600</item>
+        <item name="android:textColor">@color/orange</item>
+        <item name="android:textSize">26sp</item>
+    </style>
+
 
 
 
@@ -164,12 +170,12 @@
 
 
     <!-- APP BARS -->
-    <style name="ScieceBoard.Toolbar.CollapsingToolbar.ExpandendTitleTextAppearance"
+    <style name="ScienceBoard.Toolbar.CollapsingToolbar.ExpandendTitleTextAppearance"
         parent="">
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@android:color/white</item>
     </style>
-    <style name="ScieceBoard.Toolbar.CollapsingToolbar.CollapsedTitleTextAppearance"
+    <style name="ScienceBoard.Toolbar.CollapsingToolbar.CollapsedTitleTextAppearance"
         parent="TextAppearance.MaterialComponents.Headline3">
         <item name="android:textColor">@color/black</item>
     </style>
@@ -185,4 +191,26 @@
     </style>
 
 
+    <!-- DATE PICKER -->
+
+<!--    <style name="ScienceBoard.DatePicker" parent="android:Theme.Material.Light">-->
+<!--&lt;!&ndash;        <item name="android:colorPrimary">@color/orange</item>&ndash;&gt;-->
+<!--&lt;!&ndash;        <item name="android:textColorPrimary">@color/orange</item>&ndash;&gt;-->
+<!--&lt;!&ndash;        <item name="android:datePickerStyle">@style/MyDatePickerStyle</item>&ndash;&gt;-->
+<!--        <item name="android:colorAccent">@color/orange</item>-->
+<!--    </style>-->
+
+    <style name="ScienceBoard.DatePicker" parent="android:Theme.Material.Light.Dialog">
+<!--        <item name="colorAccent">@color/orange</item>-->
+        <item name="android:colorAccent">@color/orange</item>
+        <item name="android:colorPrimary">@color/orange</item>
+        <item name="colorPrimary">@color/orange</item>
+<!--        <item name="android:colorPrimaryDark">@color/orange</item>-->
+    </style>
+    <style name="MyDatePickerDialogTheme" parent="android:Theme.Material.Light.Dialog">
+        <item name="android:datePickerStyle">@style/MyDatePickerStyle</item>
+    </style>
+    <style name="MyDatePickerStyle" parent="@android:style/Widget.Material.Light.DatePicker">
+        <item name="android:headerBackground">@color/orange</item>
+    </style>
 </resources>
