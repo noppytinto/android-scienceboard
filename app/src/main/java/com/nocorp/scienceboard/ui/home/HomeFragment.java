@@ -3,7 +3,6 @@ package com.nocorp.scienceboard.ui.home;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.content.DialogInterface;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
@@ -81,7 +80,7 @@ public class HomeFragment extends Fragment implements
     private AdProvider adProvider;
     private List<Source> sourcesFetched;
     private List<ListItem> articlesToDisplay;
-    private List<Topic> myTopics;
+    private List<Topic> myFollowedTopics;
     private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 2;
     private final int AD_DISTANCE = 5; // distance between ads (in terms of items)
     private long currentDateInMillis;
@@ -185,7 +184,8 @@ public class HomeFragment extends Fragment implements
                         false,
                         startingDate);
 
-                myTopics = extractFollowedTopics(TopicRepository.getCachedAllTopics());
+                myFollowedTopics = extractFollowedTopics(TopicRepository.getCachedAllTopics());
+                TopicRepository.setFollowedTopics(myFollowedTopics);
             }
         });
     }
@@ -211,10 +211,10 @@ public class HomeFragment extends Fragment implements
                 //
 
                 //
-                setTopicsThumbnails(resultArticles, myTopics, homeViewModel.getPickedSources());
+                setTopicsThumbnails(resultArticles, myFollowedTopics, homeViewModel.getPickedSources());
                 resultArticles = adProvider.populateListWithAds(resultArticles, AD_DISTANCE);
                 articlesToDisplay = new ArrayList<>(resultArticles);
-                populateWithMyTopics(myTopics, articlesToDisplay);
+                populateWithMyFollowedTopics(myFollowedTopics, articlesToDisplay);
                 recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
 //                showCenteredToast("articles fetched");
                 recyclerIsLoading = false;
@@ -222,7 +222,7 @@ public class HomeFragment extends Fragment implements
         });
     }
 
-    private void populateWithMyTopics(List<Topic> topics, List<ListItem> listItems) {
+    private void populateWithMyFollowedTopics(List<Topic> topics, List<ListItem> listItems) {
         MyTopics myTopics = new MyTopics();
 
         // convert Topic --> to ListItem, for recycler list
@@ -246,7 +246,7 @@ public class HomeFragment extends Fragment implements
             if(fetchedArticles!=null && !fetchedArticles.isEmpty()) {
                 fetchedArticles = adProvider.populateListWithAds(fetchedArticles, AD_DISTANCE);
                 articlesToDisplay = new ArrayList<>(fetchedArticles);
-                populateWithMyTopics(myTopics, articlesToDisplay);
+                populateWithMyFollowedTopics(myFollowedTopics, articlesToDisplay);
                 recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
             }
             else {
@@ -401,7 +401,7 @@ public class HomeFragment extends Fragment implements
     }
 
     private void showSwitchTopicDialog() {
-        List<String> list = buildMyTopicsChoices(myTopics);
+        List<String> list = buildMyTopicsChoices(myFollowedTopics);
         if(list==null || list.isEmpty()) return;
 
         //
@@ -413,7 +413,7 @@ public class HomeFragment extends Fragment implements
                 .setTitle(R.string.switch_topic_dialog_label)
                 .setItems(items, (dialog, which) -> {
 
-                    Topic topicChosen = myTopics.get(which);
+                    Topic topicChosen = myFollowedTopics.get(which);
                     if(topicChosen!=null) {
                         Log.d(TAG, "showSwitchTopicDialog: choice: " + topicChosen.getDisplayName());
 
@@ -423,12 +423,8 @@ public class HomeFragment extends Fragment implements
                     }
 
                 })
-                .setNegativeButton(R.string.newgative_button_message_switch_topic_dialog, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
+                .setNegativeButton(R.string.newgative_button_message_switch_topic_dialog,
+                        (dialog, which) -> dialog.dismiss())
         .show();
     }
 
@@ -586,7 +582,8 @@ public class HomeFragment extends Fragment implements
             startingDate = timeMachineViewModel.getPickedDate();
         }
 
-        myTopics = extractFollowedTopics(TopicRepository.getCachedAllTopics());
+        myFollowedTopics = extractFollowedTopics(TopicRepository.getCachedAllTopics());
+        TopicRepository.setFollowedTopics(myFollowedTopics);
 
         homeViewModel.fetchArticles(
                 sourcesFetched,

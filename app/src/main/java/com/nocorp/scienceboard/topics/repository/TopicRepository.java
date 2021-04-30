@@ -16,6 +16,7 @@ import java.util.List;
 public class TopicRepository {
     private final String TAG = this.getClass().getSimpleName();
     private static List<Topic> cachedAllTopics;
+    private static List<Topic> followedTopics;
     private static List<Topic> cachedFollowedTopics;
 
 
@@ -25,12 +26,16 @@ public class TopicRepository {
     public TopicRepository() {
     }
 
+    public static void setFollowedTopics(List<Topic> followedTopics) {
+        TopicRepository.followedTopics = followedTopics;
+    }
 
+    public static List<Topic> getFollowedTopics() {
+        return followedTopics;
+    }
 
 
     //--------------------------------------------------------------------- METHODS
-
-
     /**
      * NOTE:
      * will always create some topics,

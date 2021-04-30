@@ -36,6 +36,8 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.nocorp.scienceboard.NavGraphDirections;
 import com.nocorp.scienceboard.R;
@@ -46,6 +48,7 @@ import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
 import com.nocorp.scienceboard.topics.model.Topic;
+import com.nocorp.scienceboard.topics.repository.TopicRepository;
 import com.nocorp.scienceboard.ui.bookmarks.BookmarksViewModel;
 import com.nocorp.scienceboard.ui.timemachine.OnDateChangedListener;
 import com.nocorp.scienceboard.ui.timemachine.TimeMachineViewModel;
@@ -77,6 +80,7 @@ public class TopicFeedsFragment extends Fragment implements
     private ImageView toolbarImage;
     private MaterialToolbar toolbar;
     private CollapsingToolbarLayout collapsingToolbar;
+    private FloatingActionButton switchTopicButton;
 
     // recycler
     private RecyclerAdapterArticlesList recyclerAdapterArticlesList;
@@ -202,7 +206,8 @@ public class TopicFeedsFragment extends Fragment implements
         toolbar = viewBinding.toolbarTopicFeedsFragment;
         collapsingToolbar = viewBinding.collapsingToolbarTopicFeedsFragment;
         initToolbar(toolbar);
-
+        switchTopicButton = viewBinding.floatingActionButtonTopicFeedsFragmentSwitchTopic;
+        switchTopicButton.setOnClickListener(v -> showSwitchTopicDialog());
 
         //
         currentDateInMillis = System.currentTimeMillis();
@@ -446,6 +451,55 @@ public class TopicFeedsFragment extends Fragment implements
         });
     }
 
+    private void showSwitchTopicDialog() {
+        List<Topic> topics = TopicRepository.getFollowedTopics();
+        if(topics==null) return;
+
+        // remove the current topic destinantion
+        List<Topic> followedTopics = new ArrayList<>(topics);
+        followedTopics.remove(currentTopic);
+
+        //
+        List<String> list = buildMyTopicsChoices(followedTopics);
+        if(list==null || list.isEmpty()) return;
+
+        //
+        CharSequence[] items = list.toArray(new CharSequence[0]);
+//        String[] items = new String[stockList.size()];
+//        items = stockList.toArray(items);
+
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.switch_topic_dialog_label)
+                .setItems(items, (dialog, which) -> {
+
+                    Topic topicChosen = followedTopics.get(which);
+                    if(topicChosen!=null) {
+                        Log.d(TAG, "showSwitchTopicDialog: choice: " + topicChosen.getDisplayName());
+
+                        NavGraphDirections.ActionGlobalTopicFeedsFragment action =
+                                NavGraphDirections.actionGlobalTopicFeedsFragment(topicChosen);
+                        Navigation.findNavController(view).popBackStack();
+                        Navigation.findNavController(view).navigate(action);
+                    }
+
+                })
+                .setNegativeButton(R.string.newgative_button_message_switch_topic_dialog,
+                        (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
+    private List<String> buildMyTopicsChoices(List<Topic> topics) {
+        List<String> result = new ArrayList<>();
+        if(topics==null || topics.isEmpty()) return result;
+
+        for(Topic current: topics) {
+            String topicName = current.getDisplayName();
+            if(topicName!=null)
+                result.add(topicName);
+        }
+
+        return result;
+    }
 
 
 
