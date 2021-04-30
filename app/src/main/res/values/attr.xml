@@ -37,6 +37,11 @@
 
 
 
+    <!-- topic item in customize topic fragment -->
+    <attr name="topicItemTextColor_customizeTopicsFragment" format="reference|color"/>
+
+
+
 
 
 

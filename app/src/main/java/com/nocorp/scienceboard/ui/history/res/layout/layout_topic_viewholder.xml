@@ -15,7 +15,7 @@
         android:ellipsize="end"
         android:maxLines="4"
         android:paddingBottom="5dp"
-        android:textColor="@color/black"
+        android:textColor="?attr/topicItemTextColor_customizeTopicsFragment"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"

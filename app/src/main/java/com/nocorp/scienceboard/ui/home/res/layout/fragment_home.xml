@@ -7,11 +7,14 @@
     tools:context=".ui.home.HomeFragment"
     >
 
-<!--    <include-->
-<!--        android:id="@+id/include_mainActivity"-->
-<!--        layout="@layout/layout_empty_message_home_fragment"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent" />-->
+    <include
+        android:id="@+id/include_mainActivity_oneEmptyMyTopicsList"
+        layout="@layout/layout_empty__my_topics_message_home_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        tools:visibility="visible" />
 
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout

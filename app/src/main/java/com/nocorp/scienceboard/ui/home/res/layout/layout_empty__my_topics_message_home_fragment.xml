@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+    <ImageView
+        android:id="@+id/imageView_layoutEmptyTopics"
+        android:layout_width="133dp"
+        android:layout_height="127dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_undraw_empty_topics_list" />
+
+    <TextView
+        android:id="@+id/textView_layoutEmptyTopics"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/your_re_topic_list_is_empty"
+        app:layout_constraintEnd_toEndOf="@+id/imageView_layoutEmptyTopics"
+        app:layout_constraintStart_toStartOf="@+id/imageView_layoutEmptyTopics"
+        app:layout_constraintTop_toBottomOf="@+id/imageView_layoutEmptyTopics" />
+
+    <Button
+        android:id="@+id/button_layoutEmptyTopics"
+        style="@style/ScienceBoard.Button.OutlinedButton.CustomizeMyTopics"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="+   Add Topic"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/textView_layoutEmptyTopics"
+        app:layout_constraintStart_toStartOf="@+id/textView_layoutEmptyTopics"
+        app:layout_constraintTop_toBottomOf="@+id/textView_layoutEmptyTopics" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -63,6 +64,8 @@ public class HomeFragment extends Fragment implements
     private SwipeRefreshLayout swipeRefreshLayout;
     private Toast toast;
     private FloatingActionButton switchTopicButton;
+    private View includeEmptyTopicsMessage;
+    private Button addTopicButton;
 
     // recycler
     private RecyclerAdapterArticlesList recyclerAdapterArticlesList;
@@ -186,6 +189,14 @@ public class HomeFragment extends Fragment implements
 
                 myFollowedTopics = extractFollowedTopics(TopicRepository.getCachedAllTopics());
                 TopicRepository.setFollowedTopics(myFollowedTopics);
+                if(myFollowedTopics==null || myFollowedTopics.isEmpty()) {
+                    includeEmptyTopicsMessage.setVisibility(View.VISIBLE);
+                    swipeRefreshLayout.setVisibility(View.GONE);
+                }
+                else {
+                    includeEmptyTopicsMessage.setVisibility(View.GONE);
+                    swipeRefreshLayout.setVisibility(View.VISIBLE);
+                }
             }
         });
     }
@@ -353,6 +364,7 @@ public class HomeFragment extends Fragment implements
     }
 
     private void showCustomizeHomeFeedFragment() {
+        Log.d(TAG, "showCustomizeHomeFeedFragment: called");
 //        // add container transformation animation
 //        FragmentNavigator.Extras animations = new FragmentNavigator
 //                .Extras
@@ -376,6 +388,9 @@ public class HomeFragment extends Fragment implements
         recyclerViewArticles = viewBinding.recyclerViewHomeFragment;
         switchTopicButton = viewBinding.floatingActionButtonHomeFragmentSwitchTopic;
         switchTopicButton.setOnClickListener(v -> showSwitchTopicDialog());
+        includeEmptyTopicsMessage = view.findViewById(R.id.include_mainActivity_oneEmptyMyTopicsList);
+        addTopicButton = viewBinding.includeMainActivityOneEmptyMyTopicsList.buttonLayoutEmptyTopics;
+        addTopicButton.setOnClickListener(v -> showCustomizeHomeFeedFragment());
 
         //
         currentDateInMillis = System.currentTimeMillis();
@@ -578,12 +593,23 @@ public class HomeFragment extends Fragment implements
     private void refreshArticlesAndTopics() {
         long startingDate = currentDateInMillis;
 
+        myFollowedTopics = extractFollowedTopics(TopicRepository.getCachedAllTopics());
+        TopicRepository.setFollowedTopics(myFollowedTopics);
+
+        if(myFollowedTopics==null || myFollowedTopics.isEmpty()) {
+            includeEmptyTopicsMessage.setVisibility(View.VISIBLE);
+            swipeRefreshLayout.setVisibility(View.GONE);
+
+            return;
+        }
+        else {
+            includeEmptyTopicsMessage.setVisibility(View.GONE);
+            swipeRefreshLayout.setVisibility(View.VISIBLE);
+        }
+
         if (timeMachineViewModel.timeMachineIsEnabled()) {
             startingDate = timeMachineViewModel.getPickedDate();
         }
-
-        myFollowedTopics = extractFollowedTopics(TopicRepository.getCachedAllTopics());
-        TopicRepository.setFollowedTopics(myFollowedTopics);
 
         homeViewModel.fetchArticles(
                 sourcesFetched,

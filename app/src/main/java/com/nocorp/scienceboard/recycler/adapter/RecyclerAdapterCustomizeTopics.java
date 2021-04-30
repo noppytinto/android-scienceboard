@@ -22,8 +22,8 @@ public class RecyclerAdapterCustomizeTopics extends
 
     private FollowChipListener listener;
     public interface FollowChipListener {
-        void onFollowChipChecked(int position, View view);
-        void onFollowChipUnchecked(int position, View view);
+        void onFollowChipChecked(int position, Chip chip);
+        void onFollowChipUnchecked(int position, Chip chip);
 
     }
 
@@ -90,11 +90,11 @@ public class RecyclerAdapterCustomizeTopics extends
 
             followChip.setOnClickListener((buttonView) -> {
                 if(followChip.isChecked()) {
-                    listener.onFollowChipChecked(getAdapterPosition(), itemView);
+                    listener.onFollowChipChecked(getAdapterPosition(), followChip);
                     followChip.setText("followed");
                 }
                 else {
-                    listener.onFollowChipUnchecked(getAdapterPosition(), itemView);
+                    listener.onFollowChipUnchecked(getAdapterPosition(), followChip);
                     followChip.setText("follow");
                 }
             });

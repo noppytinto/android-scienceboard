@@ -16,13 +16,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
+import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.transition.MaterialContainerTransform;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentCustomizeTopicsBinding;
 import com.nocorp.scienceboard.topics.model.Topic;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterCustomizeTopics;
+import com.yandex.metrica.impl.ob.To;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +39,7 @@ public class CustomizeTopicsFragment extends Fragment implements RecyclerAdapter
     private FragmentCustomizeTopicsBinding viewBinding;
     private List<Topic> topicsFetched;
     private ExtendedFloatingActionButton floatingActionButton;
+    private Toast toast;
 
     //
     private List<Topic> topicsToUpdate;
@@ -135,7 +139,7 @@ public class CustomizeTopicsFragment extends Fragment implements RecyclerAdapter
 
 
     @Override
-    public void onFollowChipChecked(int position, View view) {
+    public void onFollowChipChecked(int position, Chip chip) {
         Topic topic = recyclerAdapterCustomizeTopics.getItem(position);
         if(topic!=null) {
             topicsToUpdate.remove(topic);
@@ -143,21 +147,37 @@ public class CustomizeTopicsFragment extends Fragment implements RecyclerAdapter
             topicsToUpdate.add(topic);
         }
         else {
-            Log.d(TAG, "onFollowChipChecked: cannot follow topic, cause: topic is null");
+            Log.e(TAG, "onFollowChipChecked: cannot follow topic, cause: topic is null");
         }
     }
 
     @Override
-    public void onFollowChipUnchecked(int position, View view) {
+    public void onFollowChipUnchecked(int position, Chip chip) {
         Topic topic = recyclerAdapterCustomizeTopics.getItem(position);
+
         if(topic!=null) {
-            topicsToUpdate.remove(topic);
-            topic.setFollowed(false);
+            topicsToUpdate.remove(topic); // remove old topic state, if any
+            topic.setFollowed(false); // set new topic state
             topicsToUpdate.add(topic);
         }
         else {
-            Log.d(TAG, "onFollowChipChecked: cannot unfollow topic, cause: topic is null");
+            Log.e(TAG, "onFollowChipUnchecked: cannot unfollow topic, cause: topic is null");
         }
+    }
+
+//    private boolean atLeastOneTopicIsFollowed(List<Topic> topics) {
+//        boolean result = false;
+//        if(topics==null || topics.isEmpty()) return result;
+//
+//        for (Topic current)
+//
+//        return result;
+//    }
+
+    private void showToast(String message) {
+        if(toast!=null) toast.cancel();
+        toast = Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT);
+        toast.show();
     }
 
 

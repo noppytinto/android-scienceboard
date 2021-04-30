@@ -66,6 +66,9 @@
         <item name="switchTopicFABbackgroundColor">@color/black</item>
         <item name="switchTopicFABiconColor">@color/white</item>
 
+        <!-- topic item in customize topic fragment -->
+        <item name="topicItemTextColor_customizeTopicsFragment">@color/black</item>
+
 
 
 
