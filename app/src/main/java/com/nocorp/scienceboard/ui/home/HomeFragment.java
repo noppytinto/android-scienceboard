@@ -49,10 +49,7 @@ import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 
@@ -84,7 +81,7 @@ public class HomeFragment extends Fragment implements
     private AdProvider adProvider;
     private List<Source> sourcesFetched;
     private List<ListItem> articlesToDisplay;
-    private List<Topic> topics;
+    private List<Topic> myTopics;
     private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 2;
     private final int AD_DISTANCE = 5; // distance between ads (in terms of items)
     private long currentDateInMillis;
@@ -188,7 +185,7 @@ public class HomeFragment extends Fragment implements
                         false,
                         startingDate);
 
-                topics = extractFollowedTopics(TopicRepository.getCachedAllTopics());
+                myTopics = extractFollowedTopics(TopicRepository.getCachedAllTopics());
             }
         });
     }
@@ -214,10 +211,10 @@ public class HomeFragment extends Fragment implements
                 //
 
                 //
-                setTopicsThumbnails(resultArticles, topics, homeViewModel.getPickedSources());
+                setTopicsThumbnails(resultArticles, myTopics, homeViewModel.getPickedSources());
                 resultArticles = adProvider.populateListWithAds(resultArticles, AD_DISTANCE);
                 articlesToDisplay = new ArrayList<>(resultArticles);
-                populateWithMyTopics(topics, articlesToDisplay);
+                populateWithMyTopics(myTopics, articlesToDisplay);
                 recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
 //                showCenteredToast("articles fetched");
                 recyclerIsLoading = false;
@@ -249,7 +246,7 @@ public class HomeFragment extends Fragment implements
             if(fetchedArticles!=null && !fetchedArticles.isEmpty()) {
                 fetchedArticles = adProvider.populateListWithAds(fetchedArticles, AD_DISTANCE);
                 articlesToDisplay = new ArrayList<>(fetchedArticles);
-                populateWithMyTopics(topics, articlesToDisplay);
+                populateWithMyTopics(myTopics, articlesToDisplay);
                 recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
             }
             else {
@@ -404,24 +401,48 @@ public class HomeFragment extends Fragment implements
     }
 
     private void showSwitchTopicDialog() {
-        // todo
+        List<String> list = buildMyTopicsChoices(myTopics);
+        if(list==null || list.isEmpty()) return;
 
-        List<String> list = new ArrayList<>();
-        list.add("stock1");
-        list.add("stock2");
-
+        //
         CharSequence[] items = list.toArray(new CharSequence[0]);
-
 //        String[] items = new String[stockList.size()];
 //        items = stockList.toArray(items);
 
         new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Go to:")
+                .setTitle(R.string.switch_topic_dialog_label)
                 .setItems(items, (dialog, which) -> {
 
+                    Topic topicChosen = myTopics.get(which);
+                    if(topicChosen!=null) {
+                        Log.d(TAG, "showSwitchTopicDialog: choice: " + topicChosen.getDisplayName());
+
+                        NavGraphDirections.ActionGlobalTopicFeedsFragment action =
+                                NavGraphDirections.actionGlobalTopicFeedsFragment(topicChosen);
+                        Navigation.findNavController(view).navigate(action);
+                    }
+
+                })
+                .setNegativeButton(R.string.newgative_button_message_switch_topic_dialog, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
                 })
         .show();
+    }
 
+    private List<String> buildMyTopicsChoices(List<Topic> topics) {
+        List<String> result = new ArrayList<>();
+        if(topics==null || topics.isEmpty()) return result;
+
+        for(Topic current: topics) {
+            String topicName = current.getDisplayName();
+            if(topicName!=null)
+                result.add(topicName);
+        }
+
+        return result;
     }
 
     private List<String> setTopicsThumbnails(List<ListItem> listItems, List<Topic> topics, List<Source> sources) {
@@ -565,7 +586,7 @@ public class HomeFragment extends Fragment implements
             startingDate = timeMachineViewModel.getPickedDate();
         }
 
-        topics = extractFollowedTopics(TopicRepository.getCachedAllTopics());
+        myTopics = extractFollowedTopics(TopicRepository.getCachedAllTopics());
 
         homeViewModel.fetchArticles(
                 sourcesFetched,

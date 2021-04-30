@@ -38,9 +38,10 @@
         android:src="@drawable/ic_list_bulleted"
         android:transitionName="@string/transition_switch_topic_to_my_topics_list"
         android:visibility="visible"
-        app:backgroundTint="@color/black"
+        app:backgroundTint="?attr/switchTopicFABbackgroundColor"
         app:fabSize="mini"
-        app:layout_behavior="com.nocorp.scienceboard.behavior.ScrollAwareFABBehavior" />
+        />
+<!--    app:layout_behavior="com.nocorp.scienceboard.behavior.ScrollAwareFABBehavior"-->
 
 
 

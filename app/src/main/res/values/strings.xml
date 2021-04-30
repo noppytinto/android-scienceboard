@@ -81,6 +81,8 @@
     <string name="transformation_article_to_webview">transformation_article_to_webview</string>
     <string name="plus_symbol">+</string>
     <string name="transition_switch_topic_to_my_topics_list">transition_switch_topic_to_my_topics_list</string>
+    <string name="switch_topic_dialog_label">Go to topic:</string>
+    <string name="newgative_button_message_switch_topic_dialog">Cancel</string>
 
 
 </resources>

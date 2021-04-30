@@ -2,7 +2,7 @@
     <!-- Base application theme. -->
     <style name="Theme.ScienceBoard" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/dark</item>
+        <item name="colorPrimary">@color/white</item>
         <item name="colorPrimaryVariant">@color/black</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
@@ -44,6 +44,9 @@
         <!-- TOPIC FEEDS TOOLBAR -->
         <item name="navigationIconColor">@color/white</item>
 <!--        <item name="navigationIconTint">@color/red</item>-->
+        <!-- TOPIC FEEDS COLLAPSING TOOLBAR -->
+        <item name="myContentScrimColor">@color/gray_900</item>
+        <item name="myCollapsingToolbarColor">@color/gray_900</item>
 
         <!-- ARTICLE VIEWHOLDER -->
         <item name="articleDividerColor">@color/gray_800</item>
@@ -59,6 +62,9 @@
         <item name="adButtonTextColor">@color/gray_600</item>
         <item name="adButtonStrokeColor">@color/gray_700</item>
         <item name="adButtonRippleColor">@color/orange</item>
+        <!-- switch topic FAB -->
+        <item name="switchTopicFABbackgroundColor">@color/white</item>
+        <item name="switchTopicFABiconColor">@color/black</item>
 
 
 

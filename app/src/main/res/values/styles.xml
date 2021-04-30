@@ -190,6 +190,7 @@
     <style name="ScienceBoard.Toolbar.TopicFeeds" parent="ThemeOverlay.MaterialComponents.Toolbar.Primary">
         <!-- This attributes is used by navigation icon and overflow icon -->
         <item name="colorOnPrimary">?attr/navigationIconColor</item>
+        <item name="background">@color/white</item>
     </style>
     <style name="ScienceBoard.Toolbar.TitleTextAppearance"
         parent="@style/TextAppearance.MaterialComponents.Headline6">

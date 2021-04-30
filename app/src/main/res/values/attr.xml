@@ -23,6 +23,20 @@
     <attr name="editBookmarksIconColor" format="reference|color"/>
     <!-- TOPIC FEEDS TOOLBAR -->
     <attr name="navigationIconColor" format="reference|color"/>
+    <!-- TOPIC FEEDS COLLAPSING TOOLBAR -->
+    <attr name="myContentScrimColor" format="reference|color"/>
+    <attr name="myCollapsingToolbarColor" format="reference|color"/>
+
+
+
+
+    <!-- BUTTON -->
+    <!-- switch topic FAB -->
+    <attr name="switchTopicFABbackgroundColor" format="reference|color"/>
+    <attr name="switchTopicFABiconColor" format="reference|color"/>
+
+
+
 
 
 

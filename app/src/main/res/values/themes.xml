@@ -2,7 +2,7 @@
     <!-- Base application theme. -->
     <style name="Theme.ScienceBoard" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/white</item>
+        <item name="colorPrimary">@color/orange</item>
         <item name="colorPrimaryVariant">@color/gray</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
@@ -15,7 +15,6 @@
         <item name="colorAccent">@color/orange</item>
         <item name="android:colorBackground">@color/gray_100</item> <!-- (background) -->
         <item name="android:textColorSecondary">@color/white</item> <!-- ("more icon" menu) -->
-<!--        <item name="android:datePickerStyle">@style/ScienceBoard.DatePicker</item>-->
         <!-- Customize your theme here. -->
 
         <!-- TEXT -->
@@ -45,6 +44,9 @@
         <!-- TOPIC FEEDS TOOLBAR -->
         <item name="navigationIconColor">@color/black</item>
 <!--        <item name="navigationIconTint">@color/red</item>-->
+        <!-- TOPIC FEEDS COLLAPSING TOOLBAR -->
+        <item name="myContentScrimColor">@color/white</item>
+        <item name="myCollapsingToolbarColor">@color/white</item>
 
         <!-- ARTICLE VIEWHOLDER -->
         <item name="articleDividerColor">@color/gray_300</item>
@@ -60,6 +62,9 @@
         <item name="adButtonTextColor">@color/gray_500</item>
         <item name="adButtonStrokeColor">@color/gray_300</item>
         <item name="adButtonRippleColor">@color/orange</item>
+        <!-- switch topic FAB -->
+        <item name="switchTopicFABbackgroundColor">@color/black</item>
+        <item name="switchTopicFABiconColor">@color/white</item>
 
 
 
