@@ -23,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebStorage;
 import android.webkit.WebView;
@@ -434,7 +435,12 @@ public class WebviewFragment extends Fragment implements
 
     private void defineWebclientBehavior_mainWebview(WebView webView) {
         defineWebviewBackButtonBehavior(webView);
-//        webView.setWebChromeClient(new WebChromeClient());
+        webView.setWebChromeClient(new WebChromeClient() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
+            public void onProgressChanged(WebView view, int progress) {
+                progressIndicator.setProgress(progress, true); //Make the bar disappear after URL is loaded
+            }
+        });
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -468,6 +474,7 @@ public class WebviewFragment extends Fragment implements
                 String message = "An error occurred when displaying page." + "\ndescription: " + description + "\nerror: " + errorCode;
                 showErrorSnackbar(message, requireContext());
             }
+
 
 //            @Override
 //            public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
