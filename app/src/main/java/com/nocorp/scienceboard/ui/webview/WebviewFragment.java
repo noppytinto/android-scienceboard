@@ -412,7 +412,7 @@ public class WebviewFragment extends Fragment implements
 //        webSettings.setDisplayZoomControls(false);
 //        webView.setFocusable(true);
 //        webView.setFocusableInTouchMode(true);
-//        webView.setLayerType(WebView.LAYER_TYPE_SOFTWARE, null); // TODO: this might fix blank screen porblem
+//        webView.setLayerType(WebView.LAYER_TYPE_SOFTWARE, null); // TODO: this might fix blank screen problem
     }
 
     private void applyCustomWebviewSettings_mainWebview(WebView webView) {
