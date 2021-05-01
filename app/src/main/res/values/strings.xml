@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ScienceBoard</string>
+    <string name="app_name">NewsBoard</string>
     <string name="title_home"> </string>
     <string name="title_bookmarks">Bookmarks</string>
     <string name="title_history">History</string>
@@ -86,6 +86,8 @@
     <string name="warning_message_on_unfollowing_topic">you must follow at least one topic</string>
     <string name="your_re_topic_list_is_empty">Your\'re topic list is empty!</string>
     <string name="preference_app_theme_key">app_theme</string>
+    <string name="string_empty_message_no_bookmarks_saved">Empty list!\nSave articles to read them later\nor just to bookmark them.</string>
+    <string name="string_empty_message_no_history">Empty list!\nStart reading some articles.</string>
 
 
 </resources>

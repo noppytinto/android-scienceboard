@@ -47,6 +47,10 @@
 
 
 
+    <!-- BOTTOMBAR -->
+    <attr name="bottomBarBackgroundColor" format="reference|color"/>
+    <attr name="bottomBarIconsColor_selected" format="reference|color"/>
+    <attr name="bottomBarIconsColor_unselected" format="reference|color"/>
 
 
     <!-- TABS -->

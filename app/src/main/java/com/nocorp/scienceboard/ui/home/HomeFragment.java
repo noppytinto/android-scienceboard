@@ -69,9 +69,9 @@ public class HomeFragment extends Fragment implements
     private FragmentHomeBinding viewBinding;
     private SwipeRefreshLayout swipeRefreshLayout;
     private Toast toast;
-    private FloatingActionButton switchTopicButton;
+    private FloatingActionButton switchTopicFAB;
     private View includeEmptyTopicsMessage;
-    private Button addTopicButton;
+    private Button addTopicButton_emptyMessage;
     private MenuItem switchThemeMenuItem;
 
     // recycler
@@ -152,29 +152,10 @@ public class HomeFragment extends Fragment implements
     }// end onViewCreated
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        viewBinding = null;
-    }
-
-    @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.menu_home, menu);
         switchThemeMenuItem = menu.findItem(R.id.option_homeFragment_changeTheme);
         checkDarkMode();
-    }
-
-    private void checkDarkMode() {
-        SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
-        boolean defaultValue = getResources().getBoolean(R.bool.preference_app_theme_default_value_key);
-        darkModeEnabled = sharedPref.getBoolean(getString(R.string.preference_app_theme_key), defaultValue);
-
-        if(darkModeEnabled) {
-            changeMenuItemIcon(switchThemeMenuItem, R.drawable.ic_sun);
-        }
-        else {
-            changeMenuItemIcon(switchThemeMenuItem, R.drawable.ic_moon);
-        }
     }
 
     @Override
@@ -186,50 +167,20 @@ public class HomeFragment extends Fragment implements
         return false;
     }
 
-    private void switchTheme(MenuItem swithcThemeMenuItem) {
-        Log.d(TAG, "enableDarkMode: clicked");
-        if(darkModeEnabled) {
-            enableDaylightMode();
-            changeMenuItemIcon(swithcThemeMenuItem, R.drawable.ic_sun);
-            // writing preference
-            SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putBoolean(getString(R.string.preference_app_theme_key), false);
-            editor.apply();
-        }
-        else {
-            darkModeEnabled = true;
-            changeMenuItemIcon(swithcThemeMenuItem, R.drawable.ic_moon);
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-
-            // writing preference
-            SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putBoolean(getString(R.string.preference_app_theme_key), true);
-            editor.apply();
-        }
-    }
-
-    private void changeMenuItemIcon(MenuItem menuItem, int resourceId) {
-        if(menuItem==null) return;
-
-        try {
-            menuItem.setIcon(resourceId);
-            Log.d(TAG, "changeMenuItemIcon: changed");
-        } catch (Exception e) {
-            Log.e(TAG, "SCIENCE_BOARD - changeMenuItemICon: cannot change icon, cause:" + e.getMessage() );
-        }
-    }
-
-    private void enableDaylightMode() {
-        darkModeEnabled = false;
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-    }
-
     @Override
     public void onPrepareOptionsMenu(@NonNull Menu menu) {
         super.onPrepareOptionsMenu(menu);
     }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        viewBinding = null;
+    }
+
+
+
+
 
     //---------------------------------------------------------------------------------------- METHODS
 
@@ -271,10 +222,12 @@ public class HomeFragment extends Fragment implements
                 if(myFollowedTopics==null || myFollowedTopics.isEmpty()) {
                     includeEmptyTopicsMessage.setVisibility(View.VISIBLE);
                     swipeRefreshLayout.setVisibility(View.GONE);
+                    switchTopicFAB.setVisibility(View.GONE);
                 }
                 else {
                     includeEmptyTopicsMessage.setVisibility(View.GONE);
                     swipeRefreshLayout.setVisibility(View.VISIBLE);
+                    switchTopicFAB.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -442,18 +395,6 @@ public class HomeFragment extends Fragment implements
         });
     }
 
-    private void showCustomizeHomeFeedFragment() {
-        Log.d(TAG, "showCustomizeHomeFeedFragment: called");
-//        // add container transformation animation
-//        FragmentNavigator.Extras animations = new FragmentNavigator
-//                .Extras
-//                .Builder()
-//                .addSharedElement(view, view.getTransitionName())
-//                .build();
-
-        Navigation.findNavController(view)
-                .navigate(R.id.action_homeFragment_to_topicsFragment);
-    }
 
 
 
@@ -465,11 +406,11 @@ public class HomeFragment extends Fragment implements
         swipeRefreshLayout = viewBinding.swipeRefreshLayoutHomeFragment;
         swipeRefreshLayout.setColorSchemeResources(R.color.orange);
         recyclerViewArticles = viewBinding.recyclerViewHomeFragment;
-        switchTopicButton = viewBinding.floatingActionButtonHomeFragmentSwitchTopic;
-        switchTopicButton.setOnClickListener(v -> showSwitchTopicDialog());
+        switchTopicFAB = viewBinding.floatingActionButtonHomeFragmentSwitchTopic;
+        switchTopicFAB.setOnClickListener(v -> showSwitchTopicDialog());
         includeEmptyTopicsMessage = view.findViewById(R.id.include_mainActivity_oneEmptyMyTopicsList);
-        addTopicButton = viewBinding.includeMainActivityOneEmptyMyTopicsList.buttonLayoutEmptyTopics;
-        addTopicButton.setOnClickListener(v -> showCustomizeHomeFeedFragment());
+        addTopicButton_emptyMessage = viewBinding.includeMainActivityOneEmptyMyTopicsList.buttonLayoutEmptyTopics;
+        addTopicButton_emptyMessage.setOnClickListener(v -> showCustomizeHomeFeedFragment());
 
         //
         currentDateInMillis = System.currentTimeMillis();
@@ -492,34 +433,6 @@ public class HomeFragment extends Fragment implements
         initRecycleViewArticles(recyclerViewArticles);
         setupScrollListener(recyclerViewArticles);
         setupSwipeDownToRefresh(swipeRefreshLayout);
-    }
-
-    private void showSwitchTopicDialog() {
-        List<String> list = buildMyTopicsChoices(myFollowedTopics);
-        if(list==null || list.isEmpty()) return;
-
-        //
-        CharSequence[] items = list.toArray(new CharSequence[0]);
-//        String[] items = new String[stockList.size()];
-//        items = stockList.toArray(items);
-
-        new MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.switch_topic_dialog_label)
-                .setItems(items, (dialog, which) -> {
-
-                    Topic topicChosen = myFollowedTopics.get(which);
-                    if(topicChosen!=null) {
-                        Log.d(TAG, "showSwitchTopicDialog: choice: " + topicChosen.getDisplayName());
-
-                        NavGraphDirections.ActionGlobalTopicFeedsFragment action =
-                                NavGraphDirections.actionGlobalTopicFeedsFragment(topicChosen);
-                        Navigation.findNavController(view).navigate(action);
-                    }
-
-                })
-                .setNegativeButton(R.string.newgative_button_message_switch_topic_dialog,
-                        (dialog, which) -> dialog.dismiss())
-        .show();
     }
 
     private List<String> buildMyTopicsChoices(List<Topic> topics) {
@@ -678,12 +591,13 @@ public class HomeFragment extends Fragment implements
         if(myFollowedTopics==null || myFollowedTopics.isEmpty()) {
             includeEmptyTopicsMessage.setVisibility(View.VISIBLE);
             swipeRefreshLayout.setVisibility(View.GONE);
-
+            switchTopicFAB.setVisibility(View.GONE);
             return;
         }
         else {
             includeEmptyTopicsMessage.setVisibility(View.GONE);
             swipeRefreshLayout.setVisibility(View.VISIBLE);
+            switchTopicFAB.setVisibility(View.VISIBLE);
         }
 
         if (timeMachineViewModel.timeMachineIsEnabled()) {
@@ -697,12 +611,106 @@ public class HomeFragment extends Fragment implements
                 startingDate);
     }
 
+    private void showSwitchTopicDialog() {
+        List<String> list = buildMyTopicsChoices(myFollowedTopics);
+        if(list==null || list.isEmpty()) return;
+
+        //
+        CharSequence[] items = list.toArray(new CharSequence[0]);
+//        String[] items = new String[stockList.size()];
+//        items = stockList.toArray(items);
+
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.switch_topic_dialog_label)
+                .setItems(items, (dialog, which) -> {
+
+                    Topic topicChosen = myFollowedTopics.get(which);
+                    if(topicChosen!=null) {
+                        Log.d(TAG, "showSwitchTopicDialog: choice: " + topicChosen.getDisplayName());
+
+                        NavGraphDirections.ActionGlobalTopicFeedsFragment action =
+                                NavGraphDirections.actionGlobalTopicFeedsFragment(topicChosen);
+                        Navigation.findNavController(view).navigate(action);
+                    }
+
+                })
+                .setNegativeButton(R.string.newgative_button_message_switch_topic_dialog,
+                        (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
+    private void showCustomizeHomeFeedFragment() {
+        Log.d(TAG, "showCustomizeHomeFeedFragment: called");
+//        // add container transformation animation
+//        FragmentNavigator.Extras animations = new FragmentNavigator
+//                .Extras
+//                .Builder()
+//                .addSharedElement(view, view.getTransitionName())
+//                .build();
 
 
+        Navigation.findNavController(view)
+                .navigate(R.id.action_homeFragment_to_topicsFragment);
+    }
+
+    private void switchTheme(MenuItem swithcThemeMenuItem) {
+        Log.d(TAG, "enableDarkMode: clicked");
+        if(darkModeEnabled) {
+            disableDarkMode();
+            changeMenuItemIcon(swithcThemeMenuItem, R.drawable.ic_sun);
+            // writing preference
+            SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putBoolean(getString(R.string.preference_app_theme_key), false);
+            editor.apply();
+        }
+        else {
+            darkModeEnabled = true;
+            changeMenuItemIcon(swithcThemeMenuItem, R.drawable.ic_moon);
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+
+            // writing preference
+            SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putBoolean(getString(R.string.preference_app_theme_key), true);
+            editor.apply();
+        }
+    }
+
+    private void changeMenuItemIcon(MenuItem menuItem, int resourceId) {
+        if(menuItem==null) return;
+
+        try {
+            menuItem.setIcon(resourceId);
+            Log.d(TAG, "changeMenuItemIcon: changed");
+        } catch (Exception e) {
+            Log.e(TAG, "SCIENCE_BOARD - changeMenuItemICon: cannot change icon, cause:" + e.getMessage() );
+        }
+    }
+
+    private void disableDarkMode() {
+        darkModeEnabled = false;
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+    }
+
+    private void checkDarkMode() {
+        SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
+        boolean defaultValue = getResources().getBoolean(R.bool.preference_app_theme_default_value_key);
+        darkModeEnabled = sharedPref.getBoolean(getString(R.string.preference_app_theme_key), defaultValue);
+
+        if(darkModeEnabled) {
+            changeMenuItemIcon(switchThemeMenuItem, R.drawable.ic_sun);
+        }
+        else {
+            changeMenuItemIcon(switchThemeMenuItem, R.drawable.ic_moon);
+        }
+    }
 
 
 
     //---------------------------------------------------------------------------------------- UTILITY METHODS
+
+
 
     private List<Topic> extractFollowedTopics(List<Topic> topics) {
         List<Topic> result = null;

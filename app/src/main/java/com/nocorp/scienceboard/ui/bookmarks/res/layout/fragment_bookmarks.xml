@@ -7,6 +7,8 @@
     android:paddingTop="?actionBarSize"
     tools:context=".ui.bookmarks.BookmarksFragment">
 
+
+
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/progressIndicator_bookmarksFragment"
         android:layout_width="wrap_content"
@@ -34,5 +36,22 @@
 
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <include
+        android:id="@+id/include_bookmarksFragment_emptyMessage"
+        layout="@layout/empty_message_no_bookmarks_saved"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.35000002"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

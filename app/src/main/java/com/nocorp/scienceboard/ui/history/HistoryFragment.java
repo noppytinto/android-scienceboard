@@ -41,6 +41,7 @@ public class HistoryFragment extends Fragment implements
     private Toast toast;
     private View view;
     private CircularProgressIndicator progressIndicator;
+    private View includeEmptyMessage;
 
     //
     private MenuItem deleteMenuItem;
@@ -82,6 +83,7 @@ public class HistoryFragment extends Fragment implements
 
         historyViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), articles -> {
             if(articles==null || articles.size()==0) {
+                includeEmptyMessage.setVisibility(View.VISIBLE);
                 recyclerAdapterArticlesList.clearList();
                 swipeRefreshLayout.setRefreshing(false);
                 progressIndicator.setVisibility(View.GONE);
@@ -89,6 +91,7 @@ public class HistoryFragment extends Fragment implements
 //                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
             }
             else {
+                includeEmptyMessage.setVisibility(View.GONE);
                 updateMenu(false);
                 swipeRefreshLayout.setRefreshing(false);
                 progressIndicator.setVisibility(View.GONE);
@@ -164,13 +167,19 @@ public class HistoryFragment extends Fragment implements
 
     private void clearHistory() {
         historyViewModel.clearHistory();
+        includeEmptyMessage.setVisibility(View.VISIBLE);
     }
 
     private void initView() {
         progressIndicator = binding.progressIndicatorHistoryFragment;
         swipeRefreshLayout = binding.swipeRefreshHistoryFragment;
         swipeRefreshLayout.setColorSchemeResources(R.color.orange_light);
+        includeEmptyMessage = view.findViewById(R.id.include_historyFragment_emptyMessage);
+
+        // viewmodels
         historyViewModel = new ViewModelProvider(this).get(HistoryViewModel.class);
+
+        //
         initRecycleView();
         setupSwipeDownToRefresh();
     }

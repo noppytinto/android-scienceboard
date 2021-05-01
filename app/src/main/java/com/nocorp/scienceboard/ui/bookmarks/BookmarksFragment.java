@@ -45,8 +45,7 @@ public class BookmarksFragment extends Fragment implements
     private Toast toast;
     private View view;
     private CircularProgressIndicator progressIndicator;
-
-    //
+    private View includeEmptyMessage;
 
     //
     private MenuItem deleteMenuItem;
@@ -94,37 +93,15 @@ public class BookmarksFragment extends Fragment implements
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initView();
-
         selectedItems = new HashSet<>();
 
-        bookmarksViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), articles -> {
-            swipeRefreshLayout.setRefreshing(false);
-            progressIndicator.setVisibility(View.GONE);
-
-            if(articles==null || articles.isEmpty()) {
-//                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
-                Log.d(TAG, "SCIENCE_BOARD - onViewCreated: " + getString(R.string.string_articles_fetch_fail_message));
-            }
-            else {
-                recyclerAdapterArticlesList.loadNewData(articles);
-//                showCenteredToast("bookmarks fetched");
-                Log.d(TAG, "SCIENCE_BOARD - onViewCreated: bookmarks fetched");
-            }
-
-            // update top menu items visibili
-            requireActivity().invalidateOptionsMenu();
-        });
-
+        //
+        observeBookmarksFetch();
         bookmarksViewModel.fetchBookmarks(0);
     }
 
 
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        viewBinding = null;
-    }
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
@@ -201,38 +178,44 @@ public class BookmarksFragment extends Fragment implements
         return false;
     }
 
-
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        viewBinding = null;
+    }
 
 
     //--------------------------------------------------------------------- My METHODS
 
-    private void initView() {
-        progressIndicator = viewBinding.progressIndicatorBookmarksFragment;
-        swipeRefreshLayout = viewBinding.swipeRefreshBookmarksFragment;
-        swipeRefreshLayout.setColorSchemeResources(R.color.orange_light);
-        bookmarksViewModel = new ViewModelProvider(requireActivity()).get(BookmarksViewModel.class);
-        initRecycleView();
-        setupSwipeDownToRefresh();
-    }
 
-    private void initRecycleView() {
-        // defining Recycler view
-        recyclerView = viewBinding.recyclerViewBookmarksFragment;
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this, null);
-        recyclerView.setAdapter(recyclerAdapterArticlesList);
-    }
 
-    private void setupSwipeDownToRefresh() {
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-            Log.d(TAG, "SCIENCE_BOARD - onRefresh called from SwipeRefreshLayout");
-            refreshAction();
+    //-------------------------------------------- observing
+
+    private void observeBookmarksFetch() {
+        bookmarksViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), articles -> {
+            swipeRefreshLayout.setRefreshing(false);
+            progressIndicator.setVisibility(View.GONE);
+
+            if(articles==null || articles.isEmpty()) {
+//                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
+                Log.e(TAG, "SCIENCE_BOARD - onViewCreated: " + getString(R.string.string_articles_fetch_fail_message));
+                includeEmptyMessage.setVisibility(View.VISIBLE);
+            }
+            else {
+                includeEmptyMessage.setVisibility(View.GONE);
+                recyclerAdapterArticlesList.loadNewData(articles);
+//                showCenteredToast("bookmarks fetched");
+//                Log.d(TAG, "SCIENCE_BOARD - onViewCreated: bookmarks fetched");
+            }
+
+            // update top menu items visibility
+            requireActivity().invalidateOptionsMenu();
         });
     }
 
-    private void refreshAction() {
-        bookmarksViewModel.fetchBookmarks(0);
-    }
+
+
+    //-------------------------------------------- listeners
 
     @Override
     public void onArticleClicked(int position, View itemView) {
@@ -249,14 +232,6 @@ public class BookmarksFragment extends Fragment implements
         }
     }
 
-    private void openArticle(Article article) {
-        NavGraphDirections.ActionGlobalWebviewFragment action =
-                NavGraphDirections.actionGlobalWebviewFragment(article);
-        Navigation.findNavController(view).navigate(action);
-    }
-
-
-
     @Override
     public void onBookmarksButtonClicked(int position) {
         Article article = (Article) recyclerAdapterArticlesList.getItem(position);
@@ -267,21 +242,8 @@ public class BookmarksFragment extends Fragment implements
         }
     }
 
-    private void showCenteredToast(String message) {
-        if(toast!=null) toast.cancel();
-        toast = Toast.makeText(requireContext(),message, Toast.LENGTH_SHORT);
-//        toast.setGravity(Gravity.CENTER, 0, 0);
-        toast.show();
-    }
 
-    private void showToast(String message) {
-        if(toast!=null) toast.cancel();
-        toast = Toast.makeText(requireContext(),message, Toast.LENGTH_SHORT);
-        toast.show();
-    }
-
-
-    //------- EDIT MODE
+    //-------------------------------------------- EDIT MODE
 
     private void selectAllItemsAction() {
         if(allItemsSelected) {
@@ -386,6 +348,7 @@ public class BookmarksFragment extends Fragment implements
         if(recyclerAdapterArticlesList.getAllItems()==null || recyclerAdapterArticlesList.getAllItems().isEmpty()){
             stopEditingModeAction();
             ((MainActivity)requireActivity()).changeToolbarTitle("Bookmarks");
+            includeEmptyMessage.setVisibility(View.VISIBLE);
         }
         else {
             // update item menu
@@ -393,10 +356,69 @@ public class BookmarksFragment extends Fragment implements
             atLeastOneItemSelected = false;
             selectedItems.clear();
             requireActivity().invalidateOptionsMenu();
+            includeEmptyMessage.setVisibility(View.GONE);
         }
 
         //
         Log.d(TAG, "selectItem: " + selectedItems);
     }
+
+
+    //--------------------------------------------
+
+    private void initView() {
+        progressIndicator = viewBinding.progressIndicatorBookmarksFragment;
+        swipeRefreshLayout = viewBinding.swipeRefreshBookmarksFragment;
+        swipeRefreshLayout.setColorSchemeResources(R.color.orange_light);
+        includeEmptyMessage = view.findViewById(R.id.include_bookmarksFragment_emptyMessage);
+
+        // viewmodels
+        bookmarksViewModel = new ViewModelProvider(requireActivity()).get(BookmarksViewModel.class);
+
+        //
+        initRecycleView();
+        setupSwipeDownToRefresh();
+    }
+
+    private void initRecycleView() {
+        // defining Recycler view
+        recyclerView = viewBinding.recyclerViewBookmarksFragment;
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recyclerAdapterArticlesList = new RecyclerAdapterArticlesList(new ArrayList<>(), this, null);
+        recyclerView.setAdapter(recyclerAdapterArticlesList);
+    }
+
+    private void setupSwipeDownToRefresh() {
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            Log.d(TAG, "SCIENCE_BOARD - onRefresh called from SwipeRefreshLayout");
+            refreshAction();
+        });
+    }
+
+    private void refreshAction() {
+        bookmarksViewModel.fetchBookmarks(0);
+    }
+
+    private void openArticle(Article article) {
+        NavGraphDirections.ActionGlobalWebviewFragment action =
+                NavGraphDirections.actionGlobalWebviewFragment(article);
+        Navigation.findNavController(view).navigate(action);
+    }
+
+    private void showCenteredToast(String message) {
+        if(toast!=null) toast.cancel();
+        toast = Toast.makeText(requireContext(),message, Toast.LENGTH_SHORT);
+//        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
+    }
+
+    private void showToast(String message) {
+        if(toast!=null) toast.cancel();
+        toast = Toast.makeText(requireContext(),message, Toast.LENGTH_SHORT);
+        toast.show();
+    }
+
+
+
 
 }// end  BookmarksFragment

@@ -73,8 +73,10 @@
         <!-- switch theme button -->
         <item name="switchThemeSunIconColor">#FFFAB3</item>
 
-
-
+        <!-- BOTTOM BAR -->
+        <item name="bottomBarBackgroundColor">@color/white</item>
+        <item name="bottomBarIconsColor_selected">@color/black</item>
+        <item name="bottomBarIconsColor_unselected">@color/gray_500</item>
 
 
 

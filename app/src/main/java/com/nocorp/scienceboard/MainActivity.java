@@ -11,7 +11,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.TextView;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity
     private ActionBar appBar;
     private Toast toast;
     private AppBarConfiguration appBarConfiguration;
-    private TextView toolbarTextLogo;
+    private ImageView toolbarLogo;
     private Chip chipTimeMachine;
     private View toolbarInnerContainer;
     private FloatingActionButton timeMachineEnabledIndicator;
@@ -190,7 +190,7 @@ public class MainActivity extends AppCompatActivity
         if(appBar!=null) appBar.setDisplayHomeAsUpEnabled(true);
         bottomNavBar = viewBinding.includeMainActivity.bottomNavView;
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-        toolbarTextLogo = viewBinding.textViewMainActivityToolbarLogo;
+        toolbarLogo = viewBinding.imageViewMainActivityToolbarLogo;
         chipTimeMachine = viewBinding.chipMainActivityTimeMachine;
         toolbarInnerContainer = viewBinding.constraintActivityMainActivityToolbarInnerContainer;
         chipTimeMachine.setOnClickListener(v -> showTimeMachineDatePicker());
@@ -367,7 +367,8 @@ public class MainActivity extends AppCompatActivity
                 showCenteredToast("an error occurred when fetching sources from remote DB");
             }
             else {
-                showCenteredToast("sources fetched from remote DB");
+                //TODO
+//                showCenteredToast("sources fetched from remote DB");
             }
         });
 

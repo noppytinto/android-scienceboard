@@ -11,9 +11,9 @@
         <item name="colorOnSecondary">@color/black</item>
         <item name="colorError">@color/red</item>
         <item name="colorOnError">@color/white</item>
-        <item name="colorSurface">@color/gray_1000</item> <!-- (chips background) -->
+        <item name="colorSurface">@color/gray_1100</item> <!-- (chips background) -->
         <item name="colorAccent">@color/orange</item>
-        <item name="android:colorBackground">@color/gray_1000</item> <!-- (background) -->
+        <item name="android:colorBackground">@color/gray_900</item> <!-- (background) -->
         <item name="android:textColorSecondary">@color/white</item> <!-- ("more icon" menu) -->
         <!-- Customize your theme here. -->
 
@@ -72,6 +72,21 @@
         <item name="switchThemeMoonIconColor">#A2D8FF</item>
         <!-- switch theme button -->
         <item name="switchThemeSunIconColor">#7C6100</item>
+
+        <!-- BOTTOM BAR -->
+        <item name="bottomBarBackgroundColor">@color/black</item>
+        <item name="bottomBarIconsColor_selected">@color/white</item>
+        <item name="bottomBarIconsColor_unselected">@color/gray_700</item>
+
+
+
+
+
+
+
+
+
+
 
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>

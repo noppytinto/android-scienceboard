@@ -268,7 +268,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
 
         //
         String sourceName = item.getSourceRealName();
-        if(sourceName != null) readablePubDate = sourceName + " / " + readablePubDate;
+        if(sourceName != null) readablePubDate = sourceName + "  •  " + readablePubDate;
 
         holder.pubDate.setText(readablePubDate);
     }
@@ -363,7 +363,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
 
         //
         String sourceName = item.getSourceRealName();
-        if(sourceName != null) readablePubDate = sourceName + " / " + readablePubDate;
+        if(sourceName != null) readablePubDate = sourceName + "  •  " + readablePubDate;
 
         holder.pubDate.setText(readablePubDate);
     }
@@ -405,7 +405,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
 
         //
         String sourceName = item.getSourceRealName();
-        if(sourceName != null) readablePubDate = sourceName + " / " + readablePubDate;
+        if(sourceName != null) readablePubDate = sourceName + "  •  " + readablePubDate;
 
         holder.pubDate.setText(readablePubDate);
     }

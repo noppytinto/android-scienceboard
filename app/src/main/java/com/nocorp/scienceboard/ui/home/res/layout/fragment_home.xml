@@ -9,7 +9,7 @@
 
     <include
         android:id="@+id/include_mainActivity_oneEmptyMyTopicsList"
-        layout="@layout/layout_empty__my_topics_message_home_fragment"
+        layout="@layout/empty_message_no_topics_followed"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"

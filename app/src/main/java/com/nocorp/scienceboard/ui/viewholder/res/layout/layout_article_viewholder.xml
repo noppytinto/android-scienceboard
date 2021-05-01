@@ -75,7 +75,7 @@
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="@+id/textView_articleViewholder_title"
             app:layout_constraintTop_toBottomOf="@+id/textView_articleViewholder_title"
-            tools:text="Physics / 1h" />
+            tools:text="Physics  •  1h" />
 
         <!-- TODO -->
         <ImageView

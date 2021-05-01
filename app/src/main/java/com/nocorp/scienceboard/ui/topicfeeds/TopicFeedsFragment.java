@@ -80,7 +80,7 @@ public class TopicFeedsFragment extends Fragment implements
     private ImageView toolbarImage;
     private MaterialToolbar toolbar;
     private CollapsingToolbarLayout collapsingToolbar;
-    private FloatingActionButton switchTopicButton;
+    private FloatingActionButton switchTopicFAB;
 
     // recycler
     private RecyclerAdapterArticlesList recyclerAdapterArticlesList;
@@ -206,8 +206,8 @@ public class TopicFeedsFragment extends Fragment implements
         toolbar = viewBinding.toolbarTopicFeedsFragment;
         collapsingToolbar = viewBinding.collapsingToolbarTopicFeedsFragment;
         initToolbar(toolbar);
-        switchTopicButton = viewBinding.floatingActionButtonTopicFeedsFragmentSwitchTopic;
-        switchTopicButton.setOnClickListener(v -> showSwitchTopicDialog());
+        switchTopicFAB = viewBinding.floatingActionButtonTopicFeedsFragmentSwitchTopic;
+        switchTopicFAB.setOnClickListener(v -> showSwitchTopicDialog());
 
         //
         currentDateInMillis = System.currentTimeMillis();

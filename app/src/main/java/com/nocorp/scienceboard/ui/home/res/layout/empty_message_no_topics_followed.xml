@@ -25,6 +25,7 @@
         app:layout_constraintStart_toStartOf="@+id/imageView_layoutEmptyTopics"
         app:layout_constraintTop_toBottomOf="@+id/imageView_layoutEmptyTopics" />
 
+
     <Button
         android:id="@+id/button_layoutEmptyTopics"
         style="@style/ScienceBoard.Button.OutlinedButton.CustomizeMyTopics"
@@ -36,4 +37,5 @@
         app:layout_constraintEnd_toEndOf="@+id/textView_layoutEmptyTopics"
         app:layout_constraintStart_toStartOf="@+id/textView_layoutEmptyTopics"
         app:layout_constraintTop_toBottomOf="@+id/textView_layoutEmptyTopics" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

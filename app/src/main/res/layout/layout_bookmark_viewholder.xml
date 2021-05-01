@@ -70,7 +70,7 @@
             android:textSize="12sp"
             app:layout_constraintStart_toStartOf="@+id/textView_bookmarkViewholder_title"
             app:layout_constraintTop_toBottomOf="@+id/textView_bookmarkViewholder_title"
-            tools:text="Physics / 1h" />
+            tools:text="Physics  •  1h" />
 
         <!-- TODO -->
         <ImageView
