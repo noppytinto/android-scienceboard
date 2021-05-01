@@ -9,6 +9,7 @@
         android:id="@+id/appbar_mainActivity"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
+        android:elevation="20dp"
         >
 
         <androidx.appcompat.widget.Toolbar
@@ -16,7 +17,8 @@
             style="@style/ScienceBoard.Toolbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:contentInsetStart="10dp">
+            app:contentInsetStart="10dp"
+            >
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintActivity_mainActivity_toolbarInnerContainer"

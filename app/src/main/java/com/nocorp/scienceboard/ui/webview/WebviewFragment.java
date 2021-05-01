@@ -240,8 +240,17 @@ public class WebviewFragment extends Fragment implements
 
     @Override
     public void onDetach() {
+        Log.d(TAG, "onDetach: called");
         super.onDetach();
         if(snackbar!=null && snackbar.isShown()) snackbar.dismiss();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        webViewReadmode.stopLoading();
+        webViewBottomSheet.stopLoading();
+        webViewMain.stopLoading();
     }
 
     @Override
@@ -393,6 +402,9 @@ public class WebviewFragment extends Fragment implements
         webView.setScrollbarFadingEnabled(false);
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setDatabaseEnabled(true);
+        // testing
+//        webSettings.setAllowFileAccess(true);
+        webView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
 //        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);// TODO: allow youtube to set a video fullscreen
 
 
