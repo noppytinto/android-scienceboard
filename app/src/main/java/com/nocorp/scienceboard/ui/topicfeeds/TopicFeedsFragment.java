@@ -301,15 +301,15 @@ public class TopicFeedsFragment extends Fragment implements
         List<ListItem> randomizedList = new ArrayList<>(articles);
         Collections.shuffle(randomizedList);
 
-        Article article = (Article) randomizedList.get(0);
-        String thumbnailUrl = article.getThumbnailUrl();
+        Article randomArticle = (Article) randomizedList.get(0);// get the first one
+        String thumbnailUrl = randomArticle.getThumbnailUrl();
 
         try {
             RequestOptions gildeOptions = new RequestOptions()
                     .fallback(R.drawable.placeholder_image)
                     .placeholder(R.drawable.placeholder_image)
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .fitCenter();
+//                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .centerCrop();
 
             Glide.with(requireContext())
                     .load(thumbnailUrl)

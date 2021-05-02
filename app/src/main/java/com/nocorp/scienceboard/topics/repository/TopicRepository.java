@@ -3,6 +3,9 @@ package com.nocorp.scienceboard.topics.repository;
 import android.content.Context;
 import android.util.Log;
 
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.nocorp.scienceboard.topics.model.Topic;
 import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
 import com.nocorp.scienceboard.topics.room.TopicDao;
@@ -15,15 +18,21 @@ import java.util.List;
 
 public class TopicRepository {
     private final String TAG = this.getClass().getSimpleName();
-    private static List<Topic> cachedAllTopics;
+    private static List<Topic> cachedAllTopics_enabled;
+    private static List<Topic> fallbackTopics;
     private static List<Topic> followedTopics;
     private static List<Topic> cachedFollowedTopics;
+    private FirebaseFirestore db;
+    private final String TOPICS_COLLECTION_NAME = "topics";
+    private final String ENABLED = "enabled";
+    private final String DISPLAY_NAME_ENG = "display_name_eng";
 
 
 
     //----------------------------------------------------------------------------------------- CONSTRUCTORS
 
     public TopicRepository() {
+        db = FirebaseFirestore.getInstance();
     }
 
     public static void setFollowedTopics(List<Topic> followedTopics) {
@@ -44,10 +53,8 @@ public class TopicRepository {
      */
     public void init(Context context, OnTopicRepositoryInitilizedListener listener) {
         // (will be relevant only on the first app launch)
-        cachedAllTopics = buildTopics_eventually();
-
-        //
-        saveTopicsInRoom(cachedAllTopics, context, listener);
+        fallbackTopics = buildFallbackTopicsList();
+        getTopicsFromRemoteDb(context, listener);
     }
 
 
@@ -59,6 +66,33 @@ public class TopicRepository {
      */
     public void fetchTopics(Context context, OnTopicsFetchedListener listener) {
         getTopicsFromRoom(context, listener);
+//        getTopicsFromRemoteDb(context, listener);
+    }
+
+    private void getTopicsFromRemoteDb(Context context, OnTopicRepositoryInitilizedListener listener) {
+        cachedAllTopics_enabled = new ArrayList<>();
+        db.collection(TOPICS_COLLECTION_NAME)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            Topic topic = buildTopic(document);
+                            if (topic != null) cachedAllTopics_enabled.add(topic);
+                        }
+
+                        Log.d(TAG, "getTopicsFromRemoteDb: topics fetched from remote db");
+                    }
+                    else {
+                        if(task.getException()!=null) {
+                            Log.w(TAG, "SCIENCE_BOARD - Error getting topics.", task.getException());
+                            listener.onFailed("Error getting topics." + task.getException().getMessage());
+                        }
+                        cachedAllTopics_enabled = fallbackTopics;
+                    }
+
+                    saveTopicsInRoom_async(cachedAllTopics_enabled, context, listener);
+
+                });
     }
 
     /**
@@ -66,14 +100,23 @@ public class TopicRepository {
      * will create topics only if
      * the first time the app is launched,*
      */
-    private List<Topic> buildTopics_eventually() {
+    private List<Topic> buildFallbackTopicsList() {
         List<Topic> result = new ArrayList<>();
         result.add(buildTopic("space", "Space"));
         result.add(buildTopic("tech", "Tech"));
         result.add(buildTopic("physics", "Physics"));
         result.add(buildTopic("medicine", "Medicine"));
         result.add(buildTopic("biology", "Biology"));
-
+        result.add(buildTopic("fakenews", "Fake News"));
+        result.add(buildTopic("economy", "Economy"));
+        result.add(buildTopic("geology", "Geology"));
+        result.add(buildTopic("gossip", "Gossip"));
+        result.add(buildTopic("health", "Health"));
+        result.add(buildTopic("medicine", "Medicine"));
+        result.add(buildTopic("music", "Music"));
+        result.add(buildTopic("news", "News"));
+        result.add(buildTopic("politics", "Politics"));
+        result.add(buildTopic("sport", "Sport"));
         return result;
     }
 
@@ -83,17 +126,43 @@ public class TopicRepository {
         return new Topic(id, name);
     }
 
-    private void saveTopicsInRoom(@NotNull List<Topic> topics, Context context, OnTopicRepositoryInitilizedListener listener) {
+
+    private Topic buildTopic(DocumentSnapshot document) {
+        Topic topic = null;
+        if(document==null) return topic;
+
+        try {
+            topic = new Topic();
+            topic.setId((String) document.getId());
+            topic.setDisplayName((String) document.get(DISPLAY_NAME_ENG));
+            Boolean enabled = (Boolean) document.get(ENABLED);
+            if(enabled!=null) topic.setEnabled(enabled);
+        } catch (Exception e) {
+            Log.e(TAG, "buildTopic: ", e);
+            topic = null;
+        }
+
+        return topic;
+    }
+
+
+    private void saveTopicsInRoom_async(@NotNull List<Topic> topics, Context context, OnTopicRepositoryInitilizedListener listener) {
+        if(topics==null) return;
         Runnable task = () -> {
             try {
-                // NOTE: if a topic extist, will be ignored
+                // NOTE: if a topic extist, will be ignored...
                 TopicDao dao = getTopicDao(context);
                 dao.insertAll(topics);
+                // ...but update enabled status
+                for(Topic current: topics) {
+                    dao.updateEnabledStatus(current.getEnabled(), current.getId());
+                }
+
                 listener.onComplete();
             } catch (Exception e) {
                 Log.e(TAG, "SCIENCE_BOARD - saveTopicsInRoom: cannot save in Room, cause:" + e.getMessage());
                 // always try getting topics from room in case of insertAll fail
-                listener.onFailded("cannot save in Room, cause: " + e.getMessage());
+                listener.onFailed("cannot save in Room, cause: " + e.getMessage());
             }
 
         };
@@ -103,7 +172,7 @@ public class TopicRepository {
             t.runTask(task);
         } catch (Exception e) {
             Log.e(TAG, "SCIENCE_BOARD - saveTopicsInRoom: cannot start thread " + e.getMessage());
-            listener.onFailded("cannot save in Room, cause: " + e.getMessage());
+            listener.onFailed("cannot save in Room, cause: " + e.getMessage());
         }
     }
 
@@ -119,11 +188,11 @@ public class TopicRepository {
             try {
                 // NOTE: if a topic extist, will be ignored
                 TopicDao dao = getTopicDao(context);
-                cachedAllTopics = dao.selectAll();
-                listener.onComplete(cachedAllTopics);
+                cachedAllTopics_enabled = dao.selectAll();
+                listener.onComplete(cachedAllTopics_enabled);
             } catch (Exception e) {
                 Log.e(TAG, "SCIENCE_BOARD - getTopicsFromRoom: cannot get topics from Room, cause:" + e.getMessage());
-                listener.onFailed(e.getMessage(), cachedAllTopics);
+                listener.onFailed(e.getMessage(), cachedAllTopics_enabled);
             }
         };
 
@@ -132,7 +201,7 @@ public class TopicRepository {
             t.runTask(task);
         } catch (Exception e) {
             Log.e(TAG, "SCIENCE_BOARD - getTopicsFromRoom: cannot start thread " + e.getMessage());
-            listener.onFailed(e.getMessage(), cachedAllTopics);
+            listener.onFailed(e.getMessage(), cachedAllTopics_enabled);
         }
     }
 
@@ -141,8 +210,8 @@ public class TopicRepository {
         return roomDatabase.getTopicDao();
     }
 
-    public static List<Topic> getCachedAllTopics() {
-        return cachedAllTopics;
+    public static List<Topic> getCachedAllTopics_enabled() {
+        return cachedAllTopics_enabled;
     }
 
     public void updateAll(List<Topic> topicsToUpdate, Context context, OnTopicRepositoryUpdatedListener listener) {
@@ -153,10 +222,10 @@ public class TopicRepository {
                 dao.updateAll(topicsToUpdate);
 
                 // update cached topics
-                cachedAllTopics = dao.selectAll();
+                cachedAllTopics_enabled = dao.selectAll();
 
                 //
-                listener.onComplete(cachedAllTopics);
+                listener.onComplete(cachedAllTopics_enabled);
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.e(TAG, "SCIENCE_BOARD - follow: cannot update topics in Room, cause:" + e.getMessage());

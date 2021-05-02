@@ -161,7 +161,7 @@ public class HomeFragment extends Fragment implements
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if(item.getItemId() == R.id.option_homeFragment_changeTheme) {
-            switchTheme(switchThemeMenuItem);
+            switchTheme();
             return true;
         }
         return false;
@@ -217,7 +217,7 @@ public class HomeFragment extends Fragment implements
                         false,
                         startingDate);
 
-                myFollowedTopics = extractFollowedTopics(TopicRepository.getCachedAllTopics());
+                myFollowedTopics = extractFollowedTopics(TopicRepository.getCachedAllTopics_enabled());
                 TopicRepository.setFollowedTopics(myFollowedTopics);
                 if(myFollowedTopics==null || myFollowedTopics.isEmpty()) {
                     includeEmptyTopicsMessage.setVisibility(View.VISIBLE);
@@ -585,7 +585,7 @@ public class HomeFragment extends Fragment implements
     private void refreshArticlesAndTopics() {
         long startingDate = currentDateInMillis;
 
-        myFollowedTopics = extractFollowedTopics(TopicRepository.getCachedAllTopics());
+        myFollowedTopics = extractFollowedTopics(TopicRepository.getCachedAllTopics_enabled());
         TopicRepository.setFollowedTopics(myFollowedTopics);
 
         if(myFollowedTopics==null || myFollowedTopics.isEmpty()) {
@@ -653,27 +653,13 @@ public class HomeFragment extends Fragment implements
                 .navigate(R.id.action_homeFragment_to_topicsFragment);
     }
 
-    private void switchTheme(MenuItem swithcThemeMenuItem) {
+    private void switchTheme() {
         Log.d(TAG, "enableDarkMode: clicked");
         if(darkModeEnabled) {
             disableDarkMode();
-            changeMenuItemIcon(swithcThemeMenuItem, R.drawable.ic_sun);
-            // writing preference
-            SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putBoolean(getString(R.string.preference_app_theme_key), false);
-            editor.apply();
         }
         else {
-            darkModeEnabled = true;
-            changeMenuItemIcon(swithcThemeMenuItem, R.drawable.ic_moon);
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-
-            // writing preference
-            SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putBoolean(getString(R.string.preference_app_theme_key), true);
-            editor.apply();
+            enableDarkMode();
         }
     }
 
@@ -682,15 +668,46 @@ public class HomeFragment extends Fragment implements
 
         try {
             menuItem.setIcon(resourceId);
-            Log.d(TAG, "changeMenuItemIcon: changed");
+            Log.d(TAG, "SCIENCE_BOARD - changeMenuItemIcon: changed");
         } catch (Exception e) {
             Log.e(TAG, "SCIENCE_BOARD - changeMenuItemICon: cannot change icon, cause:" + e.getMessage() );
+        }
+    }
+
+    private void changeMenuItemTitle(MenuItem menuItem, String value) {
+        if(menuItem==null) return;
+
+        try {
+            menuItem.setTitle(value);
+            Log.d(TAG, "SCIENCE_BOARD - changeMenuItemTitle: changed");
+        } catch (Exception e) {
+            Log.e(TAG, "SCIENCE_BOARD - changeMenuItemTitle: cannot change icon, cause:" + e.getMessage() );
         }
     }
 
     private void disableDarkMode() {
         darkModeEnabled = false;
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        changeMenuItemIcon(switchThemeMenuItem, R.drawable.ic_sun);
+        changeMenuItemTitle(switchThemeMenuItem, "Disable Dark Mode");
+        // writing preference
+        SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putBoolean(getString(R.string.preference_app_theme_key), false);
+        editor.apply();
+    }
+
+    private void enableDarkMode() {
+        darkModeEnabled = true;
+        changeMenuItemIcon(switchThemeMenuItem, R.drawable.ic_moon);
+        changeMenuItemTitle(switchThemeMenuItem, "Enable Dark Mode");
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+
+        // writing preference
+        SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putBoolean(getString(R.string.preference_app_theme_key), true);
+        editor.apply();
     }
 
     private void checkDarkMode() {
@@ -700,9 +717,11 @@ public class HomeFragment extends Fragment implements
 
         if(darkModeEnabled) {
             changeMenuItemIcon(switchThemeMenuItem, R.drawable.ic_sun);
+            changeMenuItemTitle(switchThemeMenuItem, "Disable Dark Mode");
         }
         else {
             changeMenuItemIcon(switchThemeMenuItem, R.drawable.ic_moon);
+            changeMenuItemTitle(switchThemeMenuItem, "Enable Dark Mode");
         }
     }
 
@@ -719,7 +738,7 @@ public class HomeFragment extends Fragment implements
         result = new ArrayList<>();
 
         for (Topic topic: topics) {
-            if(topic.getFollowed() == true) {
+            if(topic.getFollowed() == true && topic.getEnabled()) {
                 result.add(topic);
             }
         }

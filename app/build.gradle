@@ -90,10 +90,12 @@ dependencies {
     implementation 'com.google.firebase:firebase-perf'
     // Declare the dependency for the Cloud Firestore library
     implementation 'com.google.firebase:firebase-firestore'
+    // remote config
+    implementation 'com.google.firebase:firebase-config'
 
 
     // GOOGLE ADMOB INTEGRATION
-    implementation 'com.google.android.gms:play-services-ads:20.0.0'
+    implementation 'com.google.android.gms:play-services-ads:20.1.0'
     // for eu consent
     implementation 'com.google.android.ump:user-messaging-platform:1.0.0'
 
@@ -116,9 +118,9 @@ dependencies {
 
 
     // Preferences DataStore (SharedPreferences like APIs)
-    implementation "androidx.datastore:datastore-preferences:1.0.0-alpha08"
+    implementation "androidx.datastore:datastore-preferences:1.0.0-beta01"
     // optional - RxJava3 support
-    implementation "androidx.datastore:datastore-preferences-rxjava3:1.0.0-alpha08"
+    implementation "androidx.datastore:datastore-preferences-rxjava3:1.0.0-beta01"
 
 
     // new fragment api

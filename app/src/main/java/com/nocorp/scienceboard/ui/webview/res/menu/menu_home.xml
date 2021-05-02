@@ -11,7 +11,13 @@
     <item
         android:id="@+id/option_homeFragment_changeTheme"
         android:icon="@drawable/ic_moon"
-        android:title="Dark Mode"
-        app:showAsAction="always" />
+        android:title="Enable Dark Mode"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/option_homeFragment_about"
+        android:icon="@drawable/ic_info"
+        android:title="About"
+        app:showAsAction="never" />
 
 </menu>

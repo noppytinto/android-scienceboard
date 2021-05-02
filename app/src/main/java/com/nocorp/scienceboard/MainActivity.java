@@ -347,7 +347,7 @@ public class MainActivity extends AppCompatActivity
             }
 
             @Override
-            public void onFailded(String message) {
+            public void onFailed(String message) {
                 // use cached topics
                 fetchTopics();
                 Log.e(TAG, "SCIENCE_BOARD - loadTopics: " + message);

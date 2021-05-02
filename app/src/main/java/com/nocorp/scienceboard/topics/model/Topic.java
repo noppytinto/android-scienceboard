@@ -17,8 +17,11 @@ public class Topic extends ListItem implements Serializable {
     @NonNull
     private String id;
 
-    @ColumnInfo(defaultValue = "true")
+    @ColumnInfo(defaultValue = "false")
     private boolean followed;
+
+    @ColumnInfo(defaultValue = "false")
+    private boolean enabled;
 
     @ColumnInfo(name = "display_name")
     private String displayName;
@@ -98,5 +101,13 @@ public class Topic extends ListItem implements Serializable {
 
     public void setThumbnailUrl(String thumbnailUrl) {
         this.thumbnailUrl = thumbnailUrl;
+    }
+
+    public boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }// end Topic

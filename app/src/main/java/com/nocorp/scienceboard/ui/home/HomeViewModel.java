@@ -116,7 +116,7 @@ public class HomeViewModel extends AndroidViewModel implements
                 cachedArticles = new ArrayList<>();
                 taskIsRunning = true;
                 // pick sources for ALL tab, only once
-                pickedSources = sourceRepository.getAsourceForEachFollowedCategory_randomly(givenSources, TopicRepository.getCachedAllTopics());
+                pickedSources = sourceRepository.getAsourceForEachFollowedCategory_randomly(givenSources, TopicRepository.getCachedAllTopics_enabled());
                 articleRepository.getArticles_backInTime(
                         pickedSources,
                         numArticlesForEachSource,

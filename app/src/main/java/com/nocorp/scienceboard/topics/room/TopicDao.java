@@ -12,14 +12,13 @@ import java.util.List;
 
 @Dao
 public interface TopicDao {
-    @Query("SELECT * FROM topic")
+    @Query("SELECT * FROM topic WHERE enabled = 1")
     List<Topic> selectAll();
 
-    @Query("SELECT * FROM topic WHERE followed = 1 ")
+    @Query("SELECT * FROM topic WHERE followed = 1  AND enabled = 1")
     List<Topic> selectFollowedTopics();
 
-
-    @Query("SELECT * FROM topic WHERE id = :givenValue")
+    @Query("SELECT * FROM topic WHERE id = :givenValue AND enabled = 1")
     List<Topic> selectById(String givenValue);
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
@@ -38,4 +37,9 @@ public interface TopicDao {
             "SET followed = :value " +
             "WHERE id = :topicName")
     int updateFollowStatus(boolean value, String topicName);
+
+    @Query("UPDATE Topic " +
+            "SET enabled = :value " +
+            "WHERE id = :topicName")
+    int updateEnabledStatus(boolean value, String topicName);
 }
