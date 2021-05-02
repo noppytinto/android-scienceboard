@@ -25,7 +25,6 @@ import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentCustomizeTopicsBinding;
 import com.nocorp.scienceboard.topics.model.Topic;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterCustomizeTopics;
-import com.yandex.metrica.impl.ob.To;
 
 import java.util.ArrayList;
 import java.util.List;

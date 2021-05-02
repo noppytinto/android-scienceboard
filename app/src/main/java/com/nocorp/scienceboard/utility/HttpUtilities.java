@@ -52,16 +52,16 @@ public class HttpUtilities {
         return result;
     }
 
-    public static String inputStreamToString(InputStream inputStream) {
-        String result = null;
-        if(inputStream==null) return result;
-        try {
-            result = org.apache.commons.io.IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
+//    public static String inputStreamToString(InputStream inputStream) {
+//        String result = null;
+//        if(inputStream==null) return result;
+//        try {
+//            result = org.apache.commons.io.IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return result;
+//    }
 
 
 
