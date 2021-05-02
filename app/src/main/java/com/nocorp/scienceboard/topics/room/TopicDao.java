@@ -12,7 +12,7 @@ import java.util.List;
 
 @Dao
 public interface TopicDao {
-    @Query("SELECT * FROM topic WHERE enabled = 1")
+    @Query("SELECT * FROM topic WHERE enabled = 1 ORDER BY id")
     List<Topic> selectAll();
 
     @Query("SELECT * FROM topic WHERE followed = 1  AND enabled = 1")
