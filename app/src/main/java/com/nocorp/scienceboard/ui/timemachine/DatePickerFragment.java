@@ -74,6 +74,8 @@ public class DatePickerFragment extends DialogFragment
 
     private void setupDatePickerDialog(DatePickerDialog dialog) {
         dialog.getDatePicker().setMaxDate(System.currentTimeMillis());
+        dialog.getDatePicker().setMinDate(1618869600000L); // 15 April 2021
+
 //        dialog.setTitle(getString(R.string.date_picker_label));
     }
 
