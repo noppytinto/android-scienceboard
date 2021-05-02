@@ -23,7 +23,9 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
+import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -164,7 +166,15 @@ public class HomeFragment extends Fragment implements
             switchTheme();
             return true;
         }
+        else if(item.getItemId() == R.id.option_homeFragment_about) {
+            showAboutFragment();
+            return true;
+        }
         return false;
+    }
+
+    private void showAboutFragment() {
+        Navigation.findNavController(view).navigate(R.id.action_homeFragment_to_aboutFragment);
     }
 
     @Override
