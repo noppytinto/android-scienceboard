@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -59,7 +60,8 @@ public class MainActivity extends AppCompatActivity
     private ActionBar appBar;
     private Toast toast;
     private AppBarConfiguration appBarConfiguration;
-    private ImageView toolbarLogo;
+//    private ImageView toolbarLogo;
+    private TextView toolbarLogo;
     private Chip chipTimeMachine;
     private View toolbarInnerContainer;
     private FloatingActionButton timeMachineEnabledIndicator;
@@ -72,8 +74,8 @@ public class MainActivity extends AppCompatActivity
     private TimeMachineViewModel timeMachineViewModel;
 
     //
-    private final int DATE_PICKER_DEFAULT_CHIP_STROKE_WIDTH = 0;
-    private final int DATE_PICKER_SET_CHIP_STROKE_WIDTH = 7;
+    private final int DATE_PICKER_DEFAULT_CHIP_STROKE_WIDTH = 3;
+    private final int DATE_PICKER_SET_CHIP_STROKE_WIDTH = 4;
     private long datePicked;
     private int MONTH_OFFSET_CORRECTION = 1;
     private final int NUM_ADS_TO_LOAD = 5;
@@ -322,9 +324,12 @@ public class MainActivity extends AppCompatActivity
         Log.d(TAG, "removeTimeMachineModeLayout: called");
         datePicked = System.currentTimeMillis();
         chipTimeMachine.setText(R.string.today_label_date_picker);
-        chipTimeMachine.setChipStrokeWidth(DATE_PICKER_DEFAULT_CHIP_STROKE_WIDTH);
+
         chipTimeMachine.setCloseIconVisible(false);
+        chipTimeMachine.setChipStrokeWidth(DATE_PICKER_DEFAULT_CHIP_STROKE_WIDTH);
         chipTimeMachine.setOnCloseIconClickListener(null);
+        chipTimeMachine.setChipStrokeColor(ColorStateList.valueOf(getResources().getColor(R.color.gray_500)));
+
         stopBlinkingView(timeMachineEnabledIndicator);
     }
 
