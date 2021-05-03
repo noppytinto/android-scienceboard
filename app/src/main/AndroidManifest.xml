@@ -27,7 +27,7 @@
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-5571913923339240~6853624675"/>
+            android:value="${BABAD}"/>
 
         <meta-data
             android:name="firebase_performance_logcat_enabled"

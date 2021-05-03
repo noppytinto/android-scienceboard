@@ -218,7 +218,12 @@ public class HomeFragment extends Fragment implements
 
                 Log.d(TAG, "onChanged: using sources");
                 if (timeMachineViewModel.timeMachineIsEnabled()) {
-                    startingDate = timeMachineViewModel.getPickedDate();
+                    try {
+                        startingDate = timeMachineViewModel.getPickedDate();
+                    } catch (Exception e) {
+                        Log.e(TAG, "observeSourcesFetched: ", e);
+                        startingDate = currentDateInMillis;
+                    }
                 }
 
                 homeViewModel.fetchArticles(

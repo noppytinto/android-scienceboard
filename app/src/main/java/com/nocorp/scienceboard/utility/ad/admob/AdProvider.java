@@ -8,10 +8,9 @@ import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.google.android.gms.ads.nativead.NativeAdOptions;
+import com.nocorp.scienceboard.BuildConfig;
 import com.nocorp.scienceboard.utility.ad.admob.model.ListAd;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 
@@ -22,7 +21,7 @@ public class AdProvider {
     private final String TAG = this.getClass().getSimpleName();
     private static AdProvider singletonInstance;
     private static boolean adMobInitialized;
-    private final String AD_UNIT_ID = "ca-app-pub-3940256099942544/2247696110"; // TODO: this is a test id, change on production
+//    private String abc = "ca-app-pub-3940256099942544/2247696110"; // TODO: this is a test id, change on production
 
     private List<NativeAd> nativeAds;
     private OnNativeAdsloadedListener listener;
@@ -124,7 +123,7 @@ public class AdProvider {
 
         nativeAds = new ArrayList<>();
 
-        adLoader = new AdLoader.Builder(context, AD_UNIT_ID) // TODO: this is a test id, change on production
+        adLoader = new AdLoader.Builder(context, BuildConfig.BABAD_T) // TODO: this is a test id, change on production
                 .forNativeAd(ad -> {
                     // Show the ad.
                     if (viewDestroyed) {

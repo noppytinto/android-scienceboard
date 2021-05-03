@@ -5,6 +5,7 @@ plugins {
     id 'com.google.gms.google-services'
     id 'com.google.firebase.crashlytics'
     id 'com.google.firebase.firebase-perf'
+    id 'com.google.secrets_gradle_plugin' version "0.6"
 
 }
 //apply plugin: "androidx.navigation.safeargs"
@@ -26,13 +27,13 @@ android {
     }
 
     buildTypes {
-//        debug {
-//            minifyEnabled true
-//            shrinkResources true
-//            proguardFiles getDefaultProguardFile(
-//                    'proguard-android-optimize.txt'),
-//                    'proguard-rules.pro'
-//        }
+        debug {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile(
+                    'proguard-android-optimize.txt'),
+                    'proguard-rules.pro'
+        }
         release {
             minifyEnabled true
             shrinkResources true
@@ -68,6 +69,13 @@ android {
                 'src/main/java/com/nocorp/scienceboard/ui/bookmarks/res',
                 'src/main/java/com/nocorp/scienceboard/ui/ad/res'
         ]
+    }
+
+
+    secrets {
+        // Change the properties file from the default "local.properties" in your root project
+        // to another properties file in your root project.
+        propertiesFileName 'baba.properties'
     }
 }
 

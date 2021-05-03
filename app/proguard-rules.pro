@@ -81,11 +81,21 @@
 
 
 
+
+# ---------------- ADMOB MEDIATION
+#-keep public class com.google.android.gms.** {
+# public *;
+#}
+#-keep public class com.google.ads.** {
+# public *;
+#}
+
+
+
 # ---------------- MINE
 
 # This rule will properly ProGuard all the model classes in
 # the package com.yourcompany.models. Modify to fit the structure
 # of your app.
--keepclassmembers class com.nocorp.scienceboard.model.** {
-  *;
-}
+-keep class com.nocorp.scienceboard.model.Article {*;}
+-keep class com.nocorp.scienceboard.topics.model.Topic {*;}
