@@ -29,6 +29,7 @@ public class TopicRepository {
     private final String TOPICS_COLLECTION_NAME = "topics";
     private final String ENABLED = "enabled";
     private final String DISPLAY_NAME_ENG = "display_name_eng";
+    private final int FETCH_INTERVAL = 1; // in days
 
 
 
@@ -62,7 +63,7 @@ public class TopicRepository {
         // then use cached sources from local variable or Room
         long lastFetchDate = getFromSharedPref(context.getString(R.string.pref_last_topics_fetch_date), context);
         Log.d(TAG, "init topics list: lastFetchDate: " + lastFetchDate);
-        if(MyUtilities.isWithin_seconds(60, lastFetchDate)) {
+        if(MyUtilities.isWithin_days(FETCH_INTERVAL, lastFetchDate)) {
             fetchLocally_strategy(context, listener);
         }
         //

@@ -46,6 +46,7 @@ public class HomeViewModel extends AndroidViewModel implements
     private HistoryRepository historyRepository;
     private BookmarksRepository bookmarksRepository;
     private GeneralRepository generalRepository;
+    private final int FETCH_INTERVAL = 15; // in minutes
 
 
 
@@ -100,11 +101,11 @@ public class HomeViewModel extends AndroidViewModel implements
                               long startingDateInMillis) {
         Log.d(TAG, "fetchArticles: called, forced:" + forced);
 
-        // if the request is within 1 our
+        // if the request is within 15 mins
         // then use cached sources from local variable or Room
         Log.d(TAG, "SCIENCE_BOARD - fetchArticles: lastArticlesFetchDate: " + lastFetchDate);
-        if(MyUtilities.isWithin_seconds(30, lastFetchDate)) {
-            Log.d(TAG, "SCIENCE_BOARD - fetchArticles: fetching from cache (within 30 mins)");
+        if(MyUtilities.isWithin_minutes(FETCH_INTERVAL, lastFetchDate)) {
+            Log.d(TAG, "SCIENCE_BOARD - fetchArticles: fetching from cache (within 15 mins)");
             tryCachedArticles(givenSources,
                     numArticlesForEachSource,
                     startingDateInMillis);

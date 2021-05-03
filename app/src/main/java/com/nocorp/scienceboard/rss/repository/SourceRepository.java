@@ -35,6 +35,7 @@ public class SourceRepository {
     private FirebaseFirestore db;
     private static boolean firestoreFetchCompleted;
     private static boolean taskIsRunning;
+    private final int FETCH_INTERVAL = 1; // in days
 
 
 
@@ -63,7 +64,7 @@ public class SourceRepository {
             // then use cached sources from local variable or Room
             long lastFetchDate = getFromSharedPref(context.getString(R.string.pref_last_sources_fetch_date), context);
             Log.d(TAG, "loadSources: lastFetchDate: " + lastFetchDate);
-            if(MyUtilities.isWithin_seconds(60, lastFetchDate)) {
+            if(MyUtilities.isWithin_days(FETCH_INTERVAL, lastFetchDate)) {
                 fetchLocally_strategy(context, listener);
             }
             //
