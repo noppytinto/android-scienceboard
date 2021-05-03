@@ -21,6 +21,9 @@ public interface ArticleDao {
     @Query("SELECT * FROM article WHERE id = :givenValue")
     List<Article> selectById(String givenValue);
 
+    @Query("SELECT * FROM article WHERE source_id = :givenSourceId")
+    List<Article> selectBySourceId(String givenSourceId);
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertAll(List<Article> articles);
 

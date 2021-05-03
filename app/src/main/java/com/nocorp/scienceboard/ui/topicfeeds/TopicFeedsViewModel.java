@@ -136,7 +136,7 @@ public class TopicFeedsViewModel extends AndroidViewModel implements
                 if(pickedSources == null || pickedSources.isEmpty()) {
                     pickedSources = sourceRepository.getAllSourcesOfThisCategory(givenSources, topicId);
                 }
-                articleRepository.getArticles_backInTime(
+                articleRepository.fetchArticles(
                         pickedSources,
                         numArticlesForEachSource,
                         getApplication(),
@@ -195,7 +195,7 @@ public class TopicFeedsViewModel extends AndroidViewModel implements
             Runnable task = () -> {
 //                sleepforNseconds(1);
                 Log.d(TAG, "SCIENCE_BOARD - fetchNextArticles: fetching new articles");
-                articleRepository.getNextArticles(oldestArticlesSnapshots, numArticlesForEachSource, getApplication());
+                articleRepository.fetchNextArticles(oldestArticlesSnapshots, numArticlesForEachSource, getApplication());
             };
 
             ThreadManager threadManager = ThreadManager.getInstance();

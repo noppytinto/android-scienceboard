@@ -13,6 +13,7 @@ import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.rss.room.ArticleDao;
 import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
+import com.nocorp.scienceboard.utility.MyUtilities;
 
 import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
@@ -35,12 +36,14 @@ public class ArticleRepository {
     private int sourcesConsumed;
     private int sourcesToConsume;
     private List<DocumentSnapshot> oldestArticlesSnapshots;
+    private SourceRepository sourceRepository;
 
 
     //--------------------------------------------------------------------------- CONSTRUCTORS
 
     public ArticleRepository(ArticlesRepositoryListener listener) {
         this.listener = listener;
+        sourceRepository = new SourceRepository();
         db = FirebaseFirestore.getInstance();
     }
 
@@ -62,9 +65,9 @@ public class ArticleRepository {
 //        downloadArticlesFromServer(givenSources, numArticlesForEachSource, context);
 //    }
 
-    public void getArticles_backInTime(List<Source> givenSources,
-                            int numArticlesForEachSource,
-                            Context context, long startingDate) {
+    public void fetchArticles(List<Source> givenSources,
+                              int numArticlesForEachSource,
+                              Context context, long startingDate) {
         //TODO: givenSources==null should be returned only in case of errors
         if(givenSources==null || givenSources.isEmpty()) {
             listener.onArticlesFetchCompleted(new ArrayList<>(), new ArrayList<>());
@@ -72,12 +75,12 @@ public class ArticleRepository {
         }
 
         // server strategy
-        downloadArticlesFromServer_backInTime(givenSources, numArticlesForEachSource, context, startingDate);
+        downloadArticlesFromServer(givenSources, numArticlesForEachSource, context, startingDate);
     }
 
-    public void getNextArticles(List<DocumentSnapshot> oldestArticles,
-                                int numArticlesForEachSource,
-                                Context context) {
+    public void fetchNextArticles(List<DocumentSnapshot> oldestArticles,
+                                  int numArticlesForEachSource,
+                                  Context context) {
 
         if(oldestArticles==null || oldestArticles.isEmpty()) {
             listener.onNextArticlesFetchFailed("no more articles");
@@ -120,9 +123,10 @@ public class ArticleRepository {
 //        }
 //    }
 
-    private void downloadArticlesFromServer_backInTime(List<Source> givenSources,
+    private void downloadArticlesFromServer(List<Source> givenSources,
                                             int numArticlesForEachSource,
-                                            Context context, long startingDate) {
+                                            Context context,
+                                            long startingDate) {
         // download source articles
         fetchedArticles = new ArrayList<>();
         oldestArticlesSnapshots = new ArrayList<>();
@@ -132,7 +136,7 @@ public class ArticleRepository {
 
         //
         for(Source currentSource: givenSources) {
-            downloadArticlesFromServer_companion_backInTime(currentSource.getId(), numArticlesForEachSource, context, startingDate);
+            downloadNewArticlesFromServer_companion(currentSource.getId(), numArticlesForEachSource, context, startingDate);
         }
 
         //
@@ -140,6 +144,29 @@ public class ArticleRepository {
             Log.d(TAG, "SCIENCE_BOARD - all articles fetched");
             listener.onArticlesFetchCompleted(fetchedArticles, oldestArticlesSnapshots);
         }
+    }
+
+    private void fetchLocally_strategy(Source source, Context context) {
+        List<Article> fetchedArticles = null;
+        fetchedArticles = getArticlesByIdFromRoom(source, context);
+
+    }
+
+    private List<Article> getArticlesByIdFromRoom(Source source, Context context) {
+        List<Article> result = null;
+
+        try {
+            ArticleDao articleDao = getArticleDao(context);
+            result = articleDao.selectBySourceId(source.getId());
+
+            // getting oldest document
+            // note: now i points to the real(starting from 1) last element position
+//            extractOldestArticle(documentSnapshots, i);
+        } catch (Exception e) {
+            Log.e(TAG, "SCIENCE_BOARD - fetchLocally_strategy: cannot fetch articles from room, cause:" + e.getMessage());
+        }
+
+        return result;
     }
 
 
@@ -193,9 +220,9 @@ public class ArticleRepository {
 //    }
 
     // get the latest <limit> articles
-    private void downloadArticlesFromServer_companion_backInTime(String sourceName,
-                                                      int limit,
-                                                      Context context, long startingDate) {
+    private void downloadNewArticlesFromServer_companion(String sourceName,
+                                                         int limit,
+                                                         Context context, long startingDate) {
         List<Article> result = new ArrayList<>();
         db.collection(ARTICLES_COLLECTION_NAME)
                 .whereEqualTo(SOURCE_ID, (String)sourceName)
@@ -218,7 +245,8 @@ public class ArticleRepository {
                                 }
                             }
                             // getting oldest document
-                            extractOldestArticles(documentSnapshots, i);
+                            // note: now i points to the real(starting from 1) last element position
+                            extractOldestArticle(documentSnapshots, i);
                         }
 
                         //
@@ -255,7 +283,6 @@ public class ArticleRepository {
             downloadNextArticlesFromServer_companion(currentDocument, numArticlesForEachSource, context);
         }
         if(sourcesConsumed >= sourcesToConsume) {
-//            releaseThread.close();
             Log.d(TAG, "SCIENCE_BOARD - all articles fetched");
             listener.onNextArticlesFetchCompleted(fetchedArticles, oldestArticlesSnapshots);
         }
@@ -288,7 +315,7 @@ public class ArticleRepository {
                                 }
                             }
                             // getting oldest document
-                            extractOldestArticles(documentSnapshots, i);
+                            extractOldestArticle(documentSnapshots, i);
                         }
 
                         //
@@ -338,7 +365,7 @@ public class ArticleRepository {
         }
         else {
             fetchedArticles.addAll(articles);
-            saveArticlesInRoom(articles, context);
+            saveArticlesInRoom_async(articles, context);
             sourcesConsumed++;
         }
 
@@ -348,15 +375,20 @@ public class ArticleRepository {
         }
     }
 
-    private void extractOldestArticles(List<DocumentSnapshot> documentSnapshots, int i) {
-        oldestArticlesSnapshots.add(documentSnapshots.get(i-1));
+    private void extractOldestArticle(List<DocumentSnapshot> documentSnapshots, int lastRealElementPosition) {
+        oldestArticlesSnapshots.add(documentSnapshots.get(lastRealElementPosition-1));
     }
 
-    private void saveArticlesInRoom(@NotNull List<Article> articles, Context context) {
-        ArticleDao articleDao = getArticleDao(context);
+//    private void extractOldestArticle(List<Article> givenArticles) {
+//        oldestArticlesSnapshots.add(documentSnapshots.get(lastRealElementPosition-1));
+//
+//
+//    }
 
+    private void saveArticlesInRoom_async(@NotNull List<Article> articles, Context context) {
         Runnable task = () -> {
             try {
+                ArticleDao articleDao = getArticleDao(context);
                 articleDao.insertAll(articles);
             } catch (Exception e) {
                 e.printStackTrace();

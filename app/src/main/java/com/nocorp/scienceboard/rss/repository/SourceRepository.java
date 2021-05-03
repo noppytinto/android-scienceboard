@@ -17,7 +17,6 @@ import com.nocorp.scienceboard.utility.MyUtilities;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,13 +30,10 @@ public class SourceRepository {
     private final String LANGUAGE = "language";
     private final String CATEGORY = "categories";
     private final String ENABLED = "enabled";
-
     private static List<Source> cachedSources;
-    private List<String> sourceUrls;
     private SourceRepositoryListener listener;
     private FirebaseFirestore db;
     private static boolean firestoreFetchCompleted;
-    private final List<String> mainCategories = Arrays.asList("space", "physics", "tech", "medicine", "biology");
     private static boolean taskIsRunning;
 
 
@@ -96,7 +92,7 @@ public class SourceRepository {
     }
 
     private void loadSourcesFromRoom(Context context, OnSourcesFetchedListener listener) {
-        getSourcesFromRoom_sync(context, listener);
+        getSourcesFromRoom_async(context, listener);
     }
 
     private void storeFetchDate(Context context) {
@@ -186,7 +182,7 @@ public class SourceRepository {
         }
     }
 
-    private void getSourcesFromRoom_sync(Context context, OnSourcesFetchedListener listener) {
+    private void getSourcesFromRoom_async(Context context, OnSourcesFetchedListener listener) {
         Runnable task = () -> {
             try {
                 List<Source> result = null;
@@ -309,4 +305,15 @@ public class SourceRepository {
     }
 
 
+    public long getLastArticlesFetchDate_sync(String givenSourceId, Context context) {
+        long result = 0;
+        try {
+            SourceDao sourceDao = getSourceDao(context);
+            result = sourceDao.selectLastArticlesFetchDate(givenSourceId);
+        } catch (Exception e) {
+            Log.e(TAG, "SCIENCE_BOARD - getLastArticlesFetchDate_sync: cannot get sources last articles fetch date from Room, cause:" + e.getMessage());
+        }
+
+        return result;
+    }
 }// end SourceRepository

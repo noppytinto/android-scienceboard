@@ -20,6 +20,9 @@ public interface SourceDao {
     @Query("SELECT * FROM source WHERE id = :givenValue")
     List<Source> selectByName(String givenValue);
 
+    @Query("SELECT last_articles_fetch_date FROM source WHERE id = :givenId")
+    long selectLastArticlesFetchDate(String givenId);
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertAll(List<Source> sources);
 

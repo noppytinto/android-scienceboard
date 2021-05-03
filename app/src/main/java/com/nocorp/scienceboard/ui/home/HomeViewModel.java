@@ -1,6 +1,8 @@
 package com.nocorp.scienceboard.ui.home;
 
 import android.app.Application;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import androidx.lifecycle.AndroidViewModel;
@@ -8,6 +10,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.bookmarks.repository.BookmarksRepository;
 import com.nocorp.scienceboard.bookmarks.repository.OnBookmarksCheckedListener;
 import com.nocorp.scienceboard.history.repository.HistoryRepository;
@@ -20,6 +23,7 @@ import com.nocorp.scienceboard.rss.repository.SourceRepository;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.topics.repository.TopicRepository;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
+import com.nocorp.scienceboard.utility.MyUtilities;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -37,6 +41,7 @@ public class HomeViewModel extends AndroidViewModel implements
     private static boolean bookmarksChecksTaskIsRunning;
     private SourceRepository sourceRepository;
     private static List<ListItem> cachedArticles;
+    private static long lastFetchDate;
     private static List<DocumentSnapshot> oldestArticlesSnapshots;
     private HistoryRepository historyRepository;
     private BookmarksRepository bookmarksRepository;
@@ -92,32 +97,49 @@ public class HomeViewModel extends AndroidViewModel implements
     public void fetchArticles(List<Source> givenSources,
                               int numArticlesForEachSource,
                               boolean forced,
-                              long startingDateinMillis) {
+                              long startingDateInMillis) {
         Log.d(TAG, "fetchArticles: called, forced:" + forced);
-        if(forced) {
-            downloadArticlesFromFollowedTopics(
-                    givenSources,
-                    numArticlesForEachSource,
-                    startingDateinMillis);
-        }
-        else {
+
+        // if the request is within 1 our
+        // then use cached sources from local variable or Room
+        Log.d(TAG, "SCIENCE_BOARD - fetchArticles: lastArticlesFetchDate: " + lastFetchDate);
+        if(MyUtilities.isWithin_seconds(30, lastFetchDate)) {
+            Log.d(TAG, "SCIENCE_BOARD - fetchArticles: fetching from cache (within 30 mins)");
             tryCachedArticles(givenSources,
                     numArticlesForEachSource,
-                    startingDateinMillis);
+                    startingDateInMillis);
         }
+        //
+        else {
+            if(forced) {
+                Log.d(TAG, "SCIENCE_BOARD - fetchArticles: FORCED: fetching from remote");
+                downloadArticlesFromFollowedTopics(
+                        givenSources,
+                        numArticlesForEachSource,
+                        startingDateInMillis);
+            }
+            else {
+                Log.d(TAG, "SCIENCE_BOARD - fetchArticles: NOT FORCED: fetching from cache");
+                tryCachedArticles(givenSources,
+                        numArticlesForEachSource,
+                        startingDateInMillis);
+            }
+        }
+
     }
 
-    private void downloadArticlesFromFollowedTopics(
-            List<Source> givenSources,
+    private void downloadArticlesFromFollowedTopics(List<Source> givenSources,
             int numArticlesForEachSource,
             long startingDateinMillis) {
+
         if( ! taskIsRunning) {
             Runnable task = () -> {
                 cachedArticles = new ArrayList<>();
                 taskIsRunning = true;
+
                 // pick sources for ALL tab, only once
                 pickedSources = sourceRepository.getAsourceForEachFollowedCategory_randomly(givenSources, TopicRepository.getCachedAllTopics_enabled());
-                articleRepository.getArticles_backInTime(
+                articleRepository.fetchArticles(
                         pickedSources,
                         numArticlesForEachSource,
                         getApplication(),
@@ -141,6 +163,7 @@ public class HomeViewModel extends AndroidViewModel implements
     @Override
     public void onArticlesFetchCompleted(List<ListItem> articles, List<DocumentSnapshot> oldestArticles) {
         taskIsRunning = false;
+        lastFetchDate = System.currentTimeMillis();
 
         if(articles==null) {
             // TODO: null is returned only in case of errors
@@ -160,6 +183,7 @@ public class HomeViewModel extends AndroidViewModel implements
     @Override
     public void onArticlesFetchFailed(String cause) {
         taskIsRunning = false;
+//        lastFetchDate = System.currentTimeMillis();
 
         // TODO
     }
@@ -175,7 +199,7 @@ public class HomeViewModel extends AndroidViewModel implements
             Runnable task = () -> {
 //                sleepforNseconds(1);
                 Log.d(TAG, "SCIENCE_BOARD - fetchNextArticles: fetching new articles");
-                articleRepository.getNextArticles(oldestArticlesSnapshots, numArticlesForEachSource, getApplication());
+                articleRepository.fetchNextArticles(oldestArticlesSnapshots, numArticlesForEachSource, getApplication());
             };
 
             ThreadManager threadManager = ThreadManager.getInstance();

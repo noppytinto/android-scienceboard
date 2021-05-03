@@ -34,6 +34,10 @@ public class Source implements Serializable{
     @ColumnInfo(defaultValue = "false")
     private boolean enabled;
 
+    @ColumnInfo(name = "last_articles_fetch_date")
+    private long lastArticlesFetchDate;
+
+
 
     public String getId() {
         return id;
@@ -114,4 +118,13 @@ public class Source implements Serializable{
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
+
+    public long getLastArticlesFetchDate() {
+        return lastArticlesFetchDate;
+    }
+
+    public void setLastArticlesFetchDate(long lastArticlesFetchDate) {
+        this.lastArticlesFetchDate = lastArticlesFetchDate;
+    }
+
 }// end Source

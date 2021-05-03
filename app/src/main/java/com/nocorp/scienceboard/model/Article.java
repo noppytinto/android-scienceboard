@@ -35,6 +35,7 @@ public class Article extends ListItem implements Comparable<Article>, Serializab
     private boolean bookmarked;
 
 
+
     public Article() {
         setItemType(MyValues.ItemType.ARTICLE);
     }
@@ -158,4 +159,6 @@ public class Article extends ListItem implements Comparable<Article>, Serializab
     public void setBookmarked(boolean bookmarked) {
         this.bookmarked = bookmarked;
     }
+
+
 }// end Article
