@@ -164,12 +164,12 @@ public class HomeViewModel extends AndroidViewModel implements
     @Override
     public void onArticlesFetchCompleted(List<ListItem> articles, List<DocumentSnapshot> oldestArticles) {
         taskIsRunning = false;
-        lastFetchDate = System.currentTimeMillis();
 
         if(articles==null) {
             // TODO: null is returned only in case of errors
         }
         else {
+            lastFetchDate = System.currentTimeMillis();
             oldestArticlesSnapshots = oldestArticles;
 
             // publish results

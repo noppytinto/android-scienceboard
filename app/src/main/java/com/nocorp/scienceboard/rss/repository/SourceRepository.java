@@ -122,7 +122,6 @@ public class SourceRepository {
 
     private void loadSourcesFromRemoteDb(Context context, OnSourcesFetchedListener listener) {
 
-        storeFetchDate(context);
         cachedSources = new ArrayList<>();
         db.collection(SOURCES_COLLECTION_NAME)
                 .get()
@@ -146,6 +145,7 @@ public class SourceRepository {
                         }
 
                         //
+                        storeFetchDate(context);
                         saveSourcesInRoom_async(cachedSources, context);
 
                         //

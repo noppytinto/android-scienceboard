@@ -129,7 +129,6 @@ public class TopicRepository {
     }
 
     private void getTopicsFromRemoteDb(Context context, OnTopicRepositoryInitilizedListener listener) {
-        storeFetchDate(context);
         cachedAllTopics_enabled = new ArrayList<>();
         db.collection(TOPICS_COLLECTION_NAME)
                 .get()
@@ -139,6 +138,8 @@ public class TopicRepository {
                             Topic topic = buildTopic(document);
                             if (topic != null) cachedAllTopics_enabled.add(topic);
                         }
+
+                        storeFetchDate(context);
 
                         Log.d(TAG, "getTopicsFromRemoteDb: topics fetched from remote db");
                     }
