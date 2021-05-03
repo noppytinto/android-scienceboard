@@ -46,7 +46,7 @@ public class HomeViewModel extends AndroidViewModel implements
     private HistoryRepository historyRepository;
     private BookmarksRepository bookmarksRepository;
     private GeneralRepository generalRepository;
-    private final int FETCH_INTERVAL = 15; // in minutes
+//    private final int FETCH_INTERVAL = 15; // in minutes
 
 
 
@@ -101,32 +101,38 @@ public class HomeViewModel extends AndroidViewModel implements
                               long startingDateInMillis) {
         Log.d(TAG, "fetchArticles: called, forced:" + forced);
 
-        // if the request is within 15 mins
-        // then use cached sources from local variable or Room
-        Log.d(TAG, "SCIENCE_BOARD - fetchArticles: lastArticlesFetchDate: " + lastFetchDate);
-        if(MyUtilities.isWithin_minutes(FETCH_INTERVAL, lastFetchDate)) {
-            Log.d(TAG, "SCIENCE_BOARD - fetchArticles: fetching from cache (within 15 mins)");
-            tryCachedArticles(givenSources,
+
+
+        if(forced) {
+            Log.d(TAG, "SCIENCE_BOARD - fetchArticles: FORCED: fetching from remote");
+            downloadArticlesFromFollowedTopics(
+                    givenSources,
                     numArticlesForEachSource,
                     startingDateInMillis);
         }
-        //
         else {
-            if(forced) {
-                Log.d(TAG, "SCIENCE_BOARD - fetchArticles: FORCED: fetching from remote");
-                downloadArticlesFromFollowedTopics(
-                        givenSources,
-                        numArticlesForEachSource,
-                        startingDateInMillis);
-            }
-            else {
-                Log.d(TAG, "SCIENCE_BOARD - fetchArticles: NOT FORCED: fetching from cache");
-                tryCachedArticles(givenSources,
-                        numArticlesForEachSource,
-                        startingDateInMillis);
-            }
-        }
+            Log.d(TAG, "SCIENCE_BOARD - fetchArticles: NOT FORCED: trying fetching from cache");
+            tryCachedArticles(givenSources,
+                    numArticlesForEachSource,
+                    startingDateInMillis);
 
+            //        // if the request is within 15 mins
+//        // then use cached sources from local variable or Room
+//            Log.d(TAG, "SCIENCE_BOARD - fetchArticles: lastArticlesFetchDate: " + lastFetchDate);
+
+//            if(MyUtilities.isWithin_minutes(FETCH_INTERVAL, lastFetchDate)) {
+//                Log.d(TAG, "SCIENCE_BOARD - fetchArticles: fetching from cache (within 15 mins)");
+//                tryCachedArticles(givenSources,
+//                        numArticlesForEachSource,
+//                        startingDateInMillis);
+//            }
+//            else {
+//                Log.d(TAG, "SCIENCE_BOARD - fetchArticles: NOT FORCED: fetching from cache");
+//                tryCachedArticles(givenSources,
+//                        numArticlesForEachSource,
+//                        startingDateInMillis);
+//            }
+        }
     }
 
     private void downloadArticlesFromFollowedTopics(List<Source> givenSources,
@@ -154,9 +160,11 @@ public class HomeViewModel extends AndroidViewModel implements
 
     private void tryCachedArticles(List<Source> givenSources, int numArticlesForEachSource, long startingDateinMillis) {
         if(cachedArticles == null) {
+            Log.d(TAG, "SCIENCE_BOARD - tryCachedArticles: fetched from remote");
             downloadArticlesFromFollowedTopics(givenSources, numArticlesForEachSource, startingDateinMillis);
         }
         else {
+            Log.d(TAG, "SCIENCE_BOARD - tryCachedArticles: fetched from cache");
             setArticlesList(cachedArticles);
         }
     }
@@ -169,7 +177,7 @@ public class HomeViewModel extends AndroidViewModel implements
             // TODO: null is returned only in case of errors
         }
         else {
-            lastFetchDate = System.currentTimeMillis();
+//            lastFetchDate = System.currentTimeMillis();
             oldestArticlesSnapshots = oldestArticles;
 
             // publish results

@@ -51,7 +51,7 @@ public class TopicFeedsViewModel extends AndroidViewModel implements
     private List<ListItem> cachedArticles;
     private List<DocumentSnapshot> oldestArticlesSnapshots;
     private long lastFetchDate;
-    private final int FETCH_INTERVAL = 15; // in minutes
+//    private final int FETCH_INTERVAL = 15; // in minutes
 
 
     
@@ -110,35 +110,57 @@ public class TopicFeedsViewModel extends AndroidViewModel implements
                               boolean forced,
                               String topicId,
                               long startingDateinMillis) {
-        // if the request is within 15 mins
-        // then use cached sources from local variable or Room
-        Log.d(TAG, "SCIENCE_BOARD - fetchArticles: lastArticlesFetchDate: " + lastFetchDate);
-        if(MyUtilities.isWithin_minutes(FETCH_INTERVAL, lastFetchDate)) {
-            Log.d(TAG, "SCIENCE_BOARD - fetchArticles: fetching from cache (within 15 mins)");
-            tryCachedArticles(
+
+
+
+
+
+        if(forced) {
+            Log.d(TAG, "SCIENCE_BOARD - fetchArticles: FORCED: fetching from remote");
+            downloadArticlesFromTopic(
                     givenSources,
                     numArticlesForEachSource,
                     topicId,
                     startingDateinMillis);
         }
         else {
-            if(forced) {
-                Log.d(TAG, "SCIENCE_BOARD - fetchArticles: FORCED: fetching from remote");
-                downloadArticlesFromTopic(
-                        givenSources,
-                        numArticlesForEachSource,
-                        topicId,
-                        startingDateinMillis);
-            }
-            else {
-                Log.d(TAG, "SCIENCE_BOARD - fetchArticles: NOT FORCED: trying fetching from cache");
-                tryCachedArticles(
-                        givenSources,
-                        numArticlesForEachSource,
-                        topicId,
-                        startingDateinMillis);
-            }
+            Log.d(TAG, "SCIENCE_BOARD - fetchArticles: NOT FORCED: trying fetching from cache");
+            tryCachedArticles(
+                    givenSources,
+                    numArticlesForEachSource,
+                    topicId,
+                    startingDateinMillis);
         }
+
+//        // if the request is within 15 mins
+//        // then use cached sources from local variable or Room
+//        Log.d(TAG, "SCIENCE_BOARD - fetchArticles: lastArticlesFetchDate: " + lastFetchDate);
+//        if(MyUtilities.isWithin_minutes(FETCH_INTERVAL, lastFetchDate)) {
+//            Log.d(TAG, "SCIENCE_BOARD - fetchArticles: fetching from cache (within 15 mins)");
+//            tryCachedArticles(
+//                    givenSources,
+//                    numArticlesForEachSource,
+//                    topicId,
+//                    startingDateinMillis);
+//        }
+//        else {
+//            if(forced) {
+//                Log.d(TAG, "SCIENCE_BOARD - fetchArticles: FORCED: fetching from remote");
+//                downloadArticlesFromTopic(
+//                        givenSources,
+//                        numArticlesForEachSource,
+//                        topicId,
+//                        startingDateinMillis);
+//            }
+//            else {
+//                Log.d(TAG, "SCIENCE_BOARD - fetchArticles: NOT FORCED: trying fetching from cache");
+//                tryCachedArticles(
+//                        givenSources,
+//                        numArticlesForEachSource,
+//                        topicId,
+//                        startingDateinMillis);
+//            }
+//        }
     }
 
     private void downloadArticlesFromTopic(
@@ -168,9 +190,11 @@ public class TopicFeedsViewModel extends AndroidViewModel implements
 
     private void tryCachedArticles(List<Source> givenSources, int numArticlesForEachSource, String topicId, long startingDateinMillis) {
         if(cachedArticles == null) {
+            Log.d(TAG, "SCIENCE_BOARD - tryCachedArticles: fetched from remote");
             downloadArticlesFromTopic(givenSources, numArticlesForEachSource, topicId, startingDateinMillis);
         }
         else {
+            Log.d(TAG, "SCIENCE_BOARD - tryCachedArticles: fetched from cache");
             setArticlesList(cachedArticles);
         }
     }
@@ -183,7 +207,7 @@ public class TopicFeedsViewModel extends AndroidViewModel implements
             // TODO: null is returned only in case of errors
         }
         else {
-            lastFetchDate = System.currentTimeMillis();
+//            lastFetchDate = System.currentTimeMillis();
             oldestArticlesSnapshots = oldestArticles;
 
             // publish results
