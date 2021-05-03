@@ -90,9 +90,6 @@ public class WebviewFragment extends Fragment implements
     private String webpageUrl;
     private String sourceName;
     private WebView webViewMain;
-    private MenuItem stopMenuItem;
-    private MenuItem bookmarkMenuItem;
-    private MenuItem reloadPageMenuItem;
     private Article currentArticle;
     private boolean articleAlreadyInBookmarks;
 
@@ -121,7 +118,6 @@ public class WebviewFragment extends Fragment implements
     private WebView webViewReadmode;
     private boolean readModeEnabled = false;
     private String readModeContent;
-    private MenuItem readModeMenuItem;
 
     // animations
     private int shortAnimationDuration;
@@ -131,6 +127,17 @@ public class WebviewFragment extends Fragment implements
     private final String googleSearchQueryUrl = "https://www.google.com/search?q=";
 //    private final String javascript_getTheSelectedWord = "(function(){return window.getSelection().toString()})()";
 //    private String selectedWord;
+
+
+    // menuitems
+    private MenuItem readModeMenuItem;
+    private MenuItem stopMenuItem;
+    private MenuItem bookmarkMenuItem;
+    private MenuItem reloadPageMenuItem;
+    private MenuItem increaseTextSize;
+    private MenuItem decreaseTextSize;
+    private MenuItem defaultTextSize;
+    private MenuItem deleteCacheCookies;
 
 
 
@@ -164,6 +171,20 @@ public class WebviewFragment extends Fragment implements
 
         setSharedElementEnterTransition(transform);
 //        setSharedElementReturnTransition(transform);
+    }
+
+    private void enableReadModeLayout(){
+        increaseTextSize.setVisible(false);
+        decreaseTextSize.setVisible(false);
+        defaultTextSize.setVisible(false);
+        deleteCacheCookies.setVisible(false);
+    }
+
+    private void disableReadModeLayout(){
+        increaseTextSize.setVisible(true);
+        decreaseTextSize.setVisible(true);
+        defaultTextSize.setVisible(true);
+        deleteCacheCookies.setVisible(true);
     }
 
 
@@ -354,12 +375,21 @@ public class WebviewFragment extends Fragment implements
         webViewMain = viewBinding.webViewWebviewFragment;
         progressIndicator = viewBinding.progressIndicatorWebviewFragment;
         currentTextSize = DEFAULT_TEXT_SIZE;
-        stopMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_stop);
-        bookmarkMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_bookmark);
         chipGroup = viewBinding.includeWebviewFragment.chipGroupBottomSheetWebview;
         chipsContainer = viewBinding.includeWebviewFragment.containerBottomSheetWebview;
         chips = new ArrayList<>();
         selectedKeywords = new ArrayList<>();
+
+        // menuitems
+        stopMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_stop);
+        bookmarkMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_bookmark);
+        readModeMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_readmode);
+        reloadPageMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_refresh);
+        increaseTextSize = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_increaseTextSize);
+        decreaseTextSize = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_decreaseTextSize);
+        defaultTextSize = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_defaultTextSize);
+        deleteCacheCookies = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_delete);
+
 
         // viewmodels
         bookmarksViewModel = new ViewModelProvider(requireActivity()).get(BookmarksViewModel.class);
@@ -367,8 +397,6 @@ public class WebviewFragment extends Fragment implements
 
         // read mode
         webViewReadmode = viewBinding.webViewWebviewFragmentReadMode;
-        readModeMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_readmode);
-        reloadPageMenuItem = viewBinding.toolbarWebviewFragment.getMenu().findItem(R.id.option_webviewMenu_refresh);
 
 
         // webview botomsheet
@@ -596,6 +624,7 @@ public class WebviewFragment extends Fragment implements
     }
 
     private void startReadModeAction(String readModeContent) {
+        enableReadModeLayout();
 //        webViewMain.loadDataWithBaseURL(null, extractedContentHtmlWithUtf8Encoding, "text/html", "UTF-8", null);
         if(readModeContent ==null || readModeContent.isEmpty()) return;
 
@@ -983,6 +1012,7 @@ public class WebviewFragment extends Fragment implements
         webViewReadmode.setVisibility(View.GONE);
         readModeMenuItem.setTitle("Read mode");
         showMenuIitemIcon(reloadPageMenuItem);
+        disableReadModeLayout();
     }
 
     private void buildKeywordsChips(List<String> keywords, ChipGroup chipGroup) {
