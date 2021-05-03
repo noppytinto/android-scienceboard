@@ -200,20 +200,21 @@ public class HomeFragment extends Fragment implements
     //---------------------------------------------------------- observing viewmodels
 
     private void observeSourcesFetched() {
-        sourceViewModel.getObservableAllSources().observe(getViewLifecycleOwner(), sources -> {
+        sourceViewModel.getObservableAllSources().observe(getViewLifecycleOwner(), resultSources -> {
             Log.d(TAG, "observeSourcesFetched: called");
-            if(sources == null) {
+            if(resultSources == null) {
                 //TODO: error message
                 Log.e(TAG, "SCIENCE_BOARD - loadSources: an error occurrend when fetching sources");
                 showCenteredToast("an error occurred when fetching sources from remote DB");
             }
-            else if(sources.isEmpty()) {
+            else if(resultSources.isEmpty()) {
                 //TODO: warning message, no topics in memory
                 Log.w(TAG, "SCIENCE_BOARD - loadSources: no sources in remote DB");
             }
             else {
 //                // TODO
-                sourcesFetched = new ArrayList<>(sources);
+                sourcesFetched = new ArrayList<>(resultSources);
+                sourcesFetched = extractEnabledSources(sourcesFetched);
                 long startingDate = currentDateInMillis;
 
                 Log.d(TAG, "onChanged: using sources");
@@ -227,7 +228,7 @@ public class HomeFragment extends Fragment implements
                 }
 
                 homeViewModel.fetchArticles(
-                        sources,
+                        sourcesFetched,
                         NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
                         false,
                         startingDate);
@@ -246,6 +247,17 @@ public class HomeFragment extends Fragment implements
                 }
             }
         });
+    }
+
+    private List<Source> extractEnabledSources(List<Source> sourcesFetched) {
+        List<Source> result = new ArrayList<>();
+
+        for(Source currentSource: sourcesFetched) {
+            if(currentSource.getEnabled())
+                result.add(currentSource);
+        }
+
+        return result;
     }
 
     private void observeArticlesFetched() {

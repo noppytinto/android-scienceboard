@@ -87,6 +87,9 @@
     <string name="preference_app_theme_key">app_theme</string>
     <string name="string_empty_message_no_bookmarks_saved">Empty list!\nSave articles to read them later\nor just to bookmark them.</string>
     <string name="string_empty_message_no_history">Empty list!\nStart reading some articles.</string>
+    <string name="pref_last_sources_fetch_date">pref_last_sources_fetch_date</string>
+    <string name="pref_last_topics_fetch_date">pref_last_topics_fetch_date</string>
+    <string name="pref_last_articles_fetch_date">pref_last_articles_fetch_date</string>
 
 
 </resources>

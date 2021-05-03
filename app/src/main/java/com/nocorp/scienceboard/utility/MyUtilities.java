@@ -1,6 +1,7 @@
 package com.nocorp.scienceboard.utility;
 
 import android.content.Context;
+import android.util.Log;
 
 
 import org.json.JSONException;
@@ -105,6 +106,87 @@ public class MyUtilities {
         else res = " s";
 
         return res;
+    }
+
+
+    public static boolean isWithin_seconds(int givenSeconds, long startingMillis) {
+        boolean result = true;
+        if(givenSeconds<=0 || startingMillis<=0) return false;
+
+        // get current time
+        long currentMillis = System.currentTimeMillis();
+        if(startingMillis>currentMillis) return result;
+
+        // calculate diff
+        long diffInMillis = currentMillis - startingMillis;
+        long diffInSeconds = TimeUnit.MILLISECONDS.toSeconds(diffInMillis);
+
+        //
+        result = diffInSeconds >= 0 && diffInSeconds <= givenSeconds;
+
+        Log.d("MyUtilities: ", "isWithin_seconds: seconds: " + givenSeconds + ", result: " + result);
+
+        return result;
+    }
+
+    public static boolean isWithin_minutes(int givenMinutes, long startingMillis) {
+        boolean result = true;
+        if(givenMinutes<=0 || startingMillis<=0) return false;
+
+        // get current time
+        long currentMillis = System.currentTimeMillis();
+        if(startingMillis>currentMillis) return result;
+
+        // calculate diff
+        long diffInMillis = currentMillis - startingMillis;
+        long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(diffInMillis);
+
+        //
+        result = diffInMinutes >= 0 && diffInMinutes <= givenMinutes;
+
+        Log.d("MyUtilities: ", "isWithin_minutes: minutes: " + givenMinutes + ", result: " + result);
+
+        return result;
+    }
+
+    public static boolean isWithin_hours(int givenHours, long startingMillis) {
+        boolean result = true;
+        if(givenHours<=0 || startingMillis<=0) return false;
+
+        // get current time
+        long currentMillis = System.currentTimeMillis();
+        if(startingMillis>currentMillis) return result;
+
+        // calculate diff
+        long diffInMillis = currentMillis - startingMillis;
+        long diffInHours = TimeUnit.MILLISECONDS.toHours(diffInMillis);
+
+        //
+        result = diffInHours >= 0 && diffInHours <= givenHours;
+
+        Log.d("MyUtilities: ", "isWithin_hours: hours: " + givenHours + ", result: " + result);
+
+        return result;
+    }
+
+    public static boolean isWithin_days(int givenDays, long startingMillis) {
+        boolean result = true;
+        if(givenDays<=0 || startingMillis<=0) return false;
+
+        // get current time
+        long currentMillis = System.currentTimeMillis();
+        if(startingMillis>currentMillis) return result;
+
+        // calculate diff
+        long diffInMillis = currentMillis - startingMillis;
+        long diffInHours = TimeUnit.MILLISECONDS.toDays(diffInMillis);
+
+        //
+        result = diffInHours >= 0 && diffInHours <= givenDays;
+
+        Log.d("MyUtilities: ", "isWithin_days: days: " + givenDays + ", result: " + result);
+
+        return result;
     }
 
 //    public static void encryptFile(String filename, String rawData, Context context) {

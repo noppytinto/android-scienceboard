@@ -1,15 +1,19 @@
 package com.nocorp.scienceboard.rss.repository;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.topics.model.Topic;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
 import com.nocorp.scienceboard.rss.room.SourceDao;
+import com.nocorp.scienceboard.utility.MyUtilities;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -55,28 +59,79 @@ public class SourceRepository {
 
     //--------------------------------------------------------------------------- PUBLIC METHODS
 
-    public void loadSources(Context context, OnSourcesFetchedListener listener) {
+    public void fetchSources(Context context, OnSourcesFetchedListener listener) {
         if( ! taskIsRunning) {
             taskIsRunning = true;
-            if(cachedSources==null) {
-                loadSourcesFromRemoteDb(context, listener);
+
+            // if the request is within 1 our
+            // then use cached sources from local variable or Room
+            long lastFetchDate = getFromSharedPref(context.getString(R.string.pref_last_sources_fetch_date), context);
+            Log.d(TAG, "loadSources: lastFetchDate: " + lastFetchDate);
+            if(MyUtilities.isWithin_seconds(60, lastFetchDate)) {
+                fetchLocally_strategy(context, listener);
             }
+            //
             else {
-                taskIsRunning = false;
-                listener.onComplete(cachedSources);
+                fetchRemotely_strategy(context, listener);
             }
         }
     }
 
+    private void fetchRemotely_strategy(Context context, OnSourcesFetchedListener listener) {
+        Log.d(TAG, "fetchRemotely_strategy: loading sources remotely");
+        loadSourcesFromRemoteDb(context, listener);
+    }
+
+    private void fetchLocally_strategy(Context context, OnSourcesFetchedListener listener) {
+        if(cachedSources==null) {
+            Log.d(TAG, "fetchLocally_strategy: loading sources from room");
+            loadSourcesFromRoom(context, listener);
+            taskIsRunning = false;
+        }
+        else {
+            Log.d(TAG, "fetchLocally_strategy: loading sources from cachedSources");
+            taskIsRunning = false;
+            listener.onComplete(cachedSources);
+        }
+    }
+
+    private void loadSourcesFromRoom(Context context, OnSourcesFetchedListener listener) {
+        getSourcesFromRoom_sync(context, listener);
+    }
+
+    private void storeFetchDate(Context context) {
+        long currentMillis = System.currentTimeMillis();
+        saveInSharedPref(currentMillis, context.getString(R.string.pref_last_sources_fetch_date), context);
+        Log.d(TAG, "storeFetchDate: fetch date:" + currentMillis);
+    }
+
+    private void saveInSharedPref(long givenValue, String prefName, Context context) {
+        SharedPreferences sharedPref = context.getSharedPreferences(
+                prefName,
+                Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putLong(prefName, givenValue);
+        editor.apply();
+    }
+
+    private long getFromSharedPref(String prefName, Context context) {
+        final long defaultValue = -1;
+        SharedPreferences sharedPref = context.getSharedPreferences(
+                prefName,
+                Context.MODE_PRIVATE);
+        long result = sharedPref.getLong(prefName, defaultValue);
+        return result;
+    }
+
     private void loadSourcesFromRemoteDb(Context context, OnSourcesFetchedListener listener) {
+
+        storeFetchDate(context);
         cachedSources = new ArrayList<>();
         db.collection(SOURCES_COLLECTION_NAME)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            Boolean sourceEnabled = (Boolean) document.get(ENABLED);
-
                             // testing code
 //                            String name = (String) document.get(NAME);
 //                            String testname = "lifehacker";
@@ -87,16 +142,14 @@ public class SourceRepository {
 //                                }
 //                            }
 
-                            if(sourceEnabled!=null && sourceEnabled) {
-                                Source source = buildSource(document);
-                                if(source!=null)  {
-                                    cachedSources.add(source);
-                                }
+                            Source source = buildSource(document);
+                            if(source!=null)  {
+                                cachedSources.add(source);
                             }
                         }
 
                         //
-                        saveSourcesInRoom(cachedSources, context);
+                        saveSourcesInRoom_async(cachedSources, context);
 
                         //
                         Collections.shuffle(cachedSources); // randomize collection
@@ -111,11 +164,14 @@ public class SourceRepository {
                 });
     }
 
-    private void saveSourcesInRoom(@NotNull List<Source> sources, Context context) {
+    private void saveSourcesInRoom_async(@NotNull List<Source> sources, Context context) {
         Runnable task = () -> {
             try {
-                SourceDao sourceDao = getSourceDao(context);
-                sourceDao.insertAll(sources);
+                SourceDao dao = getSourceDao(context);
+                dao.insertAll(sources);
+                for(Source current: sources) {
+                    dao.updateEnabledStatus(current.getEnabled(), current.getId());
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.e(TAG, "SCIENCE_BOARD - saveSourcesInRoom: cannot save sources in Room, cause:" + e.getMessage());
@@ -126,8 +182,29 @@ public class SourceRepository {
         try {
             t.runTask(task);
         } catch (Exception e) {
-            e.printStackTrace();
             Log.e(TAG, "SCIENCE_BOARD - saveSourcesInRoom: cannot start thread " + e.getMessage());
+        }
+    }
+
+    private void getSourcesFromRoom_sync(Context context, OnSourcesFetchedListener listener) {
+        Runnable task = () -> {
+            try {
+                List<Source> result = null;
+                SourceDao sourceDao = getSourceDao(context);
+                result = sourceDao.selectAll();
+                cachedSources = result;
+                listener.onComplete(result);
+            } catch (Exception e) {
+                Log.e(TAG, "SCIENCE_BOARD - getSourcesFromRoom_sync: cannot get sources from Room, cause:" + e.getMessage());
+                listener.onFailded("cannot get sources from Room, cause:" + e.getMessage());
+            }
+        };
+
+        ThreadManager t = ThreadManager.getInstance();
+        try {
+            t.runTask(task);
+        } catch (Exception e) {
+            Log.e(TAG, "SCIENCE_BOARD - getSourcesFromRoom_sync: cannot start thread " + e.getMessage());
         }
     }
 
@@ -192,6 +269,8 @@ public class SourceRepository {
         source.setLanguage((String) document.get(LANGUAGE));
         List<String> categories = (List<String>) document.get(CATEGORY);
         source.setCategories(categories);
+        Boolean sourceEnabled = (Boolean) document.get(ENABLED);
+        if(sourceEnabled!=null) source.setEnabled(sourceEnabled);
 
         return source;
     }

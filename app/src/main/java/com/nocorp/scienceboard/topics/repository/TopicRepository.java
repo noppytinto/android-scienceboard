@@ -1,15 +1,18 @@
 package com.nocorp.scienceboard.topics.repository;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.topics.model.Topic;
 import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
 import com.nocorp.scienceboard.topics.room.TopicDao;
 import com.nocorp.scienceboard.system.ThreadManager;
+import com.nocorp.scienceboard.utility.MyUtilities;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -54,7 +57,34 @@ public class TopicRepository {
     public void init(Context context, OnTopicRepositoryInitilizedListener listener) {
         // (will be relevant only on the first app launch)
         fallbackTopics = buildFallbackTopicsList();
+
+        // if the request is within 1 our
+        // then use cached sources from local variable or Room
+        long lastFetchDate = getFromSharedPref(context.getString(R.string.pref_last_topics_fetch_date), context);
+        Log.d(TAG, "init topics list: lastFetchDate: " + lastFetchDate);
+        if(MyUtilities.isWithin_seconds(60, lastFetchDate)) {
+            fetchLocally_strategy(context, listener);
+        }
+        //
+        else {
+            fetchRemotely_strategy(context, listener);
+        }
+    }
+
+    private void fetchRemotely_strategy(Context context, OnTopicRepositoryInitilizedListener listener) {
+        Log.d(TAG, "fetchRemotely_strategy: loading topics remotely");
         getTopicsFromRemoteDb(context, listener);
+    }
+
+    private void fetchLocally_strategy(Context context, OnTopicRepositoryInitilizedListener listener) {
+        if(cachedAllTopics_enabled==null) {
+            Log.d(TAG, "fetchLocally_strategy: loading topics from room");
+            getTopicsFromRoom_async(context, listener);
+        }
+        else {
+            Log.d(TAG, "fetchLocally_strategy: loading topics from cachedAllTopics_enabled");
+            listener.onComplete();
+        }
     }
 
 
@@ -65,11 +95,40 @@ public class TopicRepository {
      * cached topics are at least populated on the first app launch by buildTopics_eventually()
      */
     public void fetchTopics(Context context, OnTopicsFetchedListener listener) {
-        getTopicsFromRoom(context, listener);
+
+
+        getTopicsFromRoom_async(context, listener);
 //        getTopicsFromRemoteDb(context, listener);
     }
 
+
+
+    private void storeFetchDate(Context context) {
+        long currentMillis = System.currentTimeMillis();
+        saveInSharedPref(currentMillis, context.getString(R.string.pref_last_topics_fetch_date), context);
+        Log.d(TAG, "storeFetchDate: fetch date:" + currentMillis);
+    }
+
+    private void saveInSharedPref(long givenValue, String prefName, Context context) {
+        SharedPreferences sharedPref = context.getSharedPreferences(
+                prefName,
+                Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putLong(prefName, givenValue);
+        editor.apply();
+    }
+
+    private long getFromSharedPref(String prefName, Context context) {
+        final long defaultValue = -1;
+        SharedPreferences sharedPref = context.getSharedPreferences(
+                prefName,
+                Context.MODE_PRIVATE);
+        long result = sharedPref.getLong(prefName, defaultValue);
+        return result;
+    }
+
     private void getTopicsFromRemoteDb(Context context, OnTopicRepositoryInitilizedListener listener) {
+        storeFetchDate(context);
         cachedAllTopics_enabled = new ArrayList<>();
         db.collection(TOPICS_COLLECTION_NAME)
                 .get()
@@ -183,7 +242,7 @@ public class TopicRepository {
      * because in case of Room fail, will fallback in cachedTopics,
      * cached topics are at least populated on the first app launch by buildTopics_eventually()
      */
-    private void getTopicsFromRoom(Context context, OnTopicsFetchedListener listener) {
+    private void getTopicsFromRoom_async(Context context, OnTopicsFetchedListener listener) {
         Runnable task = () -> {
             try {
                 // NOTE: if a topic extist, will be ignored
@@ -191,7 +250,7 @@ public class TopicRepository {
                 cachedAllTopics_enabled = dao.selectAll();
                 listener.onComplete(cachedAllTopics_enabled);
             } catch (Exception e) {
-                Log.e(TAG, "SCIENCE_BOARD - getTopicsFromRoom: cannot get topics from Room, cause:" + e.getMessage());
+                Log.e(TAG, "SCIENCE_BOARD - getTopicsFromRoom_async: cannot get topics from Room, cause:" + e.getMessage());
                 listener.onFailed(e.getMessage(), cachedAllTopics_enabled);
             }
         };
@@ -200,10 +259,33 @@ public class TopicRepository {
         try {
             t.runTask(task);
         } catch (Exception e) {
-            Log.e(TAG, "SCIENCE_BOARD - getTopicsFromRoom: cannot start thread " + e.getMessage());
+            Log.e(TAG, "SCIENCE_BOARD - getTopicsFromRoom_async: cannot start thread " + e.getMessage());
             listener.onFailed(e.getMessage(), cachedAllTopics_enabled);
         }
     }
+
+    private void getTopicsFromRoom_async(Context context, OnTopicRepositoryInitilizedListener listener) {
+        Runnable task = () -> {
+            try {
+                // NOTE: if a topic extist, will be ignored
+                TopicDao dao = getTopicDao(context);
+                cachedAllTopics_enabled = dao.selectAll();
+                listener.onComplete();
+            } catch (Exception e) {
+                Log.e(TAG, "SCIENCE_BOARD - getTopicsFromRoom_async: cannot get topics from Room, cause:" + e.getMessage());
+                listener.onFailed(e.getMessage());
+            }
+        };
+
+        ThreadManager t = ThreadManager.getInstance();
+        try {
+            t.runTask(task);
+        } catch (Exception e) {
+            Log.e(TAG, "SCIENCE_BOARD - getTopicsFromRoom_async: cannot start thread " + e.getMessage());
+            listener.onFailed(e.getMessage());
+        }
+    }
+
 
     private TopicDao getTopicDao(Context context) {
         ScienceBoardRoomDatabase roomDatabase = ScienceBoardRoomDatabase.getInstance(context);

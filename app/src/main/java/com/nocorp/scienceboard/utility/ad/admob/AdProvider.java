@@ -51,7 +51,6 @@ public class AdProvider {
         if(singletonInstance==null) {
             singletonInstance = new AdProvider();
             Log.d(AdProvider.class.getSimpleName(), "SCIENCE_BOARD - getInstance: ad provider instantiated, now call initAdMob()");
-
         }
 
        return singletonInstance;

@@ -31,6 +31,8 @@ public class Source implements Serializable{
     @ColumnInfo(defaultValue = "true")
     private boolean followed;
 
+    @ColumnInfo(defaultValue = "false")
+    private boolean enabled;
 
 
     public String getId() {
@@ -103,5 +105,13 @@ public class Source implements Serializable{
 
     public void setFollowed(boolean followed) {
         this.followed = followed;
+    }
+
+    public boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }// end Source

@@ -237,20 +237,21 @@ public class TopicFeedsFragment extends Fragment implements
     //---------------------------------------------------------- observing viewmodels
 
     private void observeSourcesFetched() {
-        sourceViewModel.getObservableAllSources().observe(getViewLifecycleOwner(), sources -> {
+        sourceViewModel.getObservableAllSources().observe(getViewLifecycleOwner(), resultSources -> {
             Log.d(TAG, "observeSourcesFetched: called");
-            if(sources == null) {
+            if(resultSources == null) {
                 //TODO: error message
                 Log.e(TAG, "SCIENCE_BOARD - loadSources: an error occurrend when fetching sources");
-                showCenteredToast("an error occurred when fetching sources from remote DB");
+                showCenteredToast("an error occurred when fetching sources from DB");
             }
-            else if(sources.isEmpty()) {
+            else if(resultSources.isEmpty()) {
                 //TODO: warning message, no topics in memory
-                Log.w(TAG, "SCIENCE_BOARD - loadSources: no sources in remote DB");
+                Log.w(TAG, "SCIENCE_BOARD - loadSources: no sources in DB");
             }
             else {
 //                // TODO
-                sourcesFetched = new ArrayList<>(sources);
+                sourcesFetched = new ArrayList<>(resultSources);
+                sourcesFetched = extractEnabledSources(sourcesFetched);
                 long startingDate = currentDateInMillis;
 
                 Log.d(TAG, "onChanged: using sources");
@@ -259,13 +260,24 @@ public class TopicFeedsFragment extends Fragment implements
                 }
 
                 topicFeedsViewModel.fetchArticles(
-                        sources,
+                        sourcesFetched,
                         NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
                         false,
                         currentTopic.getId(),
                         startingDate);
             }
         });
+    }
+
+    private List<Source> extractEnabledSources(List<Source> sourcesFetched) {
+        List<Source> result = new ArrayList<>();
+
+        for(Source currentSource: sourcesFetched) {
+            if(currentSource.getEnabled())
+                result.add(currentSource);
+        }
+
+        return result;
     }
 
     private void observeArticlesFetched() {

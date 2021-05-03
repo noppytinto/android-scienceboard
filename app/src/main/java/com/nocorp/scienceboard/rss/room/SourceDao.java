@@ -33,4 +33,9 @@ public interface SourceDao {
             "SET followed = :value " +
             "WHERE id = :sourceId")
     int updateFollowStatus(boolean value, String sourceId);
+
+    @Query("UPDATE Source " +
+            "SET enabled = :value " +
+            "WHERE id = :sourceName")
+    int updateEnabledStatus(boolean value, String sourceName);
 }
