@@ -53,7 +53,7 @@ public class AboutWebviewFragment extends Fragment {
             "                  charge you for the app or its services without making it very\n" +
             "                  clear to you exactly what you’re paying for.\n" +
             "                </p> <p>\n" +
-            "                  The NewsBridge app stores and processes personal data that\n" +
+            "                  The NoppysBoard app stores and processes personal data that\n" +
             "                  you have provided to us, in order to provide my\n" +
             "                  Service. It’s your responsibility to keep your phone and\n" +
             "                  access to the app secure. We therefore recommend that you do\n" +
@@ -62,7 +62,7 @@ public class AboutWebviewFragment extends Fragment {
             "                  official operating system of your device. It could make your\n" +
             "                  phone vulnerable to malware/viruses/malicious programs,\n" +
             "                  compromise your phone’s security features and it could mean\n" +
-            "                  that the NewsBridge app won’t work properly or at all.\n" +
+            "                  that the NoppysBoard app won’t work properly or at all.\n" +
             "                </p> <div><p>\n" +
             "                    The app does use third party services that declare their own\n" +
             "                    Terms and Conditions.\n" +
@@ -151,7 +151,7 @@ public class AboutWebviewFragment extends Fragment {
             "    </head>\n" +
             "    <body>\n" +
             "    <strong>Privacy Policy</strong> <p>\n" +
-            "                  Francesco Scutellaro built the NewsBridge app as\n" +
+            "                  Francesco Scutellaro built the NoppysBoard app as\n" +
             "                  an Ad Supported app. This SERVICE is provided by\n" +
             "                  Francesco Scutellaro at no cost and is intended for use as\n" +
             "                  is.\n" +
@@ -168,7 +168,7 @@ public class AboutWebviewFragment extends Fragment {
             "                </p> <p>\n" +
             "                  The terms used in this Privacy Policy have the same meanings\n" +
             "                  as in our Terms and Conditions, which is accessible at\n" +
-            "                  NewsBridge unless otherwise defined in this Privacy Policy.\n" +
+            "                  NoppysBoard unless otherwise defined in this Privacy Policy.\n" +
             "                </p> <p><strong>Information Collection and Use</strong></p> <p>\n" +
             "                  For a better experience, while using our Service, I\n" +
             "                  may require you to provide us with certain personally\n" +
