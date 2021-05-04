@@ -909,7 +909,7 @@ public class WebviewFragment extends Fragment implements
             else
                 newChip.setTextAppearance(requireContext(), R.style.ScienceBoard_Button_Chip_Choice_TextAppearance);
         } catch (Exception e) {
-            Log.e(TAG, "addChip: cause: ", e);
+            Log.e(TAG, "addChip: cause: ", e.getCause());
         }
 
         int i = chipId++;
@@ -943,13 +943,15 @@ public class WebviewFragment extends Fragment implements
 
         StringBuilder builder = new StringBuilder();
         for (String value : selectedKeywords) {
-            builder.append(value).append(" ");
+            builder.append(value);
+            builder.append(" ");
         }
 
         String query = builder.toString();
         String url = null;
         try {
-            url = googleSearchQueryUrl + URLEncoder.encode(query, String.valueOf(StandardCharsets.UTF_8));
+//            url = googleSearchQueryUrl + URLEncoder.encode(query, String.valueOf(StandardCharsets.UTF_8));
+            url = googleSearchQueryUrl + URLEncoder.encode(query, "utf-8");
             webViewBottomSheet.loadUrl(url);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
