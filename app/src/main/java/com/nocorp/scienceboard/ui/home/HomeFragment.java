@@ -205,7 +205,7 @@ public class HomeFragment extends Fragment implements
             if(resultSources == null) {
                 //TODO: error message
                 Log.e(TAG, "SCIENCE_BOARD - loadSources: an error occurrend when fetching sources");
-                showCenteredToast("an error occurred when fetching sources from remote DB");
+                showCenteredToast("an error occurred when fetching sources from remote server");
             }
             else if(resultSources.isEmpty()) {
                 //TODO: warning message, no topics in memory

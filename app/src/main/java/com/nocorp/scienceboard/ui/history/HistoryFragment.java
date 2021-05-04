@@ -96,7 +96,7 @@ public class HistoryFragment extends Fragment implements
                 swipeRefreshLayout.setRefreshing(false);
                 progressIndicator.setVisibility(View.GONE);
                 recyclerAdapterArticlesList.loadNewData(articles);
-                showCenteredToast(getString(R.string.string_history_fetched));
+//                showCenteredToast(getString(R.string.string_history_fetched));
             }
         });
 

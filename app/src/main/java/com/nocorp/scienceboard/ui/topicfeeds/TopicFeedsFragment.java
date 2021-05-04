@@ -242,7 +242,7 @@ public class TopicFeedsFragment extends Fragment implements
             if(resultSources == null) {
                 //TODO: error message
                 Log.e(TAG, "SCIENCE_BOARD - loadSources: an error occurrend when fetching sources");
-                showCenteredToast("an error occurred when fetching sources from DB");
+                showCenteredToast("an error occurred when fetching sources from server");
             }
             else if(resultSources.isEmpty()) {
                 //TODO: warning message, no topics in memory
