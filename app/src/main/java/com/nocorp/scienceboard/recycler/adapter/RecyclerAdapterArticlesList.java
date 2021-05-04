@@ -212,7 +212,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
             try {
                 // TODO: crahses on andorid 21 (resource "thumbnail" not found)
                 RequestOptions gildeOptions = new RequestOptions()
-                        .fallback(R.drawable.broken_image)
+                        .fallback(R.drawable.placeholder_image)
                         .placeholder(R.drawable.placeholder_image)
                         .fitCenter();
 //                        .error(R.drawable.default_avatar)

@@ -954,9 +954,9 @@ public class WebviewFragment extends Fragment implements
             url = googleSearchQueryUrl + URLEncoder.encode(query, "utf-8");
             webViewBottomSheet.loadUrl(url);
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            Log.e(TAG, "NOPPYS_BOARD - triggerKeywordsGoogleSearch: cause", e.getCause());
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "NOPPYS_BOARD - triggerKeywordsGoogleSearch: cause", e.getCause());
         }
     }
 
