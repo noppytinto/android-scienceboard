@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/fjalla_one"
-        android:text="NewsBoard"
+        android:text="@string/app_name"
         android:textSize="30dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -40,6 +40,17 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/button_aboutFragment_privacy" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="All rights reserved."
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="@+id/button_aboutFragment_terms"
+        app:layout_constraintStart_toStartOf="@+id/button_aboutFragment_terms"
+        app:layout_constraintTop_toBottomOf="@+id/button_aboutFragment_terms" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
