@@ -147,7 +147,7 @@ public class AdProvider {
                     @Override
                     public void onAdFailedToLoad(LoadAdError adError) {
                         // Handle the failure by logging, altering the UI, and so on.
-                        Log.e(TAG, "SCIENCE_BOARD - onAdFailedToLoad: ad failed to load");
+                        Log.e(TAG, "SCIENCE_BOARD - onAdFailedToLoad: ad failed to load, cause: " + adError.getMessage());
                     }
 
                     @Override

@@ -464,9 +464,15 @@ public class WebviewFragment extends Fragment implements
     private void defineWebclientBehavior_mainWebview(WebView webView) {
         defineWebviewBackButtonBehavior(webView);
         webView.setWebChromeClient(new WebChromeClient() {
-            @RequiresApi(api = Build.VERSION_CODES.N)
+//            @RequiresApi(api = Build.VERSION_CODES.N)
             public void onProgressChanged(WebView view, int progress) {
-                progressIndicator.setProgress(progress, true); //Make the bar disappear after URL is loaded
+                try {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        progressIndicator.setProgress(progress, true); //Make the bar disappear after URL is loaded
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "onProgressChanged: cause: ", e);
+                }
             }
         });
         webView.setWebViewClient(new WebViewClient() {
@@ -895,7 +901,16 @@ public class WebviewFragment extends Fragment implements
                 R.style.ScienceBoard_Button_Chip_Choice);
         newChip.setChipDrawable(chipDrawable);
         newChip.setText(name);
-        newChip.setTextAppearance(R.style.ScienceBoard_Button_Chip_Choice_TextAppearance);
+        try {
+//            newChip.setTextAppearance(R.style.ScienceBoard_Button_Chip_Choice_TextAppearance);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                newChip.setTextAppearance(R.style.ScienceBoard_Button_Chip_Choice_TextAppearance);
+            else
+                newChip.setTextAppearance(requireContext(), R.style.ScienceBoard_Button_Chip_Choice_TextAppearance);
+        } catch (Exception e) {
+            Log.e(TAG, "addChip: cause: ", e);
+        }
 
         int i = chipId++;
         newChip.setId(i);

@@ -16,7 +16,7 @@
         android:maxLines="4"
         android:paddingBottom="5dp"
         android:textColor="?attr/topicItemTextColor_customizeTopicsFragment"
-        android:textSize="18sp"
+        android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/chip_layoutTopic_follow"
