@@ -18,6 +18,7 @@ import com.nocorp.scienceboard.rss.repository.ArticleRepository;
 import com.nocorp.scienceboard.rss.repository.ArticlesRepositoryListener;
 import com.nocorp.scienceboard.rss.repository.SourceRepository;
 import com.nocorp.scienceboard.system.ThreadManager;
+import com.nocorp.scienceboard.topics.model.Topic;
 import com.nocorp.scienceboard.topics.repository.TopicRepository;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 
@@ -28,11 +29,10 @@ import java.util.List;
 
 public class HomeViewModel extends AndroidViewModel implements
         ArticlesRepositoryListener {
-    private final String TAG = "HomeViewModel";
+    private final String TAG = getClass().getSimpleName();
     private final String APP_NAME = "NOPPYS_BOARD - ";
     private MutableLiveData<List<ListItem>> articlesList;
     private MutableLiveData<List<ListItem>> nextArticlesList;
-    private ArticleRepository articleRepository;
     private static List<Source> pickedSources;
     private static boolean taskIsRunning;
     private static boolean bookmarksChecksTaskIsRunning;
@@ -40,9 +40,13 @@ public class HomeViewModel extends AndroidViewModel implements
     private static List<ListItem> cachedArticles;
     private static long lastFetchDate;
     private static List<DocumentSnapshot> oldestArticlesSnapshots;
+
+    // repos
     private HistoryRepository historyRepository;
     private BookmarksRepository bookmarksRepository;
     private GeneralRepository generalRepository;
+    private ArticleRepository articleRepository;
+    private TopicRepository topicRepository;
 //    private final int FETCH_INTERVAL = 15; // in minutes
 
 
@@ -58,6 +62,7 @@ public class HomeViewModel extends AndroidViewModel implements
         historyRepository = new HistoryRepository();
         bookmarksRepository = new BookmarksRepository();
         generalRepository = new GeneralRepository();
+        topicRepository = new TopicRepository();
     }
 
 
@@ -93,27 +98,31 @@ public class HomeViewModel extends AndroidViewModel implements
     //-------------------------------------------------------------- FETCH ARTICLES
 
     public void fetchArticles(List<Source> givenSources,
-                              int numArticlesForEachSource,
-                              boolean forced,
                               long startingDateInMillis,
-                              int numFollowedTopics) {
+                              boolean forced) {
         Log.d(TAG, APP_NAME + "fetchArticles: called, forced:" + forced);
 
+        if( ! taskIsRunning) {
+            Runnable task = () -> {
+                taskIsRunning = true;
 
+                if (forced) {
+                    Log.d(TAG, APP_NAME + "fetchArticles: FORCED: fetching from remote");
+                    downloadArticlesFromFollowedTopics( givenSources,
+                                                        topicRepository.getFollowedTopics_sync(getApplication()),
+                                                        startingDateInMillis);
+                } else {
+                    Log.d(TAG, APP_NAME + "fetchArticles: NOT FORCED: trying fetching from cache");
+                    tryCachedArticles( givenSources,
+                                       topicRepository.getFollowedTopics_sync(getApplication()),
+                                       startingDateInMillis);
+                }
+            };
 
-        if(forced) {
-            Log.d(TAG, APP_NAME + "fetchArticles: FORCED: fetching from remote");
-            downloadArticlesFromFollowedTopics( givenSources,
-                                                numArticlesForEachSource,
-                                                startingDateInMillis,
-                                                numFollowedTopics);
+            // starting task
+            ThreadManager threadManager = ThreadManager.getInstance();
+            threadManager.runTask(task);
         }
-        else {
-            Log.d(TAG, APP_NAME + "fetchArticles: NOT FORCED: trying fetching from cache");
-            tryCachedArticles( givenSources,
-                               numArticlesForEachSource,
-                               startingDateInMillis,
-                               numFollowedTopics);
 
             //        // if the request is within 15 mins
 //        // then use cached sources from local variable or Room
@@ -131,74 +140,79 @@ public class HomeViewModel extends AndroidViewModel implements
 //                        numArticlesForEachSource,
 //                        startingDateInMillis);
 //            }
-        }
-    }
+
+    }// end fetchArticles
 
     private void downloadArticlesFromFollowedTopics(List<Source> givenSources,
-                                                    int numArticlesForEachSource,
-                                                    long startingDateinMillis,
-                                                    int numFollowedTopics) {
-        if( ! taskIsRunning) {
-            Runnable task = () -> {
+                                                    List<Topic> followedTopics,
+                                                    long startingDateInMillis) {
+        Log.d(TAG, APP_NAME + "downloadArticlesFromFollowedTopics: called");
+        cachedArticles = new ArrayList<>();
+        int maxSourcesToGet = 1;
+        int numArticlesToFetchForEachSource = 2;
+        final int numFollowedTopics = followedTopics.size();
 
-                int numSourcesToFetch = 1;
-                int numArticlesToFetchForEachSource = 1;
+        // deciding how many sources to take in consideration
+        // and how many articles to fetch for each source
+        switch (numFollowedTopics) {
+            case 1: {
+                maxSourcesToGet = 5;
+                numArticlesToFetchForEachSource = 1;
+                Log.d(TAG, APP_NAME + "downloadArticlesFromFollowedTopics: case 1, " + maxSourcesToGet + " sources, " + numArticlesToFetchForEachSource + " articles for each source");
+            }
+            break;
+            case 2: {
+                maxSourcesToGet = 3;
+                numArticlesToFetchForEachSource = 2;
+                Log.d(TAG, APP_NAME + "downloadArticlesFromFollowedTopics: case 2, " + maxSourcesToGet + " sources, " + numArticlesToFetchForEachSource + " articles for each source");
+            }
+            break;
+            case 3: {
+                maxSourcesToGet = 2;
+                numArticlesToFetchForEachSource = 3;
+                Log.d(TAG, APP_NAME + "downloadArticlesFromFollowedTopics: case 3, " + maxSourcesToGet + " sources, " + numArticlesToFetchForEachSource + " articles for each source");
+            }
+            break;
+//            default: {
+//                maxSourcesToGet = 1;
+//                numArticlesToFetchForEachSource = 2;
+//                Log.d(TAG, APP_NAME + "downloadArticlesFromFollowedTopics: default case, " + maxSourcesToGet + " sources, " + numArticlesToFetchForEachSource + " articles for each source");
+//            }
+        }
 
-                switch (numFollowedTopics) {
-                    case 1: {
-                        numSourcesToFetch = 2;
-                        numArticlesToFetchForEachSource = 1;
-                    }
-                        break;
-                    default:
-                }
 
-
-                Log.d(TAG, APP_NAME + "downloadArticlesFromFollowedTopics: called");
-                cachedArticles = new ArrayList<>();
-                taskIsRunning = true;
-
-                // picking sources
-                pickedSources =
-                        sourceRepository.getNsourcesForEachFollowedCategory_randomly(
-                                givenSources,
-                                TopicRepository.getAllEnabledTopics_cached(),
-                                numSourcesToFetch);
+        // picking sources
+        pickedSources =
+                sourceRepository.getNsourcesForEachFollowedTopic_randomly( givenSources,
+                                                                           followedTopics,
+                                                                           maxSourcesToGet);
 //                pickedSources = sourceRepository.getAsourceForEachFollowedCategory_randomly(givenSources, TopicRepository.getAllEnabledTopics_cached());
 
-                // fetching articles
-                articleRepository.fetchArticles(pickedSources,
-                                                numArticlesToFetchForEachSource,
-                                                getApplication(),
-                                                startingDateinMillis);
-            };
-
-            ThreadManager threadManager = ThreadManager.getInstance();
-            threadManager.runTask(task);
-        }
+        // fetching articles
+        articleRepository.fetchArticles(pickedSources,
+                                        numArticlesToFetchForEachSource,
+                                        startingDateInMillis,
+                                        getApplication());
     }
 
     private void tryCachedArticles(List<Source> givenSources,
-                                   int numArticlesForEachSource,
-                                   long startingDateinMillis,
-                                   int numFollowedTopics) {
+                                   List<Topic> followedTopics,
+                                   long startingDateinMillis) {
         if(cachedArticles == null) {
             Log.d(TAG, APP_NAME + "tryCachedArticles: fetched from remote");
             downloadArticlesFromFollowedTopics(givenSources,
-                                               numArticlesForEachSource,
-                                               startingDateinMillis,
-                                               numFollowedTopics);
+                                               followedTopics,
+                                               startingDateinMillis);
         }
         else {
             Log.d(TAG, APP_NAME + "tryCachedArticles: fetched from cache");
             setArticlesList(cachedArticles);
+            taskIsRunning = false;
         }
     }
 
     @Override
     public void onArticlesFetchCompleted(List<ListItem> articles, List<DocumentSnapshot> oldestArticles) {
-        taskIsRunning = false;
-
         if(articles==null) {
             // TODO: null is returned only in case of errors
         }
@@ -209,10 +223,10 @@ public class HomeViewModel extends AndroidViewModel implements
             // publish results
             cachedArticles = articles;
             historyAndBookmarksCheck(articles);
-//            historyCheck(cachedArticles);
-//            bookmarksCheck(cachedArticles);
             setArticlesList(articles);
         }
+
+        taskIsRunning = false;
     }
 
     @Override
@@ -230,7 +244,7 @@ public class HomeViewModel extends AndroidViewModel implements
     //-------------------------------------------------------------- FETCH NEXT ARTICLES
 
     public void fetchNextArticles(int numArticlesForEachSource) {
-        if(!taskIsRunning) {
+        if( ! taskIsRunning) {
             Runnable task = () -> {
 //                sleepforNseconds(1);
                 Log.d(TAG, APP_NAME + "fetchNextArticles: fetching new articles");
@@ -244,21 +258,20 @@ public class HomeViewModel extends AndroidViewModel implements
 
     @Override
     public void onNextArticlesFetchCompleted(List<ListItem> newArticles, List<DocumentSnapshot> oldestArticles) {
-        taskIsRunning = false;
-
         oldestArticlesSnapshots = new ArrayList<>(oldestArticles);
 
         // publish results
         historyAndBookmarksCheck(newArticles);
         cachedArticles.addAll(newArticles);
         setNextArticlesList(cachedArticles);
+        taskIsRunning = false;
     }
 
     @Override
     public void onNextArticlesFetchFailed(String cause) {
-        taskIsRunning = false;
         setNextArticlesList(null);
         Log.e(TAG, APP_NAME + "onNextArticlesFetchFailed: " + cause);
+        taskIsRunning = false;
     }
 
 

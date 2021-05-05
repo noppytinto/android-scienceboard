@@ -19,7 +19,6 @@ import com.nocorp.scienceboard.rss.repository.ArticlesRepositoryListener;
 import com.nocorp.scienceboard.rss.repository.SourceRepository;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
-import com.nocorp.scienceboard.utility.MyUtilities;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -179,8 +178,8 @@ public class TopicFeedsViewModel extends AndroidViewModel implements
                 articleRepository.fetchArticles(
                         pickedSources,
                         numArticlesForEachSource,
-                        getApplication(),
-                        startingDateinMillis);
+                        startingDateinMillis, getApplication()
+                );
             };
 
             ThreadManager threadManager = ThreadManager.getInstance();

@@ -37,7 +37,7 @@ import com.nocorp.scienceboard.bookmarks.repository.BookmarksListOnChangedListen
 import com.nocorp.scienceboard.databinding.FragmentHomeBinding;
 import com.nocorp.scienceboard.model.Article;
 import com.nocorp.scienceboard.model.CustomizeMyTopicsButton;
-import com.nocorp.scienceboard.model.MyTopics;
+import com.nocorp.scienceboard.model.MyTopicsItem;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterMyTopics;
@@ -65,6 +65,8 @@ public class HomeFragment extends Fragment implements
         OnDateChangedListener,
         BookmarksListOnChangedListener {
     private final String TAG = this.getClass().getSimpleName();
+    private final String APP_NAME = "NOPPYS_BOARD - ";
+
     private View view;
     private FragmentHomeBinding viewBinding;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -89,7 +91,7 @@ public class HomeFragment extends Fragment implements
     //
     private AdProvider adProvider;
     private List<Source> sourcesFetched;
-    private List<ListItem> articlesToDisplay;
+    private List<ListItem> elementsToDisplayInHome;
     private List<Topic> myFollowedTopics;
     private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 2;
     private final int AD_DISTANCE = 5; // distance between ads (in terms of items)
@@ -171,10 +173,6 @@ public class HomeFragment extends Fragment implements
         return false;
     }
 
-    private void showAboutFragment() {
-        Navigation.findNavController(view).navigate(R.id.action_homeFragment_to_aboutFragment);
-    }
-
     @Override
     public void onPrepareOptionsMenu(@NonNull Menu menu) {
         super.onPrepareOptionsMenu(menu);
@@ -185,7 +183,6 @@ public class HomeFragment extends Fragment implements
         super.onDestroyView();
         viewBinding = null;
     }
-
 
 
 
@@ -210,52 +207,24 @@ public class HomeFragment extends Fragment implements
                 Log.w(TAG, "SCIENCE_BOARD - loadSources: no sources in remote DB");
             }
             else {
-//                // TODO
+                // getting enabled sources
                 sourcesFetched = new ArrayList<>(resultSources);
                 sourcesFetched = extractEnabledSources(sourcesFetched);
-                long startingDate = currentDateInMillis;
 
-                Log.d(TAG, "onChanged: using sources");
-                if (timeMachineViewModel.timeMachineIsEnabled()) {
-                    try {
-                        startingDate = timeMachineViewModel.getPickedDate();
-                    } catch (Exception e) {
-                        Log.e(TAG, "observeSourcesFetched: ", e);
-                        startingDate = currentDateInMillis;
-                    }
-                }
+                // init starting date
+                long startingDate = initStartingDate();
 
-                homeViewModel.fetchArticles(
-                        sourcesFetched,
-                        NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
-                        false,
-                        startingDate);
+                // fetching articles
+                homeViewModel.fetchArticles(sourcesFetched,
+                                            startingDate,
+                             false);
 
+                //
                 myFollowedTopics = extractFollowedTopics(TopicRepository.getAllEnabledTopics_cached());
                 TopicRepository.setFollowedTopics(myFollowedTopics);
-                if(myFollowedTopics==null || myFollowedTopics.isEmpty()) {
-                    includeEmptyTopicsMessage.setVisibility(View.VISIBLE);
-                    swipeRefreshLayout.setVisibility(View.GONE);
-                    switchTopicFAB.setVisibility(View.GONE);
-                }
-                else {
-                    includeEmptyTopicsMessage.setVisibility(View.GONE);
-                    swipeRefreshLayout.setVisibility(View.VISIBLE);
-                    switchTopicFAB.setVisibility(View.VISIBLE);
-                }
+                changeLayoutOnfollowedTopicsListChanged(myFollowedTopics);
             }
         });
-    }
-
-    private List<Source> extractEnabledSources(List<Source> sourcesFetched) {
-        List<Source> result = new ArrayList<>();
-
-        for(Source currentSource: sourcesFetched) {
-            if(currentSource.getEnabled())
-                result.add(currentSource);
-        }
-
-        return result;
     }
 
     private void observeArticlesFetched() {
@@ -272,50 +241,47 @@ public class HomeFragment extends Fragment implements
                 // TODO this should only be called when the list is empty,
                 // when errors occurs should be the case above
 
-                articlesToDisplay = new ArrayList<>();
+                elementsToDisplayInHome = new ArrayList<>();
                 recyclerAdapterArticlesList.clearList();
             }
             else {
-                //
+                elementsToDisplayInHome = new ArrayList<>();
+
+                // setting up followed topics items
+                populateHomeWithMyFollowedTopics(myFollowedTopics,
+                                                 elementsToDisplayInHome);
+                setTopicsThumbnails(resultArticles,
+                                    myFollowedTopics,
+                                    homeViewModel.getPickedSources());
+
+                // setting up article items
+                resultArticles = adProvider.populateListWithAds(resultArticles, AD_DISTANCE);
+                elementsToDisplayInHome.addAll(resultArticles);
+                recyclerAdapterArticlesList.loadNewData(elementsToDisplayInHome);
 
                 //
-                setTopicsThumbnails(resultArticles, myFollowedTopics, homeViewModel.getPickedSources());
-                resultArticles = adProvider.populateListWithAds(resultArticles, AD_DISTANCE);
-                articlesToDisplay = new ArrayList<>(resultArticles);
-                populateWithMyFollowedTopics(myFollowedTopics, articlesToDisplay);
-                recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
-//                showCenteredToast("articles fetched");
                 recyclerIsLoading = false;
             }
         });
     }
 
-    private void populateWithMyFollowedTopics(List<Topic> topics, List<ListItem> listItems) {
-        MyTopics myTopics = new MyTopics();
-
-        // convert Topic --> to ListItem, for recycler list
-        List<ListItem> convertedList = new ArrayList<>();
-        if(topics!=null) {
-            convertedList = new ArrayList<>(topics);
-            // add customize button to the end
-            convertedList.add(new CustomizeMyTopicsButton());
-        }
-
-        myTopics.setMyTopics(convertedList);
-        listItems.add(0, myTopics); // add topics
-    }
-
     private void observerNextArticlesFetched() {
-        homeViewModel.getObservableNextArticlesList().observe(getViewLifecycleOwner(), fetchedArticles -> {
+        homeViewModel.getObservableNextArticlesList().observe(getViewLifecycleOwner(), resultArticles -> {
             Log.d(TAG, "getObservableNextArticlesList: called");
             recyclerIsLoading = false;
-            recyclerAdapterArticlesList.removeLoadingView(articlesToDisplay);
+            recyclerAdapterArticlesList.removeLoadingView(elementsToDisplayInHome);
 
-            if(fetchedArticles!=null && !fetchedArticles.isEmpty()) {
-                fetchedArticles = adProvider.populateListWithAds(fetchedArticles, AD_DISTANCE);
-                articlesToDisplay = new ArrayList<>(fetchedArticles);
-                populateWithMyFollowedTopics(myFollowedTopics, articlesToDisplay);
-                recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
+            if(resultArticles!=null && !resultArticles.isEmpty()) {
+                elementsToDisplayInHome = new ArrayList<>();
+
+                // setting up followed topics items
+                populateHomeWithMyFollowedTopics(myFollowedTopics, elementsToDisplayInHome);
+
+
+                //  setting up article items
+                resultArticles = adProvider.populateListWithAds(resultArticles, AD_DISTANCE);
+                elementsToDisplayInHome.addAll(resultArticles);
+                recyclerAdapterArticlesList.loadNewData(elementsToDisplayInHome);
             }
             else {
                 // todo
@@ -380,13 +346,12 @@ public class HomeFragment extends Fragment implements
         if(listItem.getItemType() == MyValues.ItemType.TOPIC) {
             Topic clickedTopic = (Topic) listItem;
             if(clickedTopic!=null) {
-                NavGraphDirections.ActionGlobalTopicFeedsFragment action =
-                        NavGraphDirections.actionGlobalTopicFeedsFragment(clickedTopic);
-                Navigation.findNavController(view).navigate(action);
+                showTopicFeedsFragment(clickedTopic);
             }
         }
-
     }
+
+
 
     @Override
     public void onCustomizeMyTopicsButtonClicked(int position) {
@@ -410,7 +375,7 @@ public class HomeFragment extends Fragment implements
 
     @Override
     public void onDateChanged(long date) {
-
+        // TODO
     }
 
     @Override
@@ -421,6 +386,55 @@ public class HomeFragment extends Fragment implements
     }
 
 
+
+
+    //---------------------------------------------------------- destinantions
+
+    private void showAboutFragment() {
+        Navigation.findNavController(view).navigate(R.id.action_homeFragment_to_aboutFragment);
+    }
+
+    private void showCustomizeHomeFeedFragment() {
+        Log.d(TAG, "showCustomizeHomeFeedFragment: called");
+//        // add container transformation animation
+//        FragmentNavigator.Extras animations = new FragmentNavigator
+//                .Extras
+//                .Builder()
+//                .addSharedElement(view, view.getTransitionName())
+//                .build();
+
+
+        Navigation.findNavController(view)
+                .navigate(R.id.action_homeFragment_to_topicsFragment);
+    }
+
+    private void showTopicFeedsFragment(Topic clickedTopic) {
+        NavGraphDirections.ActionGlobalTopicFeedsFragment action =
+                NavGraphDirections.actionGlobalTopicFeedsFragment(clickedTopic);
+        Navigation.findNavController(view).navigate(action);
+    }
+
+    private void showSwitchTopicDialog() {
+        List<String> list = buildMyTopicsChoices(myFollowedTopics);
+        if(list==null || list.isEmpty()) return;
+
+        //
+        CharSequence[] items = list.toArray(new CharSequence[0]);
+
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.switch_topic_dialog_label)
+                .setItems(items, (dialog, which) -> {
+
+                    Topic topicChosen = myFollowedTopics.get(which);
+                    if(topicChosen!=null) {
+                        showTopicFeedsFragment(topicChosen);
+                    }
+
+                })
+                .setNegativeButton(R.string.newgative_button_message_switch_topic_dialog,
+                        (dialog, which) -> dialog.dismiss())
+                .show();
+    }
 
 
 
@@ -458,6 +472,65 @@ public class HomeFragment extends Fragment implements
         initRecycleViewArticles(recyclerViewArticles);
         setupScrollListener(recyclerViewArticles);
         setupSwipeDownToRefresh(swipeRefreshLayout);
+    }
+
+    private long initStartingDate() {
+        long result = currentDateInMillis;
+        if (timeMachineViewModel.timeMachineIsEnabled()) {
+            try {
+                result = timeMachineViewModel.getPickedDate();
+            } catch (Exception e) {
+                Log.e(TAG, "initStartingDate: ", e);
+            }
+        }
+        return result;
+    }
+
+    private void changeLayoutOnfollowedTopicsListChanged(List<Topic> followedTopics) {
+        if(followedTopics==null || followedTopics.isEmpty()) {
+            setLayoutWhenNoTopicsAreFollowed();
+        }
+        else {
+            setLayoutWhenAtLeastOneTopicIsFollowed();
+        }
+    }
+
+    private void setLayoutWhenAtLeastOneTopicIsFollowed() {
+        includeEmptyTopicsMessage.setVisibility(View.GONE);
+        swipeRefreshLayout.setVisibility(View.VISIBLE);
+        switchTopicFAB.setVisibility(View.VISIBLE);
+    }
+
+    private void setLayoutWhenNoTopicsAreFollowed() {
+        includeEmptyTopicsMessage.setVisibility(View.VISIBLE);
+        swipeRefreshLayout.setVisibility(View.GONE);
+        switchTopicFAB.setVisibility(View.GONE);
+    }
+
+    private void populateHomeWithMyFollowedTopics(List<Topic> topics, List<ListItem> elementsToDisplayInHome) {
+        MyTopicsItem myTopicsItem = new MyTopicsItem();
+
+        // convert Topic --> to ListItem, for recycler list
+        List<ListItem> convertedList = new ArrayList<>();
+        if(topics!=null) {
+            convertedList = new ArrayList<>(topics);
+            // add customize button to the end
+            convertedList.add(new CustomizeMyTopicsButton());
+        }
+
+        myTopicsItem.setMyTopics(convertedList);
+        elementsToDisplayInHome.add(myTopicsItem); // add topics as first element
+    }
+
+    private List<Source> extractEnabledSources(List<Source> sourcesFetched) {
+        List<Source> result = new ArrayList<>();
+
+        for(Source currentSource: sourcesFetched) {
+            if(currentSource.getEnabled())
+                result.add(currentSource);
+        }
+
+        return result;
     }
 
     private List<String> buildMyTopicsChoices(List<Topic> topics) {
@@ -571,8 +644,8 @@ public class HomeFragment extends Fragment implements
 
     private boolean reachedTheBottomOfList(LinearLayoutManager linearLayoutManager) {
         return linearLayoutManager != null &&
-                (articlesToDisplay != null && !articlesToDisplay.isEmpty()) &&
-                linearLayoutManager.findLastCompletelyVisibleItemPosition() == articlesToDisplay.size() - 1;
+                (elementsToDisplayInHome != null && !elementsToDisplayInHome.isEmpty()) &&
+                linearLayoutManager.findLastCompletelyVisibleItemPosition() == elementsToDisplayInHome.size() - 1;
     }
 
     private void loadMoreArticles() {
@@ -580,7 +653,7 @@ public class HomeFragment extends Fragment implements
         recyclerIsLoading = true;
 
         // adding loading view
-        recyclerAdapterArticlesList.addLoadingView(articlesToDisplay);
+        recyclerAdapterArticlesList.addLoadingView(elementsToDisplayInHome);
 
         // load new items
         homeViewModel.fetchNextArticles(NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE);
@@ -595,88 +668,43 @@ public class HomeFragment extends Fragment implements
 
     private void refreshArticles() {
         long startingDate = currentDateInMillis;
-
         if (timeMachineViewModel.timeMachineIsEnabled()) {
             startingDate = timeMachineViewModel.getPickedDate();
         }
 
-        homeViewModel.fetchArticles(
-                sourcesFetched,
-                NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
-                true,
-                startingDate);
+        //
+        homeViewModel.fetchArticles(sourcesFetched,
+                                    startingDate,
+                                    true);
     }
 
     private void refreshArticlesAndTopics() {
-        long startingDate = currentDateInMillis;
-
         myFollowedTopics = extractFollowedTopics(TopicRepository.getAllEnabledTopics_cached());
         TopicRepository.setFollowedTopics(myFollowedTopics);
 
         if(myFollowedTopics==null || myFollowedTopics.isEmpty()) {
-            includeEmptyTopicsMessage.setVisibility(View.VISIBLE);
-            swipeRefreshLayout.setVisibility(View.GONE);
-            switchTopicFAB.setVisibility(View.GONE);
+            setLayoutWhenNoTopicsAreFollowed();
             return;
         }
         else {
-            includeEmptyTopicsMessage.setVisibility(View.GONE);
-            swipeRefreshLayout.setVisibility(View.VISIBLE);
-            switchTopicFAB.setVisibility(View.VISIBLE);
+            setLayoutWhenAtLeastOneTopicIsFollowed();
         }
 
+        //
+        long startingDate = currentDateInMillis;
         if (timeMachineViewModel.timeMachineIsEnabled()) {
             startingDate = timeMachineViewModel.getPickedDate();
         }
 
-        homeViewModel.fetchArticles(
-                sourcesFetched,
-                NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
-                true,
-                startingDate);
-    }
-
-    private void showSwitchTopicDialog() {
-        List<String> list = buildMyTopicsChoices(myFollowedTopics);
-        if(list==null || list.isEmpty()) return;
-
         //
-        CharSequence[] items = list.toArray(new CharSequence[0]);
-//        String[] items = new String[stockList.size()];
-//        items = stockList.toArray(items);
-
-        new MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.switch_topic_dialog_label)
-                .setItems(items, (dialog, which) -> {
-
-                    Topic topicChosen = myFollowedTopics.get(which);
-                    if(topicChosen!=null) {
-                        Log.d(TAG, "showSwitchTopicDialog: choice: " + topicChosen.getDisplayName());
-
-                        NavGraphDirections.ActionGlobalTopicFeedsFragment action =
-                                NavGraphDirections.actionGlobalTopicFeedsFragment(topicChosen);
-                        Navigation.findNavController(view).navigate(action);
-                    }
-
-                })
-                .setNegativeButton(R.string.newgative_button_message_switch_topic_dialog,
-                        (dialog, which) -> dialog.dismiss())
-                .show();
+        homeViewModel.fetchArticles(sourcesFetched,
+                                    startingDate,
+                                    true);
     }
 
-    private void showCustomizeHomeFeedFragment() {
-        Log.d(TAG, "showCustomizeHomeFeedFragment: called");
-//        // add container transformation animation
-//        FragmentNavigator.Extras animations = new FragmentNavigator
-//                .Extras
-//                .Builder()
-//                .addSharedElement(view, view.getTransitionName())
-//                .build();
 
 
-        Navigation.findNavController(view)
-                .navigate(R.id.action_homeFragment_to_topicsFragment);
-    }
+
 
     private void switchTheme() {
         Log.d(TAG, "enableDarkMode: clicked");

@@ -60,7 +60,7 @@ public class AdProvider {
      * populate a List<ListItem> list, with ads
      *
      * @param listToPopulate
-     * @param eachNitems      add an ad each n items
+     * @param eachNitems      add an ad for each n items
      * @return
      */
     public List<ListItem> populateListWithAds(List<ListItem> listToPopulate, int eachNitems) {
@@ -70,7 +70,7 @@ public class AdProvider {
             Log.e(TAG, "SCIENCE_BOARD - populateListWithAds: admob not initilized");
             return oldList;
         }
-        if(nativeAds==null || nativeAds.size()==0) {
+        if(nativeAds==null || nativeAds.isEmpty()) {
             Log.e(TAG, "SCIENCE_BOARD - populateListWithAds: nativeAds list is empty");
             return oldList;
         }
@@ -82,18 +82,21 @@ public class AdProvider {
         int increment = baseStep + 1;
 
         for(int i=0; i<listToPopulate.size(); i++) {
-            ListItem listItem = oldList.get(i);
+            ListItem currentListItem = oldList.get(i);
             if(i==baseStep) {
-                if(j>=nativeAds.size()) j=0;
+                if(j >= nativeAds.size()) j=0;
 
                 ListAd listAd = new ListAd();
                 listAd.setAd(nativeAds.get(j));
+                // add ad
                 newList.add(listAd);
+                // and add old article
+                newList.add(currentListItem);
 
                 baseStep = baseStep + increment;
             }
             else {
-                newList.add(listItem);
+                newList.add(currentListItem);
             }
         }
 

@@ -13,7 +13,6 @@ import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.rss.room.ArticleDao;
 import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
-import com.nocorp.scienceboard.utility.MyUtilities;
 
 import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
@@ -67,7 +66,8 @@ public class ArticleRepository {
 
     public void fetchArticles(List<Source> givenSources,
                               int numArticlesForEachSource,
-                              Context context, long startingDate) {
+                              long startingDate,
+                              Context context) {
         //TODO: givenSources==null should be returned only in case of errors
         if(givenSources==null || givenSources.isEmpty()) {
             listener.onArticlesFetchCompleted(new ArrayList<>(), new ArrayList<>());

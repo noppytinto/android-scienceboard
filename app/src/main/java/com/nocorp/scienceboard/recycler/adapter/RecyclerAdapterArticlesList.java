@@ -17,9 +17,8 @@ import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.bookmarks.model.BookmarkArticle;
 import com.nocorp.scienceboard.history.model.HistoryArticle;
 import com.nocorp.scienceboard.model.Article;
-import com.nocorp.scienceboard.model.CustomizeMyTopicsButton;
 import com.nocorp.scienceboard.model.LoadingView;
-import com.nocorp.scienceboard.model.MyTopics;
+import com.nocorp.scienceboard.model.MyTopicsItem;
 import com.nocorp.scienceboard.recycler.viewholder.LoadingViewHolder;
 import com.nocorp.scienceboard.recycler.viewholder.MyTopicsViewholder;
 import com.nocorp.scienceboard.ui.viewholder.ArticleViewHolder;
@@ -158,14 +157,14 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
             buildBookmarkItem((BookmarkViewHolder) holder, article);
         }
         else if(getItemViewType(position) == MY_TOPICS_LIST_TYPE) {
-            MyTopics myTopics = (MyTopics) recyclerList.get(position);
+            MyTopicsItem myTopicsItem = (MyTopicsItem) recyclerList.get(position);
 
             //
-            buildMyTopicsItem((MyTopicsViewholder) holder, myTopics);
+            buildMyTopicsItem((MyTopicsViewholder) holder, myTopicsItem);
         }
     }
 
-    private void buildMyTopicsItem(MyTopicsViewholder holder, MyTopics item) {
+    private void buildMyTopicsItem(MyTopicsViewholder holder, MyTopicsItem item) {
         List<ListItem> myTopics = item.getMyTopics();
         if(myTopics!=null) {
 

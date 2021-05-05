@@ -21,6 +21,7 @@ import java.util.List;
 
 public class TopicRepository {
     private final String TAG = this.getClass().getSimpleName();
+    private final String APP_NAME = "NOPPYS_BOARD - ";
     private static List<Topic> cachedAllTopics_enabled;
     private static List<Topic> fallbackTopics;
     private static List<Topic> followedTopics;
@@ -45,6 +46,25 @@ public class TopicRepository {
 
     public static List<Topic> getFollowedTopics() {
         return followedTopics;
+    }
+
+    public List<Topic> getFollowedTopics_sync(Context context) {
+        List<Topic> result = new ArrayList<>();
+
+        if(followedTopics==null) {
+            try {
+                // NOTE: if a topic extist, will be ignored...
+                TopicDao dao = getTopicDao(context);
+                result = dao.selectFollowedTopics();
+            } catch (Exception e) {
+                Log.e(TAG, APP_NAME + "getFollowedTopics_sync: cannot get followed topics from Room, cause:" + e.getMessage());
+            }
+        }
+        else {
+            result = followedTopics;
+        }
+
+        return result;
     }
 
 

@@ -215,7 +215,7 @@ public class SourceRepository {
         result = new ArrayList<>();
         for(int i=0; i < topics.size(); i++) {
             if(topics.get(i).getFollowed()) {
-                Source source = extractTheFirstSourceFallingInThisCategory(allSources, topics.get(i).getId());
+                Source source = extractTheFirstSourceBelongingToThisTopic(allSources, topics.get(i).getId());
                 if(source!=null) {
                     result.add(source);
                     allSources.remove(source);
@@ -233,29 +233,28 @@ public class SourceRepository {
      * nothing will happen,
      * will be extracted only n<=givenSources.size() sources
      */
-    public List<Source> getNsourcesForEachFollowedCategory_randomly(List<Source> givenSources,
-                                                                    List<Topic> topics,
-                                                                    int numSourcesToFetch) {
+    public List<Source> getNsourcesForEachFollowedTopic_randomly(List<Source> givenSources,
+                                                                 List<Topic> followedTopics,
+                                                                 int numSourcesToFetch) {
         List<Source> result = null;
         if(givenSources==null || givenSources.isEmpty()) return null;
-        if(topics==null || topics.isEmpty()) return null;
+        if(followedTopics==null || followedTopics.isEmpty()) return null;
         if(numSourcesToFetch<=0) return null;
 
-        // shuffling
-        List<Source> allSources = new ArrayList<>(givenSources);
-        Collections.shuffle(allSources);
+        // randomizing sources
+        List<Source> randomizedSources = new ArrayList<>(givenSources);
+        Collections.shuffle(randomizedSources);
 
         //
         result = new ArrayList<>();
-        for(int i=0; i < topics.size(); i++) { // for each topic, fetch N sources
-            Topic currentTopic = topics.get(i);
-            if(currentTopic.getFollowed()) {
-                for(int j=0; j<numSourcesToFetch; j++) { // counter to fetch n sources for each topic
-                    Source extractedSource = extractTheFirstSourceFallingInThisCategory(allSources, currentTopic.getId());
-                    if(extractedSource!=null) {
-                        result.add(extractedSource);
-                        allSources.remove(extractedSource); // remove the source fetched to avoid duplications
-                    }
+        for(int i=0; i < followedTopics.size(); i++) { // for each topic, fetch N sources
+            Topic currentTopic = followedTopics.get(i);
+            for(int j=0; j<numSourcesToFetch; j++) { // counter to fetch n sources for each topic
+                Source extractedSource = extractTheFirstSourceBelongingToThisTopic(randomizedSources, currentTopic.getId());
+                if(extractedSource!=null) {
+                    result.add(extractedSource);
+                    // remove the source extracted to avoid duplications
+                    randomizedSources.remove(extractedSource);
                 }
             }
         }
@@ -312,7 +311,7 @@ public class SourceRepository {
         return source;
     }
 
-    private static Source extractTheFirstSourceFallingInThisCategory(List<Source> givenSources, String givenCategory) {
+    private static Source extractTheFirstSourceBelongingToThisTopic(List<Source> givenSources, String givenCategory) {
         Source result = null;
         if(givenSources==null || givenSources.isEmpty()) return null;
         if(givenCategory==null || givenCategory.isEmpty()) return null;

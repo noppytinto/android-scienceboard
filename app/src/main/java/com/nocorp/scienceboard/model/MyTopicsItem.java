@@ -5,13 +5,13 @@ import com.nocorp.scienceboard.utility.MyValues;
 
 import java.util.List;
 
-public class MyTopics extends ListItem {
+public class MyTopicsItem extends ListItem {
     private List<ListItem> myTopics;
-    public MyTopics() {
+    public MyTopicsItem() {
         setItemType(MyValues.ItemType.MY_TOPICS_LIST);
     }
 
-    public MyTopics(List<ListItem> topics) {
+    public MyTopicsItem(List<ListItem> topics) {
         setItemType(MyValues.ItemType.MY_TOPICS_LIST);
         this.myTopics = topics;
     }
