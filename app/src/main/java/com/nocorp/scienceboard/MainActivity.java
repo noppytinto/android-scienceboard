@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        checkDarkMode();
+//        checkDarkMode();
         initView();
         initAdProvider(this, NUM_ADS_TO_LOAD);
 

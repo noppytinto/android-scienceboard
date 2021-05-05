@@ -41,6 +41,7 @@ import com.nocorp.scienceboard.model.MyTopicsItem;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterMyTopics;
+import com.nocorp.scienceboard.rss.repository.SourceRepository;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
 import com.nocorp.scienceboard.topics.model.Topic;
 import com.nocorp.scienceboard.topics.repository.TopicRepository;
@@ -56,6 +57,8 @@ import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -123,6 +126,7 @@ public class HomeFragment extends Fragment implements
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate: called");
         super.onCreate(savedInstanceState);
 //        setExitTransition(new Hold().setDuration(1000));
         setExitTransition(new MaterialElevationScale(/* growing= */ false));
@@ -184,8 +188,13 @@ public class HomeFragment extends Fragment implements
         viewBinding = null;
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
 
-
+        // reset previous observed articles
+        homeViewModel.setArticlesList(null);
+    }
 
     //---------------------------------------------------------------------------------------- METHODS
 
@@ -248,11 +257,13 @@ public class HomeFragment extends Fragment implements
                 elementsToDisplayInHome = new ArrayList<>();
 
                 // setting up followed topics items
-                populateHomeWithMyFollowedTopics(myFollowedTopics,
-                                                 elementsToDisplayInHome);
                 setTopicsThumbnails(resultArticles,
                                     myFollowedTopics,
                                     homeViewModel.getPickedSources());
+
+                populateHomeWithMyFollowedTopics(myFollowedTopics,
+                                                 elementsToDisplayInHome);
+
 
                 // setting up article items
                 resultArticles = adProvider.populateListWithAds(resultArticles, AD_DISTANCE);
@@ -291,6 +302,7 @@ public class HomeFragment extends Fragment implements
 
     private void observeTimeMachineStatus() {
         timeMachineViewModel.getObservablePickedDate().observe(getViewLifecycleOwner(), pickedDate -> {
+            Log.d(TAG, "observeTimeMachineStatus: called");
             if(timeMachineViewModel.isDateChanged()) {
                 Log.d(TAG, "observeTimeMachineStatus: using time machine");
                 timeMachineViewModel.setDateChanged(false);
@@ -350,8 +362,6 @@ public class HomeFragment extends Fragment implements
             }
         }
     }
-
-
 
     @Override
     public void onCustomizeMyTopicsButtonClicked(int position) {
@@ -487,6 +497,7 @@ public class HomeFragment extends Fragment implements
     }
 
     private void changeLayoutOnfollowedTopicsListChanged(List<Topic> followedTopics) {
+        Log.d(TAG, "changeLayoutOnfollowedTopicsListChanged: called");
         if(followedTopics==null || followedTopics.isEmpty()) {
             setLayoutWhenNoTopicsAreFollowed();
         }
@@ -508,6 +519,7 @@ public class HomeFragment extends Fragment implements
     }
 
     private void populateHomeWithMyFollowedTopics(List<Topic> topics, List<ListItem> elementsToDisplayInHome) {
+        Log.d(TAG, "populateHomeWithMyFollowedTopics: called");
         MyTopicsItem myTopicsItem = new MyTopicsItem();
 
         // convert Topic --> to ListItem, for recycler list
@@ -523,6 +535,7 @@ public class HomeFragment extends Fragment implements
     }
 
     private List<Source> extractEnabledSources(List<Source> sourcesFetched) {
+        Log.d(TAG, "extractEnabledSources: called");
         List<Source> result = new ArrayList<>();
 
         for(Source currentSource: sourcesFetched) {
@@ -534,6 +547,7 @@ public class HomeFragment extends Fragment implements
     }
 
     private List<String> buildMyTopicsChoices(List<Topic> topics) {
+        Log.d(TAG, "buildMyTopicsChoices: called");
         List<String> result = new ArrayList<>();
         if(topics==null || topics.isEmpty()) return result;
 
@@ -546,45 +560,76 @@ public class HomeFragment extends Fragment implements
         return result;
     }
 
-    private List<String> setTopicsThumbnails(List<ListItem> listItems, List<Topic> topics, List<Source> sources) {
-        List<String> result = null;
-        if(topics==null || topics.isEmpty()) return result;
-        if(listItems==null || listItems.isEmpty()) return result;
+    private void setTopicsThumbnails(List<ListItem> elementsToDisplayInHome,
+                                     List<Topic> givenTopics,
+                                     List<Source> givenSources) {
+        Log.d(TAG, "setTopicsThumbnails: called");
+        if(givenTopics==null || givenTopics.isEmpty()) return;
+        if(elementsToDisplayInHome==null || elementsToDisplayInHome.isEmpty()) return;
+        if(givenSources==null || givenSources.isEmpty()) return;
 
+        List<Article> articles = filterArticles(elementsToDisplayInHome);
+        if(articles==null || articles.isEmpty()) return;
 
-        result = new ArrayList<>();
-        List<Source> sourcesTarget = sources;
+//        SourceRepository sourceRepository = new SourceRepository();
+//        List<Source> sourcesTarget = sourceRepository.getAsourceForEachFollowedCategory_randomly(givenSources, givenTopics);
+//        for(Source currentSource: sourcesTarget) {
+//
+//        }
 
-
-        for(Topic topic: topics) {
-            String topicId = topic.getId();
-            for(Source source: sourcesTarget) {
-                if(source.getCategories().contains(topicId)) {
-                    String sourceId = source.getId();
-                    for(ListItem listItem: listItems) {
-                        if(listItem.getItemType() == MyValues.ItemType.ARTICLE) {
-                            Article article = ((Article) listItem);
-                            if(sourceId.equals(article.getSourceId())) {
-                                String thumbnailUrl = article.getThumbnailUrl();
-                                if(thumbnailUrl!=null) {
-                                    topic.setThumbnailUrl(thumbnailUrl);
-                                    break;
-                                }
+        for(Topic currentTopic: givenTopics) { // for each topic...
+            String currentTopicId = currentTopic.getId();
+            for(Source currentSource: givenSources) { // ...get a source...
+                if(currentSource.getCategories().contains(currentTopicId)) {
+                    String currentSourceId = currentSource.getId();
+                    Collections.shuffle(articles); // ... randomize articles...
+                    for(Article currentArticle: articles) { //...get an articles with a thumbnail ...
+                        if(currentSourceId.equals(currentArticle.getSourceId())) {
+                            String thumbnailUrl = currentArticle.getThumbnailUrl();
+                            if(thumbnailUrl!=null) {
+                                currentTopic.setThumbnailUrl(thumbnailUrl);
+                                break;
                             }
                         }
-
-                    }
+                    }// end most inner for
                     break;
                 }
+            }// end middle for
+        }// end outer for
+    }
+
+    private List<Article> filterArticles(List<ListItem> elementsToDisplayInHome) {
+        List<Article> result = new ArrayList<>();
+
+        for(ListItem listItem: elementsToDisplayInHome) {
+            if(listItem.getItemType() == MyValues.ItemType.ARTICLE) {
+                Article article = ((Article) listItem);
+                result.add(article);
             }
         }
 
-
-
-
-
         return result;
     }
+
+//    private List<Article> filterArticlesOfThisSources(List<Article> givenArticles, List<Source> givenSources) {
+//        List<Article> result = new ArrayList<>();
+//
+//        List<Article> tempArticles = new ArrayList<>(givenArticles);
+//
+//
+//        for(Source currentSource: givenSources) {
+//            if(listItem.getItemType() == MyValues.ItemType.ARTICLE) {
+//                Article article = ((Article) listItem);
+//                result.add(article);
+//            }
+//        }
+//
+//        return result;
+//    }
+
+
+
+
 
     private void initRecycleViewArticles(RecyclerView recyclerView) {
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -667,6 +712,7 @@ public class HomeFragment extends Fragment implements
     }
 
     private void refreshArticles() {
+        Log.d(TAG, "refreshArticles: called");
         long startingDate = currentDateInMillis;
         if (timeMachineViewModel.timeMachineIsEnabled()) {
             startingDate = timeMachineViewModel.getPickedDate();
@@ -679,6 +725,7 @@ public class HomeFragment extends Fragment implements
     }
 
     private void refreshArticlesAndTopics() {
+        Log.d(TAG, "refreshArticlesAndTopics: called");
         myFollowedTopics = extractFollowedTopics(TopicRepository.getAllEnabledTopics_cached());
         TopicRepository.setFollowedTopics(myFollowedTopics);
 
@@ -721,7 +768,6 @@ public class HomeFragment extends Fragment implements
 
         try {
             menuItem.setIcon(resourceId);
-            Log.d(TAG, "SCIENCE_BOARD - changeMenuItemIcon: changed");
         } catch (Exception e) {
             Log.e(TAG, "SCIENCE_BOARD - changeMenuItemICon: cannot change icon, cause:" + e.getMessage() );
         }
@@ -732,13 +778,13 @@ public class HomeFragment extends Fragment implements
 
         try {
             menuItem.setTitle(value);
-            Log.d(TAG, "SCIENCE_BOARD - changeMenuItemTitle: changed");
         } catch (Exception e) {
             Log.e(TAG, "SCIENCE_BOARD - changeMenuItemTitle: cannot change icon, cause:" + e.getMessage() );
         }
     }
 
     private void disableDarkMode() {
+        Log.d(TAG, "disableDarkMode: called");
         darkModeEnabled = false;
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         changeMenuItemIcon(switchThemeMenuItem, R.drawable.ic_sun);
@@ -751,6 +797,7 @@ public class HomeFragment extends Fragment implements
     }
 
     private void enableDarkMode() {
+        Log.d(TAG, "enableDarkMode: called");
         darkModeEnabled = true;
         changeMenuItemIcon(switchThemeMenuItem, R.drawable.ic_moon);
         changeMenuItemTitle(switchThemeMenuItem, "Enable Dark Mode");
@@ -764,6 +811,7 @@ public class HomeFragment extends Fragment implements
     }
 
     private void checkDarkMode() {
+        Log.d(TAG, "checkDarkMode: called");
         SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
         boolean defaultValue = getResources().getBoolean(R.bool.preference_app_theme_default_value_key);
         darkModeEnabled = sharedPref.getBoolean(getString(R.string.preference_app_theme_key), defaultValue);
@@ -785,6 +833,7 @@ public class HomeFragment extends Fragment implements
 
 
     private List<Topic> extractFollowedTopics(List<Topic> topics) {
+        Log.d(TAG, "extractFollowedTopics: called");
         List<Topic> result = null;
         if(topics==null || topics.isEmpty()) return result;
 
