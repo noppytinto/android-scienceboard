@@ -128,13 +128,6 @@ public class TopicFeedsFragment extends Fragment implements
 
     //--------------------------------------------------------------------------------------------- ANDROID METHODS
 
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        setTransparentStatusBar();
-    }
-
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
@@ -176,15 +169,16 @@ public class TopicFeedsFragment extends Fragment implements
         Log.d(TAG, "onPause: ");
         super.onPause();
         restoreStatusbarColor();
+        topicFeedsViewModel.setArticlesList(null);
     }
 
     @Override
-    public void onDestroy() {
-        Log.d(TAG, "onDestroy: ");
-        super.onDestroy();
+    public void onResume() {
+        super.onResume();
+        setTransparentStatusBar();
     }
-//
-//    @Override
+
+    //    @Override
 //    public void onDetach() {
 //        Log.d(TAG, "onDetach: ");
 //        super.onDetach();
@@ -249,16 +243,14 @@ public class TopicFeedsFragment extends Fragment implements
                 Log.w(TAG, "SCIENCE_BOARD - loadSources: no sources in DB");
             }
             else {
-//                // TODO
+                // getting enabled sources
                 sourcesFetched = new ArrayList<>(resultSources);
                 sourcesFetched = extractEnabledSources(sourcesFetched);
-                long startingDate = currentDateInMillis;
 
-                Log.d(TAG, "onChanged: using sources");
-                if (timeMachineViewModel.timeMachineIsEnabled()) {
-                    startingDate = timeMachineViewModel.getPickedDate();
-                }
+                // init starting date
+                long startingDate = initStartingDate();
 
+                // fetching articles
                 topicFeedsViewModel.fetchArticles(
                         sourcesFetched,
                         NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
@@ -267,6 +259,18 @@ public class TopicFeedsFragment extends Fragment implements
                         startingDate);
             }
         });
+    }
+
+    private long initStartingDate() {
+        long result = currentDateInMillis;
+        if (timeMachineViewModel.timeMachineIsEnabled()) {
+            try {
+                result = timeMachineViewModel.getPickedDate();
+            } catch (Exception e) {
+                Log.e(TAG, "initStartingDate: ", e);
+            }
+        }
+        return result;
     }
 
     private List<Source> extractEnabledSources(List<Source> sourcesFetched) {

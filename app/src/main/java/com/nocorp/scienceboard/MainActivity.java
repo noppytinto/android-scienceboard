@@ -19,6 +19,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.crashlytics.internal.settings.model.AppSettingsData;
 import com.nocorp.scienceboard.databinding.ActivityMainBinding;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
 import com.nocorp.scienceboard.system.ConnectionManager;
@@ -89,11 +90,10 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        checkDarkMode();
         super.onCreate(savedInstanceState);
-//        checkDarkMode();
         initView();
         initAdProvider(this, NUM_ADS_TO_LOAD);
-
         observeDatePickedFromTimeMachine();
         loadTopics();
     }

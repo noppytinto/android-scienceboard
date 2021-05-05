@@ -196,8 +196,43 @@ public class HomeFragment extends Fragment implements
         homeViewModel.setArticlesList(null);
     }
 
+
+
     //---------------------------------------------------------------------------------------- METHODS
 
+    private void initView() {
+        // views
+        swipeRefreshLayout = viewBinding.swipeRefreshLayoutHomeFragment;
+        swipeRefreshLayout.setColorSchemeResources(R.color.orange);
+        recyclerViewArticles = viewBinding.recyclerViewHomeFragment;
+        switchTopicFAB = viewBinding.floatingActionButtonHomeFragmentSwitchTopic;
+        switchTopicFAB.setOnClickListener(v -> showSwitchTopicDialog());
+        includeEmptyTopicsMessage = view.findViewById(R.id.include_mainActivity_oneEmptyMyTopicsList);
+        addTopicButton_emptyMessage = viewBinding.includeMainActivityOneEmptyMyTopicsList.buttonLayoutEmptyTopics;
+        addTopicButton_emptyMessage.setOnClickListener(v -> showCustomizeHomeFeedFragment());
+
+        //
+        currentDateInMillis = System.currentTimeMillis();
+        adProvider = AdProvider.getInstance(); // is not guaranteed that
+        // Retrieve and cache the system's default "short" animation time.
+        shortAnimationDuration = getResources().getInteger(
+                android.R.integer.config_shortAnimTime);
+
+        // viewmodels
+        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+        sourceViewModel = new ViewModelProvider(requireActivity()).get(SourceViewModel.class);
+        topicsViewModel = new ViewModelProvider(requireActivity()).get(TopicsViewModel.class);
+        timeMachineViewModel = new ViewModelProvider(requireActivity()).get(TimeMachineViewModel.class);
+        bookmarksViewModel = new ViewModelProvider(requireActivity()).get(BookmarksViewModel.class);
+        bookmarksViewModel.setBookmarksListOnChangedListener(this);
+        webviewViewModel = new ViewModelProvider(requireActivity()).get(WebviewViewModel.class);
+        webviewViewModel.setBookmarksListOnChangedListener(this);
+
+        //
+        initRecycleViewArticles(recyclerViewArticles);
+        setupScrollListener(recyclerViewArticles);
+        setupSwipeDownToRefresh(swipeRefreshLayout);
+    }
 
 
 
@@ -226,7 +261,7 @@ public class HomeFragment extends Fragment implements
                 // fetching articles
                 homeViewModel.fetchArticles(sourcesFetched,
                                             startingDate,
-                             false);
+                                      false);
 
                 //
                 myFollowedTopics = extractFollowedTopics(TopicRepository.getAllEnabledTopics_cached());
@@ -450,39 +485,6 @@ public class HomeFragment extends Fragment implements
 
     //----------------------------------------------------------
 
-    private void initView() {
-        // views
-        swipeRefreshLayout = viewBinding.swipeRefreshLayoutHomeFragment;
-        swipeRefreshLayout.setColorSchemeResources(R.color.orange);
-        recyclerViewArticles = viewBinding.recyclerViewHomeFragment;
-        switchTopicFAB = viewBinding.floatingActionButtonHomeFragmentSwitchTopic;
-        switchTopicFAB.setOnClickListener(v -> showSwitchTopicDialog());
-        includeEmptyTopicsMessage = view.findViewById(R.id.include_mainActivity_oneEmptyMyTopicsList);
-        addTopicButton_emptyMessage = viewBinding.includeMainActivityOneEmptyMyTopicsList.buttonLayoutEmptyTopics;
-        addTopicButton_emptyMessage.setOnClickListener(v -> showCustomizeHomeFeedFragment());
-
-        //
-        currentDateInMillis = System.currentTimeMillis();
-        adProvider = AdProvider.getInstance(); // is not guaranteed that
-        // Retrieve and cache the system's default "short" animation time.
-        shortAnimationDuration = getResources().getInteger(
-                android.R.integer.config_shortAnimTime);
-
-        // viewmodels
-        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
-        sourceViewModel = new ViewModelProvider(requireActivity()).get(SourceViewModel.class);
-        topicsViewModel = new ViewModelProvider(requireActivity()).get(TopicsViewModel.class);
-        timeMachineViewModel = new ViewModelProvider(requireActivity()).get(TimeMachineViewModel.class);
-        bookmarksViewModel = new ViewModelProvider(requireActivity()).get(BookmarksViewModel.class);
-        bookmarksViewModel.setBookmarksListOnChangedListener(this);
-        webviewViewModel = new ViewModelProvider(requireActivity()).get(WebviewViewModel.class);
-        webviewViewModel.setBookmarksListOnChangedListener(this);
-
-        //
-        initRecycleViewArticles(recyclerViewArticles);
-        setupScrollListener(recyclerViewArticles);
-        setupSwipeDownToRefresh(swipeRefreshLayout);
-    }
 
     private long initStartingDate() {
         long result = currentDateInMillis;
