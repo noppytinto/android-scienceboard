@@ -16,6 +16,17 @@
         android:visibility="gone"
         tools:visibility="visible" />
 
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progressIndicator_homefragment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:indicatorColor="@color/orange"
+        />
+
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefreshLayout_homeFragment"
@@ -40,7 +51,8 @@
         android:layout_margin="16dp"
         android:src="@drawable/ic_list_bulleted"
         android:transitionName="@string/transition_switch_topic_to_my_topics_list"
-        android:visibility="visible"
+        android:visibility="gone"
+        tools:visibility="visible"
         app:backgroundTint="?attr/switchTopicFABbackgroundColor"
         app:fabSize="mini"
         />

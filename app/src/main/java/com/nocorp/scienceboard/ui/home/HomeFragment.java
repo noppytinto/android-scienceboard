@@ -30,6 +30,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.transition.MaterialElevationScale;
 import com.nocorp.scienceboard.NavGraphDirections;
 import com.nocorp.scienceboard.R;
@@ -77,6 +78,7 @@ public class HomeFragment extends Fragment implements
     private FloatingActionButton switchTopicFAB;
     private View includeEmptyTopicsMessage;
     private Button addTopicButton_emptyMessage;
+    private CircularProgressIndicator progressIndicator;
     private MenuItem switchThemeMenuItem;
 
     // recycler
@@ -202,6 +204,7 @@ public class HomeFragment extends Fragment implements
 
     private void initView() {
         // views
+        progressIndicator = viewBinding.progressIndicatorHomefragment;
         swipeRefreshLayout = viewBinding.swipeRefreshLayoutHomeFragment;
         swipeRefreshLayout.setColorSchemeResources(R.color.orange);
         recyclerViewArticles = viewBinding.recyclerViewHomeFragment;
@@ -259,6 +262,7 @@ public class HomeFragment extends Fragment implements
                 long startingDate = initStartingDate();
 
                 // fetching articles
+                progressIndicator.setVisibility(View.VISIBLE);
                 homeViewModel.fetchArticles(sourcesFetched,
                                             startingDate,
                                       false);
@@ -281,6 +285,7 @@ public class HomeFragment extends Fragment implements
 //                showCenteredToast(getString(R.string.string_articles_fetch_fail_message));// TODO: change message, do not refer to developer
             }
             else if(resultArticles.isEmpty()) {
+//                progressIndicator.setVisibility(View.GONE);
                 recyclerIsLoading = false;
                 // TODO this should only be called when the list is empty,
                 // when errors occurs should be the case above
@@ -289,6 +294,7 @@ public class HomeFragment extends Fragment implements
                 recyclerAdapterArticlesList.clearList();
             }
             else {
+                progressIndicator.setVisibility(View.GONE);
                 elementsToDisplayInHome = new ArrayList<>();
 
                 // setting up followed topics items
@@ -512,12 +518,14 @@ public class HomeFragment extends Fragment implements
         includeEmptyTopicsMessage.setVisibility(View.GONE);
         swipeRefreshLayout.setVisibility(View.VISIBLE);
         switchTopicFAB.setVisibility(View.VISIBLE);
+        progressIndicator.setVisibility(View.VISIBLE);
     }
 
     private void setLayoutWhenNoTopicsAreFollowed() {
         includeEmptyTopicsMessage.setVisibility(View.VISIBLE);
         swipeRefreshLayout.setVisibility(View.GONE);
         switchTopicFAB.setVisibility(View.GONE);
+        progressIndicator.setVisibility(View.GONE);
     }
 
     private void populateHomeWithMyFollowedTopics(List<Topic> topics, List<ListItem> elementsToDisplayInHome) {
@@ -831,8 +839,6 @@ public class HomeFragment extends Fragment implements
 
 
     //---------------------------------------------------------------------------------------- UTILITY METHODS
-
-
 
     private List<Topic> extractFollowedTopics(List<Topic> topics) {
         Log.d(TAG, "extractFollowedTopics: called");

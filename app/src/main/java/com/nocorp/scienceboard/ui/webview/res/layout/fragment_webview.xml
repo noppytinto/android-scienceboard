@@ -44,7 +44,6 @@
             android:id="@+id/progressIndicator_webviewFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:indeterminate="true"
             app:indicatorColor="@color/gray_600"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
