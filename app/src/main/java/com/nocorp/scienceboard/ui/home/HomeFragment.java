@@ -23,9 +23,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
-import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -233,7 +231,7 @@ public class HomeFragment extends Fragment implements
                         false,
                         startingDate);
 
-                myFollowedTopics = extractFollowedTopics(TopicRepository.getCachedAllTopics_enabled());
+                myFollowedTopics = extractFollowedTopics(TopicRepository.getAllEnabledTopics_cached());
                 TopicRepository.setFollowedTopics(myFollowedTopics);
                 if(myFollowedTopics==null || myFollowedTopics.isEmpty()) {
                     includeEmptyTopicsMessage.setVisibility(View.VISIBLE);
@@ -612,7 +610,7 @@ public class HomeFragment extends Fragment implements
     private void refreshArticlesAndTopics() {
         long startingDate = currentDateInMillis;
 
-        myFollowedTopics = extractFollowedTopics(TopicRepository.getCachedAllTopics_enabled());
+        myFollowedTopics = extractFollowedTopics(TopicRepository.getAllEnabledTopics_cached());
         TopicRepository.setFollowedTopics(myFollowedTopics);
 
         if(myFollowedTopics==null || myFollowedTopics.isEmpty()) {

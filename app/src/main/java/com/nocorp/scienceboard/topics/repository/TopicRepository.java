@@ -294,7 +294,7 @@ public class TopicRepository {
         return roomDatabase.getTopicDao();
     }
 
-    public static List<Topic> getCachedAllTopics_enabled() {
+    public static List<Topic> getAllEnabledTopics_cached() {
         return cachedAllTopics_enabled;
     }
 

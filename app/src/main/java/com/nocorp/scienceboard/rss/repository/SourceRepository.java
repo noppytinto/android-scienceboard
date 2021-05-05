@@ -215,7 +215,7 @@ public class SourceRepository {
         result = new ArrayList<>();
         for(int i=0; i < topics.size(); i++) {
             if(topics.get(i).getFollowed()) {
-                Source source = getTheFirstSourceFallingInThisCategory(allSources, topics.get(i).getId());
+                Source source = extractTheFirstSourceFallingInThisCategory(allSources, topics.get(i).getId());
                 if(source!=null) {
                     result.add(source);
                     allSources.remove(source);
@@ -225,6 +225,46 @@ public class SourceRepository {
 
         return result;
     }
+
+
+    /**
+     * NOTE:
+     * if numSourcesToFetch > givenSources.size()
+     * nothing will happen,
+     * will be extracted only n<=givenSources.size() sources
+     */
+    public List<Source> getNsourcesForEachFollowedCategory_randomly(List<Source> givenSources,
+                                                                    List<Topic> topics,
+                                                                    int numSourcesToFetch) {
+        List<Source> result = null;
+        if(givenSources==null || givenSources.isEmpty()) return null;
+        if(topics==null || topics.isEmpty()) return null;
+        if(numSourcesToFetch<=0) return null;
+
+        // shuffling
+        List<Source> allSources = new ArrayList<>(givenSources);
+        Collections.shuffle(allSources);
+
+        //
+        result = new ArrayList<>();
+        for(int i=0; i < topics.size(); i++) { // for each topic, fetch N sources
+            Topic currentTopic = topics.get(i);
+            if(currentTopic.getFollowed()) {
+                for(int j=0; j<numSourcesToFetch; j++) { // counter to fetch n sources for each topic
+                    Source extractedSource = extractTheFirstSourceFallingInThisCategory(allSources, currentTopic.getId());
+                    if(extractedSource!=null) {
+                        result.add(extractedSource);
+                        allSources.remove(extractedSource); // remove the source fetched to avoid duplications
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+
+
 
     public List<Source> getCachedSources() {
         return cachedSources;
@@ -272,13 +312,13 @@ public class SourceRepository {
         return source;
     }
 
-    private static Source getTheFirstSourceFallingInThisCategory(List<Source> sources, String category) {
+    private static Source extractTheFirstSourceFallingInThisCategory(List<Source> givenSources, String givenCategory) {
         Source result = null;
-        if(sources==null || sources.size()<=0) return result;
-        if(category==null || category.isEmpty()) return result;
+        if(givenSources==null || givenSources.isEmpty()) return null;
+        if(givenCategory==null || givenCategory.isEmpty()) return null;
 
-        for(Source source: sources) {
-            if(sourcefallInThisCategory(source, category)) {
+        for(Source source: givenSources) {
+            if(sourcefallInThisCategory(source, givenCategory)) {
                 result = source;
                 break;
             }
