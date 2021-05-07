@@ -169,7 +169,7 @@ public class TopicFeedsFragment extends Fragment implements
         Log.d(TAG, "onPause: ");
         super.onPause();
         restoreStatusbarColor();
-        topicFeedsViewModel.setArticlesList(null);
+//        topicFeedsViewModel.setArticlesList(null);
     }
 
     @Override
@@ -516,6 +516,9 @@ public class TopicFeedsFragment extends Fragment implements
 
         return result;
     }
+
+
+
 
 
 

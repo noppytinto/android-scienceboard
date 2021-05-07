@@ -110,10 +110,6 @@ public class TopicFeedsViewModel extends AndroidViewModel implements
                               String topicId,
                               long startingDateinMillis) {
 
-
-
-
-
         if(forced) {
             Log.d(TAG, "SCIENCE_BOARD - fetchArticles: FORCED: fetching from remote");
             downloadArticlesFromTopic(

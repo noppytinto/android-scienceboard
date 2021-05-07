@@ -311,13 +311,13 @@ public class SourceRepository {
         return source;
     }
 
-    private static Source extractTheFirstSourceBelongingToThisTopic(List<Source> givenSources, String givenCategory) {
+    private static Source extractTheFirstSourceBelongingToThisTopic(List<Source> givenSources, String givenTopicName) {
         Source result = null;
         if(givenSources==null || givenSources.isEmpty()) return null;
-        if(givenCategory==null || givenCategory.isEmpty()) return null;
+        if(givenTopicName==null || givenTopicName.isEmpty()) return null;
 
         for(Source source: givenSources) {
-            if(sourcefallInThisCategory(source, givenCategory)) {
+            if(sourcefallInThisCategory(source, givenTopicName)) {
                 result = source;
                 break;
             }
