@@ -114,6 +114,8 @@ dependencies {
     implementation 'com.google.android.gms:play-services-ads:20.1.0'
     // for eu consent
     implementation 'com.google.android.ump:user-messaging-platform:1.0.0'
+    // facebook audience sdk
+    implementation 'com.google.ads.mediation:facebook:6.4.0.0'
 
 
     // ROOM INTEGRATION
