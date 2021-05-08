@@ -12,6 +12,7 @@ import com.nocorp.scienceboard.topics.model.Topic;
 import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
 import com.nocorp.scienceboard.rss.room.SourceDao;
+import com.nocorp.scienceboard.topics.room.TopicDao;
 import com.nocorp.scienceboard.utility.MyUtilities;
 
 import org.jetbrains.annotations.NotNull;
@@ -19,6 +20,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.core.SingleEmitter;
+import io.reactivex.rxjava3.core.SingleOnSubscribe;
 
 public class SourceRepository {
     private final String TAG = this.getClass().getSimpleName();
@@ -31,7 +37,7 @@ public class SourceRepository {
     private final String CATEGORY = "categories";
     private final String ENABLED = "enabled";
     private static List<Source> cachedSources;
-    private SourceRepositoryListener listener;
+    private OnSourcesFetchedListener fetchListener;
     private FirebaseFirestore db;
     private static boolean firestoreFetchCompleted;
     private static boolean taskIsRunning;
@@ -45,16 +51,173 @@ public class SourceRepository {
         db = FirebaseFirestore.getInstance();
     }
 
-    public SourceRepository (SourceRepositoryListener listener) {
+    public SourceRepository (OnSourcesFetchedListener fetchListener) {
         db = FirebaseFirestore.getInstance();
-        this.listener = listener;
+        this.fetchListener = fetchListener;
+    }
+
+    public void setFetchListener(OnSourcesFetchedListener fetchListener) {
+        this.fetchListener = fetchListener;
+    }
+
+
+    //--------------------------------------------------------------------------- PUBLIC METHODS
+
+
+
+
+
+
+
+
+
+    //--------------------------------------------------------------------------- RXJAVA
+
+
+
+
+//    public Single<List<Source>> fetchSources_rxjava(Context context) {
+//        return Single.create(emitter -> {
+//            try {
+//                // if the request is within 1 our
+//                // then use cached sources from local variable or Room
+//                long lastFetchDate = getFromSharedPref(context.getString(R.string.pref_last_sources_fetch_date), context);
+//                if(MyUtilities.isWithin_days(FETCH_INTERVAL, lastFetchDate)) {
+//                    fetchLocally_strategy_rxjava(context, emitter);
+//                }
+//                //
+//                else {
+//                    fetchRemotely_strategy_rxjava(context, emitter);
+//                }
+//
+//            } catch (Exception ex) {
+//                emitter.onError(ex);
+//            }
+//        });
+//    }
+
+    public Single<Boolean> checkLastFetchDate(Context context) {
+        return Single.create(emitter -> {
+            long lastFetchDate = getFromSharedPref(context.getString(R.string.pref_last_topics_fetch_date), context);
+            Log.d(TAG, "checkLastFetchDate: lastFetchDate: " + lastFetchDate);
+            Boolean result = MyUtilities.isWithin_days(FETCH_INTERVAL, lastFetchDate);
+            emitter.onSuccess(result);
+        });
+    }
+
+
+
+    public Single<List<Source>> fetchLocally_strategy_rxjava(Context context) {
+        return Single.create(emitter -> {
+            List<Source> result;
+            if(cachedSources==null) {
+                Log.d(TAG, "fetchLocally_strategy: loading sources from room");
+                result = getSourcesFromRoom_sync_rxjava(context);
+                cachedSources = result;
+                emitter.onSuccess(result);
+            }
+            else {
+                Log.d(TAG, "fetchLocally_strategy: loading sources from cachedSources");
+                emitter.onSuccess(cachedSources);
+            }
+        });
+    }
+
+
+    public Single<List<Source>> fetchRemotely_strategy_rxjava(Context context) {
+        return Single.create(emitter -> {
+            Log.d(TAG, "fetchRemotely_strategy: loading sources remotely");
+            cachedSources = new ArrayList<>();
+            db.collection(SOURCES_COLLECTION_NAME)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                // testing code
+//                            String name = (String) document.get(NAME);
+//                            String testname = "lifehacker";
+//                            if(enabled!=null && enabled && name.equals(testname)) {
+//                                Source source = buildBasicSourceObject(document);
+//                                if(source!=null)  {
+//                                    cachedSources.add(source);
+//                                }
+//                            }
+
+                                Source source = buildSource(document);
+                                if(source!=null)  {
+                                    cachedSources.add(source);
+                                }
+                            }
+
+                            //
+                            storeFetchDate(context);
+
+                            //
+                            Collections.shuffle(cachedSources); // randomize collection
+
+                            //
+                            emitter.onSuccess(cachedSources);
+                        } else {
+                            if(task.getException()!=null) {
+                                Log.w(TAG, "SCIENCE_BOARD - Error getting sources.", task.getException());
+                                emitter.onError(task.getException());
+                            }
+                        }
+                    });
+        });
+    }
+
+    public Single<List<Source>> saveFetchedSourcesInRoom_sync_rxjava(@NotNull List<Source> sources, Context context) {
+        return Single.create(emitter -> {
+            try {
+                Log.d(TAG, "saveTopicsInRoom_rxjava: called");
+                saveSourcesInRoom_sync(sources, context);
+                emitter.onSuccess(sources);
+            } catch (Exception ex) {
+                emitter.onError(ex);
+            }
+        });
+    }
+
+    private List<Source> getSourcesFromRoom_sync_rxjava(Context context) {
+        List<Source> result = new ArrayList<>();
+        try {
+            SourceDao sourceDao = getSourceDao(context);
+            result = sourceDao.selectAll();
+        } catch (Exception e) {
+            Log.e(TAG, "SCIENCE_BOARD - getSourcesFromRoom_sync: cannot get sources from Room, cause:" + e.getMessage());
+        }
+
+        return result;
     }
 
 
 
 
 
-    //--------------------------------------------------------------------------- PUBLIC METHODS
+
+
+
+
+    //---------------------------------------------------------------------------
+
+
+
+    private void saveSourcesInRoom_sync(List<Source> sources, Context context) {
+        try {
+            Log.d(TAG, "saveSourcesInRoom_sync: called");
+            SourceDao dao = getSourceDao(context);
+            dao.insertAll(sources);
+            for(Source current: sources) {
+                dao.updateEnabledStatus(current.getEnabled(), current.getId());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e(TAG, "SCIENCE_BOARD - saveSourcesInRoom_sync: cannot save sources in Room, cause:" + e.getMessage());
+        }
+    }
+
+
 
     public void fetchSources(Context context, OnSourcesFetchedListener listener) {
         if( ! taskIsRunning) {
@@ -88,7 +251,7 @@ public class SourceRepository {
         else {
             Log.d(TAG, "fetchLocally_strategy: loading sources from cachedSources");
             taskIsRunning = false;
-            listener.onComplete(cachedSources);
+            listener.onSourcesFetchComplete(cachedSources);
         }
     }
 
@@ -151,11 +314,11 @@ public class SourceRepository {
                         //
                         Collections.shuffle(cachedSources); // randomize collection
                         taskIsRunning = false;
-                        listener.onComplete(cachedSources);
+                        listener.onSourcesFetchComplete(cachedSources);
                     } else {
                         if(task.getException()!=null) {
                             Log.w(TAG, "SCIENCE_BOARD - Error getting sources.", task.getException());
-                            listener.onFailded("Error getting sources." + task.getException().getMessage());
+                            listener.onSourcesFetchFailded("Error getting sources." + task.getException().getMessage());
                         }
                     }
                 });
@@ -190,10 +353,10 @@ public class SourceRepository {
                 SourceDao sourceDao = getSourceDao(context);
                 result = sourceDao.selectAll();
                 cachedSources = result;
-                listener.onComplete(result);
+                listener.onSourcesFetchComplete(result);
             } catch (Exception e) {
                 Log.e(TAG, "SCIENCE_BOARD - getSourcesFromRoom_sync: cannot get sources from Room, cause:" + e.getMessage());
-                listener.onFailded("cannot get sources from Room, cause:" + e.getMessage());
+                listener.onSourcesFetchFailded("cannot get sources from Room, cause:" + e.getMessage());
             }
         };
 

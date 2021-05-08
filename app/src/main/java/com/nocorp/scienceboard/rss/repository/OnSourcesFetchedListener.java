@@ -5,6 +5,6 @@ import com.nocorp.scienceboard.model.Source;
 import java.util.List;
 
 public interface OnSourcesFetchedListener {
-    void onComplete(List<Source> fetchedSources);
-    void onFailded(String message);
+    void onSourcesFetchComplete(List<Source> fetchedSources);
+    void onSourcesFetchFailded(String message);
 }

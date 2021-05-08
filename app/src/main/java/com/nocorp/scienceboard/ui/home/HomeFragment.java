@@ -42,7 +42,6 @@ import com.nocorp.scienceboard.model.MyTopicsItem;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterArticlesList;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterMyTopics;
-import com.nocorp.scienceboard.rss.repository.SourceRepository;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
 import com.nocorp.scienceboard.topics.model.Topic;
 import com.nocorp.scienceboard.topics.repository.TopicRepository;
@@ -58,7 +57,6 @@ import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -95,7 +93,6 @@ public class HomeFragment extends Fragment implements
 
     //
     private AdProvider adProvider;
-    private List<Source> sourcesFetched;
     private List<ListItem> elementsToDisplayInHome;
     private List<Topic> myFollowedTopics;
     private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 2;
@@ -109,7 +106,15 @@ public class HomeFragment extends Fragment implements
     private ObjectAnimator objectAnimator;
     private static boolean darkModeEnabled;
 
+    // repository
 
+    // flag variables
+    private static boolean homeFragmentArticlesLoaded = false;
+    private static boolean forceContentInitialization = false;
+
+
+    //
+    private static List<Source> sourcesFetched_cached;
 
 
 
@@ -126,6 +131,14 @@ public class HomeFragment extends Fragment implements
 
     //---------------------------------------------------------------------------------------- ANDROID METHODS
 
+
+    @Override
+    public void onSaveInstanceState(@NonNull @NotNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         Log.d(TAG, "onCreate: called");
@@ -133,12 +146,15 @@ public class HomeFragment extends Fragment implements
 //        setExitTransition(new Hold().setDuration(1000));
         setExitTransition(new MaterialElevationScale(/* growing= */ false));
         setReenterTransition(new MaterialElevationScale(/* growing= */ true));
+
+        //
         setHasOptionsMenu(true);
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView: called");
         viewBinding = FragmentHomeBinding.inflate(getLayoutInflater());
         view = viewBinding.getRoot();
         return view;
@@ -151,7 +167,38 @@ public class HomeFragment extends Fragment implements
         initView();
 
         //
+
+//        if(sourcesFetched_cached==null) {
+//            observeSourcesFetched();
+//        }
+//        else {
+//            // init starting date
+//            long startingDate = initStartingDate();
+//
+//
+//            // this will prevent articles being fetched everytime the sources are observed
+////                if(homeFragmentArticlesLoaded) {
+////                    Log.d(TAG, "observeSourcesFetched: content already initilized");
+////                    if(forceContentInitialization) {
+////                    }
+////                    else {
+////                        // ignore, retain old articles
+////                    }
+////                }
+////                else{
+////                    // ignore
+////                }
+//
+//            initContent(sourcesFetched_cached, startingDate);
+//
+//            //
+//            myFollowedTopics = TopicRepository.getFollowedTopics_fromCached();
+//            changeLayoutOnfollowedTopicsListChanged(myFollowedTopics);
+//        }
+
         observeSourcesFetched();
+
+
         observeArticlesFetched();
         observerNextArticlesFetched();
         observeCustomizationStatus();
@@ -186,19 +233,34 @@ public class HomeFragment extends Fragment implements
 
     @Override
     public void onDestroyView() {
+        Log.d(TAG, "onDestroyView: called");
         super.onDestroyView();
         viewBinding = null;
     }
 
     @Override
     public void onPause() {
+        Log.d(TAG, "onPause: called");
         super.onPause();
 
         // reset previous observed articles
-        homeViewModel.setArticlesList(null);
+//        homeViewModel.setArticlesList(null);
+
+        // setting flags
     }
 
+    @Override
+    public void onDestroy() {
+        Log.d(TAG, "onDestroy: called");
+        super.onDestroy();
+    }
 
+    @Override
+    public void onDetach() {
+        Log.d(TAG, "onDetach: called");
+        super.onDetach();
+        homeFragmentArticlesLoaded = false;
+    }
 
     //---------------------------------------------------------------------------------------- METHODS
 
@@ -242,6 +304,7 @@ public class HomeFragment extends Fragment implements
     //---------------------------------------------------------- observing viewmodels
 
     private void observeSourcesFetched() {
+        Log.d(TAG, "observeSourcesFetched: contentInitilized: " + homeFragmentArticlesLoaded);
         sourceViewModel.getObservableAllSources().observe(getViewLifecycleOwner(), resultSources -> {
             Log.d(TAG, "observeSourcesFetched: called");
             if(resultSources == null) {
@@ -254,31 +317,57 @@ public class HomeFragment extends Fragment implements
                 Log.w(TAG, "SCIENCE_BOARD - loadSources: no sources in remote DB");
             }
             else {
+
+
                 // getting enabled sources
-                sourcesFetched = new ArrayList<>(resultSources);
-                sourcesFetched = extractEnabledSources(sourcesFetched);
+                sourcesFetched_cached = sourceViewModel.getEnabledSources();
 
                 // init starting date
                 long startingDate = initStartingDate();
 
-                // fetching articles
-                progressIndicator.setVisibility(View.VISIBLE);
-                homeViewModel.fetchArticles(sourcesFetched,
-                                            startingDate,
-                                      false);
 
-                //
-                myFollowedTopics = extractFollowedTopics(TopicRepository.getAllEnabledTopics_cached());
-                TopicRepository.setFollowedTopics(myFollowedTopics);
-                changeLayoutOnfollowedTopicsListChanged(myFollowedTopics);
+                // this will prevent articles being fetched everytime the sources are observed
+//                if(homeFragmentArticlesLoaded) {
+//                    Log.d(TAG, "observeSourcesFetched: content already initilized");
+//                    if(forceContentInitialization) {
+//                    }
+//                    else {
+//                        // ignore, retain old articles
+//                    }
+//                }
+//                else{
+//                    // ignore
+//                }
+
+                initContent(sourcesFetched_cached, startingDate);
+
+
             }
         });
+    }
+
+    private void initContent(List<Source> sourcesFetched, long startingDate) {
+        Log.d(TAG, "initContent: content initilized");
+
+        // setting flag
+        homeFragmentArticlesLoaded = true;
+
+        // fetching articles
+        progressIndicator.setVisibility(View.VISIBLE);
+        homeViewModel.fetchArticles(sourcesFetched,
+                startingDate,
+                false);
+
+        //
+        myFollowedTopics = TopicRepository.getFollowedTopics_fromCached();
+        changeLayoutOnfollowedTopicsListChanged(myFollowedTopics);
     }
 
     private void observeArticlesFetched() {
         homeViewModel.getObservableArticlesList().observe(getViewLifecycleOwner(), resultArticles -> {
             Log.d(TAG, "getObservableArticlesList: called");
             swipeRefreshLayout.setRefreshing(false);
+            progressIndicator.setVisibility(View.GONE);
 
             if(resultArticles==null) {
                 recyclerIsLoading = false;
@@ -294,7 +383,6 @@ public class HomeFragment extends Fragment implements
                 recyclerAdapterArticlesList.clearList();
             }
             else {
-                progressIndicator.setVisibility(View.GONE);
                 elementsToDisplayInHome = new ArrayList<>();
 
                 // setting up followed topics items
@@ -357,7 +445,7 @@ public class HomeFragment extends Fragment implements
         topicsViewModel.getObservableCustomizationStatus().observe(getViewLifecycleOwner(), customizationCompleted -> {
             Log.d(TAG, "observeCustomizationStatus: called");
             if(customizationCompleted) {
-                refreshArticlesAndTopics();
+                updateContentWithNewTopics();
             }
             else {
                 // ignore
@@ -365,8 +453,10 @@ public class HomeFragment extends Fragment implements
         });
     }
 
-
-
+    private void updateContentWithNewTopics() {
+        refreshArticlesAndTopics();
+        topicsViewModel.setCustomizationStatus(false);
+    }
 
 
     //---------------------------------------------------------- listeners
@@ -505,16 +595,18 @@ public class HomeFragment extends Fragment implements
     }
 
     private void changeLayoutOnfollowedTopicsListChanged(List<Topic> followedTopics) {
-        Log.d(TAG, "changeLayoutOnfollowedTopicsListChanged: called");
         if(followedTopics==null || followedTopics.isEmpty()) {
+            Log.d(TAG, "changeLayoutOnfollowedTopicsListChanged: followed topics: 0");
             setLayoutWhenNoTopicsAreFollowed();
         }
         else {
+            Log.d(TAG, "changeLayoutOnfollowedTopicsListChanged: followed topics: " + followedTopics.size());
             setLayoutWhenAtLeastOneTopicIsFollowed();
         }
     }
 
     private void setLayoutWhenAtLeastOneTopicIsFollowed() {
+        Log.d(TAG, "setLayoutWhenAtLeastOneTopicIsFollowed: called");
         includeEmptyTopicsMessage.setVisibility(View.GONE);
         swipeRefreshLayout.setVisibility(View.VISIBLE);
         switchTopicFAB.setVisibility(View.VISIBLE);
@@ -522,6 +614,7 @@ public class HomeFragment extends Fragment implements
     }
 
     private void setLayoutWhenNoTopicsAreFollowed() {
+        Log.d(TAG, "setLayoutWhenNoTopicsAreFollowed: called");
         includeEmptyTopicsMessage.setVisibility(View.VISIBLE);
         swipeRefreshLayout.setVisibility(View.GONE);
         switchTopicFAB.setVisibility(View.GONE);
@@ -529,7 +622,6 @@ public class HomeFragment extends Fragment implements
     }
 
     private void populateHomeWithMyFollowedTopics(List<Topic> topics, List<ListItem> elementsToDisplayInHome) {
-        Log.d(TAG, "populateHomeWithMyFollowedTopics: called");
         MyTopicsItem myTopicsItem = new MyTopicsItem();
 
         // convert Topic --> to ListItem, for recycler list
@@ -544,20 +636,7 @@ public class HomeFragment extends Fragment implements
         elementsToDisplayInHome.add(myTopicsItem); // add topics as first element
     }
 
-    private List<Source> extractEnabledSources(List<Source> sourcesFetched) {
-        Log.d(TAG, "extractEnabledSources: called");
-        List<Source> result = new ArrayList<>();
-
-        for(Source currentSource: sourcesFetched) {
-            if(currentSource.getEnabled())
-                result.add(currentSource);
-        }
-
-        return result;
-    }
-
     private List<String> buildMyTopicsChoices(List<Topic> topics) {
-        Log.d(TAG, "buildMyTopicsChoices: called");
         List<String> result = new ArrayList<>();
         if(topics==null || topics.isEmpty()) return result;
 
@@ -573,7 +652,6 @@ public class HomeFragment extends Fragment implements
     private void setTopicsThumbnails(List<ListItem> elementsToDisplayInHome,
                                      List<Topic> givenTopics,
                                      List<Source> givenSources) {
-        Log.d(TAG, "setTopicsThumbnails: called");
         if(givenTopics==null || givenTopics.isEmpty()) return;
         if(elementsToDisplayInHome==null || elementsToDisplayInHome.isEmpty()) return;
         if(givenSources==null || givenSources.isEmpty()) return;
@@ -729,15 +807,14 @@ public class HomeFragment extends Fragment implements
         }
 
         //
-        homeViewModel.fetchArticles(sourcesFetched,
+        homeViewModel.fetchArticles(sourcesFetched_cached,
                                     startingDate,
                                     true);
     }
 
     private void refreshArticlesAndTopics() {
         Log.d(TAG, "refreshArticlesAndTopics: called");
-        myFollowedTopics = extractFollowedTopics(TopicRepository.getAllEnabledTopics_cached());
-        TopicRepository.setFollowedTopics(myFollowedTopics);
+        myFollowedTopics = TopicRepository.getFollowedTopics_fromCached();
 
         if(myFollowedTopics==null || myFollowedTopics.isEmpty()) {
             setLayoutWhenNoTopicsAreFollowed();
@@ -754,7 +831,7 @@ public class HomeFragment extends Fragment implements
         }
 
         //
-        homeViewModel.fetchArticles(sourcesFetched,
+        homeViewModel.fetchArticles(sourcesFetched_cached,
                                     startingDate,
                                     true);
     }
@@ -840,21 +917,6 @@ public class HomeFragment extends Fragment implements
 
     //---------------------------------------------------------------------------------------- UTILITY METHODS
 
-    private List<Topic> extractFollowedTopics(List<Topic> topics) {
-        Log.d(TAG, "extractFollowedTopics: called");
-        List<Topic> result = null;
-        if(topics==null || topics.isEmpty()) return result;
-
-        result = new ArrayList<>();
-
-        for (Topic topic: topics) {
-            if(topic.getFollowed() == true && topic.getEnabled()) {
-                result.add(topic);
-            }
-        }
-
-        return result;
-    }
 
     /**
      * check whether view is in VSISIBLE/INVISIBLE state

@@ -26,12 +26,11 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
 
-        // appodeal
-        maven {
-            url "https://artifactory.appodeal.com/appodeal"
-        }
+        maven {url "https://jitpack.io"}
+        maven {url "https://artifactory.appodeal.com/appodeal"}
+        maven {url "https://oss.jfrog.org/libs-snapshot"}
     }
 }
 

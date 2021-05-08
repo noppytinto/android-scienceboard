@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.nocorp.scienceboard.model.Source;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SourceViewModel extends AndroidViewModel {
@@ -38,7 +39,30 @@ public class SourceViewModel extends AndroidViewModel {
     }
 
 
+    public List<Source> getEnabledSources() {
+        if(allSources.getValue()==null || allSources.getValue().isEmpty()) return new ArrayList<>();
 
+        List<Source> result = new ArrayList<>();
+        for(Source currentSource: allSources.getValue()) {
+            if(currentSource.getEnabled())
+                result.add(currentSource);
+        }
+
+        return result;
+    }
+
+
+
+    private List<Source> extractEnabledSources(List<Source> sourcesFetched) {
+        List<Source> result = new ArrayList<>();
+
+        for(Source currentSource: sourcesFetched) {
+            if(currentSource.getEnabled())
+                result.add(currentSource);
+        }
+
+        return result;
+    }
 
 
 
@@ -47,13 +71,13 @@ public class SourceViewModel extends AndroidViewModel {
     public void loadSourcesFromRemoteDb() {
         sourceRepository.fetchSources(getApplication(), new OnSourcesFetchedListener() {
             @Override
-            public void onComplete(List<Source> fetchedSources) {
+            public void onSourcesFetchComplete(List<Source> fetchedSources) {
                 setAllSources(fetchedSources);
                 Log.d(TAG, "SCIENCE_BOARD - loadSourcesFromRemoteDb: sources fetched from remote db");
             }
 
             @Override
-            public void onFailded(String message) {
+            public void onSourcesFetchFailded(String message) {
                 setAllSources(null);
                 Log.d(TAG, "SCIENCE_BOARD - loadSourcesFromRemoteDb: sources list is empty");
             }

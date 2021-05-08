@@ -7,6 +7,7 @@ import android.util.Log;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.gson.annotations.Since;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.topics.model.Topic;
 import com.nocorp.scienceboard.rss.room.ScienceBoardRoomDatabase;
@@ -18,6 +19,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Scheduler;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.core.SingleEmitter;
+import io.reactivex.rxjava3.core.SingleOnSubscribe;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+
 
 public class TopicRepository {
     private final String TAG = this.getClass().getSimpleName();
@@ -32,6 +41,8 @@ public class TopicRepository {
     private final String DISPLAY_NAME_ENG = "display_name_eng";
     private final int FETCH_INTERVAL = 0; // in days
 
+
+    private static boolean repositoryInitilized = false;
 
 
     //----------------------------------------------------------------------------------------- CONSTRUCTORS
@@ -76,26 +87,208 @@ public class TopicRepository {
      * cached topics are at least populated on the first app launch by buildTopics_eventually()
      */
     public void init(Context context, OnTopicRepositoryInitilizedListener listener) {
-        // (will be relevant only on the first app launch)
-        fallbackTopics = buildFallbackTopicsList();
-
-        // if the request is within 1 our
-        // then use cached sources from local variable or Room
-        long lastFetchDate = getFromSharedPref(context.getString(R.string.pref_last_topics_fetch_date), context);
-        Log.d(TAG, "init topics list: lastFetchDate: " + lastFetchDate);
-        if(MyUtilities.isWithin_days(FETCH_INTERVAL, lastFetchDate)) {
-            fetchLocally_strategy(context, listener);
+        if(repositoryInitilized) {
+            // ignore
         }
-        //
         else {
-            fetchRemotely_strategy(context, listener);
+            //
+            repositoryInitilized = true;
+
+            // (will be relevant only on the first app launch)
+            fallbackTopics = buildFallbackTopicsList();
+
+            // if the request is within 1 our
+            // then use cached sources from local variable or Room
+            long lastFetchDate = getFromSharedPref(context.getString(R.string.pref_last_topics_fetch_date), context);
+            Log.d(TAG, "init topics list: lastFetchDate: " + lastFetchDate);
+            if(MyUtilities.isWithin_days(FETCH_INTERVAL, lastFetchDate)) {
+                fetchLocally_strategy(context, listener);
+            }
+            //
+            else {
+                fetchRemotely_strategy(context, listener);
+            }
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //------------------------------------------------------------------------------------ RXJAVA
+
+//    public Single<List<Topic>> fetchTopics_rxjava(Context context) {
+//        return Single.create(emitter -> {
+//            try {
+//                // (will be relevant only on the first app launch)
+//                fallbackTopics = buildFallbackTopicsList();
+//
+//                // if the request is within 1 our
+//                // then use cached sources from local variable or Room
+//                long lastFetchDate = getFromSharedPref(context.getString(R.string.pref_last_topics_fetch_date), context);
+//                Log.d(TAG, "init topics list: lastFetchDate: " + lastFetchDate);
+//                if(MyUtilities.isWithin_days(FETCH_INTERVAL, lastFetchDate)) {
+//                    fetchLocally_strategy_rxjava(context, emitter);
+//                }
+//                //
+//                else {
+//                    fetchRemotely_strategy_rxjava(context, emitter);
+//                }
+//
+//            } catch (Exception ex) {
+//                emitter.onError(ex);
+//            }
+//        });
+//    }
+
+
+
+
+    public Single<Boolean> checkLastFetchDate(Context context) {
+        return Single.create(emitter -> {
+            long lastFetchDate = getFromSharedPref(context.getString(R.string.pref_last_topics_fetch_date), context);
+            Log.d(TAG, "checkLastFetchDate: lastFetchDate: " + lastFetchDate);
+            Boolean result = MyUtilities.isWithin_days(FETCH_INTERVAL, lastFetchDate);
+            emitter.onSuccess(result);
+        });
+    }
+
+
+
+
+    public Single<List<Topic>> fetchLocally_strategy_rxjava(Context context) {
+        return Single.create(emitter -> {
+            List<Topic> result;
+            if(cachedAllTopics_enabled==null) {
+                Log.d(TAG, "fetchLocally_strategy_rxjava: loading topics from room");
+                result = getTopicsFromRoom_sync_rxjava(context);
+                cachedAllTopics_enabled = result;
+                if(result==null || result.isEmpty()) {
+                    emitter.onSuccess(new ArrayList<>());
+                }
+                else {
+                    emitter.onSuccess(result);
+                }
+            }
+            else {
+                Log.d(TAG, "fetchLocally_strategy_rxjava: loading topics from cachedAllTopics_enabled");
+                emitter.onSuccess(cachedAllTopics_enabled);
+            }
+        });
+    }
+
+
+    /**
+     * NOTE:
+     * will always fetch some topics,
+     * because in case of Room fail, will fallback in cachedTopics,
+     * cached topics are at least populated on the first app launch by buildTopics_eventually()
+     */
+    private List<Topic> getTopicsFromRoom_sync_rxjava(Context context) {
+        List<Topic> result = new ArrayList<>();
+        try {
+            // NOTE: if a topic extist, will be ignored
+            TopicDao dao = getTopicDao(context);
+            result = dao.selectAll();
+        } catch (Exception e) {
+            Log.e(TAG, "SCIENCE_BOARD - getTopicsFromRoom_sync_rxjava: cannot get topics from Room, cause:" + e.getMessage());
+        }
+
+        return result;
+    }
+
+    public Single<List<Topic>> fetchRemotely_strategy_rxjava(Context context) {
+        return Single.create(emitter -> {
+            Log.d(TAG, "fetchRemotely_strategy_rxjava: loading topics remotely");
+            cachedAllTopics_enabled = new ArrayList<>();
+            db.collection(TOPICS_COLLECTION_NAME)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Topic topic = buildTopic(document);
+                                if (topic != null) cachedAllTopics_enabled.add(topic);
+                            }
+
+                            storeFetchDate(context);
+
+                            Log.d(TAG, "getTopicsFromRemoteDb_rxjava: topics fetched from remote db");
+                        }
+                        else {
+                            if(task.getException()!=null) {
+                                Log.w(TAG, "SCIENCE_BOARD - getTopicsFromRemoteDb_rxjava: Error getting topics.", task.getException());
+                            }
+                            cachedAllTopics_enabled = fallbackTopics;
+                        }
+
+                        emitter.onSuccess(cachedAllTopics_enabled);
+                        Log.d(TAG, "getTopicsFromRemoteDb_rxjava: completed");
+                    });
+        });
+    }
+
+
+
+
+    public Single<List<Topic>> saveFetchedTopicsInRoom_rxjava(List<Topic> topics, Context context) {
+        return Single.create(emitter -> {
+            try {
+                Log.d(TAG, "saveTopicsInRoom_rxjava: called");
+                saveTopicsInRoom_sync(topics, context);
+                emitter.onSuccess(topics);
+            } catch (Exception ex) {
+                emitter.onError(ex);
+            }
+        });
+    }
+
+
+    public Single<List<Topic>> getUpdatedTopicsFromRoom_sync_rxjava(Context context) {
+        return Single.create(emitter -> {
+            try {
+                Log.d(TAG, "getTopicsFromRoom_sync_rxjava: called");
+                // NOTE: if a topic extist, will be ignored
+                TopicDao dao = getTopicDao(context);
+                cachedAllTopics_enabled = dao.selectAll();
+                emitter.onSuccess(cachedAllTopics_enabled);
+            } catch (Exception e) {
+                Log.e(TAG, "SCIENCE_BOARD - getTopicsFromRoom_sync_rxjava: cannot get topics from Room, cause:" + e.getMessage());
+                emitter.onError(e);
+            }
+        });
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //------------------------------------------------------------------------------------
+
+
 
     private void fetchRemotely_strategy(Context context, OnTopicRepositoryInitilizedListener listener) {
         Log.d(TAG, "fetchRemotely_strategy: loading topics remotely");
         getTopicsFromRemoteDb(context, listener);
     }
+
+
 
     private void fetchLocally_strategy(Context context, OnTopicRepositoryInitilizedListener listener) {
         if(cachedAllTopics_enabled==null) {
@@ -109,6 +302,8 @@ public class TopicRepository {
     }
 
 
+
+
     /**
      * NOTE:
      * will always fetch some topics,
@@ -116,8 +311,6 @@ public class TopicRepository {
      * cached topics are at least populated on the first app launch by buildTopics_eventually()
      */
     public void fetchTopics(Context context, OnTopicsFetchedListener listener) {
-
-
         getTopicsFromRoom_async(context, listener);
 //        getTopicsFromRemoteDb(context, listener);
     }
@@ -175,6 +368,8 @@ public class TopicRepository {
 
                 });
     }
+
+
 
     /**
      * NOTE:
@@ -258,6 +453,25 @@ public class TopicRepository {
     }
 
 
+    private void saveTopicsInRoom_sync(List<Topic> topics, Context context) {
+        if(topics==null) return;
+
+        try {
+            // NOTE: if a topic extist, will be ignored...
+            TopicDao dao = getTopicDao(context);
+            dao.insertAll(topics);
+            // ...but update enabled status
+            for(Topic current: topics) {
+                dao.updateEnabledStatus(current.getEnabled(), current.getId());
+            }
+            Log.d(TAG, "saveTopicsInRoom_sync: topics saved in Room");
+        } catch (Exception e) {
+            Log.e(TAG, "SCIENCE_BOARD - saveTopicsInRoom_sync: cannot save in Room, cause:" + e.getMessage());
+            // always try getting topics from room in case of insertAll fail
+        }
+    }
+
+
     /**
      * NOTE:
      * will always fetch some topics,
@@ -285,6 +499,23 @@ public class TopicRepository {
             listener.onFailed(e.getMessage(), cachedAllTopics_enabled);
         }
     }
+
+    /**
+     * NOTE:
+     * will always fetch some topics,
+     * because in case of Room fail, will fallback in cachedTopics,
+     * cached topics are at least populated on the first app launch by buildTopics_eventually()
+     */
+    private void getTopicsFromRoom_sync(Context context) {
+        try {
+            // NOTE: if a topic extist, will be ignored
+            TopicDao dao = getTopicDao(context);
+            cachedAllTopics_enabled = dao.selectAll();
+        } catch (Exception e) {
+            Log.e(TAG, "SCIENCE_BOARD - getTopicsFromRoom_async: cannot get topics from Room, cause:" + e.getMessage());
+        }
+    }
+
 
     private void getTopicsFromRoom_async(Context context, OnTopicRepositoryInitilizedListener listener) {
         Runnable task = () -> {
@@ -317,6 +548,24 @@ public class TopicRepository {
     public static List<Topic> getAllEnabledTopics_cached() {
         return cachedAllTopics_enabled;
     }
+
+    public static List<Topic> getFollowedTopics_fromCached() {
+        List<Topic> result = null;
+        if(cachedAllTopics_enabled==null || cachedAllTopics_enabled.isEmpty()) return result;
+
+        result = new ArrayList<>();
+
+        for (Topic topic: cachedAllTopics_enabled) {
+            if(topic.getFollowed() == true && topic.getEnabled()) {
+                result.add(topic);
+            }
+        }
+
+        followedTopics = new ArrayList<>(result);
+
+        return result;
+    }
+
 
     public void updateAll(List<Topic> topicsToUpdate, Context context, OnTopicRepositoryUpdatedListener listener) {
         TopicDao dao = getTopicDao(context);

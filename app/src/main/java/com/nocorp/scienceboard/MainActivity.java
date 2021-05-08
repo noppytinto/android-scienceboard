@@ -11,7 +11,6 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,11 +18,11 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.crashlytics.internal.settings.model.AppSettingsData;
 import com.nocorp.scienceboard.databinding.ActivityMainBinding;
+import com.nocorp.scienceboard.model.Source;
+import com.nocorp.scienceboard.rss.repository.SourceRepository;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
 import com.nocorp.scienceboard.system.ConnectionManager;
-import com.nocorp.scienceboard.topics.repository.OnTopicRepositoryInitilizedListener;
 import com.nocorp.scienceboard.topics.repository.TopicRepository;
 import com.nocorp.scienceboard.ui.timemachine.DatePickerFragment;
 import com.nocorp.scienceboard.ui.timemachine.TimeMachineViewModel;
@@ -47,6 +46,12 @@ import androidx.navigation.ui.NavigationUI;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Calendar;
+import java.util.List;
+
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.observers.DisposableSingleObserver;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
 public class MainActivity extends AppCompatActivity
@@ -71,7 +76,6 @@ public class MainActivity extends AppCompatActivity
     private AdProvider adProvider;
     private SourceViewModel sourceViewModel;
     private TopicsViewModel topicsViewModel;
-    private TopicRepository topicRepository;
     private TimeMachineViewModel timeMachineViewModel;
 
     //
@@ -83,6 +87,13 @@ public class MainActivity extends AppCompatActivity
     private final long ANIMATION_DURATION = 4000L;
     private ObjectAnimator objectAnimator;
 
+    // repos
+    private TopicRepository topicRepository;
+    private SourceRepository sourceRepository;
+
+
+    // rxjava
+    private CompositeDisposable compositeDisposable;
 
 
 
@@ -95,7 +106,7 @@ public class MainActivity extends AppCompatActivity
         initView();
         initAdProvider(this, NUM_ADS_TO_LOAD);
         observeDatePickedFromTimeMachine();
-        loadTopics();
+        initAppContent();
     }
 
     private void checkDarkMode() {
@@ -168,6 +179,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
+        compositeDisposable.clear();
+
         super.onDestroy();
         viewBinding = null;
         Log.d(TAG, "onDestroy: called");
@@ -234,9 +247,15 @@ public class MainActivity extends AppCompatActivity
 //        );
 
 
+        //
+        compositeDisposable = new CompositeDisposable();
+
+        // repos
+        topicRepository = new TopicRepository();
+        sourceRepository = new SourceRepository();
+
 
         // viewmodels
-        topicRepository = new TopicRepository();
         topicsViewModel = new ViewModelProvider(this).get(TopicsViewModel.class);
         sourceViewModel = new ViewModelProvider(this).get(SourceViewModel.class);
         timeMachineViewModel = new ViewModelProvider(this).get(TimeMachineViewModel.class);
@@ -340,28 +359,72 @@ public class MainActivity extends AppCompatActivity
         return cal;
     }
 
-    private void loadTopics() {
-        observeFetchedTopics();
+    private void initAppContent() {
+//        observeFetchedTopics();
 
         //
-        topicRepository.init(this, new OnTopicRepositoryInitilizedListener() {
-            @Override
-            public void onComplete() {
-                //
-                fetchTopics();
-            }
+//        topicRepository.init(this, new OnTopicRepositoryInitilizedListener() {
+//            @Override
+//            public void onComplete() {
+//                //
+//                topicsViewModel.fetchTopics();
+//            }
+//
+//            @Override
+//            public void onFailed(String message) {
+//                // use cached topics
+//                topicsViewModel.fetchTopics();
+//                Log.e(TAG, "SCIENCE_BOARD - loadTopics failed, cause: " + message);
+//            }
+//        });
 
-            @Override
-            public void onFailed(String message) {
-                // use cached topics
-                fetchTopics();
-                Log.e(TAG, "SCIENCE_BOARD - loadTopics: " + message);
-            }
-        });
-    }
 
-    private void fetchTopics() {
-        topicsViewModel.fetchTopics();
+
+        compositeDisposable.add(
+                topicRepository.checkLastFetchDate(this)
+                        .flatMap(timeElapsed -> {
+                            if(timeElapsed) {
+                                return topicRepository.fetchRemotely_strategy_rxjava(this)
+                                        .flatMap(topics -> topicRepository.saveFetchedTopicsInRoom_rxjava(topics, this))
+                                        .subscribeOn(Schedulers.io());
+                            }
+                            else {
+                                return topicRepository.fetchLocally_strategy_rxjava(this);
+                            }
+                        })
+                .flatMap(topics ->
+                        topicRepository.getUpdatedTopicsFromRoom_sync_rxjava( this)
+                                .subscribeOn(Schedulers.io()))
+                .flatMap(topics -> {
+                        topicsViewModel.setTopicsList(topics);
+                        return sourceRepository.checkLastFetchDate( this)
+                                .subscribeOn(Schedulers.io());
+                })
+                .flatMap(timeElapsed -> {
+                    if(timeElapsed) {
+                        return sourceRepository.fetchRemotely_strategy_rxjava(this)
+                                .flatMap(sources -> sourceRepository.saveFetchedSourcesInRoom_sync_rxjava(sources, this))
+                                .subscribeOn(Schedulers.io());
+                    }
+                    else {
+                        return sourceRepository.fetchLocally_strategy_rxjava( this);
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableSingleObserver<List<Source>>() {
+                    @Override
+                    public void onSuccess(@io.reactivex.rxjava3.annotations.NonNull List<Source> sources) {
+                        sourceViewModel.setAllSources(sources);
+                    }
+
+                    @Override
+                    public void onError(@io.reactivex.rxjava3.annotations.NonNull Throwable e) {
+                        sourceViewModel.setAllSources(null);
+
+                    }
+                })
+        );
     }
 
     private void loadSources() {

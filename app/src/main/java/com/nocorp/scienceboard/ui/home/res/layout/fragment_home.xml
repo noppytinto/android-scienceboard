@@ -16,16 +16,6 @@
         android:visibility="gone"
         tools:visibility="visible" />
 
-    <com.google.android.material.progressindicator.CircularProgressIndicator
-        android:id="@+id/progressIndicator_homefragment"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:indeterminate="true"
-        android:visibility="gone"
-        tools:visibility="visible"
-        app:indicatorColor="@color/orange"
-        />
 
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -59,6 +49,16 @@
 <!--    app:layout_behavior="com.nocorp.scienceboard.behavior.ScrollAwareFABBehavior"-->
 
 
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progressIndicator_homefragment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:indicatorColor="@color/orange"
+        />
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
