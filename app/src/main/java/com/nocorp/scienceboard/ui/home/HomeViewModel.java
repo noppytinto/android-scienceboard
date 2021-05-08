@@ -12,6 +12,8 @@ import com.nocorp.scienceboard.bookmarks.repository.BookmarksRepository;
 import com.nocorp.scienceboard.bookmarks.repository.OnBookmarksCheckedListener;
 import com.nocorp.scienceboard.history.repository.HistoryRepository;
 import com.nocorp.scienceboard.model.Article;
+import com.nocorp.scienceboard.model.CustomizeMyTopicsButton;
+import com.nocorp.scienceboard.model.MyTopicsItem;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.repository.GeneralRepository;
 import com.nocorp.scienceboard.rss.repository.ArticleRepository;
@@ -21,10 +23,13 @@ import com.nocorp.scienceboard.system.ThreadManager;
 import com.nocorp.scienceboard.topics.model.Topic;
 import com.nocorp.scienceboard.topics.repository.TopicRepository;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
+import com.nocorp.scienceboard.utility.MyValues;
+import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class HomeViewModel extends AndroidViewModel implements
@@ -50,6 +55,9 @@ public class HomeViewModel extends AndroidViewModel implements
 //    private final int FETCH_INTERVAL = 15; // in minutes
 
 
+    //
+    private AdProvider adProvider;
+
 
     //-------------------------------------------------------------------------------------------- CONSTRUCTORS
 
@@ -63,6 +71,9 @@ public class HomeViewModel extends AndroidViewModel implements
         bookmarksRepository = new BookmarksRepository();
         generalRepository = new GeneralRepository();
         topicRepository = new TopicRepository();
+
+        //
+        adProvider = AdProvider.getInstance(); // is not guaranteed that
     }
 
 
@@ -212,22 +223,37 @@ public class HomeViewModel extends AndroidViewModel implements
     }
 
     @Override
-    public void onArticlesFetchCompleted(List<ListItem> articles, List<DocumentSnapshot> oldestArticles) {
-        if(articles==null) {
+    public void onArticlesFetchCompleted(List<ListItem> resultArticles, List<DocumentSnapshot> oldestArticles) {
+        if(resultArticles==null) {
             // TODO: null is returned only in case of errors
         }
         else {
 //            lastFetchDate = System.currentTimeMillis();
             oldestArticlesSnapshots = oldestArticles;
 
+
+            // setting up followed topics items
+            setTopicsThumbnails(resultArticles,
+                    TopicRepository.getFollowedTopics(),
+                    getPickedSources());
+
+            populateHomeWithMyFollowedTopics(
+                    TopicRepository.getFollowedTopics(),
+                    resultArticles);
+
+
             // publish results
-            cachedArticles = articles;
-            historyAndBookmarksCheck(articles);
-            setArticlesList(articles);
+            cachedArticles = resultArticles;
+            historyAndBookmarksCheck(resultArticles);
+
+            //
+            setArticlesList(resultArticles);
         }
 
         taskIsRunning = false;
     }
+
+
 
     @Override
     public void onArticlesFetchFailed(String cause) {
@@ -237,7 +263,72 @@ public class HomeViewModel extends AndroidViewModel implements
         // TODO
     }
 
+    private void populateHomeWithMyFollowedTopics(List<Topic> topics, List<ListItem> elementsToDisplayInHome) {
+        MyTopicsItem myTopicsItem = new MyTopicsItem();
 
+        // convert Topic --> to ListItem, for recycler list
+        List<ListItem> convertedList = new ArrayList<>();
+        if(topics!=null) {
+            convertedList = new ArrayList<>(topics);
+            // add customize button to the end
+            convertedList.add(new CustomizeMyTopicsButton());
+        }
+
+        myTopicsItem.setMyTopics(convertedList);
+        elementsToDisplayInHome.add(0, myTopicsItem); // add topics as first element
+    }
+
+
+
+    private void setTopicsThumbnails(List<ListItem> elementsToDisplayInHome,
+                                     List<Topic> givenTopics,
+                                     List<Source> givenSources) {
+        if(givenTopics==null || givenTopics.isEmpty()) return;
+        if(elementsToDisplayInHome==null || elementsToDisplayInHome.isEmpty()) return;
+        if(givenSources==null || givenSources.isEmpty()) return;
+
+        List<Article> articles = filterArticles(elementsToDisplayInHome);
+        if(articles==null || articles.isEmpty()) return;
+
+//        SourceRepository sourceRepository = new SourceRepository();
+//        List<Source> sourcesTarget = sourceRepository.getAsourceForEachFollowedCategory_randomly(givenSources, givenTopics);
+//        for(Source currentSource: sourcesTarget) {
+//
+//        }
+
+        for(Topic currentTopic: givenTopics) { // for each topic...
+            String currentTopicId = currentTopic.getId();
+            for(Source currentSource: givenSources) { // ...get a source...
+                if(currentSource.getCategories().contains(currentTopicId)) {
+                    String currentSourceId = currentSource.getId();
+                    Collections.shuffle(articles); // ... randomize articles...
+                    for(Article currentArticle: articles) { //...get an articles with a thumbnail ...
+                        if(currentSourceId.equals(currentArticle.getSourceId())) {
+                            String thumbnailUrl = currentArticle.getThumbnailUrl();
+                            if(thumbnailUrl!=null) {
+                                currentTopic.setThumbnailUrl(thumbnailUrl);
+                                break;
+                            }
+                        }
+                    }// end most inner for
+                    break;
+                }
+            }// end middle for
+        }// end outer for
+    }
+
+    private List<Article> filterArticles(List<ListItem> elementsToDisplayInHome) {
+        List<Article> result = new ArrayList<>();
+
+        for(ListItem listItem: elementsToDisplayInHome) {
+            if(listItem.getItemType() == MyValues.ItemType.ARTICLE) {
+                Article article = ((Article) listItem);
+                result.add(article);
+            }
+        }
+
+        return result;
+    }
 
 
 

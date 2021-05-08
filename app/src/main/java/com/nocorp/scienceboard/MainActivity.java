@@ -179,7 +179,9 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
-        compositeDisposable.clear();
+        if(compositeDisposable!=null) {
+            compositeDisposable.clear();
+        }
 
         super.onDestroy();
         viewBinding = null;

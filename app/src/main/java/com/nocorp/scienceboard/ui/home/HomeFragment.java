@@ -22,6 +22,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -305,28 +306,28 @@ public class HomeFragment extends Fragment implements
 
     private void observeSourcesFetched() {
         Log.d(TAG, "observeSourcesFetched: contentInitilized: " + homeFragmentArticlesLoaded);
-        sourceViewModel.getObservableAllSources().observe(getViewLifecycleOwner(), resultSources -> {
-            Log.d(TAG, "observeSourcesFetched: called");
-            if(resultSources == null) {
-                //TODO: error message
-                Log.e(TAG, "SCIENCE_BOARD - loadSources: an error occurrend when fetching sources");
-                showCenteredToast("an error occurred when fetching sources from remote server");
-            }
-            else if(resultSources.isEmpty()) {
-                //TODO: warning message, no topics in memory
-                Log.w(TAG, "SCIENCE_BOARD - loadSources: no sources in remote DB");
-            }
-            else {
+        sourceViewModel.getObservableAllSources().observe(getViewLifecycleOwner(), new Observer<List<Source>>() {
+            @Override
+            public void onChanged(List<Source> resultSources) {
+                Log.d(TAG, "observeSourcesFetched: called");
+                if (resultSources == null) {
+                    //TODO: error message
+                    Log.e(TAG, "SCIENCE_BOARD - loadSources: an error occurrend when fetching sources");
+                    showCenteredToast("an error occurred when fetching sources from remote server");
+                } else if (resultSources.isEmpty()) {
+                    //TODO: warning message, no topics in memory
+                    Log.w(TAG, "SCIENCE_BOARD - loadSources: no sources in remote DB");
+                } else {
 
 
-                // getting enabled sources
-                sourcesFetched_cached = sourceViewModel.getEnabledSources();
+                    // getting enabled sources
+                    sourcesFetched_cached = sourceViewModel.getEnabledSources();
 
-                // init starting date
-                long startingDate = initStartingDate();
+                    // init starting date
+                    long startingDate = initStartingDate();
 
 
-                // this will prevent articles being fetched everytime the sources are observed
+                    // this will prevent articles being fetched everytime the sources are observed
 //                if(homeFragmentArticlesLoaded) {
 //                    Log.d(TAG, "observeSourcesFetched: content already initilized");
 //                    if(forceContentInitialization) {
@@ -339,10 +340,11 @@ public class HomeFragment extends Fragment implements
 //                    // ignore
 //                }
 
-                initContent(sourcesFetched_cached, startingDate);
+                    initContent(sourcesFetched_cached, startingDate);
 
-
+                }
             }
+
         });
     }
 
@@ -385,15 +387,6 @@ public class HomeFragment extends Fragment implements
             else {
                 elementsToDisplayInHome = new ArrayList<>();
 
-                // setting up followed topics items
-                setTopicsThumbnails(resultArticles,
-                                    myFollowedTopics,
-                                    homeViewModel.getPickedSources());
-
-                populateHomeWithMyFollowedTopics(myFollowedTopics,
-                                                 elementsToDisplayInHome);
-
-
                 // setting up article items
                 resultArticles = adProvider.populateListWithAds(resultArticles, AD_DISTANCE);
                 elementsToDisplayInHome.addAll(resultArticles);
@@ -414,8 +407,8 @@ public class HomeFragment extends Fragment implements
             if(resultArticles!=null && !resultArticles.isEmpty()) {
                 elementsToDisplayInHome = new ArrayList<>();
 
-                // setting up followed topics items
-                populateHomeWithMyFollowedTopics(myFollowedTopics, elementsToDisplayInHome);
+//                // setting up followed topics items
+//                populateHomeWithMyFollowedTopics(myFollowedTopics, elementsToDisplayInHome);
 
 
                 //  setting up article items

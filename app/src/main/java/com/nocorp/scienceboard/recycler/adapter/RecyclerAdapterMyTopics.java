@@ -18,8 +18,13 @@ import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.model.CustomizeMyTopicsButton;
@@ -119,14 +124,16 @@ public class RecyclerAdapterMyTopics extends
         String thumbnailUrl = topic.getThumbnailUrl();
 
         holder.topicNameLabel.setText(topicName);
+
+
         try {
             // TODO: crahses on andorid 21 (resource "thumbnail" not found)
             RequestOptions gildeOptions = new RequestOptions()
                     .fallback(R.drawable.placeholder_image)
                     .placeholder(R.drawable.placeholder_image)
-                    .centerCrop();
-//                        .error(R.drawable.default_avatar)
-//                        .diskCacheStrategy(DiskCacheStrategy.ALL);
+                    .centerCrop()
+                        .error(R.drawable.placeholder_image);
+//                        .diskCacheStrategy(DiskCacheStrategy.NONE);
 //                        .priority(Priority.HIGH);
 
 //            Glide.with(holder.itemView.getContext())
@@ -136,29 +143,50 @@ public class RecyclerAdapterMyTopics extends
 //                    .transition(withCrossFade())
 //                    .into(holder.thumbnail);
 
+//            Glide.with(holder.itemView.getContext())
+//                    .asBitmap()
+//                    .load(thumbnailUrl)
+//                    .apply(gildeOptions)
+//                    .thumbnail(/*sizeMultiplier = 0.25% less than original*/ THUMBNAIL_SIZE_MULTIPLIER)
+//                    .into(new CustomTarget<Bitmap>() {
+//                        @Override
+//                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+//                            holder.thumbnail.setImageBitmap(resource);
+//                            applyDominantoColor(resource, holder);
+//                        }
+//
+//                        @Override
+//                        public void onLoadCleared(@Nullable Drawable placeholder) {
+//                            holder.thumbnail.setImageDrawable(placeholder);
+//                        }
+//
+//                        @Override
+//                        public void onLoadFailed(@Nullable Drawable errorDrawable) {
+//                            super.onLoadFailed(errorDrawable);
+//                            holder.thumbnail.setImageDrawable(errorDrawable);
+//                        }
+//
+//                    });
+
             Glide.with(holder.itemView.getContext())
                     .asBitmap()
                     .load(thumbnailUrl)
                     .apply(gildeOptions)
                     .thumbnail(/*sizeMultiplier = 0.25% less than original*/ THUMBNAIL_SIZE_MULTIPLIER)
-                    .into(new CustomTarget<Bitmap>() {
+                    // this fix thumbnails duplication
+                    .addListener(new RequestListener<Bitmap>() {
                         @Override
-                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                            holder.thumbnail.setImageBitmap(resource);
+                        public boolean onLoadFailed(@Nullable @org.jetbrains.annotations.Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
                             applyDominantoColor(resource, holder);
+                            return false;
                         }
-
-                        @Override
-                        public void onLoadCleared(@Nullable Drawable placeholder) {
-//                        holder.thumbnail.setImageDrawable(placeholder);
-                        }
-
-                        @Override
-                        public void onLoadFailed(@Nullable Drawable errorDrawable) {
-                            super.onLoadFailed(errorDrawable);
-                            holder.thumbnail.setImageDrawable(errorDrawable);
-                        }
-                    });
+                    })
+                    .into(holder.thumbnail);
 
         } catch (Exception e) {
             Log.e(TAG, "SCIENCE_BOARD - buildTopicCoverItem: cannot set thumbnail in recycler, cause: " + e.getMessage());
@@ -201,6 +229,13 @@ public class RecyclerAdapterMyTopics extends
 
     public void loadNewData(List<ListItem> newList) {
         recyclerList = newList;
+        notifyDataSetChanged();
+    }
+
+    public void clearList() {
+        if(recyclerList!=null) {
+            recyclerList.clear();
+        }
         notifyDataSetChanged();
     }
 

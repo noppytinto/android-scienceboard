@@ -171,6 +171,7 @@ public class RecyclerAdapterArticlesList extends RecyclerView.Adapter<RecyclerVi
 
             //
             recyclerAdapterMyTopics = holder.recyclerAdapterMyTopics;
+//            holder.recyclerAdapterMyTopics.clearList();
             holder.recyclerAdapterMyTopics.loadNewData(myTopics);
         }
     }
