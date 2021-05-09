@@ -3,6 +3,7 @@ package com.nocorp.scienceboard.utility.ad.admob;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.ads.mediation.facebook.FacebookAdapter;
 import com.google.android.gms.ads.AdListener;
@@ -170,6 +171,7 @@ public class AdProvider {
                     public void onAdFailedToLoad(LoadAdError adError) {
                         // Handle the failure by logging, altering the UI, and so on.
                         Log.e(TAG, "SCIENCE_BOARD - onAdFailedToLoad: ad failed to load, cause: " + adError.getMessage());
+                        Toast.makeText(context, "onAdFailedToLoad: " + adError.getMessage(), Toast.LENGTH_LONG).show();
                     }
 
                     @Override
