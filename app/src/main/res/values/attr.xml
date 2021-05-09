@@ -79,6 +79,13 @@
     <attr name="adButtonStrokeColor" format="reference|color"/>
     <attr name="adButtonRippleColor" format="reference|color"/>
 
+    <!-- CUSTOMISE TOPICS FRAGMENT -->
+    <attr name="customizeTopicsFragmentSubtitleTextColor" format="reference|color"/>
+
+
+
+
+
 
 
 </resources>

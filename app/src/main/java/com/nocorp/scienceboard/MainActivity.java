@@ -140,6 +140,7 @@ public class MainActivity extends BaseActivity
         }
         else if(destination.getId() == R.id.customizeTopicsFragment) {
             hideToolbar();
+            hideBottomBar();
         }
         else if(destination.getId() == R.id.topicFeedsFragment) {
             hideToolbar();

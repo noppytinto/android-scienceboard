@@ -78,7 +78,8 @@
         <item name="bottomBarIconsColor_selected">@color/black</item>
         <item name="bottomBarIconsColor_unselected">@color/gray_500</item>
 
-
+        <!-- CUSTOMISE TOPICS FRAGMENT -->
+        <item name="customizeTopicsFragmentSubtitleTextColor">@color/gray_600</item>
 
 
         <!-- Status bar color. -->

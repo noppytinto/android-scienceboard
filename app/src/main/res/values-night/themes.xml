@@ -78,6 +78,8 @@
         <item name="bottomBarIconsColor_selected">@color/white</item>
         <item name="bottomBarIconsColor_unselected">@color/gray_700</item>
 
+        <!-- CUSTOMISE TOPICS FRAGMENT -->
+        <item name="customizeTopicsFragmentSubtitleTextColor">@color/gray_600</item>
 
 
 
