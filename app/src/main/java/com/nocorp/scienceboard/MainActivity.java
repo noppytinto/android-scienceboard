@@ -101,39 +101,16 @@ public class MainActivity extends BaseActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-//        checkDarkMode();
-
-//        int isNightMode = getResources().getConfiguration().uiMode;
-//
-//        switch (isNightMode) {
-//            case Configuration.UI_MODE_NIGHT_NO:
-//
-//        }
         Log.d(TAG, "onCreate: called");
-
         super.onCreate(savedInstanceState);
 
-
-
-
+        //
         initView();
         initAdProvider(this, NUM_ADS_TO_LOAD);
         observeDatePickedFromTimeMachine();
         initAppContent();
     }
 
-    private void checkDarkMode() {
-        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_app_theme_key), Context.MODE_PRIVATE);
-        boolean defaultValue = getResources().getBoolean(R.bool.preference_app_theme_default_value_key);
-        boolean darkModeEnabled = sharedPref.getBoolean(getString(R.string.preference_app_theme_key), defaultValue);
-
-        if(darkModeEnabled) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-        }
-        else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        }
-    }
 
     @Override
     protected void onResume() {
@@ -397,14 +374,17 @@ public class MainActivity extends BaseActivity
 
         compositeDisposable.add(
                 topicRepository.checkLastFetchDate(this)
-                        .flatMap(timeElapsed -> {
-                            if(timeElapsed) {
-                                return topicRepository.fetchRemotely_strategy_rxjava(this)
-                                        .flatMap(topics -> topicRepository.saveFetchedTopicsInRoom_rxjava(topics, this))
-                                        .subscribeOn(Schedulers.io());
+                        .flatMap(isWithinXDays -> {
+                            if(isWithinXDays) {
+                                return topicRepository.fetchLocally_strategy_rxjava(this);
+
                             }
                             else {
-                                return topicRepository.fetchLocally_strategy_rxjava(this);
+                                return topicRepository.fetchRemotely_strategy_rxjava(this)
+                                        .flatMap(topics -> topicRepository
+                                                .saveFetchedTopicsInRoom_rxjava(topics, this)
+                                                .subscribeOn(Schedulers.io())
+                                        );
                             }
                         })
                 .flatMap(topics ->
@@ -415,14 +395,16 @@ public class MainActivity extends BaseActivity
                         return sourceRepository.checkLastFetchDate( this)
                                 .subscribeOn(Schedulers.io());
                 })
-                .flatMap(timeElapsed -> {
-                    if(timeElapsed) {
-                        return sourceRepository.fetchRemotely_strategy_rxjava(this)
-                                .flatMap(sources -> sourceRepository.saveFetchedSourcesInRoom_sync_rxjava(sources, this))
-                                .subscribeOn(Schedulers.io());
+                .flatMap(isWithinXDays -> {
+                    if(isWithinXDays) {
+                        return sourceRepository.fetchLocally_strategy_rxjava( this);
                     }
                     else {
-                        return sourceRepository.fetchLocally_strategy_rxjava( this);
+                        return sourceRepository.fetchRemotely_strategy_rxjava(this)
+                                .flatMap(sources -> sourceRepository
+                                        .saveFetchedSourcesInRoom_sync_rxjava(sources, this)
+                                        .subscribeOn(Schedulers.io())
+                                );
                     }
                 })
                 .subscribeOn(Schedulers.io())

@@ -170,7 +170,7 @@ public class SourceRepository {
     public Single<List<Source>> saveFetchedSourcesInRoom_sync_rxjava(@NotNull List<Source> sources, Context context) {
         return Single.create(emitter -> {
             try {
-                Log.d(TAG, "saveTopicsInRoom_rxjava: called");
+                Log.d(TAG, "saveFetchedSourcesInRoom_sync_rxjava: called");
                 saveSourcesInRoom_sync(sources, context);
                 emitter.onSuccess(sources);
             } catch (Exception ex) {

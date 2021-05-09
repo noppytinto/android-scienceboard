@@ -228,9 +228,8 @@ public class TopicRepository {
                             }
                             cachedAllTopics_enabled = fallbackTopics;
                         }
-
-                        emitter.onSuccess(cachedAllTopics_enabled);
                         Log.d(TAG, "getTopicsFromRemoteDb_rxjava: completed");
+                        emitter.onSuccess(cachedAllTopics_enabled);
                     });
         });
     }
