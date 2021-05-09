@@ -1,13 +1,16 @@
 package com.nocorp.scienceboard.utility.ad.admob;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.util.Log;
 
+import com.google.ads.mediation.facebook.FacebookAdapter;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.AdapterStatus;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.google.android.gms.ads.nativead.NativeAdOptions;
 import com.nocorp.scienceboard.BuildConfig;
@@ -16,6 +19,7 @@ import com.nocorp.scienceboard.ui.viewholder.ListItem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class AdProvider {
     private final String TAG = this.getClass().getSimpleName();
@@ -40,9 +44,18 @@ public class AdProvider {
 
     public void initAdMob(Context context) {
         if(adMobInitialized) return;
-
         MobileAds.initialize(context, initializationStatus -> {
+            // old
+//            Log.d(AdProvider.class.getSimpleName(), "SCIENCE_BOARD - onInitializationComplete: admob initilized");
+//            adMobInitialized = true;
+
+            // new, with mediation
             Log.d(AdProvider.class.getSimpleName(), "SCIENCE_BOARD - onInitializationComplete: admob initilized");
+            Map<String, AdapterStatus> statusMap = initializationStatus.getAdapterStatusMap();
+            for (String adapterClass : statusMap.keySet()) {
+                AdapterStatus status = statusMap.get(adapterClass);
+                Log.d("MyApp", String.format("Adapter name: %s, Description: %s, Latency: %d", adapterClass, status.getDescription(), status.getLatency()));
+            }
             adMobInitialized = true;
         });
     }
@@ -125,11 +138,11 @@ public class AdProvider {
 
         nativeAds = new ArrayList<>();
 
-        adLoader = new AdLoader.Builder(context, BuildConfig.BABAD_T) // TODO: this is a test id, change on production
-                .forNativeAd(ad -> {
+        adLoader = new AdLoader.Builder(context, BuildConfig.BABAD) // TODO: this is a test id, change on production
+                .forNativeAd(nativeAd -> {
                     // Show the ad.
                     if (viewDestroyed) {
-                        ad.destroy();
+                        nativeAd.destroy();
                         Log.d(TAG, "SCIENCE_BOARD - onActivityCreated: ad destroyed");
                         return;
                     }
@@ -140,9 +153,15 @@ public class AdProvider {
                         Log.d(TAG, "SCIENCE_BOARD - onActivityCreated: ad loading");
 
                     } else {
+                        Bundle extras = nativeAd.getExtras();
+                        if (extras.containsKey(FacebookAdapter.KEY_SOCIAL_CONTEXT_ASSET)) {
+                            String socialContext = (String) extras.get(FacebookAdapter.KEY_SOCIAL_CONTEXT_ASSET);
+                            Log.d(TAG, "loadSomeAds: social context: " + socialContext);
+                        }
+
                         Log.d(TAG, "SCIENCE_BOARD - onActivityCreated: ad loaded");
                         // The AdLoader has finished loading ads.
-                        nativeAds.add(ad);
+                        nativeAds.add(nativeAd);
 //                        displayNativeAd(nativeAd);
                     }
                 })
@@ -162,7 +181,15 @@ public class AdProvider {
                 })
                 .withNativeAdOptions(new NativeAdOptions.Builder().build())
                 .build();
-        adLoader.loadAds(new AdRequest.Builder().build(), adsToLoad);
+
+        // old
+//        adLoader.loadAds(new AdRequest.Builder().build(), adsToLoad);
+
+        // new, with mediation
+        AdRequest request =  new AdRequest.Builder()
+                .build();
+        adLoader.loadAd(request);
+
     }
 
 

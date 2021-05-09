@@ -82,6 +82,8 @@
     <!-- CUSTOMISE TOPICS FRAGMENT -->
     <attr name="customizeTopicsFragmentSubtitleTextColor" format="reference|color"/>
 
+    <!-- NATIVE AD -->
+    <attr name="adAttributionBackgroundColor" format="reference|color"/>
 
 
 

@@ -81,6 +81,13 @@
         <!-- CUSTOMISE TOPICS FRAGMENT -->
         <item name="customizeTopicsFragmentSubtitleTextColor">@color/gray_600</item>
 
+        <!-- NATIVE AD -->
+        <item name="adAttributionBackgroundColor">@color/gray_400</item>
+
+
+
+
+
 
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>

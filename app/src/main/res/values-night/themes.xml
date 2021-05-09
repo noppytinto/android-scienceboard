@@ -81,6 +81,8 @@
         <!-- CUSTOMISE TOPICS FRAGMENT -->
         <item name="customizeTopicsFragmentSubtitleTextColor">@color/gray_600</item>
 
+        <!-- NATIVE AD -->
+        <item name="adAttributionBackgroundColor">@color/gray_700</item>
 
 
 

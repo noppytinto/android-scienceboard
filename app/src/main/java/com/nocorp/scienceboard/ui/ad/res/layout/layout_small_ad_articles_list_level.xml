@@ -4,14 +4,15 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_marginLeft="8dp"
+    android:layout_marginLeft="10dp"
     android:layout_marginRight="8dp"
     >
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout_layoutNativeAdArticlesListLevel_parent"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        >
 
         <androidx.cardview.widget.CardView
             android:id="@+id/cardView_layoutNativeAdArticlesListLevel_adImage"
@@ -28,13 +29,21 @@
             >
 
 
-            <ImageView
+                <!-- OLD -->
+<!--            <ImageView-->
+<!--                android:id="@+id/imageView_layoutNativeAdArticlesListLevel_adImage"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:background="@color/gray_500"-->
+<!--                android:scaleType="centerCrop"-->
+<!--                tools:srcCompat="@tools:sample/backgrounds/scenic" />-->
+
+
+            <!-- NEW, with mediation -->
+            <com.google.android.gms.ads.nativead.MediaView
                 android:id="@+id/imageView_layoutNativeAdArticlesListLevel_adImage"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/gray_500"
-                android:scaleType="centerCrop"
-                tools:srcCompat="@tools:sample/backgrounds/scenic" />
+                android:layout_height="match_parent" />
 
 
         </androidx.cardview.widget.CardView>
@@ -44,9 +53,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHeight_min="90dp"
@@ -72,11 +81,10 @@
                 android:id="@+id/textView_layoutNativeAdArticlesListLevel_adAttribution"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="4dp"
                 android:layout_marginBottom="4dp"
                 android:adjustViewBounds="true"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/buttonlayoutNativeAdArticlesListLevel_action"
                 app:layout_constraintTop_toBottomOf="@+id/buttonlayoutNativeAdArticlesListLevel_action"
                 app:layout_constraintVertical_bias="1.0"
                 app:srcCompat="@drawable/ic_ad_badge" />
@@ -87,8 +95,6 @@
                 style="@style/ScienceBoard.Button.AdButton"
                 android:layout_width="0dp"
                 android:layout_height="40dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
                 app:layout_constraintEnd_toEndOf="@+id/textView_layoutNativeAdArticlesListLevel_headline"
                 app:layout_constraintStart_toStartOf="@+id/textView_layoutNativeAdArticlesListLevel_headline"
                 app:layout_constraintTop_toBottomOf="@+id/textView_layoutNativeAdArticlesListLevel_headline"
