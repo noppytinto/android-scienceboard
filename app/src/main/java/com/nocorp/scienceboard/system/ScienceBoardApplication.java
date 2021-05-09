@@ -13,10 +13,23 @@ public class ScienceBoardApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        checkDarkMode();
         ThreadManager.init();
         MyOkHttpClient.init(this);
         Log.d(ScienceBoardApplication.class.getSimpleName(), "SCIENCE_BOARD - onCreate(): application initilized");
     }
 
+    private void checkDarkMode() {
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_app_theme_key), Context.MODE_PRIVATE);
+        boolean defaultValue = getResources().getBoolean(R.bool.preference_app_theme_default_value_key);
+        boolean darkModeEnabled = sharedPref.getBoolean(getString(R.string.preference_app_theme_key), defaultValue);
+
+        if(darkModeEnabled) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        }
+        else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+    }
 
 }

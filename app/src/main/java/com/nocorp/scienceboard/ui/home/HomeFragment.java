@@ -198,8 +198,6 @@ public class HomeFragment extends Fragment implements
 //        }
 
         observeSourcesFetched();
-
-
         observeArticlesFetched();
         observerNextArticlesFetched();
         observeCustomizationStatus();
@@ -870,7 +868,7 @@ public class HomeFragment extends Fragment implements
         changeMenuItemIcon(switchThemeMenuItem, R.drawable.ic_sun);
         changeMenuItemTitle(switchThemeMenuItem, "Disable Dark Mode");
         // writing preference
-        SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = requireActivity().getSharedPreferences(getString(R.string.preference_app_theme_key), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putBoolean(getString(R.string.preference_app_theme_key), false);
         editor.apply();
@@ -884,7 +882,7 @@ public class HomeFragment extends Fragment implements
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
 
         // writing preference
-        SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = requireActivity().getSharedPreferences(getString(R.string.preference_app_theme_key), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putBoolean(getString(R.string.preference_app_theme_key), true);
         editor.apply();
@@ -892,7 +890,7 @@ public class HomeFragment extends Fragment implements
 
     private void checkDarkMode() {
         Log.d(TAG, "checkDarkMode: called");
-        SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = requireActivity().getSharedPreferences(getString(R.string.preference_app_theme_key), Context.MODE_PRIVATE);
         boolean defaultValue = getResources().getBoolean(R.bool.preference_app_theme_default_value_key);
         darkModeEnabled = sharedPref.getBoolean(getString(R.string.preference_app_theme_key), defaultValue);
 

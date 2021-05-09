@@ -54,7 +54,7 @@ import io.reactivex.rxjava3.observers.DisposableSingleObserver;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends BaseActivity
         implements NavController.OnDestinationChangedListener {
     private final String TAG = this.getClass().getSimpleName();
     private NavController navController;
@@ -101,8 +101,21 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        checkDarkMode();
+//        checkDarkMode();
+
+//        int isNightMode = getResources().getConfiguration().uiMode;
+//
+//        switch (isNightMode) {
+//            case Configuration.UI_MODE_NIGHT_NO:
+//
+//        }
+        Log.d(TAG, "onCreate: called");
+
         super.onCreate(savedInstanceState);
+
+
+
+
         initView();
         initAdProvider(this, NUM_ADS_TO_LOAD);
         observeDatePickedFromTimeMachine();
@@ -110,7 +123,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void checkDarkMode() {
-        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_app_theme_key), Context.MODE_PRIVATE);
         boolean defaultValue = getResources().getBoolean(R.bool.preference_app_theme_default_value_key);
         boolean darkModeEnabled = sharedPref.getBoolean(getString(R.string.preference_app_theme_key), defaultValue);
 
