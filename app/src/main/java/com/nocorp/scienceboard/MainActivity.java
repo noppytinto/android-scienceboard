@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,6 +12,18 @@ import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.chip.Chip;
@@ -29,25 +40,14 @@ import com.nocorp.scienceboard.ui.timemachine.TimeMachineViewModel;
 import com.nocorp.scienceboard.ui.topics.TopicsViewModel;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.DialogFragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
-import androidx.navigation.NavDestination;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
-
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Calendar;
 import java.util.List;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.observers.DisposableSingleObserver;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
@@ -75,6 +75,7 @@ public class MainActivity extends BaseActivity
     private SourceViewModel sourceViewModel;
     private TopicsViewModel topicsViewModel;
     private TimeMachineViewModel timeMachineViewModel;
+    private MainActivityViewModel mainActivityViewModel;
 
     //
     private final int DATE_PICKER_DEFAULT_CHIP_STROKE_WIDTH = 3;
@@ -91,7 +92,7 @@ public class MainActivity extends BaseActivity
 
 
     // rxjava
-    private CompositeDisposable compositeDisposable;
+    private Disposable disposable;
 
 
 
@@ -104,11 +105,22 @@ public class MainActivity extends BaseActivity
 
         //
         initView();
-        initAdProvider(this, NUM_ADS_TO_LOAD);
         observeDatePickedFromTimeMachine();
-        initAppContent();
+
+        if(savedInstanceState==null) {
+            initAdProvider(this, NUM_ADS_TO_LOAD);
+            initAppContent();
+        }
+        else {
+            disposable = mainActivityViewModel.getMainActivityContentDisposable();
+        }
     }
 
+    @Override
+    protected void onSaveInstanceState(@NonNull @NotNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mainActivityViewModel.setMainActivityContentDisposable(disposable);
+    }
 
     @Override
     protected void onResume() {
@@ -168,10 +180,7 @@ public class MainActivity extends BaseActivity
 
     @Override
     protected void onDestroy() {
-        if(compositeDisposable!=null) {
-            compositeDisposable.clear();
-        }
-
+//        disposeDisposable(disposable);
         super.onDestroy();
         viewBinding = null;
         Log.d(TAG, "onDestroy: called");
@@ -179,6 +188,11 @@ public class MainActivity extends BaseActivity
 
 
 
+    private void disposeDisposable(Disposable disposable) {
+        if(disposable!=null && !disposable.isDisposed()) {
+            disposable.dispose();
+        }
+    }
 
 
     //------------------------------------------------------------------------------ MY METHODS
@@ -200,7 +214,6 @@ public class MainActivity extends BaseActivity
         chipTimeMachine = viewBinding.chipMainActivityTimeMachine;
         toolbarInnerContainer = viewBinding.constraintActivityMainActivityToolbarInnerContainer;
         chipTimeMachine.setOnClickListener(v -> showTimeMachineDatePicker());
-        datePicked = System.currentTimeMillis();
         timeMachineEnabledIndicator = viewBinding.floatingActionButtonExploreFragmentTimeMachine;
 
 
@@ -239,23 +252,28 @@ public class MainActivity extends BaseActivity
 
 
         //
-        compositeDisposable = new CompositeDisposable();
 
         // repos
         topicRepository = new TopicRepository();
         sourceRepository = new SourceRepository();
 
+        //
+        adProvider = AdProvider.getInstance();
 
         // viewmodels
+        mainActivityViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
         topicsViewModel = new ViewModelProvider(this).get(TopicsViewModel.class);
         sourceViewModel = new ViewModelProvider(this).get(SourceViewModel.class);
         timeMachineViewModel = new ViewModelProvider(this).get(TimeMachineViewModel.class);
 
 
+        // set
+        datePicked = System.currentTimeMillis();
+
+
     }// end initView()
 
     private void initAdProvider(Context context, int numAdsToLoad) {
-        AdProvider adProvider = AdProvider.getInstance();
         adProvider.initAdMob(context);
         adProvider.loadSomeAds(numAdsToLoad, context);
     }
@@ -369,30 +387,27 @@ public class MainActivity extends BaseActivity
 //            }
 //        });
 
+        Single<List<Source>> singleSource = topicRepository.checkLastFetchDate(this)
+                .flatMap(isWithinXDays -> {
+                    if(isWithinXDays) {
+                        return topicRepository.fetchLocally_strategy_rxjava(this);
 
-
-        compositeDisposable.add(
-                topicRepository.checkLastFetchDate(this)
-                        .flatMap(isWithinXDays -> {
-                            if(isWithinXDays) {
-                                return topicRepository.fetchLocally_strategy_rxjava(this);
-
-                            }
-                            else {
-                                return topicRepository.fetchRemotely_strategy_rxjava(this)
-                                        .flatMap(topics -> topicRepository
-                                                .saveFetchedTopicsInRoom_rxjava(topics, this)
-                                                .subscribeOn(Schedulers.io())
-                                        );
-                            }
-                        })
+                    }
+                    else {
+                        return topicRepository.fetchRemotely_strategy_rxjava(this)
+                                .flatMap(topics -> topicRepository
+                                        .saveFetchedTopicsInRoom_rxjava(topics, this)
+                                        .subscribeOn(Schedulers.io())
+                                );
+                    }
+                })
                 .flatMap(topics ->
                         topicRepository.getUpdatedTopicsFromRoom_sync_rxjava( this)
                                 .subscribeOn(Schedulers.io()))
                 .flatMap(topics -> {
-                        topicsViewModel.setTopicsList(topics);
-                        return sourceRepository.checkLastFetchDate( this)
-                                .subscribeOn(Schedulers.io());
+                    topicsViewModel.setTopicsList(topics);
+                    return sourceRepository.checkLastFetchDate( this)
+                            .subscribeOn(Schedulers.io());
                 })
                 .flatMap(isWithinXDays -> {
                     if(isWithinXDays) {
@@ -405,7 +420,9 @@ public class MainActivity extends BaseActivity
                                         .subscribeOn(Schedulers.io())
                                 );
                     }
-                })
+                });
+
+        disposable = singleSource
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new DisposableSingleObserver<List<Source>>() {
@@ -417,10 +434,10 @@ public class MainActivity extends BaseActivity
                     @Override
                     public void onError(@io.reactivex.rxjava3.annotations.NonNull Throwable e) {
                         sourceViewModel.setAllSources(null);
-
                     }
-                })
-        );
+                });
+
+
     }
 
     private void loadSources() {
