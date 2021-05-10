@@ -71,11 +71,14 @@ public class MainActivity extends BaseActivity
     private FloatingActionButton timeMachineEnabledIndicator;
 
     //
-    private AdProvider adProvider;
     private SourceViewModel sourceViewModel;
     private TopicsViewModel topicsViewModel;
     private TimeMachineViewModel timeMachineViewModel;
     private MainActivityViewModel mainActivityViewModel;
+
+    // repos
+    private TopicRepository topicRepository;
+    private SourceRepository sourceRepository;
 
     //
     private final int DATE_PICKER_DEFAULT_CHIP_STROKE_WIDTH = 3;
@@ -85,12 +88,7 @@ public class MainActivity extends BaseActivity
     private final int NUM_ADS_TO_LOAD = 5;
     private final long ANIMATION_DURATION = 4000L;
     private ObjectAnimator objectAnimator;
-
-    // repos
-    private TopicRepository topicRepository;
-    private SourceRepository sourceRepository;
-
-
+    private AdProvider adProvider;
     // rxjava
     private Disposable disposable;
 
@@ -103,10 +101,9 @@ public class MainActivity extends BaseActivity
         Log.d(TAG, "onCreate: called");
         super.onCreate(savedInstanceState);
 
-        //
+        // init
         initView();
-        observeDatePickedFromTimeMachine();
-
+        // restoring state
         if(savedInstanceState==null) {
             initAdProvider(this, NUM_ADS_TO_LOAD);
             initAppContent();
@@ -114,6 +111,9 @@ public class MainActivity extends BaseActivity
         else {
             disposable = mainActivityViewModel.getMainActivityContentDisposable();
         }
+
+        //
+        observeDatePickedFromTimeMachine();
     }
 
     @Override

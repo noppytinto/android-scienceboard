@@ -241,10 +241,9 @@ public class HomeViewModel extends AndroidViewModel implements
                     TopicRepository.getFollowedTopics(),
                     resultArticles);
 
-
             // publish results
-            cachedArticles = resultArticles;
             historyAndBookmarksCheck(resultArticles);
+            cachedArticles = resultArticles;
 
             //
             setArticlesList(resultArticles);
@@ -252,8 +251,6 @@ public class HomeViewModel extends AndroidViewModel implements
 
         taskIsRunning = false;
     }
-
-
 
     @Override
     public void onArticlesFetchFailed(String cause) {
@@ -277,8 +274,6 @@ public class HomeViewModel extends AndroidViewModel implements
         myTopicsItem.setMyTopics(convertedList);
         elementsToDisplayInHome.add(0, myTopicsItem); // add topics as first element
     }
-
-
 
     private void setTopicsThumbnails(List<ListItem> elementsToDisplayInHome,
                                      List<Topic> givenTopics,
@@ -332,6 +327,8 @@ public class HomeViewModel extends AndroidViewModel implements
 
 
 
+
+
     //-------------------------------------------------------------- FETCH NEXT ARTICLES
 
     public void fetchNextArticles(int numArticlesForEachSource) {
@@ -354,7 +351,8 @@ public class HomeViewModel extends AndroidViewModel implements
         // publish results
         historyAndBookmarksCheck(newArticles);
         cachedArticles.addAll(newArticles);
-        setNextArticlesList(cachedArticles);
+//        setNextArticlesList(cachedArticles);
+        setArticlesList(cachedArticles);
         taskIsRunning = false;
     }
 

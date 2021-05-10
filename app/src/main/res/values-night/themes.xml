@@ -100,7 +100,14 @@
 
         <!-- dropdown menu style -->
 <!--        <item name="android:dropDownListViewStyle">@style/ScienceBoard.PopupMenuListView</item>-->
+        <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
     </style>
+
+    <style name="WindowAnimationTransition">
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
+    </style>
+
 
     <style name="Theme.ScienceBoard.NoActionBar">
         <item name="windowActionBar">false</item>

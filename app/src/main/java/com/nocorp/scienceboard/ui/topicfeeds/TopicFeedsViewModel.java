@@ -52,6 +52,8 @@ public class TopicFeedsViewModel extends AndroidViewModel implements
     private long lastFetchDate;
 //    private final int FETCH_INTERVAL = 15; // in minutes
 
+    //
+    private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 1;
 
     
     //-------------------------------------------------------------------------------------------- CONSTRUCTORS
@@ -105,26 +107,21 @@ public class TopicFeedsViewModel extends AndroidViewModel implements
     //-------------------------------------------------------------- FETCH ARTICLES
 
     public void fetchArticles(List<Source> givenSources,
-                              int numArticlesForEachSource,
                               boolean forced,
                               String topicId,
                               long startingDateinMillis) {
 
         if(forced) {
             Log.d(TAG, "SCIENCE_BOARD - fetchArticles: FORCED: fetching from remote");
-            downloadArticlesFromTopic(
-                    givenSources,
-                    numArticlesForEachSource,
-                    topicId,
-                    startingDateinMillis);
+            downloadArticlesFromTopic(givenSources,
+                                      topicId,
+                                      startingDateinMillis);
         }
         else {
             Log.d(TAG, "SCIENCE_BOARD - fetchArticles: NOT FORCED: trying fetching from cache");
-            tryCachedArticles(
-                    givenSources,
-                    numArticlesForEachSource,
-                    topicId,
-                    startingDateinMillis);
+            tryCachedArticles(givenSources,
+                              topicId,
+                              startingDateinMillis);
         }
 
 //        // if the request is within 15 mins
@@ -160,7 +157,6 @@ public class TopicFeedsViewModel extends AndroidViewModel implements
 
     private void downloadArticlesFromTopic(
             List<Source> givenSources,
-            int numArticlesForEachSource,
             String topicId,
             long startingDateinMillis) {
         if( ! taskIsRunning) {
@@ -171,11 +167,10 @@ public class TopicFeedsViewModel extends AndroidViewModel implements
                 if(pickedSources == null || pickedSources.isEmpty()) {
                     pickedSources = sourceRepository.getAllSourcesOfThisCategory(givenSources, topicId);
                 }
-                articleRepository.fetchArticles(
-                        pickedSources,
-                        numArticlesForEachSource,
-                        startingDateinMillis, getApplication()
-                );
+                articleRepository.fetchArticles(pickedSources,
+                                                NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
+                                                startingDateinMillis,
+                                                getApplication());
             };
 
             ThreadManager threadManager = ThreadManager.getInstance();
@@ -183,10 +178,12 @@ public class TopicFeedsViewModel extends AndroidViewModel implements
         }
     }
 
-    private void tryCachedArticles(List<Source> givenSources, int numArticlesForEachSource, String topicId, long startingDateinMillis) {
+    private void tryCachedArticles(List<Source> givenSources, String topicId, long startingDateinMillis) {
         if(cachedArticles == null) {
             Log.d(TAG, "SCIENCE_BOARD - tryCachedArticles: fetched from remote");
-            downloadArticlesFromTopic(givenSources, numArticlesForEachSource, topicId, startingDateinMillis);
+            downloadArticlesFromTopic(givenSources,
+                                      topicId,
+                                      startingDateinMillis);
         }
         else {
             Log.d(TAG, "SCIENCE_BOARD - tryCachedArticles: fetched from cache");
@@ -228,12 +225,14 @@ public class TopicFeedsViewModel extends AndroidViewModel implements
 
     //-------------------------------------------------------------- FETCH NEXT ARTICLES
 
-    public void fetchNextArticles(int numArticlesForEachSource) {
+    public void fetchNextArticles() {
         if(!taskIsRunning) {
             Runnable task = () -> {
 //                sleepforNseconds(1);
                 Log.d(TAG, "SCIENCE_BOARD - fetchNextArticles: fetching new articles");
-                articleRepository.fetchNextArticles(oldestArticlesSnapshots, numArticlesForEachSource, getApplication());
+                articleRepository.fetchNextArticles(oldestArticlesSnapshots,
+                                                    NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
+                                                    getApplication());
             };
 
             ThreadManager threadManager = ThreadManager.getInstance();
@@ -250,7 +249,7 @@ public class TopicFeedsViewModel extends AndroidViewModel implements
         // publish results
         historyAndBookmarksCheck(newArticles);
         cachedArticles.addAll(newArticles);
-        setNextArticlesList(cachedArticles);
+        setArticlesList(cachedArticles);
     }
 
     @Override

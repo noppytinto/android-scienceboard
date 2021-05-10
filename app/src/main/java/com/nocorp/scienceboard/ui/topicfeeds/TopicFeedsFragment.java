@@ -98,7 +98,6 @@ public class TopicFeedsFragment extends Fragment implements
     private List<Source> sourcesFetched;
     private List<ListItem> articlesToDisplay;
     private Topic currentTopic;
-    private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 1;
     private final int AD_DISTANCE = 5; // distance between ads (in terms of items)
     private long currentDateInMillis;
     private boolean recyclerIsLoading = false;
@@ -244,19 +243,17 @@ public class TopicFeedsFragment extends Fragment implements
             }
             else {
                 // getting enabled sources
-                sourcesFetched = new ArrayList<>(resultSources);
-                sourcesFetched = extractEnabledSources(sourcesFetched);
+                sourcesFetched = sourceViewModel.getEnabledSources();
+
 
                 // init starting date
                 long startingDate = initStartingDate();
 
                 // fetching articles
-                topicFeedsViewModel.fetchArticles(
-                        sourcesFetched,
-                        NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
-                        false,
-                        currentTopic.getId(),
-                        startingDate);
+                topicFeedsViewModel.fetchArticles(sourcesFetched,
+                                                  false,
+                                                  currentTopic.getId(),
+                                                  startingDate);
             }
         });
     }
@@ -307,7 +304,6 @@ public class TopicFeedsFragment extends Fragment implements
                 resultArticles = adProvider.populateListWithAds(resultArticles, AD_DISTANCE);
                 articlesToDisplay = new ArrayList<>(resultArticles);
                 recyclerAdapterArticlesList.loadNewData(articlesToDisplay);
-//                showCenteredToast("articles fetched");
                 recyclerIsLoading = false;
             }
         });
@@ -628,7 +624,7 @@ public class TopicFeedsFragment extends Fragment implements
         recyclerAdapterArticlesList.addLoadingView(articlesToDisplay);
 
         // load new items
-        topicFeedsViewModel.fetchNextArticles(NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE);
+        topicFeedsViewModel.fetchNextArticles();
     }
 
     private void setupSwipeDownToRefresh(SwipeRefreshLayout swipeRefreshLayout) {
@@ -645,12 +641,10 @@ public class TopicFeedsFragment extends Fragment implements
             startingDate = timeMachineViewModel.getPickedDate();
         }
 
-        topicFeedsViewModel.fetchArticles(
-                sourcesFetched,
-                NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE,
-                true,
-                currentTopic.getId(),
-                startingDate);
+        topicFeedsViewModel.fetchArticles(sourcesFetched,
+                                          true,
+                                          currentTopic.getId(),
+                                          startingDate);
     }
 
 
