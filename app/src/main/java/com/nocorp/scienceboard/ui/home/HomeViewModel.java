@@ -168,7 +168,7 @@ public class HomeViewModel extends AndroidViewModel implements
         switch (numFollowedTopics) {
             case 1: {
                 maxSourcesToGet = 5;
-                numArticlesToFetchForEachSource = 1;
+                numArticlesToFetchForEachSource = 2;
                 Log.d(TAG, APP_NAME + "downloadArticlesFromFollowedTopics: case 1, " + maxSourcesToGet + " sources, " + numArticlesToFetchForEachSource + " articles for each source");
             }
             break;
