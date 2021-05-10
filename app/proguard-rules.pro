@@ -97,5 +97,9 @@
 # This rule will properly ProGuard all the model classes in
 # the package com.yourcompany.models. Modify to fit the structure
 # of your app.
--keep class com.nocorp.scienceboard.model.Article {*;}
--keep class com.nocorp.scienceboard.topics.model.Topic {*;}
+#-keep class com.nocorp.scienceboard.model.Article {*;}
+#-keep class com.nocorp.scienceboard.topics.model.Topic {*;}
+
+# keeping names for nav_graph arguments
+-keepnames class com.nocorp.scienceboard.model.Article
+-keepnames class com.nocorp.scienceboard.topics.model.Topic

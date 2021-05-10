@@ -270,6 +270,7 @@ public class HomeFragment extends Fragment implements
             Log.d(TAG, "getObservableArticlesList: called");
             swipeRefreshLayout.setRefreshing(false);
             progressIndicator.setVisibility(View.GONE);
+            recyclerViewArticles.setVisibility(View.VISIBLE);
 
             if(resultArticles==null) {
                 recyclerIsLoading = false;
@@ -293,6 +294,9 @@ public class HomeFragment extends Fragment implements
 
                 //
                 recyclerIsLoading = false;
+
+                //
+
             }
         });
     }
@@ -332,7 +336,10 @@ public class HomeFragment extends Fragment implements
         topicsViewModel.getObservableCustomizationStatus().observe(getViewLifecycleOwner(), customizationCompleted -> {
             Log.d(TAG, "observeCustomizationStatus: called");
             if(customizationCompleted) {
-                updateContentWithNewTopics();
+                progressIndicator.setVisibility(View.VISIBLE);
+                recyclerViewArticles.setVisibility(View.GONE);
+                refreshArticlesAndTopics();
+                topicsViewModel.setCustomizationStatus(false);
             }
             else {
                 // ignore
@@ -340,33 +347,18 @@ public class HomeFragment extends Fragment implements
         });
     }
 
-    private void updateContentWithNewTopics() {
-        refreshArticlesAndTopics();
-        topicsViewModel.setCustomizationStatus(false);
-    }
+
+
 
 
     //---------------------------------------------------------- listeners
 
     @Override
     public void onArticleClicked(int position, View itemView) {
-        Article article = (Article) recyclerAdapterArticlesList.getItem(position);
-        if(article!=null) {
-            homeViewModel.saveInHistory(article);
-            article.setVisited(true);
-
-            // add container transformation animation
-//            FragmentNavigator.Extras animations = new FragmentNavigator
-//                    .Extras
-//                    .Builder()
-//                    .addSharedElement(itemView, itemView.getTransitionName())
-//                    .build();
-
-            NavGraphDirections.ActionGlobalWebviewFragment action =
-                    NavGraphDirections.actionGlobalWebviewFragment(article);
-            Navigation.findNavController(view).navigate(action);
-        }
+        showArticleWebview(position);
     }
+
+
 
     @Override
     public void onTopicCoverClicked(int position) {
@@ -417,6 +409,25 @@ public class HomeFragment extends Fragment implements
 
 
     //---------------------------------------------------------- destinantions
+
+    private void showArticleWebview(int position) {
+        Article article = (Article) recyclerAdapterArticlesList.getItem(position);
+        if(article!=null) {
+            homeViewModel.saveInHistory(article);
+            article.setVisited(true);
+
+            // add container transformation animation
+//            FragmentNavigator.Extras animations = new FragmentNavigator
+//                    .Extras
+//                    .Builder()
+//                    .addSharedElement(itemView, itemView.getTransitionName())
+//                    .build();
+
+            NavGraphDirections.ActionGlobalWebviewFragment action =
+                    NavGraphDirections.actionGlobalWebviewFragment(article);
+            Navigation.findNavController(view).navigate(action);
+        }
+    }
 
     private void showAboutFragment() {
         Navigation.findNavController(view).navigate(R.id.action_homeFragment_to_aboutFragment);

@@ -159,33 +159,8 @@ public class WebviewFragment extends Fragment implements
 //        setEnterTransition();
     }
 
-    private void setEnterTransition() {
-        // TRANSITION
-        MaterialContainerTransform transform = new MaterialContainerTransform();
-//        transform.setInterpolator(new FastOutSlowInInterpolator());
-        transform.setDrawingViewId(R.id.nav_host_fragment);
-//        transform.setContainerColor(Color.WHITE);
-//        transform.setFadeMode(MaterialContainerTransform.FADE_MODE_THROUGH);
-        transform.setDuration(700);
-        transform.setAllContainerColors(getResources().getColor(R.color.white));
 
-        setSharedElementEnterTransition(transform);
-//        setSharedElementReturnTransition(transform);
-    }
 
-    private void enableReadModeLayout(){
-        increaseTextSize.setVisible(false);
-        decreaseTextSize.setVisible(false);
-        defaultTextSize.setVisible(false);
-        deleteCacheCookies.setVisible(false);
-    }
-
-    private void disableReadModeLayout(){
-        increaseTextSize.setVisible(true);
-        decreaseTextSize.setVisible(true);
-        defaultTextSize.setVisible(true);
-        deleteCacheCookies.setVisible(true);
-    }
 
 
 
@@ -597,6 +572,21 @@ public class WebviewFragment extends Fragment implements
 
 
     //--------------------------------------------------------- actions
+
+    private void enableReadModeLayout(){
+        increaseTextSize.setVisible(false);
+        decreaseTextSize.setVisible(false);
+        defaultTextSize.setVisible(false);
+        deleteCacheCookies.setVisible(false);
+    }
+
+    private void disableReadModeLayout(){
+        increaseTextSize.setVisible(true);
+        decreaseTextSize.setVisible(true);
+        defaultTextSize.setVisible(true);
+        deleteCacheCookies.setVisible(true);
+    }
+
 
     private void shareTextAction(String message) {
         try {
@@ -1143,5 +1133,18 @@ public class WebviewFragment extends Fragment implements
         return result;
     }
 
+    private void setEnterTransition() {
+        // TRANSITION
+        MaterialContainerTransform transform = new MaterialContainerTransform();
+//        transform.setInterpolator(new FastOutSlowInInterpolator());
+        transform.setDrawingViewId(R.id.nav_host_fragment);
+//        transform.setContainerColor(Color.WHITE);
+//        transform.setFadeMode(MaterialContainerTransform.FADE_MODE_THROUGH);
+        transform.setDuration(700);
+        transform.setAllContainerColors(getResources().getColor(R.color.white));
+
+        setSharedElementEnterTransition(transform);
+//        setSharedElementReturnTransition(transform);
+    }
 
 }// end WebviewFragment
