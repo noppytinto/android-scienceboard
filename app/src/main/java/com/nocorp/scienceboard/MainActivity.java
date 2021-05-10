@@ -39,6 +39,7 @@ import com.nocorp.scienceboard.ui.timemachine.DatePickerFragment;
 import com.nocorp.scienceboard.ui.timemachine.TimeMachineViewModel;
 import com.nocorp.scienceboard.ui.topics.TopicsViewModel;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
+import com.nocorp.scienceboard.utility.ad.admob.OnAdmobInitilizedListener;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -274,8 +275,10 @@ public class MainActivity extends BaseActivity
     }// end initView()
 
     private void initAdProvider(Context context, int numAdsToLoad) {
-        adProvider.initAdMob(context);
-        adProvider.loadSomeAds(numAdsToLoad, context);
+        adProvider.initAdMob(context, () -> {
+            Log.d(TAG, "onAdmobInitialized: called");
+            adProvider.loadSomeAds(numAdsToLoad, context);
+        });
     }
 
 
