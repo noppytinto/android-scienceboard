@@ -57,6 +57,12 @@ public class RemoteConfigServer {
         return mFirebaseRemoteConfig.getLong("num_list_ads_to_request");
     }
 
+    public String getTopicsListMessage() {
+        Log.d("RemoteConfig: ", "getTopicsListMessage() called");
+        return mFirebaseRemoteConfig.getString("custom_message_topics_list");
+    }
+
+
 
 
 

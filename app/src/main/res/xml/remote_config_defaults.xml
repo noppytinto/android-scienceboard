@@ -8,4 +8,8 @@
         <key>num_list_ads_to_request</key>
         <value>1</value>
     </entry>
+    <entry>
+        <key>custom_message_topics_list</key>
+        <value>pick your favourite Topics</value>
+    </entry>
 </defaultsMap>

@@ -42,18 +42,19 @@
         android:layout_marginTop="32dp"
         android:src="@drawable/ic_undraw_check_boxes"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.70"
+        app:layout_constraintHorizontal_bias="0.76"
         app:layout_constraintStart_toEndOf="@+id/textView_topicsFragment_subheader"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/textView_topicsFragment_subheader"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="pick your favourite Topics"
         android:textColor="?attr/customizeTopicsFragmentSubtitleTextColor"
         android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@+id/textView_topicsFragment_header"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/textView_topicsFragment_header"
         app:layout_constraintTop_toBottomOf="@+id/textView_topicsFragment_header" />
 

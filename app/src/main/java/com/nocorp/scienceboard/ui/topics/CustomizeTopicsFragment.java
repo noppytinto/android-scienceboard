@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.chip.Chip;
@@ -23,6 +24,7 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.google.android.material.transition.MaterialContainerTransform;
 import com.nocorp.scienceboard.R;
 import com.nocorp.scienceboard.databinding.FragmentCustomizeTopicsBinding;
+import com.nocorp.scienceboard.system.RemoteConfigServer;
 import com.nocorp.scienceboard.topics.model.Topic;
 import com.nocorp.scienceboard.recycler.adapter.RecyclerAdapterCustomizeTopics;
 
@@ -39,9 +41,11 @@ public class CustomizeTopicsFragment extends Fragment implements RecyclerAdapter
     private List<Topic> topicsFetched;
     private ExtendedFloatingActionButton floatingActionButton;
     private Toast toast;
+    private TextView subheader;
 
     //
     private List<Topic> topicsToUpdate;
+    private RemoteConfigServer remoteConfigServer;
 
 
 
@@ -74,6 +78,12 @@ public class CustomizeTopicsFragment extends Fragment implements RecyclerAdapter
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initView();
+
+        //
+        String subheaderMessage = remoteConfigServer.getTopicsListMessage();
+        subheader.setText(subheaderMessage);
+
+        //
         floatingActionButton.show();
         floatingActionButton.setOnClickListener(v -> {
             topicsViewModel.updateTopicsFollowStatus(topicsToUpdate);
@@ -108,6 +118,10 @@ public class CustomizeTopicsFragment extends Fragment implements RecyclerAdapter
         floatingActionButton = viewBinding.floatingActionButtonTopicsFragment;
         recyclerView = viewBinding.recyclerViewTopicsFragment;
         topicsToUpdate = new ArrayList<>();
+        subheader = viewBinding.textViewTopicsFragmentSubheader;
+        //
+        remoteConfigServer = RemoteConfigServer.getInstance();
+        //
         initRecycleView(recyclerView);
     }
 
