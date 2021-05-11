@@ -4,4 +4,8 @@
         <key>test</key>
         <value>local value</value>
     </entry>
+    <entry>
+        <key>num_list_ads_to_request</key>
+        <value>1</value>
+    </entry>
 </defaultsMap>

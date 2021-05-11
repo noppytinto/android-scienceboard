@@ -36,7 +36,8 @@ public class AdProvider{
     private AdLoader adLoader;
 
     private int numAdsLoaded;
-    private final int NUM_ADS_TO_LOAD = 5;
+//    private final int NUM_ADS_TO_LOAD = 5;
+    private long NUM_ADS_TO_LOAD;
 
     //
     private OnAdmobInitilizedListener admobInitilizedListener;
@@ -49,6 +50,7 @@ public class AdProvider{
 
     private AdProvider() {
         nativeAdsList = new ArrayList<>();
+        NUM_ADS_TO_LOAD = 1;
     }
 
     private AdProvider(OnAdmobInitilizedListener admobInitilizedListener) {
@@ -63,11 +65,11 @@ public class AdProvider{
         this.admobInitilizedListener = admobInitilizedListener;
         MobileAds.initialize(context, initializationStatus -> {
             // old
-//            Log.d(AdProvider.class.getSimpleName(), "SCIENCE_BOARD - onInitializationComplete: admob initilized");
+//            Log.d(AdProvider.class.getSimpleName(), "NOPPYS_BOARD - onInitializationComplete: admob initilized");
 //            adMobInitialized = true;
 
             // new, with mediation
-            Log.d(AdProvider.class.getSimpleName(), "SCIENCE_BOARD - onInitializationComplete: admob initilized");
+            Log.d(AdProvider.class.getSimpleName(), "NOPPYS_BOARD - onInitializationComplete: admob initilized");
             Map<String, AdapterStatus> statusMap = initializationStatus.getAdapterStatusMap();
             for (String adapterClass : statusMap.keySet()) {
                 AdapterStatus status = statusMap.get(adapterClass);
@@ -90,7 +92,7 @@ public class AdProvider{
     public static AdProvider getInstance() {
         if(singletonInstance==null) {
             singletonInstance = new AdProvider();
-            Log.d(AdProvider.class.getSimpleName(), "SCIENCE_BOARD - getInstance: ad provider instantiated, now call initAdMob()");
+            Log.d(AdProvider.class.getSimpleName(), "NOPPYS_BOARD - getInstance: ad provider instantiated, now call initAdMob()");
         }
 
        return singletonInstance;
@@ -99,7 +101,7 @@ public class AdProvider{
     public static AdProvider getInstance(OnAdmobInitilizedListener admobInitilizedListener) {
         if(singletonInstance==null) {
             singletonInstance = new AdProvider(admobInitilizedListener);
-            Log.d(AdProvider.class.getSimpleName(), "SCIENCE_BOARD - getInstance: ad provider instantiated, now call initAdMob()");
+            Log.d(AdProvider.class.getSimpleName(), "NOPPYS_BOARD - getInstance: ad provider instantiated, now call initAdMob()");
         }
 
         return singletonInstance;
@@ -120,12 +122,13 @@ public class AdProvider{
     }
 
 
-    public void loadSomeAds(int adsToLoad, Context context) {
+    public void loadSomeAds(long adsToLoad) {
         if( ! adMobInitialized) {
-            Log.e(TAG, "SCIENCEBOARD - loadSomeAds: admob not initilized");
+            Log.e(TAG, "NOPPYS_BOARD - loadSomeAds: admob not initilized");
 //            return;
         }
 
+        NUM_ADS_TO_LOAD = adsToLoad;
         nativeAdsList = new ArrayList<>();
 
 
@@ -135,12 +138,13 @@ public class AdProvider{
 //        adLoader.loadAds(new AdRequest.Builder().build(), adsToLoad);
 
         // new, with mediation
+        Log.d(TAG, "NOPPYS_BOARD - loadSomeAds: ads to request: " + adsToLoad);
         adLoader.loadAd(new AdRequest.Builder().build());
     }
 
     public void reloadAds() {
         if( ! adMobInitialized) {
-            Log.e(TAG, "SCIENCEBOARD - loadSomeAds: admob not initilized");
+            Log.e(TAG, "NOPPYS_BOARD - loadSomeAds: admob not initilized");
             return;
         }
         nativeAdsList = new ArrayList<>();
@@ -154,14 +158,14 @@ public class AdProvider{
                     // Show the ad.
                     if (viewDestroyed) {
                         nativeAd.destroy();
-                        Log.d(TAG, "SCIENCE_BOARD - loadSomeAds: ad destroyed");
+                        Log.d(TAG, "NOPPYS_BOARD - loadSomeAds: ad destroyed");
                         return;
                     }
 
                     if (adLoader.isLoading()) {
                         // The AdLoader is still loading ads.
                         // Expect more adLoaded or onAdFailedToLoad callbacks.
-                        Log.d(TAG, "SCIENCE_BOARD - loadSomeAds: ad loading");
+                        Log.d(TAG, "NOPPYS_BOARD - loadSomeAds: ad loading");
 
                     } else {
                         // The AdLoader has finished loading ads.
@@ -169,8 +173,8 @@ public class AdProvider{
 
                         // load multiple ads
                         numAdsLoaded++;
-                        Log.d(TAG, "SCIENCE_BOARD - loadSomeAds: ads loaded: " + numAdsLoaded);
-                        if(numAdsLoaded<NUM_ADS_TO_LOAD) {
+                        Log.d(TAG, "NOPPYS_BOARD - loadSomeAds: ads loaded: " + numAdsLoaded);
+                        if(numAdsLoaded < NUM_ADS_TO_LOAD) {
                             adLoader.loadAd(new AdRequest.Builder().build());
                         }
                     }
@@ -180,14 +184,14 @@ public class AdProvider{
                     public void onAdFailedToLoad(LoadAdError adError) {
                         numAdsLoaded++;
                         // Handle the failure by logging, altering the UI, and so on.
-                        Log.e(TAG, "SCIENCE_BOARD - onAdFailedToLoad: ad failed to load, cause: " + adError.getMessage());
+                        Log.e(TAG, "NOPPYS_BOARD - onAdFailedToLoad: ad failed to load, cause: " + adError.getMessage());
                         Toast.makeText(context, "onAdFailedToLoad: " + adError.getMessage(), Toast.LENGTH_LONG).show();
                     }
 
                     @Override
                     public void onAdClicked() {
                         // Log the click event or other custom behavior.
-                        Log.d(TAG, "SCIENCE_BOARD - onAdClicked: ad clicked");
+                        Log.d(TAG, "NOPPYS_BOARD - onAdClicked: ad clicked");
                     }
 
                 })
@@ -200,11 +204,11 @@ public class AdProvider{
         List<ListItem> oldList = new ArrayList<>(listToPopulate);
 
         if( ! adMobInitialized) {
-            Log.e(TAG, "SCIENCE_BOARD - populateListWithAds: admob not initilized");
+            Log.e(TAG, "NOPPYS_BOARD - populateListWithAds: admob not initilized");
             return oldList;
         }
         if(nativeAdsList ==null || nativeAdsList.isEmpty()) {
-            Log.e(TAG, "SCIENCE_BOARD - populateListWithAds: nativeAds list is empty");
+            Log.e(TAG, "NOPPYS_BOARD - populateListWithAds: nativeAds list is empty");
             return oldList;
         }
 
@@ -242,7 +246,7 @@ public class AdProvider{
 
     private NativeAd pickRandomAd(List<NativeAd> nativeAdsList) {
         if(nativeAdsList ==null || nativeAdsList.isEmpty()) {
-            Log.e(TAG, "SCIENCE_BOARD - populateListWithAds: nativeAds list is empty");
+            Log.e(TAG, "NOPPYS_BOARD - populateListWithAds: nativeAds list is empty");
             return null;
         }
         NativeAd adToLoad = null;

@@ -28,7 +28,7 @@ public class RemoteConfigServer {
         mFirebaseRemoteConfig.setConfigSettingsAsync(configSettings);
         mFirebaseRemoteConfig.setDefaultsAsync(R.xml.remote_config_defaults);
 
-        // NOTE: the deault interval il 12h
+        // NOTE: the default interval il 12h
         //.setMinimumFetchIntervalInSeconds(0)
     }
 
@@ -52,12 +52,17 @@ public class RemoteConfigServer {
         return mFirebaseRemoteConfig.getString("test");
     }
 
+    public long getNumListAdsToRequest() {
+        Log.d("RemoteConfig: ", "getNumListAdsToRequest() called");
+        return mFirebaseRemoteConfig.getLong("num_list_ads_to_request");
+    }
+
 
 
 
     //------------------------------------------------------- METHODS
 
-    public void loadConfigParams() {
+    public void loadConfigParams(RemoteConfigListener listener) {
 //        mFirebaseRemoteConfig.fetch(0);
 //        mFirebaseRemoteConfig.activate();
 

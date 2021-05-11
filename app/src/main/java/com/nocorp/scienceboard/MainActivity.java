@@ -34,6 +34,7 @@ import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.rss.repository.SourceRepository;
 import com.nocorp.scienceboard.rss.repository.SourceViewModel;
 import com.nocorp.scienceboard.system.ConnectionManager;
+import com.nocorp.scienceboard.system.RemoteConfigServer;
 import com.nocorp.scienceboard.topics.repository.TopicRepository;
 import com.nocorp.scienceboard.ui.timemachine.DatePickerFragment;
 import com.nocorp.scienceboard.ui.timemachine.TimeMachineViewModel;
@@ -90,6 +91,7 @@ public class MainActivity extends BaseActivity
     private final long ANIMATION_DURATION = 4000L;
     private ObjectAnimator objectAnimator;
     private AdProvider adProvider;
+    private RemoteConfigServer remoteConfigServer;
     // rxjava
     private Disposable disposable;
 
@@ -270,15 +272,19 @@ public class MainActivity extends BaseActivity
 
         // set
         datePicked = System.currentTimeMillis();
-
+        remoteConfigServer = RemoteConfigServer.getInstance();
 
     }// end initView()
 
     private void initAdProvider(Context context, int numAdsToLoad) {
-        adProvider.initAdMob(context, () -> {
-            Log.d(TAG, "onAdmobInitialized: called");
-            adProvider.loadSomeAds(numAdsToLoad, context);
+        remoteConfigServer.loadConfigParams(taskIsSuccessful -> {
+            long numAdsToLoad1 = remoteConfigServer.getNumListAdsToRequest();
+            adProvider.initAdMob(context, () -> {
+                Log.d(TAG, "onAdmobInitialized: called");
+                adProvider.loadSomeAds(numAdsToLoad1);
+            });
         });
+
     }
 
 
