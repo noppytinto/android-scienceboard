@@ -185,7 +185,7 @@ public class AdProvider{
                         numAdsLoaded++;
                         // Handle the failure by logging, altering the UI, and so on.
                         Log.e(TAG, "NOPPYS_BOARD - onAdFailedToLoad: ad failed to load, cause: " + adError.getMessage());
-                        Toast.makeText(context, "onAdFailedToLoad: " + adError.getMessage(), Toast.LENGTH_LONG).show();
+//                        Toast.makeText(context, "onAdFailedToLoad: " + adError.getMessage(), Toast.LENGTH_LONG).show();
                     }
 
                     @Override

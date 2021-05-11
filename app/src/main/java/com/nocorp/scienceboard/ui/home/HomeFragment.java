@@ -28,7 +28,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.google.android.ads.mediationtestsuite.MediationTestSuite;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
@@ -182,10 +181,10 @@ public class HomeFragment extends Fragment implements
             showAboutFragment();
             return true;
         }
-        else if(item.getItemId() == R.id.option_homeFragment_launchMediationTestSuite) {
-            MediationTestSuite.launch(requireContext());
-            return true;
-        }
+//        else if(item.getItemId() == R.id.option_homeFragment_launchMediationTestSuite) {
+//            MediationTestSuite.launch(requireContext());
+//            return true;
+//        }
         return false;
     }
 

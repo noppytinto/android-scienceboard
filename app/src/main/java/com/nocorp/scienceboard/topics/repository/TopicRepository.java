@@ -39,7 +39,7 @@ public class TopicRepository {
     private final String TOPICS_COLLECTION_NAME = "topics";
     private final String ENABLED = "enabled";
     private final String DISPLAY_NAME_ENG = "display_name_eng";
-    private final int FETCH_INTERVAL = 0; // in days
+    private final int FETCH_INTERVAL = 1; // in days
 
 
     private static boolean repositoryInitilized = false;

@@ -41,7 +41,7 @@ public class SourceRepository {
     private FirebaseFirestore db;
     private static boolean firestoreFetchCompleted;
     private static boolean taskIsRunning;
-    private final int FETCH_INTERVAL = 0; // in days
+    private final int FETCH_INTERVAL = 1; // in days
 
 
 

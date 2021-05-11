@@ -20,11 +20,11 @@
         android:title="About"
         app:showAsAction="never" />
 
-    <item
-        android:id="@+id/option_homeFragment_launchMediationTestSuite"
-        android:icon="@drawable/ic_info"
-        android:title="Mediation test suite"
-        app:showAsAction="never" />
+<!--    <item-->
+<!--        android:id="@+id/option_homeFragment_launchMediationTestSuite"-->
+<!--        android:icon="@drawable/ic_info"-->
+<!--        android:title="Mediation test suite"-->
+<!--        app:showAsAction="never" />-->
 
 
 </menu>

@@ -29,6 +29,11 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.ump.ConsentForm;
+import com.google.android.ump.ConsentInformation;
+import com.google.android.ump.ConsentRequestParameters;
+import com.google.android.ump.FormError;
+import com.google.android.ump.UserMessagingPlatform;
 import com.nocorp.scienceboard.databinding.ActivityMainBinding;
 import com.nocorp.scienceboard.model.Source;
 import com.nocorp.scienceboard.rss.repository.SourceRepository;
@@ -95,6 +100,11 @@ public class MainActivity extends BaseActivity
     // rxjava
     private Disposable disposable;
 
+    //
+    private ConsentInformation consentInformation;
+    private ConsentForm consentForm;
+
+
 
 
     //------------------------------------------------------------------------------ ANDROID METHODS
@@ -106,8 +116,12 @@ public class MainActivity extends BaseActivity
 
         // init
         initView();
+
+        //
+
         // restoring state
         if(savedInstanceState==null) {
+//            getAdmobUserConsent(this);
             initAdProvider(this, NUM_ADS_TO_LOAD);
             initAppContent();
         }
@@ -117,6 +131,90 @@ public class MainActivity extends BaseActivity
 
         //
         observeDatePickedFromTimeMachine();
+    }
+
+    private void getAdmobUserConsent(Context context) {
+        // Set tag for underage of consent. false means users are not underage.
+        ConsentRequestParameters params = new ConsentRequestParameters
+                .Builder()
+                .setTagForUnderAgeOfConsent(false)
+                .build();
+
+        consentInformation = UserMessagingPlatform.getConsentInformation(this);
+
+        consentInformation.requestConsentInfoUpdate(
+                this,
+                params,
+                new ConsentInformation.OnConsentInfoUpdateSuccessListener() {
+                    @Override
+                    public void onConsentInfoUpdateSuccess() {
+                        // The consent information state was updated.
+                        // You are now ready to check if a form is available.
+                        if (consentInformation.isConsentFormAvailable()) {
+                            Log.d(TAG, "onConsentInfoUpdateSuccess: called, consent form available");
+
+                            loadForm(context);
+                        }
+                        else {
+                            Log.d(TAG, "onConsentInfoUpdateSuccess: called, consent form NOT available");
+                        }
+
+                        Log.d(TAG, "onConsentInfoUpdateSuccess: called, consent type: " + consentInformation.getConsentType());
+                        Log.d(TAG, "onConsentInfoUpdateSuccess: called, consent status: " + consentInformation.getConsentStatus());
+                    }
+                },
+                new ConsentInformation.OnConsentInfoUpdateFailureListener() {
+                    @Override
+                    public void onConsentInfoUpdateFailure(FormError formError) {
+                        // Handle the error.
+                        Log.d(TAG, "onConsentInfoUpdateFailure: " + formError.getMessage());
+                    }
+                });
+    }
+
+    public void loadForm(Context context) {
+        Log.d(TAG, "loadForm: called");
+        UserMessagingPlatform.loadConsentForm(
+                this,
+                new UserMessagingPlatform.OnConsentFormLoadSuccessListener() {
+                    @Override
+                    public void onConsentFormLoadSuccess(ConsentForm consentForm) {
+                        MainActivity.this.consentForm = consentForm;
+                        if(consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.REQUIRED) {
+                            Log.d(TAG, "onConsentFormLoadSuccess: REQUIRED");
+                            consentForm.show(
+                                    MainActivity.this,
+                                    new ConsentForm.OnConsentFormDismissedListener() {
+                                        @Override
+                                        public void onConsentFormDismissed(@Nullable FormError formError) {
+                                            // Handle dismissal by reloading form.
+                                            Log.d(TAG, "onConsentFormDismissed: called");
+                                            loadForm(context);
+                                        }
+                                    });
+                        }
+
+                        else if(consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.NOT_REQUIRED) {
+                            Log.d(TAG, "onConsentFormLoadSuccess: NOT_REQUIRED");
+                        }
+
+                        else if(consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.UNKNOWN) {
+                            Log.d(TAG, "onConsentFormLoadSuccess: UNKNOWN");
+                        }
+                        else if(consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.OBTAINED) {
+                            Log.d(TAG, "onConsentFormLoadSuccess: OBTAINED");
+                            initAdProvider(context, NUM_ADS_TO_LOAD);
+                        }
+                    }
+                },
+                new UserMessagingPlatform.OnConsentFormLoadFailureListener() {
+                    @Override
+                    public void onConsentFormLoadFailure(FormError formError) {
+                        // Handle the error
+                        Log.d(TAG, "onConsentFormLoadFailure: " + formError.getMessage());
+                    }
+                }
+        );
     }
 
     @Override
