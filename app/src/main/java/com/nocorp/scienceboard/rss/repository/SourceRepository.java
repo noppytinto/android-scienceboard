@@ -98,7 +98,7 @@ public class SourceRepository {
 
     public Single<Boolean> checkLastFetchDate(Context context) {
         return Single.create(emitter -> {
-            long lastFetchDate = getFromSharedPref(context.getString(R.string.pref_last_topics_fetch_date), context);
+            long lastFetchDate = getFromSharedPref(context.getString(R.string.pref_last_sources_fetch_date), context);
             Log.d(TAG, "checkLastFetchDate: lastFetchDate: " + lastFetchDate);
             Boolean result = MyUtilities.isWithin_days(FETCH_INTERVAL, lastFetchDate);
             emitter.onSuccess(result);
