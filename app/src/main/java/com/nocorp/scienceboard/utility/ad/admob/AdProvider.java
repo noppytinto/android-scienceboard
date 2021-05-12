@@ -28,7 +28,6 @@ public class AdProvider{
     private final String TAG = this.getClass().getSimpleName();
     private static AdProvider singletonInstance;
     private static boolean adMobInitialized;
-//    private String abc = "ca-app-pub-3940256099942544/2247696110"; // TODO: this is a test id, change on production
 
     private List<NativeAd> nativeAdsList;
     private OnNativeAdsloadedListener listener;
@@ -185,7 +184,7 @@ public class AdProvider{
                         numAdsLoaded++;
                         // Handle the failure by logging, altering the UI, and so on.
                         Log.e(TAG, "NOPPYS_BOARD - onAdFailedToLoad: ad failed to load, cause: " + adError.getMessage());
-//                        Toast.makeText(context, "onAdFailedToLoad: " + adError.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, "onAdFailedToLoad: " + adError.getMessage() + " (" + adError.getResponseInfo() + ")", Toast.LENGTH_LONG).show();
                     }
 
                     @Override
@@ -199,50 +198,50 @@ public class AdProvider{
                 .build();
     }
 
-
-    public List<ListItem> populateListWithAds(List<ListItem> listToPopulate, int eachNitems) {
-        List<ListItem> oldList = new ArrayList<>(listToPopulate);
-
-        if( ! adMobInitialized) {
-            Log.e(TAG, "NOPPYS_BOARD - populateListWithAds: admob not initilized");
-            return oldList;
-        }
-        if(nativeAdsList ==null || nativeAdsList.isEmpty()) {
-            Log.e(TAG, "NOPPYS_BOARD - populateListWithAds: nativeAds list is empty");
-            return oldList;
-        }
-
-        List<ListItem> newList = new ArrayList<>();
-
-        int j=0;
-        int baseStep = eachNitems;
-        int increment = baseStep + 1;
-
-        for(int i=0; i<listToPopulate.size(); i++) {
-            ListItem currentListItem = oldList.get(i);
-            if(i==baseStep) {
-//                if(j >= nativeAdsList.size()) j=0; // for picking native ads in sequential order
-
-                ListAd listAd = new ListAd();
-//                listAd.setAd(nativeAdsList.get(j));
-                NativeAd adToLoad = pickRandomAd(nativeAdsList);
-                if(adToLoad!=null) {
-                    listAd.setAd(adToLoad);
-                    // add ad
-                    newList.add(listAd);
-                }
-                // and add old article
-                newList.add(currentListItem);
-
-                baseStep = baseStep + increment;
-            }
-            else {
-                newList.add(currentListItem);
-            }
-        }
-
-        return newList;
-    }
+//
+//    public List<ListItem> populateListWithAds(List<ListItem> listToPopulate, int eachNitems) {
+//        List<ListItem> oldList = new ArrayList<>(listToPopulate);
+//
+//        if( ! adMobInitialized) {
+//            Log.e(TAG, "NOPPYS_BOARD - populateListWithAds: admob not initilized");
+//            return oldList;
+//        }
+//        if(nativeAdsList ==null || nativeAdsList.isEmpty()) {
+//            Log.e(TAG, "NOPPYS_BOARD - populateListWithAds: nativeAds list is empty");
+//            return oldList;
+//        }
+//
+//        List<ListItem> newList = new ArrayList<>();
+//
+//        int j=0;
+//        int baseStep = eachNitems;
+//        int increment = baseStep + 1;
+//
+//        for(int i=0; i<listToPopulate.size(); i++) {
+//            ListItem currentListItem = oldList.get(i);
+//            if(i==baseStep) {
+////                if(j >= nativeAdsList.size()) j=0; // for picking native ads in sequential order
+//
+//                ListAd listAd = new ListAd();
+////                listAd.setAd(nativeAdsList.get(j));
+//                NativeAd adToLoad = pickRandomAd(nativeAdsList);
+//                if(adToLoad!=null) {
+//                    listAd.setAd(adToLoad);
+//                    // add ad
+//                    newList.add(listAd);
+//                }
+//                // and add old article
+//                newList.add(currentListItem);
+//
+//                baseStep = baseStep + increment;
+//            }
+//            else {
+//                newList.add(currentListItem);
+//            }
+//        }
+//
+//        return newList;
+//    }
 
     private NativeAd pickRandomAd(List<NativeAd> nativeAdsList) {
         if(nativeAdsList ==null || nativeAdsList.isEmpty()) {

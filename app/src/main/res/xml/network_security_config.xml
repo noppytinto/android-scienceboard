@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
+
+    <!-- for appodeal -->
     <base-config cleartextTrafficPermitted="true">
         <trust-anchors>
             <certificates src="system" />
@@ -8,10 +10,11 @@
     </base-config>
 
 
-<!--    for facebook audience (media caching)-->
+<!--    for appodeal and facebook audience (media caching)-->
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">127.0.0.1</domain>
     </domain-config>
+
 
 
 <!--    <domain-config cleartextTrafficPermitted="true">-->

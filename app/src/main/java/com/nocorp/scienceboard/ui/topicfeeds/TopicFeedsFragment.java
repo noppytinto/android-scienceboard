@@ -55,6 +55,7 @@ import com.nocorp.scienceboard.ui.timemachine.TimeMachineViewModel;
 import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.ui.webview.WebviewViewModel;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
+import com.nocorp.scienceboard.utility.ad.appodeal.AppodealAdProvider;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -94,7 +95,8 @@ public class TopicFeedsFragment extends Fragment implements
     private BookmarksViewModel bookmarksViewModel;
 
     //
-    private AdProvider adProvider;
+//    private AdProvider adProvider;
+    private AppodealAdProvider adProvider;
     private List<Source> sourcesFetched;
     private List<ListItem> articlesToDisplay;
     private Topic currentTopic;
@@ -204,7 +206,8 @@ public class TopicFeedsFragment extends Fragment implements
 
         //
         currentDateInMillis = System.currentTimeMillis();
-        adProvider = AdProvider.getInstance(); // is not guaranteed that
+//        adProvider = AdProvider.getInstance(); // is not guaranteed that
+        adProvider = AppodealAdProvider.getInstance(); // is not guaranteed that
         // Retrieve and cache the system's default "short" animation time.
         shortAnimationDuration = getResources().getInteger(
                 android.R.integer.config_shortAnimTime);

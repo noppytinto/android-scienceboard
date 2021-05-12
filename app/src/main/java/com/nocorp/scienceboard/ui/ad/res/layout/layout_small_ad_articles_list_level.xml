@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.gms.ads.nativead.NativeAdView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.appodeal.ads.NativeAdView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_marginLeft="10dp"
     android:layout_marginRight="8dp"
+    android:id="@+id/native_layout"
     >
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -40,10 +41,16 @@
 
 
             <!-- NEW, with mediation -->
-            <com.google.android.gms.ads.nativead.MediaView
+<!--            <com.google.android.gms.ads.nativead.MediaView-->
+<!--                android:id="@+id/imageView_layoutNativeAdArticlesListLevel_adImage"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent" />-->
+
+            <com.appodeal.ads.NativeIconView
                 android:id="@+id/imageView_layoutNativeAdArticlesListLevel_adImage"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:layout_gravity="center" />
 
 
         </androidx.cardview.widget.CardView>
@@ -84,14 +91,14 @@
                 android:layout_marginBottom="4dp"
                 android:adjustViewBounds="true"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@+id/buttonlayoutNativeAdArticlesListLevel_action"
-                app:layout_constraintTop_toBottomOf="@+id/buttonlayoutNativeAdArticlesListLevel_action"
+                app:layout_constraintEnd_toEndOf="@+id/button_layoutNativeAdArticlesListLevel_action"
+                app:layout_constraintTop_toBottomOf="@+id/button_layoutNativeAdArticlesListLevel_action"
                 app:layout_constraintVertical_bias="1.0"
                 app:srcCompat="@drawable/ic_ad_badge" />
 
 
             <Button
-                android:id="@+id/buttonlayoutNativeAdArticlesListLevel_action"
+                android:id="@+id/button_layoutNativeAdArticlesListLevel_action"
                 style="@style/ScienceBoard.Button.AdButton"
                 android:layout_width="0dp"
                 android:layout_height="40dp"
@@ -111,8 +118,16 @@
             app:layout_constraintStart_toStartOf="@+id/cardView2"
             app:layout_constraintTop_toBottomOf="@+id/cardView2" />
 
+        <FrameLayout
+            android:id="@+id/view_layoutNativeAdArticlesListLevel_providerView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 
-</com.google.android.gms.ads.nativead.NativeAdView>
+</com.appodeal.ads.NativeAdView>
