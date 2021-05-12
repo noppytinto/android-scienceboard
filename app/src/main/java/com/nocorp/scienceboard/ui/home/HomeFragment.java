@@ -53,6 +53,7 @@ import com.nocorp.scienceboard.ui.viewholder.ListItem;
 import com.nocorp.scienceboard.ui.webview.WebviewViewModel;
 import com.nocorp.scienceboard.utility.MyValues;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
+import com.nocorp.scienceboard.utility.ad.appodeal.AppodealAdProvider;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -92,7 +93,8 @@ public class HomeFragment extends Fragment implements
     private BookmarksViewModel bookmarksViewModel;
 
     //
-    private AdProvider adProvider;
+//    private AdProvider adProvider;
+    private AppodealAdProvider adProvider;
     private List<ListItem> elementsToDisplayInHome;
     private List<Topic> myFollowedTopics;
     private final int NUM_ARTICLES_TO_FETCH_FOR_EACH_SOURCE = 2;
@@ -217,7 +219,8 @@ public class HomeFragment extends Fragment implements
 
         //
         currentDateInMillis = System.currentTimeMillis();
-        adProvider = AdProvider.getInstance(); // is not guaranteed that
+//        adProvider = AdProvider.getInstance(); // is not guaranteed that
+        adProvider = AppodealAdProvider.getInstance(); // is not guaranteed that
         // Retrieve and cache the system's default "short" animation time.
         shortAnimationDuration = getResources().getInteger(
                 android.R.integer.config_shortAnimTime);
