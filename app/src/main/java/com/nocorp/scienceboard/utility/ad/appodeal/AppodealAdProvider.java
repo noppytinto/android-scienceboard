@@ -39,7 +39,9 @@ public class AppodealAdProvider {
     private AppodealAdProvider() {
         nativeAdsList = new ArrayList<>();
         cachedAds = new ArrayList<>();
-//        Appodeal.setTesting(true);
+        Appodeal.disableLocationPermissionCheck();
+        Appodeal.disableWriteExternalStoragePermissionCheck();
+        Appodeal.setTesting(true);
     }
 
     public static AppodealAdProvider getInstance() {
