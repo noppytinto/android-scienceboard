@@ -41,7 +41,7 @@ public class AppodealAdProvider {
         cachedAds = new ArrayList<>();
         Appodeal.disableLocationPermissionCheck();
         Appodeal.disableWriteExternalStoragePermissionCheck();
-        Appodeal.setTesting(true);
+//        Appodeal.setTesting(true);
     }
 
     public static AppodealAdProvider getInstance() {
