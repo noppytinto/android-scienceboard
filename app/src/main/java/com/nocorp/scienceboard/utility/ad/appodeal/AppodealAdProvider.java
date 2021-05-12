@@ -39,8 +39,7 @@ public class AppodealAdProvider {
     private AppodealAdProvider() {
         nativeAdsList = new ArrayList<>();
         cachedAds = new ArrayList<>();
-        NUM_ADS_TO_LOAD = 1;
-        Appodeal.setTesting(true);
+//        Appodeal.setTesting(true);
     }
 
     public static AppodealAdProvider getInstance() {
@@ -68,7 +67,7 @@ public class AppodealAdProvider {
                         showConsentLogs(consent);
                         boolean consentFormRequired = checkShouldShowConsentForm(activity);
                         if(consentFormRequired) {
-                            if(consent.getIabConsentString() == null) {
+                            if(consent.getIabConsentString() == null || consent.getIabConsentString().isEmpty()) {
                                 showConsentForm(activity);
                             }
                             else {
@@ -293,13 +292,16 @@ public class AppodealAdProvider {
 
     private void fetchCachedAds() {
         if(cachedAds==null || cachedAds.isEmpty()) {
-            List<NativeAd> temp = Appodeal.getNativeAds((int) NUM_ADS_TO_LOAD);
-            if(temp!=null && !temp.isEmpty()) {
-                cachedAds.addAll(temp);
+            if(Appodeal.isLoaded(Appodeal.NATIVE)) {
+                List<NativeAd> temp = Appodeal.getNativeAds((int) NUM_ADS_TO_LOAD);
+                if(temp!=null && !temp.isEmpty()) {
+                    cachedAds.addAll(temp);
+                }
             }
         }
         else {
-            nativeAdsList.addAll(cachedAds);
+            nativeAdsList = cachedAds;
+            Log.d(TAG, "fetchCachedAds: nativeAdsList size: " + nativeAdsList.size());
         }
 
         //        if(cachedAds!=null && !cachedAds.isEmpty()) {

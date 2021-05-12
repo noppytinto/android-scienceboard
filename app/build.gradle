@@ -26,20 +26,20 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
-//    lintOptions {
-////        checkReleaseBuilds false
-//        // Or, if you prefer, you can continue to check for errors in release builds,
-//        // but continue the build even when errors are found:
-//        abortOnError false
-//    }
+    lintOptions {
+//        checkReleaseBuilds false
+        // Or, if you prefer, you can continue to check for errors in release builds,
+        // but continue the build even when errors are found:
+        abortOnError false
+    }
 
     buildTypes {
         debug {
 //            applicationIdSuffix ".debug"
 //            debuggable true
 
-//            minifyEnabled true
-//            shrinkResources true
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile(
                     'proguard-android-optimize.txt'),
                     'proguard-rules.pro'
@@ -127,7 +127,7 @@ dependencies {
     // mediation test suite
 //    implementation 'com.google.android.ads:mediation-test-suite:1.5.0'
     // GOOGLE ADMOB CONSENT SDK
-    implementation 'com.google.android.ump:user-messaging-platform:1.0.0'
+//    implementation 'com.google.android.ump:user-messaging-platform:1.0.0'
 
     // ROOM INTEGRATION
     def room_version = "2.3.0"
@@ -198,7 +198,7 @@ dependencies {
 
     // APPODEAL
     implementation 'com.appodeal.ads:sdk:2.9.2.+'
-    //Consent SDK
+    // Consent SDK
     implementation 'com.explorestack:consent:1.0.4'
     implementation 'com.google.android.gms:play-services-ads-identifier:17.0.0'
 
