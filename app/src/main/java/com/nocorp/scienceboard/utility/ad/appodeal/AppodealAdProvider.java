@@ -41,6 +41,7 @@ public class AppodealAdProvider {
         cachedAds = new ArrayList<>();
         Appodeal.disableLocationPermissionCheck();
         Appodeal.disableWriteExternalStoragePermissionCheck();
+//        Appodeal.setLogLevel(com.appodeal.ads.utils.Log.LogLevel.debug);
 //        Appodeal.setTesting(true);
     }
 
@@ -294,11 +295,13 @@ public class AppodealAdProvider {
 
     private void fetchCachedAds() {
         if(cachedAds==null || cachedAds.isEmpty()) {
-            if(Appodeal.isLoaded(Appodeal.NATIVE)) {
-                List<NativeAd> temp = Appodeal.getNativeAds((int) NUM_ADS_TO_LOAD);
-                if(temp!=null && !temp.isEmpty()) {
-                    cachedAds.addAll(temp);
-                }
+//            if(Appodeal.isLoaded(Appodeal.NATIVE)) {
+//
+//            }
+
+            List<NativeAd> temp = Appodeal.getNativeAds((int) NUM_ADS_TO_LOAD);
+            if(temp!=null && !temp.isEmpty()) {
+                cachedAds.addAll(temp);
             }
         }
         else {

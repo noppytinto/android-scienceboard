@@ -38,8 +38,8 @@ android {
 //            applicationIdSuffix ".debug"
 //            debuggable true
 
-            minifyEnabled true
-            shrinkResources true
+//            minifyEnabled true
+//            shrinkResources true
             proguardFiles getDefaultProguardFile(
                     'proguard-android-optimize.txt'),
                     'proguard-rules.pro'
@@ -197,7 +197,7 @@ dependencies {
 
 
     // APPODEAL
-    implementation 'com.appodeal.ads:sdk:2.9.2.+'
+    implementation 'com.appodeal.ads:sdk:2.9.3.+'
     // Consent SDK
     implementation 'com.explorestack:consent:1.0.4'
     implementation 'com.google.android.gms:play-services-ads-identifier:17.0.0'
