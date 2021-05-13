@@ -40,8 +40,9 @@ public class AppodealAdProvider {
         nativeAdsList = new ArrayList<>();
         cachedAds = new ArrayList<>();
         Appodeal.disableLocationPermissionCheck();
-        Appodeal.disableWriteExternalStoragePermissionCheck();
-//        Appodeal.setLogLevel(com.appodeal.ads.utils.Log.LogLevel.debug);
+//        Appodeal.disableWriteExternalStoragePermissionCheck();
+//        Appodeal.setAutoCache(Appodeal.NATIVE, false);
+        Appodeal.setLogLevel(com.appodeal.ads.utils.Log.LogLevel.debug);
 //        Appodeal.setTesting(true);
     }
 
@@ -155,7 +156,8 @@ public class AppodealAdProvider {
     }
 
     private void initAppodeal(Activity activity) {
-        Appodeal.setRequiredNativeMediaAssetType(Native.MediaAssetType.ICON);
+        Appodeal.updateConsent(true);
+        Appodeal.setRequiredNativeMediaAssetType(Native.MediaAssetType.ALL);
         Appodeal.setNativeAdType(Native.NativeAdType.NoVideo);
         Consent consent = ConsentManager.getInstance(activity).getConsent();
         Appodeal.initialize(activity, BuildConfig.BABAD_A, Appodeal.NATIVE, consent);
@@ -168,7 +170,6 @@ public class AppodealAdProvider {
     private void loadNativeAds(Activity activity) {
         Log.d(TAG, "loadNativeAds: called, num ads to load: " + NUM_ADS_TO_LOAD);
         Appodeal.cache(activity, Appodeal.NATIVE, (int) NUM_ADS_TO_LOAD);
-
 
 
 //        int i=0;
@@ -300,7 +301,9 @@ public class AppodealAdProvider {
 //            }
 
             List<NativeAd> temp = Appodeal.getNativeAds((int) NUM_ADS_TO_LOAD);
+            if(temp!=null) Log.d(TAG, "fetchCachedAds: temp: " + temp.size());
             if(temp!=null && !temp.isEmpty()) {
+                Log.d(TAG, "fetchCachedAds: temp: " + temp.size());
                 cachedAds.addAll(temp);
             }
         }

@@ -20,10 +20,23 @@ public class SmallAdViewHolder extends RecyclerView.ViewHolder {
     public ConstraintLayout parent;
     public View view;
 
+    //
+    private NativeAdView nativeAdView;
+    private TextView titleView;
+    private NativeIconView nativeIconView;
+    private FrameLayout providerViewContainer;
+    private Button ctaButton;
+
     public SmallAdViewHolder(@NonNull View itemView) {
         super(itemView);
         view = itemView;
         parent = itemView.findViewById(R.id.constraintLayout_layoutNativeAdArticlesListLevel_parent);
+        nativeAdView = (NativeAdView) view.findViewById(R.id.native_layout);
+        titleView = (TextView) nativeAdView.findViewById(R.id.textView_layoutNativeAdArticlesListLevel_headline);
+        nativeIconView = (NativeIconView) nativeAdView.findViewById(R.id.imageView_layoutNativeAdArticlesListLevel_adImage);
+        providerViewContainer = (FrameLayout) nativeAdView.findViewById(R.id.view_layoutNativeAdArticlesListLevel_providerView);
+        ctaButton = (Button) nativeAdView.findViewById(R.id.button_layoutNativeAdArticlesListLevel_action);
+
     }
 
 
@@ -31,16 +44,13 @@ public class SmallAdViewHolder extends RecyclerView.ViewHolder {
         if(givenNativeAd==null) return;
 
         //
-        NativeAdView nativeAdView = (NativeAdView) view.findViewById(R.id.native_layout);
         nativeAdView.unregisterViewForInteraction();
 
         //
-        TextView titleView = (TextView) nativeAdView.findViewById(R.id.textView_layoutNativeAdArticlesListLevel_headline);
         titleView.setText(givenNativeAd.getTitle());
         nativeAdView.setTitleView(titleView);
 
         //
-        NativeIconView nativeIconView = (NativeIconView) nativeAdView.findViewById(R.id.imageView_layoutNativeAdArticlesListLevel_adImage);
         nativeAdView.setNativeIconView(nativeIconView);
 
         //
@@ -49,14 +59,12 @@ public class SmallAdViewHolder extends RecyclerView.ViewHolder {
             if (providerView.getParent() != null && providerView.getParent() instanceof ViewGroup) {
                 ((ViewGroup) providerView.getParent()).removeView(providerView);
             }
-            FrameLayout providerViewContainer = (FrameLayout) nativeAdView.findViewById(R.id.view_layoutNativeAdArticlesListLevel_providerView);
             ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             providerViewContainer.addView(providerView, layoutParams);
         }
         nativeAdView.setProviderView(providerView);
 
         //
-        Button ctaButton = (Button) nativeAdView.findViewById(R.id.button_layoutNativeAdArticlesListLevel_action);
         ctaButton.setText(givenNativeAd.getCallToAction());
         nativeAdView.setCallToActionView(ctaButton);
 
