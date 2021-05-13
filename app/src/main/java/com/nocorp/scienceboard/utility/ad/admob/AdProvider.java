@@ -36,7 +36,7 @@ public class AdProvider{
     private AdLoader adLoader;
 
     private int numAdsLoaded;
-//    private final int NUM_ADS_TO_LOAD = 5;
+    //    private final int NUM_ADS_TO_LOAD = 5;
     private long NUM_ADS_TO_LOAD;
 
     //
@@ -95,7 +95,7 @@ public class AdProvider{
             Log.d(AdProvider.class.getSimpleName(), "NOPPYS_BOARD - getInstance: ad provider instantiated, now call initAdMob()");
         }
 
-       return singletonInstance;
+        return singletonInstance;
     }
 
     public static AdProvider getInstance(OnAdmobInitilizedListener admobInitilizedListener) {
@@ -122,6 +122,27 @@ public class AdProvider{
     }
 
 
+    public void loadSomeAds(long adsToLoad, AdRequest adRequest) {
+        if( ! adMobInitialized) {
+            Log.e(TAG, "NOPPYS_BOARD - loadSomeAds: admob not initilized");
+//            return;
+        }
+
+        NUM_ADS_TO_LOAD = adsToLoad;
+        nativeAdsList = new ArrayList<>();
+
+
+//            buildAdLoader(context);
+
+        // old
+//        adLoader.loadAds(new AdRequest.Builder().build(), adsToLoad);
+
+        // new, with mediation
+        Log.d(TAG, "NOPPYS_BOARD - loadSomeAds: ads to request: " + adsToLoad);
+        adLoader.loadAd(adRequest);
+    }
+
+
     public void loadSomeAds(long adsToLoad) {
         if( ! adMobInitialized) {
             Log.e(TAG, "NOPPYS_BOARD - loadSomeAds: admob not initilized");
@@ -142,14 +163,15 @@ public class AdProvider{
         adLoader.loadAd(new AdRequest.Builder().build());
     }
 
-    public void reloadAds() {
+
+    public void reloadAds(AdRequest adRequest) {
         if( ! adMobInitialized) {
             Log.e(TAG, "NOPPYS_BOARD - loadSomeAds: admob not initilized");
             return;
         }
         nativeAdsList = new ArrayList<>();
         numAdsLoaded = 0;
-        adLoader.loadAd(new AdRequest.Builder().build());
+        adLoader.loadAd(adRequest);
     }
 
     private void buildAdLoader(Context context) {

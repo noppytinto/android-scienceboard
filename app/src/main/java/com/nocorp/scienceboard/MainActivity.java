@@ -25,6 +25,9 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.google.ads.consent.ConsentStatus;
+import com.google.ads.mediation.admob.AdMobAdapter;
+import com.google.android.gms.ads.AdRequest;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -45,6 +48,7 @@ import com.nocorp.scienceboard.ui.timemachine.DatePickerFragment;
 import com.nocorp.scienceboard.ui.timemachine.TimeMachineViewModel;
 import com.nocorp.scienceboard.ui.topics.TopicsViewModel;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
+import com.nocorp.scienceboard.utility.ad.admob.AdmobConsentProvider;
 import com.nocorp.scienceboard.utility.ad.admob.OnAdmobInitilizedListener;
 
 import org.jetbrains.annotations.NotNull;
@@ -71,7 +75,7 @@ public class MainActivity extends BaseActivity
     private ActionBar appBar;
     private Toast toast;
     private AppBarConfiguration appBarConfiguration;
-//    private ImageView toolbarLogo;
+    //    private ImageView toolbarLogo;
     private TextView toolbarLogo;
     private Chip chipTimeMachine;
     private View toolbarInnerContainer;
@@ -103,6 +107,7 @@ public class MainActivity extends BaseActivity
     //
     private ConsentInformation consentInformation;
     private ConsentForm consentForm;
+    private AdmobConsentProvider admobConsentProvider;
 
 
 
@@ -121,8 +126,9 @@ public class MainActivity extends BaseActivity
 
         // restoring state
         if(savedInstanceState==null) {
+            getAdmobUserConsent_legacy(this);
 //            getAdmobUserConsent(this);
-            initAdProvider(this, NUM_ADS_TO_LOAD);
+//            initAdProvider(this);
             initAppContent();
         }
         else {
@@ -131,6 +137,15 @@ public class MainActivity extends BaseActivity
 
         //
         observeDatePickedFromTimeMachine();
+    }
+
+    private void getAdmobUserConsent_legacy(Context context) {
+        admobConsentProvider.checkUserConsent(this, new AdmobConsentProvider.OnAdmobConsentUpdatedListener() {
+            @Override
+            public void onAdmobConsentUpdatedCompleted(AdRequest adRequest) {
+                initAdProvider(context, adRequest);
+            }
+        });
     }
 
     private void getAdmobUserConsent(Context context) {
@@ -203,7 +218,9 @@ public class MainActivity extends BaseActivity
                         }
                         else if(consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.OBTAINED) {
                             Log.d(TAG, "onConsentFormLoadSuccess: OBTAINED");
-                            initAdProvider(context, NUM_ADS_TO_LOAD);
+
+                            updateConsentStatus(consentInformation.getConsentStatus());
+
                         }
                     }
                 },
@@ -215,6 +232,42 @@ public class MainActivity extends BaseActivity
                     }
                 }
         );
+    }
+
+
+    private void updateConsentStatus(int consentStatus) {
+        //                        ConsentInformation.getInstance(context).setTagForUnderAgeOfConsent(true);
+
+        AdRequest adRequest;
+
+        if(consentStatus == ConsentInformation.ConsentType.PERSONALIZED) {
+            Log.d(TAG, "updateConsentStatus: consent status: PERSONALIZED");
+            adRequest = new AdRequest.Builder()
+                    .build();
+
+        }
+        else if(consentStatus == ConsentInformation.ConsentType.NON_PERSONALIZED) {
+            Log.d(TAG, "updateConsentStatus: consent status: NON-PERSONALIZED");
+
+            Bundle extras = new Bundle();
+            extras.putString("npa", "1");
+            adRequest = new AdRequest.Builder()
+                    .addNetworkExtrasBundle(AdMobAdapter.class, extras)
+                    .build();
+        }
+        else {
+            Log.d(TAG, "updateConsentStatus: consent status: UNKNOWN");
+
+            Bundle extras = new Bundle();
+            extras.putString("npa", "1");
+            adRequest = new AdRequest.Builder()
+                    .addNetworkExtrasBundle(AdMobAdapter.class, extras)
+                    .build();
+        }
+
+        initAdProvider(this, adRequest);
+
+
     }
 
     @Override
@@ -360,6 +413,7 @@ public class MainActivity extends BaseActivity
 
         //
         adProvider = AdProvider.getInstance();
+        admobConsentProvider = AdmobConsentProvider.getInstance();
 
         // viewmodels
         mainActivityViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
@@ -374,16 +428,28 @@ public class MainActivity extends BaseActivity
 
     }// end initView()
 
-    private void initAdProvider(Context context, int numAdsToLoad) {
+    private void initAdProvider(Context context, AdRequest adRequest) {
         remoteConfigServer.loadConfigParams(taskIsSuccessful -> {
-            long numAdsToLoad1 = remoteConfigServer.getNumListAdsToRequest();
+            long numAdsToLoad = remoteConfigServer.getNumListAdsToRequest();
             adProvider.initAdMob(context, () -> {
                 Log.d(TAG, "onAdmobInitialized: called");
-                adProvider.loadSomeAds(numAdsToLoad1);
+                adProvider.loadSomeAds(numAdsToLoad, adRequest);
             });
         });
-
     }
+
+
+    private void initAdProvider(Context context) {
+        remoteConfigServer.loadConfigParams(taskIsSuccessful -> {
+            long numAdsToLoad = remoteConfigServer.getNumListAdsToRequest();
+            adProvider.initAdMob(context, () -> {
+                Log.d(TAG, "onAdmobInitialized: called");
+                adProvider.loadSomeAds(numAdsToLoad);
+            });
+        });
+    }
+
+
 
 
 
