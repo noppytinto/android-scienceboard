@@ -7,6 +7,8 @@ import android.util.Log;
 
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.amplifyframework.AmplifyException;
+import com.amplifyframework.core.Amplify;
 import com.nocorp.scienceboard.R;
 
 public class ScienceBoardApplication extends Application {
@@ -16,7 +18,17 @@ public class ScienceBoardApplication extends Application {
         checkDarkMode();
         ThreadManager.init();
         MyOkHttpClient.init(this);
+        initAmplify();
         Log.d(ScienceBoardApplication.class.getSimpleName(), "SCIENCE_BOARD - onCreate(): application initilized");
+    }
+
+    private void initAmplify() {
+        try {
+            Amplify.configure(getApplicationContext());
+            Log.d("MyAmplifyApp", "Initialized Amplify");
+        } catch (AmplifyException error) {
+            Log.e("MyAmplifyApp", "Could not initialize Amplify", error);
+        }
     }
 
     private void checkDarkMode() {

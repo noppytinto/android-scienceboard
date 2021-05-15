@@ -7,6 +7,9 @@ plugins {
     id 'com.google.firebase.firebase-perf'
     id 'com.google.secrets_gradle_plugin' version "0.6"
 
+
+    // AMPLIFY
+    id 'com.amplifyframework.amplifytools'
 }
 //apply plugin: "androidx.navigation.safeargs"
 //// firebase integration
@@ -229,4 +232,17 @@ dependencies {
 //    implementation group: 'joda-time', name: 'joda-time', version: '2.10.10'
 
     implementation 'net.dankito.readability4j:readability4j:1.0.3'
+
+
+
+
+    // amazon amplify
+    // Amplify core dependency
+    implementation 'com.amplifyframework:core:1.17.4'
+    // Support for Java 8 features
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
+    //
+    implementation 'com.amplifyframework:aws-api:1.17.4'
+    implementation 'com.amplifyframework:aws-datastore:1.17.4'
+
 }

@@ -25,7 +25,6 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import com.google.ads.consent.ConsentStatus;
 import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -34,7 +33,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.ump.ConsentForm;
 import com.google.android.ump.ConsentInformation;
-import com.google.android.ump.ConsentRequestParameters;
 import com.google.android.ump.FormError;
 import com.google.android.ump.UserMessagingPlatform;
 import com.nocorp.scienceboard.databinding.ActivityMainBinding;
@@ -48,8 +46,7 @@ import com.nocorp.scienceboard.ui.timemachine.DatePickerFragment;
 import com.nocorp.scienceboard.ui.timemachine.TimeMachineViewModel;
 import com.nocorp.scienceboard.ui.topics.TopicsViewModel;
 import com.nocorp.scienceboard.utility.ad.admob.AdProvider;
-import com.nocorp.scienceboard.utility.ad.admob.AdmobConsentProvider;
-import com.nocorp.scienceboard.utility.ad.admob.OnAdmobInitilizedListener;
+import com.nocorp.scienceboard.utility.ad.admob.AdmobConsentManager;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -103,11 +100,9 @@ public class MainActivity extends BaseActivity
     private RemoteConfigServer remoteConfigServer;
     // rxjava
     private Disposable disposable;
-
     //
-    private ConsentInformation consentInformation;
-    private ConsentForm consentForm;
-    private AdmobConsentProvider admobConsentProvider;
+
+    private AdmobConsentManager admobConsentManager;
 
 
 
@@ -137,137 +132,6 @@ public class MainActivity extends BaseActivity
 
         //
         observeDatePickedFromTimeMachine();
-    }
-
-    private void getAdmobUserConsent_legacy(Context context) {
-        admobConsentProvider.checkUserConsent(this, new AdmobConsentProvider.OnAdmobConsentUpdatedListener() {
-            @Override
-            public void onAdmobConsentUpdatedCompleted(AdRequest adRequest) {
-                initAdProvider(context, adRequest);
-            }
-        });
-    }
-
-    private void getAdmobUserConsent(Context context) {
-        // Set tag for underage of consent. false means users are not underage.
-        ConsentRequestParameters params = new ConsentRequestParameters
-                .Builder()
-                .setTagForUnderAgeOfConsent(false)
-                .build();
-
-        consentInformation = UserMessagingPlatform.getConsentInformation(this);
-
-        consentInformation.requestConsentInfoUpdate(
-                this,
-                params,
-                new ConsentInformation.OnConsentInfoUpdateSuccessListener() {
-                    @Override
-                    public void onConsentInfoUpdateSuccess() {
-                        // The consent information state was updated.
-                        // You are now ready to check if a form is available.
-                        if (consentInformation.isConsentFormAvailable()) {
-                            Log.d(TAG, "onConsentInfoUpdateSuccess: called, consent form available");
-
-                            loadForm(context);
-                        }
-                        else {
-                            Log.d(TAG, "onConsentInfoUpdateSuccess: called, consent form NOT available");
-                        }
-
-                        Log.d(TAG, "onConsentInfoUpdateSuccess: called, consent type: " + consentInformation.getConsentType());
-                        Log.d(TAG, "onConsentInfoUpdateSuccess: called, consent status: " + consentInformation.getConsentStatus());
-                    }
-                },
-                new ConsentInformation.OnConsentInfoUpdateFailureListener() {
-                    @Override
-                    public void onConsentInfoUpdateFailure(FormError formError) {
-                        // Handle the error.
-                        Log.d(TAG, "onConsentInfoUpdateFailure: " + formError.getMessage());
-                    }
-                });
-    }
-
-    public void loadForm(Context context) {
-        Log.d(TAG, "loadForm: called");
-        UserMessagingPlatform.loadConsentForm(
-                this,
-                new UserMessagingPlatform.OnConsentFormLoadSuccessListener() {
-                    @Override
-                    public void onConsentFormLoadSuccess(ConsentForm consentForm) {
-                        MainActivity.this.consentForm = consentForm;
-                        if(consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.REQUIRED) {
-                            Log.d(TAG, "onConsentFormLoadSuccess: REQUIRED");
-                            consentForm.show(
-                                    MainActivity.this,
-                                    new ConsentForm.OnConsentFormDismissedListener() {
-                                        @Override
-                                        public void onConsentFormDismissed(@Nullable FormError formError) {
-                                            // Handle dismissal by reloading form.
-                                            Log.d(TAG, "onConsentFormDismissed: called");
-                                            loadForm(context);
-                                        }
-                                    });
-                        }
-
-                        else if(consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.NOT_REQUIRED) {
-                            Log.d(TAG, "onConsentFormLoadSuccess: NOT_REQUIRED");
-                        }
-
-                        else if(consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.UNKNOWN) {
-                            Log.d(TAG, "onConsentFormLoadSuccess: UNKNOWN");
-                        }
-                        else if(consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.OBTAINED) {
-                            Log.d(TAG, "onConsentFormLoadSuccess: OBTAINED");
-
-                            updateConsentStatus(consentInformation.getConsentStatus());
-
-                        }
-                    }
-                },
-                new UserMessagingPlatform.OnConsentFormLoadFailureListener() {
-                    @Override
-                    public void onConsentFormLoadFailure(FormError formError) {
-                        // Handle the error
-                        Log.d(TAG, "onConsentFormLoadFailure: " + formError.getMessage());
-                    }
-                }
-        );
-    }
-
-
-    private void updateConsentStatus(int consentStatus) {
-        //                        ConsentInformation.getInstance(context).setTagForUnderAgeOfConsent(true);
-
-        AdRequest adRequest;
-
-        if(consentStatus == ConsentInformation.ConsentType.PERSONALIZED) {
-            Log.d(TAG, "updateConsentStatus: consent status: PERSONALIZED");
-            adRequest = new AdRequest.Builder()
-                    .build();
-
-        }
-        else if(consentStatus == ConsentInformation.ConsentType.NON_PERSONALIZED) {
-            Log.d(TAG, "updateConsentStatus: consent status: NON-PERSONALIZED");
-
-            Bundle extras = new Bundle();
-            extras.putString("npa", "1");
-            adRequest = new AdRequest.Builder()
-                    .addNetworkExtrasBundle(AdMobAdapter.class, extras)
-                    .build();
-        }
-        else {
-            Log.d(TAG, "updateConsentStatus: consent status: UNKNOWN");
-
-            Bundle extras = new Bundle();
-            extras.putString("npa", "1");
-            adRequest = new AdRequest.Builder()
-                    .addNetworkExtrasBundle(AdMobAdapter.class, extras)
-                    .build();
-        }
-
-        initAdProvider(this, adRequest);
-
-
     }
 
     @Override
@@ -413,7 +277,7 @@ public class MainActivity extends BaseActivity
 
         //
         adProvider = AdProvider.getInstance();
-        admobConsentProvider = AdmobConsentProvider.getInstance();
+        admobConsentManager = AdmobConsentManager.getInstance();
 
         // viewmodels
         mainActivityViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
@@ -438,7 +302,6 @@ public class MainActivity extends BaseActivity
         });
     }
 
-
     private void initAdProvider(Context context) {
         remoteConfigServer.loadConfigParams(taskIsSuccessful -> {
             long numAdsToLoad = remoteConfigServer.getNumListAdsToRequest();
@@ -449,6 +312,14 @@ public class MainActivity extends BaseActivity
         });
     }
 
+    private void getAdmobUserConsent_legacy(Context context) {
+        admobConsentManager.checkUserConsent(this, new AdmobConsentManager.OnAdmobConsentUpdatedListener() {
+            @Override
+            public void onAdmobConsentUpdatedCompleted(AdRequest adRequest) {
+                initAdProvider(context, adRequest);
+            }
+        });
+    }
 
 
 
@@ -651,7 +522,6 @@ public class MainActivity extends BaseActivity
 
     //-------------------------------------------------- UTILITIES
 
-
     private void blinkView(View view) {
         view.setVisibility(View.VISIBLE);
         fadeIn(view);
@@ -665,7 +535,6 @@ public class MainActivity extends BaseActivity
         objectAnimator.setRepeatMode(ObjectAnimator.REVERSE);
         objectAnimator.start();
     }
-
 
     private void fadeOut(View view) {
         ObjectAnimator objectAnimator = ObjectAnimator.ofFloat(view, "alpha", 1f, 0f);
@@ -773,5 +642,7 @@ public class MainActivity extends BaseActivity
             toolbar.setTitle(value);
         }
     }
+
+
 
 }// end MainActivity
