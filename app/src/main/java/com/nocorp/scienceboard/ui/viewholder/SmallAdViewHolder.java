@@ -2,7 +2,6 @@ package com.nocorp.scienceboard.ui.viewholder;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,17 +13,13 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.ads.mediation.facebook.FacebookAdapter;
-import com.google.ads.mediation.facebook.FacebookMediationAdapter;
+
 import com.google.android.gms.ads.MediaContent;
-import com.google.android.gms.ads.ResponseInfo;
 import com.google.android.gms.ads.nativead.MediaView;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.google.android.gms.ads.nativead.NativeAdView;
 import com.nocorp.scienceboard.R;
 
-import java.util.Collections;
-import java.util.List;
 
 public class SmallAdViewHolder extends RecyclerView.ViewHolder {
     private final String TAG = this.getClass().getSimpleName();
