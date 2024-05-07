@@ -26,6 +26,7 @@ Supported languages:
 - server for fetching news (Java) ([code](https://github.com/noppytinto/java-spring-scienceboardserver))
 - NLP to search articles by keywords (server side)
 
+
 ```mermaid
 sequenceDiagram
     participant App
@@ -33,6 +34,7 @@ sequenceDiagram
     participant Firebase 
     Server->>+Server: cron job: Fetch RSS (every hour)
     Server->>+Server: Parse RSS into "Articles"
+    Server->>+Server: Extract keywords using NLP
     Server->>+Firebase: save articles
 
 
@@ -40,6 +42,7 @@ sequenceDiagram
     App->>+Firebase: Fetch articles
     Firebase-->>+App: return articles
 ```
+
 
 ## Screenshots
 
