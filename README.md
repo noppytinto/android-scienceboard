@@ -24,7 +24,7 @@ Supported languages:
 - Rxjava
 - Firebase
 - server for fetching news (Java) ([code](https://github.com/noppytinto/java-spring-scienceboardserver))
-- NLP to classify news by similarity (server side)
+- NLP to search articles by keywords (server side)
 
 ```mermaid
 sequenceDiagram
