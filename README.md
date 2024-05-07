@@ -23,7 +23,7 @@ Supported languages:
 - Android (Java)
 - Rxjava
 - Firebase
-- server for fetching news (Java)
+- server for fetching news (Java) ([code](https://github.com/noppytinto/java-spring-scienceboardserver))
 
 ```mermaid
 sequenceDiagram
