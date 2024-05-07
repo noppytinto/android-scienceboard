@@ -1,5 +1,7 @@
 # NoppysBoard - Simple News Reader
 
+STATUS: ~~published~~ no more available
+
 ## Description
 Welcome to NoppysBoard!
 - customize your home feed
