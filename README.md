@@ -19,12 +19,13 @@ Welcome to NoppysBoard!
 Supported languages:
 - English
 
-## Stack
+## Stack & Tools
 - Android (Java)
 - Rxjava
 - Firebase
 - server for fetching news (Java) ([code](https://github.com/noppytinto/java-spring-scienceboardserver))
 - NLP to search articles by keywords (server side)
+- Axure for mocking
 
 
 ```mermaid
