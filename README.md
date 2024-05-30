@@ -4,15 +4,14 @@ STATUS: ~~published~~ no more available
 
 ## Description
 Welcome to NoppysBoard!
-- customize your home feed
-- go back in time to see old news (time travel mode)
-- save articles in bookmarks to read them later
-- maybe you were reading an interesting article, but didn't have enough time, use the history to track previous visited articles
-- when you're reading an article, you can do some research on the web without leaving the app:
-- search similar articles on the web
-- quick keywords based search
-- or just search everything you want
-- dark mode
+- Customized User Experience: Implemented personalized home feeds allowing users to tailor their news consumption.
+- Unique "Time Travel" Mode: Enabled users to revisit old news articles, providing a comprehensive historical perspective.
+- Enhanced Readability: Added bookmark functionality for users to save articles for later reading, and a history feature to track previously visited articles.
+- In-App Research Tools: Developed in-app search capabilities for users to perform web research without leaving the app, including:
+    - Similar Articles Search: Quickly find related news content.
+    - Keyword-Based Search: Efficiently locate information using keywords.
+    - General Web Search: Perform comprehensive searches within the app.
+- User-Centric Design: Included a dark mode for improved readability and reduced eye strain.
 
 
 //--------------------------
